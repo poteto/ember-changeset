@@ -1,0 +1,13 @@
+<form>
+  <fieldset>
+    <label for="input-first-name">First Name</label>
+    {{input id="input-first-name" value=changeset.firstName}}
+  </fieldset>
+  <fieldset>
+    <label for="input-last-name">Last Name</label>
+    {{input id="input-last-name" value=changeset.lastName}}
+  </fieldset>
+
+  <button id="submit-button" type="submit" {{action submit changeset}}>Submit</button>
+  <button id="cancel-button" {{action rollback changeset}}>Cancel</button>
+</form>

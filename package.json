@@ -1,7 +1,7 @@
 {
   "name": "ember-changeset",
   "version": "0.0.0",
-  "description": "The default blueprint for ember-cli addons.",
+  "description": "Changesets for Ember",
   "directories": {
     "doc": "doc",
     "test": "tests"
@@ -11,11 +11,13 @@
     "start": "ember server",
     "test": "ember try:testall"
   },
-  "repository": "",
+  "repository": "https://github.com/poteto/ember-changeset",
+  "bugs": "https://github.com/poteto/ember-changeset/issues",
+  "homepage": "https://github.com/poteto/ember-changeset",
   "engines": {
     "node": ">= 0.10.0"
   },
-  "author": "",
+  "author": "Lauren Tan <arr@sugarpirate.com>",
   "license": "MIT",
   "devDependencies": {
     "broccoli-asset-rev": "^2.4.2",
