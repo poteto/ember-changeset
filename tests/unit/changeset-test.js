@@ -129,3 +129,11 @@ test('it works with setProperties', function(assert) {
 
   assert.deepEqual(get(dummyChangeset, 'changes'), expectedResult, 'precondition');
 });
+
+test('#error returns the error object', function(assert) {
+  let dummyChangeset = new Changeset(dummyModel, dummyValidator);
+  let expectedResult = { name: { validation: 'too short', value: 'a' } };
+  dummyChangeset.set('name', 'a');
+
+  assert.deepEqual(get(dummyChangeset, 'error'), expectedResult, 'should return error object');
+});

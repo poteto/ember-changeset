@@ -95,9 +95,32 @@ On rollback, all changes are dropped and the underlying Object is left untouched
 
 ## API
 
+#### `error`
+
+Returns the error object.
+
+```js
+{ 
+  firstName: {
+    value: 'Jim', 
+    validation: 'First name must be greater than 7 characters'
+  } 
+}
+```
+
+You can use this property to locate a single error:
+
+```hbs
+{{#if changeset.error.firstName}}
+  <p>{{changeset.error.firstName.validation}}</p>
+{{/if}}
+```
+
+**[⬆️ back to top](#api)**
+
 #### `errors`
 
-Returns an array of error messages. If your `validate` function returns a non-boolean value, it is added here as the `validation` property.
+Returns an array of errors. If your `validate` function returns a non-boolean value, it is added here as the `validation` property.
 
 ```js
 [
