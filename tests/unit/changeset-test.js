@@ -12,6 +12,18 @@ const {
 } = Ember;
 
 let dummyModel;
+let dummyValidations = {
+  name(value) {
+    return isPresent(value) && value.length > 3 || 'too short';
+  }
+};
+function dummyValidator(key, newValue, oldValue) {
+  let validatorFn = dummyValidations[key];
+
+  if (typeOf(validatorFn) === 'function') {
+    return validatorFn(newValue, oldValue);
+  }
+}
 
 module('Unit | Utility | changeset', {
   beforeEach() {
@@ -28,7 +40,7 @@ test('#get proxies to content', function(assert) {
 });
 
 test('#set adds a change if valid', function(assert) {
-  let expectedChanges = { name: 'foo' };
+  let expectedChanges = [{ key: 'name', value: 'foo' }];
   let dummyChangeset = new Changeset(dummyModel);
   dummyChangeset.set('name', 'foo');
   let changes = get(dummyChangeset, 'changes');
@@ -37,31 +49,37 @@ test('#set adds a change if valid', function(assert) {
 });
 
 test('#set does not add a change if invalid', function(assert) {
-  let validations = {
-    name(value) {
-      return isPresent(value) && value.length > 3;
-    }
-  };
-  let dummyChangeset = new Changeset(dummyModel, function(key, newValue, oldValue) {
-    let validatorFn = validations[key];
-
-    if (typeOf(validatorFn) === 'function') {
-      return validatorFn(newValue, oldValue);
-    }
-  });
+  let dummyChangeset = new Changeset(dummyModel, dummyValidator);
   dummyChangeset.set('name', 'a');
   let changes = get(dummyChangeset, 'changes');
+  let errors = get(dummyChangeset, 'errors');
+  let isValid = get(dummyChangeset, 'isValid');
+  let isInvalid = get(dummyChangeset, 'isInvalid');
 
-  assert.deepEqual(changes, {}, 'should not add change');
+  assert.deepEqual(changes, [], 'should not add change');
+  assert.deepEqual(errors, [{ key: 'name', validation: 'too short', value: 'a' }], 'should have errors');
+  assert.notOk(isValid, 'should not be valid');
+  assert.ok(isInvalid, 'should be invalid');
 });
 
-test('#execute applies changes to content', function(assert) {
+test('#execute applies changes to content if valid', function(assert) {
   let dummyChangeset = new Changeset(dummyModel);
   dummyChangeset.set('name', 'foo');
 
   assert.equal(get(dummyModel, 'name'), undefined, 'precondition');
+  assert.ok(get(dummyChangeset, 'isValid'), 'should be valid');
   dummyChangeset.execute();
   assert.equal(get(dummyModel, 'name'), 'foo', 'should apply changes');
+});
+
+test('#execute does not apply changes to content if invalid', function(assert) {
+  let dummyChangeset = new Changeset(dummyModel, dummyValidator);
+  dummyChangeset.set('name', 'a');
+
+  assert.equal(get(dummyModel, 'name'), undefined, 'precondition');
+  assert.ok(get(dummyChangeset, 'isInvalid'), 'should be invalid');
+  dummyChangeset.execute();
+  assert.equal(get(dummyModel, 'name'), undefined, 'should not apply changes');
 });
 
 test('#save proxies to content', function(assert) {
@@ -80,10 +98,34 @@ test('#save proxies to content', function(assert) {
 
 test('#rollback restores old values', function(assert) {
   let dummyChangeset = new Changeset(dummyModel);
+  let expectedResult = [
+    { key: 'firstName', value: 'foo' },
+    { key: 'lastName', value: 'bar' }
+  ];
   dummyChangeset.set('firstName', 'foo');
   dummyChangeset.set('lastName', 'bar');
 
-  assert.deepEqual(get(dummyChangeset, 'changes'), { firstName: 'foo', lastName: 'bar' }, 'precondition');
+  assert.deepEqual(get(dummyChangeset, 'changes'), expectedResult, 'precondition');
   dummyChangeset.rollback();
-  assert.deepEqual(get(dummyChangeset, 'changes'), {}, 'should rollback');
+  assert.deepEqual(get(dummyChangeset, 'changes'), [], 'should rollback');
+});
+
+test('#rollback resets valid state', function(assert) {
+  let dummyChangeset = new Changeset(dummyModel, dummyValidator);
+  dummyChangeset.set('name', 'a');
+
+  assert.ok(get(dummyChangeset, 'isInvalid'), 'should be invalid');
+  dummyChangeset.rollback();
+  assert.ok(get(dummyChangeset, 'isValid'), 'should be valid');
+});
+
+test('it works with setProperties', function(assert) {
+  let dummyChangeset = new Changeset(dummyModel);
+  let expectedResult = [
+    { key: 'firstName', value: 'foo' },
+    { key: 'lastName', value: 'bar' }
+  ];
+  dummyChangeset.setProperties({ firstName: 'foo', lastName: 'bar' });
+
+  assert.deepEqual(get(dummyChangeset, 'changes'), expectedResult, 'precondition');
 });
