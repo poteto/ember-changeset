@@ -14,6 +14,27 @@ Given Ember's Data Down, Actions Up (DDAU) approach, a changeset is more appropr
 
 `ember-changeset` only allows valid changes to be set, so your Objects will never become invalid (assuming you have 100% validation coverage). Additionally, this addon is designed to be un-opinionated about your choice of form and/or validation library, so you can easily integrate it into an existing solution.
 
+#### tl;dr
+
+```js
+let changeset = new Changeset(user, validatorFn);
+user.get('firstName'); // "Michael"
+user.get('lastName'); // "Bolton"
+
+changeset.set('firstName', 'Jim');
+changeset.set('lastName', 'B');
+changeset.get('errors'); // [{ key: 'lastName', validation: 'too short', value: 'B' }]
+changeset.set('lastName', 'Bob');
+changeset.get('isValid'); // true
+
+user.get('firstName'); // "Michael"
+user.get('lastName'); // "Bolton"
+
+changeset.execute().save(); // sets and saves valid changes on the user
+user.get('firstName'); // "Jim"
+user.get('lastName'); // "Bob"
+```
+
 ## Usage
 
 First, create a new `Changeset` using the `changeset` helper:
