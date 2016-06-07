@@ -3,7 +3,7 @@ import objectToArray from 'ember-changeset/utils/object-to-array';
 
 const {
   Object: EmberObject,
-  computed: { not },
+  computed: { not, readOnly },
   computed,
   assert,
   get,
@@ -20,6 +20,7 @@ export function changeset(content, validate) {
   return EmberObject.extend({
     changes: objectToArray('_changes'),
     errors: objectToArray('_errors'),
+    error: readOnly('_errors'),
 
     isInvalid: not('isValid'),
     isValid: computed('_errors', function() {
