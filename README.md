@@ -14,7 +14,7 @@ Given Ember's Data Down, Actions Up (DDAU) approach, a changeset is more appropr
 
 `ember-changeset` only allows valid changes to be set, so your Objects will never become invalid (assuming you have 100% validation coverage). Additionally, this addon is designed to be un-opinionated about your choice of form and/or validation library, so you can easily integrate it into an existing solution.
 
-The simplest way to incorporate validations is to use `ember-changeset-validations`, a companion addon to this one. It has a simple mental model, and there are no Observers or CPs involved – just pure functions.
+The simplest way to incorporate validations is to use [`ember-changeset-validations`](https://github.com/poteto/ember-changeset-validations/), a companion addon to this one. It has a simple mental model, and there are no Observers or CPs involved – just pure functions.
 
 #### tl;dr
 
