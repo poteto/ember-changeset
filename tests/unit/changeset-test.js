@@ -15,6 +15,9 @@ let dummyModel;
 let dummyValidations = {
   name(value) {
     return isPresent(value) && value.length > 3 || 'too short';
+  },
+  password() {
+    return ['foo', 'bar'];
   }
 };
 function dummyValidator(key, newValue, oldValue) {
@@ -49,15 +52,20 @@ test('#set adds a change if valid', function(assert) {
 });
 
 test('#set does not add a change if invalid', function(assert) {
+  let expectedErrors = [
+    { key: 'name', validation: 'too short', value: 'a' },
+    { key: 'password', validation: ['foo', 'bar'], value: 'foo' }
+  ];
   let dummyChangeset = new Changeset(dummyModel, dummyValidator);
   dummyChangeset.set('name', 'a');
+  dummyChangeset.set('password', 'foo');
   let changes = get(dummyChangeset, 'changes');
   let errors = get(dummyChangeset, 'errors');
   let isValid = get(dummyChangeset, 'isValid');
   let isInvalid = get(dummyChangeset, 'isInvalid');
 
   assert.deepEqual(changes, [], 'should not add change');
-  assert.deepEqual(errors, [{ key: 'name', validation: 'too short', value: 'a' }], 'should have errors');
+  assert.deepEqual(errors, expectedErrors, 'should have errors');
   assert.notOk(isValid, 'should not be valid');
   assert.ok(isInvalid, 'should be invalid');
 });

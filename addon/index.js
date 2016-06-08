@@ -8,6 +8,7 @@ const {
   assert,
   get,
   isPresent,
+  isArray,
   setProperties,
   set,
   typeOf
@@ -43,7 +44,7 @@ export function changeset(content, validate) {
       let errors = get(this, '_errors');
       let validation = this._validate(key, value);
 
-      if (validation === true) {
+      if (validation === true || isArray(validation) && validation[0] === true) {
         if (isPresent(get(errors, key))) {
           delete errors[key];
           this.notifyPropertyChange(`_errors.${key}`);
