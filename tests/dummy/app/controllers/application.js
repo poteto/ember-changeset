@@ -15,9 +15,7 @@ const validations = {
 export default Controller.extend({
   actions: {
     submit(changeset) {
-      return changeset
-        .execute()
-        .save();
+      return changeset.save();
     },
 
     rollback(changeset) {

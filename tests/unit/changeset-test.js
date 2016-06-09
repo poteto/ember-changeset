@@ -100,7 +100,7 @@ test('#save proxies to content', function(assert) {
   dummyChangeset.set('name', 'foo');
 
   assert.equal(result, undefined, 'precondition');
-  dummyChangeset.execute().save();
+  dummyChangeset.save();
   assert.equal(result, 'ok', 'should save');
 });
 
