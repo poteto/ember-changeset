@@ -206,6 +206,26 @@ You can use this property in the template:
 {{/if}}
 ```
 
+#### `isPristine`
+
+Returns a Boolean value of the changeset's state. A pristine changeset is one with no changes.
+
+```js
+get(changeset, 'isPristine'); // true
+```
+
+**[⬆️ back to top](#api)**
+
+#### `isDirty`
+
+Returns a Boolean value of the changeset's state. A dirty changeset is one with changes.
+
+```js
+get(changeset, 'isDirty'); // true
+```
+
+**[⬆️ back to top](#api)**
+
 #### `get`
 
 Exactly the same semantics as `Ember.get`. This proxies to the underlying Object.
