@@ -22,11 +22,16 @@ export function changeset(content, validate) {
     changes: objectToArray('_changes'),
     errors: objectToArray('_errors'),
     error: readOnly('_errors'),
+    isInvalid: not('isValid').readOnly(),
+    isPristine: not('isDirty').readOnly(),
 
-    isInvalid: not('isValid'),
     isValid: computed('_errors', function() {
       return keys(get(this, '_errors')).length === 0;
-    }),
+    }).readOnly(),
+
+    isDirty: computed('_changes', function() {
+      return keys(get(this, '_changes')).length !== 0;
+    }).readOnly(),
 
     init() {
       this._content = content || null;
@@ -64,7 +69,7 @@ export function changeset(content, validate) {
     },
 
     execute() {
-      if (get(this, 'isValid')) {
+      if (get(this, 'isValid') && get(this, 'isDirty')) {
         setProperties(this._content, get(this, '_changes'));
       }
       return this;
@@ -72,6 +77,7 @@ export function changeset(content, validate) {
 
     save() {
       if (typeOf(this._content.save) === 'function') {
+        this.execute();
         return this._content
           .save()
           .then(() => { this.rollback(); });

@@ -32,7 +32,7 @@ changeset.get('isValid'); // true
 user.get('firstName'); // "Michael"
 user.get('lastName'); // "Bolton"
 
-changeset.execute().save(); // sets and saves valid changes on the user
+changeset.save(); // sets and saves valid changes on the user
 user.get('firstName'); // "Jim"
 user.get('lastName'); // "Bob"
 ```
@@ -61,9 +61,7 @@ const { Controller } = Ember;
 export default Controller.extend({
   actions: {
     submit(changeset) {
-      return changeset
-        .execute()
-        .save();
+      return changeset.save();
     },
 
     rollback(changeset) {
@@ -250,19 +248,13 @@ Applies the valid changes to the underlying Object.
 changeset.execute(); // returns changeset
 ```
 
-You can chain off this method:
-
-```js
-changeset.execute().save();
-```
-
 Note that executing the changeset will not remove the internal list of changes - instead, you should do so explicitly with `rollback` or `save` if that is desired.
 
 **[⬆️ back to top](#api)**
 
 #### `save`
 
-Proxies to the underlying Object's `save` method, if one exists. If it does, it expects the method to return a `Promise`.
+Executes changes, then proxies to the underlying Object's `save` method, if one exists. If it does, it expects the method to return a `Promise`.
 
 ```js
 changeset.save(); // returns Promise
