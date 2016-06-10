@@ -34,7 +34,12 @@ function dummyValidator(key, newValue, oldValue) {
 
 module('Unit | Utility | changeset', {
   beforeEach() {
-    dummyModel = EmberObject.create();
+    let Dummy = EmberObject.extend({
+      save() {
+        return resolve(this);
+      }
+    });
+    dummyModel = Dummy.create();
   }
 });
 
@@ -170,4 +175,62 @@ test('it noops when new value is strictly equal to old value', function(assert) 
   dummyChangeset.set('name', 'Jim Bob');
 
   assert.deepEqual(get(dummyChangeset, 'changes'), [], 'should noop');
+});
+
+test('#merge merges 2 valid changesets', function(assert) {
+  let dummyChangesetA = new Changeset(dummyModel);
+  let dummyChangesetB = new Changeset(dummyModel);
+  dummyChangesetA.set('firstName', 'Jim');
+  dummyChangesetB.set('lastName', 'Bob');
+  let dummyChangesetC = dummyChangesetA.merge(dummyChangesetB);
+  let expectedChanges = [{ key: 'firstName', value: 'Jim' }, { key: 'lastName', value: 'Bob' }];
+
+  assert.deepEqual(get(dummyChangesetC, 'changes'), expectedChanges, 'should merge 2 valid changesets');
+});
+
+test('#merge does not merge invalid changesets', function(assert) {
+  let dummyChangesetA = new Changeset(dummyModel, dummyValidator);
+  let dummyChangesetB = new Changeset(dummyModel, dummyValidator);
+  dummyChangesetA.set('name', 'a');
+  dummyChangesetB.set('name', 'b');
+
+  assert.throws(() => dummyChangesetA.merge(dummyChangesetB), ({ message }) => {
+    return message === 'Assertion Failed: Cannot merge invalid changesets';
+  }, 'should throw error');
+});
+
+test('#merge does not merge a changeset with a non-changeset', function(assert) {
+  let dummyChangesetA = new Changeset(dummyModel, dummyValidator);
+  let dummyChangesetB = { _changes: { name: 'b' } };
+  dummyChangesetA.set('name', 'a');
+
+  assert.throws(() => dummyChangesetA.merge(dummyChangesetB), ({ message }) => {
+    return message === 'Assertion Failed: Cannot merge with a non-changeset';
+  }, 'should throw error');
+});
+
+test('#merge does not merge a changeset with different content', function(assert) {
+  let dummyChangesetA = new Changeset(dummyModel, dummyValidator);
+  let dummyChangesetB = new Changeset(EmberObject.create(), dummyValidator);
+
+  assert.throws(() => dummyChangesetA.merge(dummyChangesetB), ({ message }) => {
+    return message === 'Assertion Failed: Cannot merge with a changeset of different content';
+  }, 'should throw error');
+});
+
+test('#merge preserves content and validator of origin changeset', function(assert) {
+  let dummyChangesetA = new Changeset(dummyModel, dummyValidator);
+  let dummyChangesetB = new Changeset(dummyModel);
+  let dummyChangesetC = dummyChangesetA.merge(dummyChangesetB);
+  let expectedErrors = [{ key: 'name', validation: 'too short', value: 'a' }];
+
+  dummyChangesetC.set('name', 'a');
+  assert.deepEqual(dummyChangesetC.get('errors'), expectedErrors, 'should preserve validator');
+
+  run(() => {
+    dummyChangesetC.set('name', 'Jim Bob');
+    dummyChangesetC.save().then(() => {
+      assert.equal(dummyModel.get('name'), 'Jim Bob', 'should set value on model');
+    });
+  });
 });
