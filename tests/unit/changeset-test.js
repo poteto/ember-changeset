@@ -163,3 +163,11 @@ test('it accepts async validations', function(assert) {
     done();
   });
 });
+
+test('it noops when new value is strictly equal to old value', function(assert) {
+  set(dummyModel, 'name', 'Jim Bob');
+  let dummyChangeset = new Changeset(dummyModel);
+  dummyChangeset.set('name', 'Jim Bob');
+
+  assert.deepEqual(get(dummyChangeset, 'changes'), [], 'should noop');
+});
