@@ -18,7 +18,7 @@ const { keys } = Object;
 const CONTENT = '_content';
 const CHANGES = '_changes';
 const ERRORS = '_errors';
-
+const hasOwnProp = Object.prototype.hasOwnProperty;
 /**
  * Changeset factory
  *
@@ -75,7 +75,13 @@ export function changeset(content, validate) {
     setUnknownProperty(key, value) {
       let changes = get(this, CHANGES);
       let errors = get(this, ERRORS);
-      let validation = this._validate(key, value);
+      let content = get(this, CONTENT);
+      let oldValue = get(content, key);
+      let validation = this._validate(key, value, oldValue);
+
+      if (hasOwnProp.call(content, key) && value === oldValue) {
+        return;
+      }
 
       if (isPromise(validation)) {
         return validation.then((resolvedValidation) => {
@@ -156,11 +162,10 @@ export function changeset(content, validate) {
      * @private
      * @param {String} key
      * @param {Any} newValue
+     * @param {Any} oldValue
      * @return {Boolean|String}
      */
-    _validate(key, newValue) {
-      let oldValue = get(this, `${CONTENT}.${key}`);
-
+    _validate(key, newValue, oldValue) {
       if (typeOf(validate) === 'function') {
         let isValid = validate(key, newValue, oldValue);
         return isPresent(isValid) ? isValid : true;
