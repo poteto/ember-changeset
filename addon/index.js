@@ -1,6 +1,7 @@
 import Ember from 'ember';
 import objectToArray from 'ember-changeset/utils/object-to-array';
 import isPromise from 'ember-changeset/utils/is-promise';
+import { CHANGESET, isChangeset } from 'ember-changeset/-private/internals';
 
 const {
   Object: EmberObject,
@@ -14,11 +15,14 @@ const {
   set,
   typeOf
 } = Ember;
+const assign = Ember.assign || Ember.merge;
 const { keys } = Object;
 const CONTENT = '_content';
 const CHANGES = '_changes';
 const ERRORS = '_errors';
+const VALIDATOR = '_validator';
 const hasOwnProp = Object.prototype.hasOwnProperty;
+
 /**
  * Changeset factory
  *
@@ -30,6 +34,7 @@ export function changeset(content, validate) {
   assert('Invalid model for changeset', content);
 
   return EmberObject.extend({
+    __changeset__: CHANGESET,
     changes: objectToArray(CHANGES),
     errors: objectToArray(ERRORS),
     error: readOnly(ERRORS),
@@ -47,9 +52,10 @@ export function changeset(content, validate) {
 
     init() {
       this._super(...arguments);
-      this._content = content || null;
-      this._changes = {};
-      this._errors = {};
+      this[CONTENT] = content || null;
+      this[CHANGES] = {};
+      this[ERRORS] = {};
+      this[VALIDATOR] = validate;
     },
 
     /**
@@ -157,6 +163,47 @@ export function changeset(content, validate) {
     },
 
     /**
+     * Merges 2 valid changesets and returns a new changeset. Both changesets
+     * must point to the same underlying object. The changeset target is the
+     * origin. For example:
+     *
+     * ```
+     * let changesetA = new Changeset(user, validatorFn);
+     * let changesetB = new Changeset(user, validatorFn);
+     * changesetA.set('firstName', 'Jim');
+     * changesetB.set('firstName', 'Jimmy');
+     * changesetB.set('lastName', 'Fallon');
+     * let changesetC = changesetA.merge(changesetB);
+     * changesetC.execute();
+     * user.get('firstName'); // "Jimmy"
+     * user.get('lastName'); // "Fallon"
+     * ```
+     *
+     * @public
+     * @param  {Changeset} changeset
+     * @return {Changeset}
+     */
+    merge(changeset) {
+      let content = get(this, CONTENT);
+      assert('Cannot merge with a non-changeset', isChangeset(changeset));
+      assert('Cannot merge with a changeset of different content', get(changeset, CONTENT) === content);
+      assert('Cannot merge invalid changesets', get(this, 'isValid') && get(changeset, 'isValid'));
+
+      if (get(this, 'isPristine') && get(changeset, 'isPristine')) {
+        return this;
+      }
+
+      let changesA = get(this, CHANGES);
+      let changesB = get(changeset, CHANGES);
+      let mergedChanges = assign(changesA, changesB);
+      let newChangeset = new Changeset(content, get(this, VALIDATOR));
+      newChangeset[CHANGES] = mergedChanges;
+      newChangeset.notifyPropertyChange(CHANGES);
+
+      return newChangeset;
+    },
+
+    /**
      * Validates a given key and value.
      *
      * @private
@@ -166,8 +213,9 @@ export function changeset(content, validate) {
      * @return {Boolean|String}
      */
     _validate(key, newValue, oldValue) {
-      if (typeOf(validate) === 'function') {
-        let isValid = validate(key, newValue, oldValue);
+      let validator = get(this, VALIDATOR);
+      if (typeOf(validator) === 'function') {
+        let isValid = validator(key, newValue, oldValue);
         return isPresent(isValid) ? isValid : true;
       }
 

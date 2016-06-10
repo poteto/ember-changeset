@@ -310,6 +310,36 @@ changeset.rollback(); // returns changeset
 
 **[⬆️ back to top](#api)**
 
+#### `merge`
+
+Merges 2 valid changesets and returns a new changeset with the same underlying content and validator as the origin. Both changesets must point to the same underlying object. For example:
+
+```js
+let changesetA = new Changeset(user, validatorFn);
+let changesetB = new Changeset(user, validatorFn);
+changesetA.set('firstName', 'Jim');
+changesetB.set('firstName', 'Jimmy');
+changesetB.set('lastName', 'Fallon');
+let changesetC = changesetA.merge(changesetB);
+changesetC.execute();
+user.get('firstName'); // "Jimmy"
+user.get('lastName'); // "Fallon"
+```
+
+Note that both changesets `A` and `B` are not destroyed by the merge, so you might want to call `destroy()` on them to avoid memory leaks.
+
+**[⬆️ back to top](#api)**
+
+#### `rollback`
+
+Rollsback all unsaved changes and resets all errors.
+
+```js
+changeset.rollback(); // returns changeset
+```
+
+**[⬆️ back to top](#api)**
+
 ## Validation signature
 
 To use with your favorite validation library, you should create a custom `validator` action to be passed into the changeset:
