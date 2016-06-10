@@ -25,6 +25,7 @@ user.get('lastName'); // "Bolton"
 
 changeset.set('firstName', 'Jim');
 changeset.set('lastName', 'B');
+changeset.get('isInvalid'); // true
 changeset.get('errors'); // [{ key: 'lastName', validation: 'too short', value: 'B' }]
 changeset.set('lastName', 'Bob');
 changeset.get('isValid'); // true
@@ -39,7 +40,7 @@ user.get('lastName'); // "Bob"
 
 ## Usage
 
-First, create a new `Changeset` using the `changeset` helper:
+First, create a new `Changeset` using the `changeset` helper or through JavaScript:
 
 ```hbs
 {{! application/template.hbs}}
@@ -48,6 +49,21 @@ First, create a new `Changeset` using the `changeset` helper:
     submit=(action "submit")
     rollback=(action "rollback")
 }}
+```
+
+```js
+import Ember from 'ember';
+import Changeset from 'ember-changeset';
+
+const { Component, get } = Ember;
+
+export default Component.extend({
+  init() {
+    let model = get(this, 'model');
+    let validator = get(this, 'validate');
+    this.changeset = new Changeset(model, validator);
+  }
+});
 ```
 
 The helper receives any Object (including `DS.Model`, `Ember.Object`, or even POJOs) and an optional `validator` action. If a `validator` is passed into the helper, the changeset will attempt to call that function when a value changes.

@@ -1,10 +1,11 @@
 import Ember from 'ember';
-import Changeset from 'dummy/utils/changeset';
+import Changeset from 'ember-changeset';
 import { module, test } from 'qunit';
 
 const {
   Object: EmberObject,
   RSVP: { resolve },
+  run,
   get,
   isPresent,
   set,
@@ -18,6 +19,9 @@ let dummyValidations = {
   },
   password() {
     return ['foo', 'bar'];
+  },
+  async(value) {
+    return resolve(value);
   }
 };
 function dummyValidator(key, newValue, oldValue) {
@@ -144,4 +148,18 @@ test('#error returns the error object', function(assert) {
   dummyChangeset.set('name', 'a');
 
   assert.deepEqual(get(dummyChangeset, 'error'), expectedResult, 'should return error object');
+});
+
+test('it accepts async validations', function(assert) {
+  let done = assert.async();
+  let dummyChangeset = new Changeset(dummyModel, dummyValidator);
+  let expectedChanges = [{ key: 'async', value: true }];
+  let expectedError = { async: { validation: 'is invalid', value: 'is invalid' } };
+  run(() => dummyChangeset.set('async', true));
+  run(() => dummyChangeset.set('async', 'is invalid'));
+  run(() => {
+    assert.deepEqual(get(dummyChangeset, 'changes'), expectedChanges, 'should set change');
+    assert.deepEqual(get(dummyChangeset, 'error'), expectedError, 'should set error');
+    done();
+  });
 });
