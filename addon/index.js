@@ -6,22 +6,27 @@ import { CHANGESET, isChangeset } from 'ember-changeset/-private/internals';
 const {
   Object: EmberObject,
   computed: { not, readOnly },
-  computed,
   assert,
+  computed,
   get,
-  isPresent,
   isArray,
-  setProperties,
+  isPresent,
+  merge,
   set,
+  setProperties,
   typeOf
 } = Ember;
-const assign = Ember.assign || Ember.merge;
+const assign = Ember.assign || Object.assign || _assign;
 const { keys } = Object;
 const CONTENT = '_content';
 const CHANGES = '_changes';
 const ERRORS = '_errors';
 const VALIDATOR = '_validator';
 const hasOwnProp = Object.prototype.hasOwnProperty;
+
+function _assign(origin, ...sources) {
+  return sources.reduce((acc, source) => merge(acc, source), merge({}, origin));
+}
 
 /**
  * Changeset factory
@@ -195,7 +200,7 @@ export function changeset(content, validate) {
 
       let changesA = get(this, CHANGES);
       let changesB = get(changeset, CHANGES);
-      let mergedChanges = assign(changesA, changesB);
+      let mergedChanges = assign({}, changesA, changesB);
       let newChangeset = new Changeset(content, get(this, VALIDATOR));
       newChangeset[CHANGES] = mergedChanges;
       newChangeset.notifyPropertyChange(CHANGES);
