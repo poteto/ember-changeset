@@ -17,8 +17,8 @@ let dummyValidations = {
   name(value) {
     return isPresent(value) && value.length > 3 || 'too short';
   },
-  password() {
-    return ['foo', 'bar'];
+  password(value) {
+    return value || ['foo', 'bar'];
   },
   async(value) {
     return resolve(value);
@@ -63,11 +63,11 @@ test('#set adds a change if valid', function(assert) {
 test('#set does not add a change if invalid', function(assert) {
   let expectedErrors = [
     { key: 'name', validation: 'too short', value: 'a' },
-    { key: 'password', validation: ['foo', 'bar'], value: 'foo' }
+    { key: 'password', validation: ['foo', 'bar'], value: false }
   ];
   let dummyChangeset = new Changeset(dummyModel, dummyValidator);
   dummyChangeset.set('name', 'a');
-  dummyChangeset.set('password', 'foo');
+  dummyChangeset.set('password', false);
   let changes = get(dummyChangeset, 'changes');
   let errors = get(dummyChangeset, 'errors');
   let isValid = get(dummyChangeset, 'isValid');
@@ -238,28 +238,55 @@ test('#merge preserves content and validator of origin changeset', function(asse
 });
 
 test('#validate/0 validates all fields immediately', function(assert) {
-  dummyModel.setProperties({ name: 'J', password: '123' });
+  let done = assert.async();
+  dummyModel.setProperties({ name: 'J', password: false });
   let dummyChangeset = new Changeset(dummyModel, dummyValidator, dummyValidations);
 
   run(() => {
-    dummyChangeset.validate();
-
-    assert.deepEqual(get(dummyChangeset, 'error.password'), { validation: ['foo', 'bar'], value: '123' }, 'should validate immediately');
-    assert.deepEqual(get(dummyChangeset, 'changes'), [], 'should not set changes');
-    assert.equal(get(dummyChangeset, 'errors.length'), 2, 'should have 2 errors');
+    dummyChangeset.validate().then(() => {
+      assert.deepEqual(get(dummyChangeset, 'error.password'), { validation: ['foo', 'bar'], value: false }, 'should validate immediately');
+      assert.deepEqual(get(dummyChangeset, 'changes'), [], 'should not set changes');
+      assert.equal(get(dummyChangeset, 'errors.length'), 3, 'should have 3 errors');
+      done();
+    });
   });
 });
 
 test('#validate/1 validates a single field immediately', function(assert) {
+  let done = assert.async();
   dummyModel.setProperties({ name: 'J', password: '123' });
   let dummyChangeset = new Changeset(dummyModel, dummyValidator, dummyValidations);
 
   run(() => {
-    dummyChangeset.validate('name');
+    dummyChangeset.validate('name').then(() => {
+      assert.deepEqual(get(dummyChangeset, 'error.name'), { validation: 'too short', value: 'J' }, 'should validate immediately');
+      assert.deepEqual(get(dummyChangeset, 'changes'), [], 'should not set changes');
+      assert.equal(get(dummyChangeset, 'errors.length'), 1, 'should only have 1 error');
+      done();
+    });
+  });
+});
 
-    assert.deepEqual(get(dummyChangeset, 'error.name'), { validation: 'too short', value: 'J' }, 'should validate immediately');
-    assert.deepEqual(get(dummyChangeset, 'changes'), [], 'should not set changes');
-    assert.equal(get(dummyChangeset, 'errors.length'), 1, 'should only have 1 error');
+test('#validate works correctly with changeset values', function(assert) {
+  let done = assert.async();
+  dummyModel.setProperties({ name: undefined, password: false, async: true });
+  let dummyChangeset = new Changeset(dummyModel, dummyValidator, dummyValidations);
+
+  run(() => {
+    dummyChangeset.set('name', 'Jim Bob');
+    dummyChangeset.validate().then(() => {
+      assert.equal(get(dummyChangeset, 'errors.length'), 1, 'should have 1 error');
+      assert.ok(get(dummyChangeset, 'isInvalid'), 'should be invalid');
+    });
+  });
+
+  run(() => {
+    dummyChangeset.set('password', true);
+    dummyChangeset.validate().then(() => {
+      assert.equal(get(dummyChangeset, 'errors.length'), 0, 'should have no errors');
+      assert.ok(get(dummyChangeset, 'isValid'), 'should be valid');
+      done();
+    });
   });
 });
 

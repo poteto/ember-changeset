@@ -4,6 +4,7 @@ import isPromise from 'ember-changeset/utils/is-promise';
 import { CHANGESET, isChangeset } from 'ember-changeset/-private/internals';
 
 const {
+  RSVP: { all, resolve },
   Object: EmberObject,
   computed: { not, readOnly },
   assert,
@@ -202,20 +203,28 @@ export function changeset(obj, validateFn, validationMap) {
      *
      * @public
      * @param  {String|Undefined} key
-     * @return {Changeset}
+     * @return {Promise}
      */
     validate(key) {
       let content = get(this, CONTENT);
+      let changes = get(this, CHANGES);
       assert('Cannot immediately validate without validation map', isPresent(validationMap));
 
       if (isNone(key)) {
-        keys(validationMap)
-          .forEach((validationKey) => this._validateAndSet(validationKey, get(content, validationKey)));
-      } else {
-        this._validateAndSet(key, get(content, key));
+        let maybePromise = keys(validationMap)
+          .map((validationKey) => {
+            let hasKey = keys(changes).indexOf(validationKey) !== -1;
+            let value = hasKey ? get(changes, validationKey) : get(content, validationKey);
+            return this._validateAndSet(validationKey, value);
+          });
+
+        return all(maybePromise);
       }
 
-      return this;
+      let hasKey = keys(changes).indexOf(key) !== -1;
+      let value = hasKey ? get(changes, key) : get(content, key);
+
+      return resolve(this._validateAndSet(key, value));
     },
 
     /**

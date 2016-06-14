@@ -342,15 +342,16 @@ changeset.rollback(); // returns changeset
 
 #### `validate`
 
-Immediately validates all or a single field on the changeset. Requires a validation map to be passed in when the changeset is first instantiated.
+Validates all or a single field on the changeset. Requires a validation map to be passed in when the changeset is first instantiated.
 
 ```js
 user.set('lastName', 'B');
 changeset.get('isValid'); // true
-changeset.validate('lastName'); // validate single field; returns changeset
-changeset.validate(); // validate all fields; returns changeset
-changeset.get('isInvalid'); // true
-changeset.get('errors'); // [{ key: 'lastName', validation: 'too short', value: 'B' }]
+changeset.validate('lastName'); // validate single field; returns Promise
+changeset.validate().then(() => {
+  changeset.get('isInvalid'); // true
+  changeset.get('errors'); // [{ key: 'lastName', validation: 'too short', value: 'B' }]
+}); // validate all fields; returns Promise
 ```
 
 **[⬆️ back to top](#api)**
