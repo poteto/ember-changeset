@@ -236,3 +236,37 @@ test('#merge preserves content and validator of origin changeset', function(asse
     });
   });
 });
+
+test('#validate/0 validates all fields immediately', function(assert) {
+  dummyModel.setProperties({ name: 'J', password: '123' });
+  let dummyChangeset = new Changeset(dummyModel, dummyValidator, dummyValidations);
+
+  run(() => {
+    dummyChangeset.validate();
+
+    assert.deepEqual(get(dummyChangeset, 'error.password'), { validation: ['foo', 'bar'], value: '123' }, 'should validate immediately');
+    assert.deepEqual(get(dummyChangeset, 'changes'), [], 'should not set changes');
+    assert.equal(get(dummyChangeset, 'errors.length'), 2, 'should have 2 errors');
+  });
+});
+
+test('#validate/1 validates a single field immediately', function(assert) {
+  dummyModel.setProperties({ name: 'J', password: '123' });
+  let dummyChangeset = new Changeset(dummyModel, dummyValidator, dummyValidations);
+
+  run(() => {
+    dummyChangeset.validate('name');
+
+    assert.deepEqual(get(dummyChangeset, 'error.name'), { validation: 'too short', value: 'J' }, 'should validate immediately');
+    assert.deepEqual(get(dummyChangeset, 'changes'), [], 'should not set changes');
+    assert.equal(get(dummyChangeset, 'errors.length'), 1, 'should only have 1 error');
+  });
+});
+
+test('#validate throws an error if no validation map is present', function(assert) {
+  let dummyChangeset = new Changeset(dummyModel, dummyValidator);
+
+  assert.throws(() => dummyChangeset.validate(), ({ message }) => {
+    return message === 'Assertion Failed: Cannot immediately validate without validation map';
+  }, 'should throw error');
+});

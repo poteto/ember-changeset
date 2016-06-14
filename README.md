@@ -340,6 +340,21 @@ changeset.rollback(); // returns changeset
 
 **[⬆️ back to top](#api)**
 
+#### `validate`
+
+Immediately validates all or a single field on the changeset. Requires a validation map to be passed in when the changeset is first instantiated.
+
+```js
+user.set('lastName', 'B');
+changeset.get('isValid'); // true
+changeset.validate('lastName'); // validate single field; returns changeset
+changeset.validate(); // validate all fields; returns changeset
+changeset.get('isInvalid'); // true
+changeset.get('errors'); // [{ key: 'lastName', validation: 'too short', value: 'B' }]
+```
+
+**[⬆️ back to top](#api)**
+
 ## Validation signature
 
 To use with your favorite validation library, you should create a custom `validator` action to be passed into the changeset:

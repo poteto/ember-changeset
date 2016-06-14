@@ -11,6 +11,7 @@ const {
   get,
   isArray,
   isPresent,
+  isNone,
   merge,
   set,
   setProperties,
@@ -29,14 +30,15 @@ function _assign(origin, ...sources) {
 }
 
 /**
- * Changeset factory
+ * Creates new changesets.
  *
- * @param  {Object} content
- * @param  {Function} validate
+ * @param  {Object} obj
+ * @param  {Function} validateFn
+ * @param  {Object} validationMap
  * @return {Ember.Object}
  */
-export function changeset(content, validate) {
-  assert('Invalid model for changeset', content);
+export function changeset(obj, validateFn, validationMap) {
+  assert('Underlying object for changeset is missing', isPresent(obj));
 
   return EmberObject.extend({
     __changeset__: CHANGESET,
@@ -57,10 +59,10 @@ export function changeset(content, validate) {
 
     init() {
       this._super(...arguments);
-      this[CONTENT] = content || null;
+      this[CONTENT] = obj || null;
       this[CHANGES] = {};
       this[ERRORS] = {};
-      this[VALIDATOR] = validate;
+      this[VALIDATOR] = validateFn;
     },
 
     /**
@@ -84,23 +86,7 @@ export function changeset(content, validate) {
      * @return {Any}
      */
     setUnknownProperty(key, value) {
-      let changes = get(this, CHANGES);
-      let errors = get(this, ERRORS);
-      let content = get(this, CONTENT);
-      let oldValue = get(content, key);
-      let validation = this._validate(key, value, oldValue);
-
-      if (hasOwnProp.call(content, key) && value === oldValue) {
-        return;
-      }
-
-      if (isPromise(validation)) {
-        return validation.then((resolvedValidation) => {
-          return this._setProperty(changes, errors, resolvedValidation, { key, value });
-        });
-      }
-
-      return this._setProperty(changes, errors, validation, { key, value });
+      return this._validateAndSet(key, value);
     },
 
     /**
@@ -209,6 +195,54 @@ export function changeset(content, validate) {
     },
 
     /**
+     * Validates the changeset immediately against the validationMap passed in.
+     * If no key is passed into this method, it will validate all fields on the
+     * validationMap and set errors accordingly. Will throw an error if no
+     * validationMap is present.
+     *
+     * @public
+     * @param  {String|Undefined} key
+     * @return {Changeset}
+     */
+    validate(key) {
+      let content = get(this, CONTENT);
+      assert('Cannot immediately validate without validation map', isPresent(validationMap));
+
+      if (isNone(key)) {
+        keys(validationMap)
+          .forEach((validationKey) => this._validateAndSet(validationKey, get(content, validationKey)));
+      } else {
+        this._validateAndSet(key, get(content, key));
+      }
+
+      return this;
+    },
+
+    /**
+     * For a given key and value, set error or change.
+     *
+     * @private
+     * @param  {String} key
+     * @param  {Any} value
+     * @return {Any}
+     */
+    _validateAndSet(key, value) {
+      let changes = get(this, CHANGES);
+      let errors = get(this, ERRORS);
+      let content = get(this, CONTENT);
+      let oldValue = get(content, key);
+      let validation = this._validate(key, value, oldValue);
+
+      if (isPromise(validation)) {
+        return validation.then((resolvedValidation) => {
+          return this._setProperty(content, changes, errors, resolvedValidation, { key, value, oldValue });
+        });
+      }
+
+      return this._setProperty(content, changes, errors, validation, { key, value, oldValue });
+    },
+
+    /**
      * Validates a given key and value.
      *
      * @private
@@ -238,7 +272,7 @@ export function changeset(content, validate) {
      * @param {Any} options.value
      * @return {Any}
      */
-    _setProperty(changes, errors, validation, { key, value } = {}) {
+    _setProperty(content, changes, errors, validation, { key, value, oldValue } = {}) {
       if (validation === true || isArray(validation) && validation[0] === true) {
         if (isPresent(get(errors, key))) {
           delete errors[key];
@@ -247,6 +281,10 @@ export function changeset(content, validate) {
         }
 
         this.notifyPropertyChange(CHANGES);
+
+        if (hasOwnProp.call(content, key) && value === oldValue) {
+          return;
+        }
 
         return set(changes, key, value);
       } else {
