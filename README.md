@@ -188,6 +188,26 @@ You can use this property to render a list of changes:
 
 **[⬆️ back to top](#api)**
 
+#### `change`
+
+Returns the change object.
+
+```js
+{
+  firstName: 'Jim'
+}
+```
+
+You can use this property to locate a single change:
+
+```hbs
+{{#if changeset.change.firstName}}
+  <p>You changed {{changeset.firstName}} to {{changeset.change.firstName}}!</p>
+{{/if}}
+```
+
+**[⬆️ back to top](#api)**
+
 #### `isValid`
 
 Returns a Boolean value of the changeset's validity.

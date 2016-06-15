@@ -155,6 +155,14 @@ test('#error returns the error object', function(assert) {
   assert.deepEqual(get(dummyChangeset, 'error'), expectedResult, 'should return error object');
 });
 
+test('#change returns the changes object', function(assert) {
+  let dummyChangeset = new Changeset(dummyModel);
+  let expectedResult = { name: 'a' };
+  dummyChangeset.set('name', 'a');
+
+  assert.deepEqual(get(dummyChangeset, 'change'), expectedResult, 'should return changes object');
+});
+
 test('it accepts async validations', function(assert) {
   let done = assert.async();
   let dummyChangeset = new Changeset(dummyModel, dummyValidator);
