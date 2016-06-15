@@ -342,7 +342,7 @@ changeset.rollback(); // returns changeset
 
 #### `validate`
 
-Validates all or a single field on the changeset. Requires a validation map to be passed in when the changeset is first instantiated.
+Validates all or a single field on the changeset. This will also validate the property on the underlying object, and is a useful method if you require the changeset to validate immediately on render. Requires a validation map to be passed in when the changeset is first instantiated.
 
 ```js
 user.set('lastName', 'B');
