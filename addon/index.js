@@ -45,6 +45,7 @@ export function changeset(obj, validateFn, validationMap) {
     __changeset__: CHANGESET,
     changes: objectToArray(CHANGES),
     errors: objectToArray(ERRORS),
+    change: readOnly(CHANGES),
     error: readOnly(ERRORS),
 
     isInvalid: not('isValid').readOnly(),
