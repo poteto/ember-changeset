@@ -388,7 +388,7 @@ const { Controller } = Ember;
 
 export default Controller.extend({
   actions: {
-    validate(key, newValue, oldValue) {
+    validate(key, newValue, oldValue, changes) {
       // lookup a validator function on your favorite validation library
       // should return a Boolean
     }
@@ -401,7 +401,7 @@ export default Controller.extend({
 {{dummy-form changeset=(changeset model (action "validate"))}}
 ```
 
-Your action will receive the `key`, `newValue` and `oldValue`.
+Your action will receive the `key`, `newValue`, `oldValue` and a one way reference to `changes`.
 
 ## Installation
 
