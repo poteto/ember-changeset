@@ -22,11 +22,11 @@ export default Controller.extend({
       return changeset.rollback();
     },
 
-    validate(key, newValue, oldValue) {
+    validate({ key, newValue, oldValue, changes }) {
       let validatorFn = validations[key];
 
       if (typeOf(validatorFn) === 'function') {
-        return validatorFn(newValue, oldValue);
+        return validatorFn(newValue, oldValue, changes);
       }
     }
   }

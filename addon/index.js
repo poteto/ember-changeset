@@ -270,7 +270,12 @@ export function changeset(obj, validateFn, validationMap) {
       let validator = get(this, VALIDATOR);
 
       if (typeOf(validator) === 'function') {
-        let isValid = validator(key, newValue, oldValue, pureAssign(changes));
+        let isValid = validator({
+          key,
+          newValue,
+          oldValue,
+          changes: pureAssign(changes)
+        });
 
         return isPresent(isValid) ? isValid : true;
       }

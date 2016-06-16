@@ -27,7 +27,7 @@ let dummyValidations = {
     return resolve(value);
   }
 };
-function dummyValidator(key, newValue, oldValue, changes) {
+function dummyValidator({ key, newValue, oldValue, changes }) {
   let validatorFn = dummyValidations[key];
 
   if (typeOf(validatorFn) === 'function') {
