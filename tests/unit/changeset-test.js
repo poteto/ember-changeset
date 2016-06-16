@@ -20,15 +20,18 @@ let dummyValidations = {
   password(value) {
     return value || ['foo', 'bar'];
   },
+  passwordConfirmation(newValue, _oldValue, { password }) {
+    return isPresent(newValue) && password === newValue || "password doesn't match";
+  },
   async(value) {
     return resolve(value);
   }
 };
-function dummyValidator(key, newValue, oldValue) {
+function dummyValidator(key, newValue, oldValue, changes) {
   let validatorFn = dummyValidations[key];
 
   if (typeOf(validatorFn) === 'function') {
-    return validatorFn(newValue, oldValue);
+    return validatorFn(newValue, oldValue, changes);
   }
 }
 
@@ -254,7 +257,7 @@ test('#validate/0 validates all fields immediately', function(assert) {
     dummyChangeset.validate().then(() => {
       assert.deepEqual(get(dummyChangeset, 'error.password'), { validation: ['foo', 'bar'], value: false }, 'should validate immediately');
       assert.deepEqual(get(dummyChangeset, 'changes'), [], 'should not set changes');
-      assert.equal(get(dummyChangeset, 'errors.length'), 3, 'should have 3 errors');
+      assert.equal(get(dummyChangeset, 'errors.length'), 4, 'should have 4 errors');
       done();
     });
   });
@@ -277,19 +280,20 @@ test('#validate/1 validates a single field immediately', function(assert) {
 
 test('#validate works correctly with changeset values', function(assert) {
   let done = assert.async();
-  dummyModel.setProperties({ name: undefined, password: false, async: true });
+  dummyModel.setProperties({ name: undefined, password: false, async: true, passwordConfirmation: false });
   let dummyChangeset = new Changeset(dummyModel, dummyValidator, dummyValidations);
 
   run(() => {
     dummyChangeset.set('name', 'Jim Bob');
     dummyChangeset.validate().then(() => {
-      assert.equal(get(dummyChangeset, 'errors.length'), 1, 'should have 1 error');
+      assert.equal(get(dummyChangeset, 'errors.length'), 2, 'should have 2 errors');
       assert.ok(get(dummyChangeset, 'isInvalid'), 'should be invalid');
     });
   });
 
   run(() => {
     dummyChangeset.set('password', true);
+    dummyChangeset.set('passwordConfirmation', true);
     dummyChangeset.validate().then(() => {
       assert.equal(get(dummyChangeset, 'errors.length'), 0, 'should have no errors');
       assert.ok(get(dummyChangeset, 'isValid'), 'should be valid');

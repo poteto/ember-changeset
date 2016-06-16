@@ -30,6 +30,10 @@ function _assign(origin, ...sources) {
   return sources.reduce((acc, source) => merge(acc, source), merge({}, origin));
 }
 
+function pureAssign() {
+  return assign({}, ...arguments);
+}
+
 /**
  * Creates new changesets.
  *
@@ -188,7 +192,7 @@ export function changeset(obj, validateFn, validationMap) {
 
       let changesA = get(this, CHANGES);
       let changesB = get(changeset, CHANGES);
-      let mergedChanges = assign({}, changesA, changesB);
+      let mergedChanges = pureAssign(changesA, changesB);
       let newChangeset = new Changeset(content, get(this, VALIDATOR));
       newChangeset[CHANGES] = mergedChanges;
       newChangeset.notifyPropertyChange(CHANGES);
@@ -262,9 +266,12 @@ export function changeset(obj, validateFn, validationMap) {
      * @return {Boolean|String}
      */
     _validate(key, newValue, oldValue) {
+      let changes = get(this, CHANGES);
       let validator = get(this, VALIDATOR);
+
       if (typeOf(validator) === 'function') {
-        let isValid = validator(key, newValue, oldValue);
+        let isValid = validator(key, newValue, oldValue, pureAssign(changes));
+
         return isPresent(isValid) ? isValid : true;
       }
 
