@@ -11,8 +11,8 @@ const {
   computed,
   get,
   isArray,
-  isPresent,
   isNone,
+  isPresent,
   merge,
   set,
   setProperties,
@@ -34,6 +34,10 @@ function pureAssign() {
   return assign({}, ...arguments);
 }
 
+function defaultValidatorFn() {
+  return true;
+}
+
 /**
  * Creates new changesets.
  *
@@ -42,7 +46,7 @@ function pureAssign() {
  * @param  {Object} validationMap
  * @return {Ember.Object}
  */
-export function changeset(obj, validateFn, validationMap) {
+export function changeset(obj, validateFn = defaultValidatorFn, validationMap = {}) {
   assert('Underlying object for changeset is missing', isPresent(obj));
 
   return EmberObject.extend({
@@ -213,7 +217,10 @@ export function changeset(obj, validateFn, validationMap) {
     validate(key) {
       let content = get(this, CONTENT);
       let changes = get(this, CHANGES);
-      assert('Cannot immediately validate without validation map', isPresent(validationMap));
+
+      if (keys(validationMap).length === 0) {
+        return resolve(null);
+      }
 
       if (isNone(key)) {
         let maybePromise = keys(validationMap)
