@@ -301,11 +301,3 @@ test('#validate works correctly with changeset values', function(assert) {
     });
   });
 });
-
-test('#validate throws an error if no validation map is present', function(assert) {
-  let dummyChangeset = new Changeset(dummyModel, dummyValidator);
-
-  assert.throws(() => dummyChangeset.validate(), ({ message }) => {
-    return message === 'Assertion Failed: Cannot immediately validate without validation map';
-  }, 'should throw error');
-});
