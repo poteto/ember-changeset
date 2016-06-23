@@ -264,10 +264,12 @@ get(changeset, 'isDirty'); // true
 
 #### `get`
 
-Exactly the same semantics as `Ember.get`. This proxies to the underlying Object.
+Exactly the same semantics as `Ember.get`. This proxies to the underlying Object, or the changed value if present.
 
 ```js
 get(changeset, 'firstName'); // "Jim"
+set(changeset, 'firstName', 'Billy'); // "Billy"
+get(changeset, 'firstName'); // "Billy"
 ```
 
 You can use and bind this property in the template:
