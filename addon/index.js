@@ -76,15 +76,19 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
     },
 
     /**
-     * Proxies `get` to the underlying content.
+     * Proxies `get` to the underlying content or changed value, if present.
      *
      * @public
      * @param  {String} key
      * @return {Any}
      */
     unknownProperty(key) {
+      let changes = get(this, CHANGES);
       let content = get(this, CONTENT);
-      return get(content, key);
+      let changedValue = get(changes, key);
+      let originalValue = get(content, key);
+
+      return isPresent(changedValue) ? changedValue : originalValue;
     },
 
     /**
