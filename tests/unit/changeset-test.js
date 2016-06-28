@@ -27,6 +27,7 @@ let dummyValidations = {
     return resolve(value);
   }
 };
+
 function dummyValidator({ key, newValue, oldValue, changes }) {
   let validatorFn = dummyValidations[key];
 
@@ -46,6 +47,7 @@ module('Unit | Utility | changeset', {
   }
 });
 
+// Methods
 test('#get proxies to content', function(assert) {
   set(dummyModel, 'name', 'Jim Bob');
   let dummyChangeset = new Changeset(dummyModel);
@@ -148,17 +150,6 @@ test('#rollback resets valid state', function(assert) {
   assert.ok(get(dummyChangeset, 'isValid'), 'should be valid');
 });
 
-test('it works with setProperties', function(assert) {
-  let dummyChangeset = new Changeset(dummyModel);
-  let expectedResult = [
-    { key: 'firstName', value: 'foo' },
-    { key: 'lastName', value: 'bar' }
-  ];
-  dummyChangeset.setProperties({ firstName: 'foo', lastName: 'bar' });
-
-  assert.deepEqual(get(dummyChangeset, 'changes'), expectedResult, 'precondition');
-});
-
 test('#error returns the error object', function(assert) {
   let dummyChangeset = new Changeset(dummyModel, dummyValidator);
   let expectedResult = { name: { validation: 'too short', value: 'a' } };
@@ -173,28 +164,6 @@ test('#change returns the changes object', function(assert) {
   dummyChangeset.set('name', 'a');
 
   assert.deepEqual(get(dummyChangeset, 'change'), expectedResult, 'should return changes object');
-});
-
-test('it accepts async validations', function(assert) {
-  let done = assert.async();
-  let dummyChangeset = new Changeset(dummyModel, dummyValidator);
-  let expectedChanges = [{ key: 'async', value: true }];
-  let expectedError = { async: { validation: 'is invalid', value: 'is invalid' } };
-  run(() => dummyChangeset.set('async', true));
-  run(() => dummyChangeset.set('async', 'is invalid'));
-  run(() => {
-    assert.deepEqual(get(dummyChangeset, 'changes'), expectedChanges, 'should set change');
-    assert.deepEqual(get(dummyChangeset, 'error'), expectedError, 'should set error');
-    done();
-  });
-});
-
-test('it noops when new value is strictly equal to old value', function(assert) {
-  set(dummyModel, 'name', 'Jim Bob');
-  let dummyChangeset = new Changeset(dummyModel);
-  dummyChangeset.set('name', 'Jim Bob');
-
-  assert.deepEqual(get(dummyChangeset, 'changes'), [], 'should noop');
 });
 
 test('#merge merges 2 valid changesets', function(assert) {
@@ -309,4 +278,41 @@ test('#validate works correctly with changeset values', function(assert) {
       done();
     });
   });
+});
+
+// Behavior
+test('it works with setProperties', function(assert) {
+  let dummyChangeset = new Changeset(dummyModel);
+  let expectedResult = [
+    { key: 'firstName', value: 'foo' },
+    { key: 'lastName', value: 'bar' }
+  ];
+  dummyChangeset.setProperties({ firstName: 'foo', lastName: 'bar' });
+
+  assert.deepEqual(get(dummyChangeset, 'changes'), expectedResult, 'precondition');
+});
+
+test('it accepts async validations', function(assert) {
+  let done = assert.async();
+  let dummyChangeset = new Changeset(dummyModel, dummyValidator);
+  let expectedChanges = [{ key: 'async', value: true }];
+  let expectedError = { async: { validation: 'is invalid', value: 'is invalid' } };
+  run(() => dummyChangeset.set('async', true));
+  run(() => dummyChangeset.set('async', 'is invalid'));
+  run(() => {
+    assert.deepEqual(get(dummyChangeset, 'changes'), expectedChanges, 'should set change');
+    assert.deepEqual(get(dummyChangeset, 'error'), expectedError, 'should set error');
+    done();
+  });
+});
+
+test('it clears errors when setting to original value', function(assert) {
+  set(dummyModel, 'name', 'Jim Bob');
+  let dummyChangeset = new Changeset(dummyModel, dummyValidator);
+  dummyChangeset.set('name', '');
+
+  assert.ok(get(dummyChangeset, 'isInvalid'), 'should be invalid');
+  dummyChangeset.set('name', 'Jim Bob');
+  assert.ok(get(dummyChangeset, 'isValid'), 'should be valid');
+  assert.notOk(get(dummyChangeset, 'isInvalid'), 'should be valid');
 });
