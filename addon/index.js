@@ -24,7 +24,6 @@ const CONTENT = '_content';
 const CHANGES = '_changes';
 const ERRORS = '_errors';
 const VALIDATOR = '_validator';
-const hasOwnProp = Object.prototype.hasOwnProperty;
 
 function _assign(origin, ...sources) {
   return sources.reduce((acc, source) => merge(acc, source), merge({}, origin));
@@ -83,12 +82,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      * @return {Any}
      */
     unknownProperty(key) {
-      let changes = get(this, CHANGES);
-      let content = get(this, CONTENT);
-      let changedValue = get(changes, key);
-      let originalValue = get(content, key);
-
-      return isPresent(changedValue) ? changedValue : originalValue;
+      return this._valueFor(key);
     },
 
     /**
@@ -219,9 +213,6 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      * @return {Promise}
      */
     validate(key) {
-      let content = get(this, CONTENT);
-      let changes = get(this, CHANGES);
-
       if (keys(validationMap).length === 0) {
         return resolve(null);
       }
@@ -229,18 +220,13 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
       if (isNone(key)) {
         let maybePromise = keys(validationMap)
           .map((validationKey) => {
-            let hasKey = keys(changes).indexOf(validationKey) !== -1;
-            let value = hasKey ? get(changes, validationKey) : get(content, validationKey);
-            return this._validateAndSet(validationKey, value);
+            return this._validateAndSet(validationKey, this._valueFor(validationKey));
           });
 
         return all(maybePromise);
       }
 
-      let hasKey = keys(changes).indexOf(key) !== -1;
-      let value = hasKey ? get(changes, key) : get(content, key);
-
-      return resolve(this._validateAndSet(key, value));
+      return resolve(this._validateAndSet(key, this._valueFor(key)));
     },
 
     /**
@@ -260,11 +246,11 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
 
       if (isPromise(validation)) {
         return validation.then((resolvedValidation) => {
-          return this._setProperty(content, changes, errors, resolvedValidation, { key, value, oldValue });
+          return this._setProperty(content, changes, errors, resolvedValidation, { key, value });
         });
       }
 
-      return this._setProperty(content, changes, errors, validation, { key, value, oldValue });
+      return this._setProperty(content, changes, errors, validation, { key, value });
     },
 
     /**
@@ -305,7 +291,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      * @param {Any} options.value
      * @return {Any}
      */
-    _setProperty(content, changes, errors, validation, { key, value, oldValue } = {}) {
+    _setProperty(content, changes, errors, validation, { key, value } = {}) {
       if (validation === true || isArray(validation) && validation[0] === true) {
         if (isPresent(get(errors, key))) {
           delete errors[key];
@@ -315,16 +301,28 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
 
         this.notifyPropertyChange(CHANGES);
 
-        if (hasOwnProp.call(content, key) && value === oldValue) {
-          return;
-        }
-
         return set(changes, key, value);
       } else {
         this.notifyPropertyChange(ERRORS);
 
         return set(errors, key, { value, validation });
       }
+    },
+
+    /**
+     * Value for change or the original value.
+     *
+     * @private
+     * @param  {String} key
+     * @return {Any}
+     */
+    _valueFor(key) {
+      let changes = get(this, CHANGES);
+      let content = get(this, CONTENT);
+      let changedValue = get(changes, key);
+      let originalValue = get(content, key);
+
+      return isPresent(changedValue) ? changedValue : originalValue;
     }
   });
 }
