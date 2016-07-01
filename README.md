@@ -1,4 +1,4 @@
-# ember-changeset [![Build Status](https://travis-ci.org/poteto/ember-changeset.svg?branch=master)](https://travis-ci.org/poteto/ember-changeset) [![npm version](https://badge.fury.io/js/ember-changeset.svg)](https://badge.fury.io/js/ember-changeset) [![Ember Observer Score](http://emberobserver.com/badges/ember-changeset.svg)](http://emberobserver.com/addons/ember-changeset)
+# ember-changeset [![Build Status](https://travis-ci.org/DockYard/ember-changeset.svg?branch=master)](https://travis-ci.org/DockYard/ember-changeset) [![npm version](https://badge.fury.io/js/ember-changeset.svg)](https://badge.fury.io/js/ember-changeset) [![Ember Observer Score](http://emberobserver.com/badges/ember-changeset.svg)](http://emberobserver.com/addons/ember-changeset)
 
 Ember.js flavored changesets, inspired by [Ecto](https://github.com/elixir-lang/ecto). To install:
 
@@ -14,7 +14,7 @@ Given Ember's Data Down, Actions Up (DDAU) approach, a changeset is more appropr
 
 `ember-changeset` only allows valid changes to be set, so your Objects will never become invalid (assuming you have 100% validation coverage). Additionally, this addon is designed to be un-opinionated about your choice of form and/or validation library, so you can easily integrate it into an existing solution.
 
-The simplest way to incorporate validations is to use [`ember-changeset-validations`](https://github.com/poteto/ember-changeset-validations/), a companion addon to this one. It has a simple mental model, and there are no Observers or CPs involved – just pure functions.
+The simplest way to incorporate validations is to use [`ember-changeset-validations`](https://github.com/DockYard/ember-changeset-validations/), a companion addon to this one. It has a simple mental model, and there are no Observers or CPs involved – just pure functions.
 
 #### tl;dr
 
