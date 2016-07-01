@@ -11,9 +11,9 @@
     "start": "ember server",
     "test": "ember try:each"
   },
-  "repository": "https://github.com/poteto/ember-changeset",
-  "bugs": "https://github.com/poteto/ember-changeset/issues",
-  "homepage": "https://github.com/poteto/ember-changeset",
+  "repository": "https://github.com/DockYard/ember-changeset",
+  "bugs": "https://github.com/DockYard/ember-changeset/issues",
+  "homepage": "https://github.com/DockYard/ember-changeset",
   "engines": {
     "node": ">= 0.10.0"
   },
