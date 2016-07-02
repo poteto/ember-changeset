@@ -115,16 +115,19 @@ test('#execute does not apply changes to content if invalid', function(assert) {
 
 test('#save proxies to content', function(assert) {
   let result;
-  set(dummyModel, 'save', () => {
+  let options;
+  set(dummyModel, 'save', (dummyOptions) => {
     result = 'ok';
+    options = dummyOptions;
     return resolve(true);
   });
   let dummyChangeset = new Changeset(dummyModel);
   dummyChangeset.set('name', 'foo');
 
   assert.equal(result, undefined, 'precondition');
-  dummyChangeset.save();
+  dummyChangeset.save('test options');
   assert.equal(result, 'ok', 'should save');
+  assert.equal(options, 'test options', 'should proxy options when saving');
 });
 
 test('#rollback restores old values', function(assert) {
