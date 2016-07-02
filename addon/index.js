@@ -127,16 +127,17 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      * Executes the changeset and saves the underlying content.
      *
      * @public
+     * @param  {Object} options optional object to pass to content save method
      * @return {Promise}
      */
-    save() {
+    save(options) {
       let content = get(this, CONTENT);
 
       if (typeOf(content.save) === 'function') {
         this.execute();
 
         return content
-          .save()
+          .save(options)
           .then(() => this.rollback());
       }
     },
