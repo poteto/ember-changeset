@@ -111,6 +111,25 @@ On rollback, all changes are dropped and the underlying Object is left untouched
 
 ## API
 
+* Properties
+  + [`error`](#error)
+  + [`change`](#change)
+  + [`errors`](#errors)
+  + [`changes`](#errors)
+  + [`isValid`](#isvalid)
+  + [`isInvalid`](#isinvalid)
+  + [`isPristine`](#ispristine)
+  + [`isDirty`](#isdirty)
+* Methods
+  + [`get`](#get)
+  + [`set`](#set)
+  + [`prepare`](#prepare)
+  + [`execute`](#execute)
+  + [`save`](#save)
+  + [`merge`](#merge)
+  + [`rollback`](#rollback)
+  + [`validate`](#validate)
+
 #### `error`
 
 Returns the error object.
@@ -129,6 +148,26 @@ You can use this property to locate a single error:
 ```hbs
 {{#if changeset.error.firstName}}
   <p>{{changeset.error.firstName.validation}}</p>
+{{/if}}
+```
+
+**[⬆️ back to top](#api)**
+
+#### `change`
+
+Returns the change object.
+
+```js
+{
+  firstName: 'Jim'
+}
+```
+
+You can use this property to locate a single change:
+
+```hbs
+{{#if changeset.change.firstName}}
+  <p>You changed {{changeset.firstName}} to {{changeset.change.firstName}}!</p>
 {{/if}}
 ```
 
@@ -184,26 +223,6 @@ You can use this property to render a list of changes:
     <li>{{change.key}}: {{change.value}}</li>
   {{/each}}
 </ul>
-```
-
-**[⬆️ back to top](#api)**
-
-#### `change`
-
-Returns the change object.
-
-```js
-{
-  firstName: 'Jim'
-}
-```
-
-You can use this property to locate a single change:
-
-```hbs
-{{#if changeset.change.firstName}}
-  <p>You changed {{changeset.firstName}} to {{changeset.change.firstName}}!</p>
-{{/if}}
 ```
 
 **[⬆️ back to top](#api)**
@@ -295,6 +314,30 @@ You can use and bind this property in the template:
 ```
 
 Any updates on this value will only store the change on the changeset, even with 2 way binding.
+
+**[⬆️ back to top](#api)**
+
+#### `prepare`
+
+Provides a function to run before emitting changes to the model. The callback function must return a hash in the same shape:
+
+```js
+changeset.prepare((changes) => {
+  // changes = { firstName: "Jim", lastName: "Bob" };
+  let modified = {};
+  
+  for (let key in changes) {
+    modified[underscore(key)] = changes[key];
+  }
+  
+  // don't forget to return, the original changes object is not mutated
+  return modified; // { first_name: "Jim", last_name: "Bob" }
+}); // returns changeset
+```
+
+The callback function is **not validated** – if you modify a value, it is your responsibility to ensure that it is valid.
+
+Returns the changeset. 
 
 **[⬆️ back to top](#api)**
 
