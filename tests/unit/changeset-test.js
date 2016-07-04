@@ -5,6 +5,7 @@ import { module, test } from 'qunit';
 const {
   Object: EmberObject,
   RSVP: { resolve },
+  String: { dasherize },
   run,
   get,
   isPresent,
@@ -91,6 +92,37 @@ test('#set does not add a change if invalid', function(assert) {
   assert.deepEqual(errors, expectedErrors, 'should have errors');
   assert.notOk(isValid, 'should not be valid');
   assert.ok(isInvalid, 'should be invalid');
+});
+
+test('#prepare provides callback to modify changes', function(assert) {
+  let date = new Date();
+  let dummyChangeset = new Changeset(dummyModel);
+  dummyChangeset.set('first_name', 'foo');
+  dummyChangeset.set('date_of_birth', date);
+  dummyChangeset.prepare((changes) => {
+    let modified = {};
+
+    for (let key in changes) {
+      modified[dasherize(key)] = changes[key];
+    }
+
+    return modified;
+  });
+  let changeKeys = get(dummyChangeset, 'changes').map((change) => get(change, 'key'));
+
+  assert.deepEqual(changeKeys, ['first-name', 'date-of-birth'], 'should update changes');
+  dummyChangeset.execute();
+  assert.equal(get(dummyModel, 'first-name'), 'foo', 'should update changes');
+  assert.equal(get(dummyModel, 'date-of-birth'), date, 'should update changes');
+});
+
+test('#prepare throws if callback does not return object', function(assert) {
+  let dummyChangeset = new Changeset(dummyModel);
+  dummyChangeset.set('first_name', 'foo');
+
+  assert.throws(() => dummyChangeset.prepare(() => { return 'foo'; }), ({ message }) => {
+    return message === 'Assertion Failed: Callback to `changeset.prepare` must return an object';
+  }, 'should throw error');
 });
 
 test('#execute applies changes to content if valid', function(assert) {

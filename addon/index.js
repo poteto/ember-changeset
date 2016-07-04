@@ -1,6 +1,8 @@
 import Ember from 'ember';
 import objectToArray from 'ember-changeset/utils/object-to-array';
 import isPromise from 'ember-changeset/utils/is-promise';
+import isObject from 'ember-changeset/utils/is-object';
+import pureAssign from 'ember-changeset/utils/assign';
 import { CHANGESET, isChangeset } from 'ember-changeset/-private/internals';
 
 const {
@@ -13,25 +15,15 @@ const {
   isArray,
   isNone,
   isPresent,
-  merge,
   set,
   setProperties,
   typeOf
 } = Ember;
-const assign = Ember.assign || Object.assign || _assign;
 const { keys } = Object;
 const CONTENT = '_content';
 const CHANGES = '_changes';
 const ERRORS = '_errors';
 const VALIDATOR = '_validator';
-
-function _assign(origin, ...sources) {
-  return sources.reduce((acc, source) => merge(acc, source), merge({}, origin));
-}
-
-function pureAssign() {
-  return assign({}, ...arguments);
-}
 
 function defaultValidatorFn() {
   return true;
@@ -105,6 +97,39 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      */
     toString() {
       return `changeset:${get(this, CONTENT).toString()}`;
+    },
+
+    /**
+     * Provides a function to run before emitting changes to the model. The
+     * callback function must return a hash in the same shape:
+     *
+     * ```
+     * changeset
+     *   .prepare((changes) => {
+     *     let modified = {};
+     *
+     *     for (let key in changes) {
+     *       modified[underscore(key)] = changes[key];
+     *     }
+     *
+     *    return modified; // { first_name: "Jim", last_name: "Bob" }
+     *  })
+     *  .execute(); // execute the changes
+     * ```
+     *
+     * @param  {Function} prepareChangesFn
+     * @return {Changeset}
+     */
+    prepare(prepareChangesFn) {
+      let changes = pureAssign(get(this, CHANGES));
+      let preparedChanges = prepareChangesFn(changes);
+
+      assert('Callback to `changeset.prepare` must return an object', isObject(preparedChanges));
+
+      this[CHANGES] = preparedChanges;
+      this.notifyPropertyChange(CHANGES);
+
+      return this;
     },
 
     /**
