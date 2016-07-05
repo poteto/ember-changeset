@@ -129,6 +129,7 @@ On rollback, all changes are dropped and the underlying Object is left untouched
   + [`merge`](#merge)
   + [`rollback`](#rollback)
   + [`validate`](#validate)
+  + [`addError`](#adderror)
 
 #### `error`
 
@@ -418,6 +419,21 @@ changeset.validate().then(() => {
   changeset.get('errors'); // [{ key: 'lastName', validation: 'too short', value: 'B' }]
 }); // validate all fields; returns Promise
 ```
+
+**[⬆️ back to top](#api)**
+
+#### `addError`
+
+Manually add an error to the changeset.
+
+```js
+changeset.addError('email', {
+  value: 'jim@bob.com',
+  validation: 'Email already taken'
+});
+```
+
+Adding an error manually does not require any special setup. The error will be cleared if the value for the `key` is subsequently set to a valid value. 
 
 **[⬆️ back to top](#api)**
 

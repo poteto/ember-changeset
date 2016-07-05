@@ -117,6 +117,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      *  .execute(); // execute the changes
      * ```
      *
+     * @public
      * @param  {Function} prepareChangesFn
      * @return {Changeset}
      */
@@ -256,6 +257,21 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
     },
 
     /**
+     * Manually add an error to the changeset.
+     *
+     * @public
+     * @param {String} key
+     * @param {Any} options.value
+     * @param {Any} options.validation Validation message
+     */
+    addError(key, { value, validation }) {
+      let errors = get(this, ERRORS);
+      this.notifyPropertyChange(ERRORS);
+
+      return set(errors, key, { value, validation });
+    },
+
+    /**
      * For a given key and value, set error or change.
      *
      * @private
@@ -329,9 +345,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
 
         return set(changes, key, value);
       } else {
-        this.notifyPropertyChange(ERRORS);
-
-        return set(errors, key, { value, validation });
+        return this.addError(key, { value, validation });
       }
     },
 
