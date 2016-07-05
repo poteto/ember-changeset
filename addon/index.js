@@ -341,12 +341,14 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
           this.notifyPropertyChange(ERRORS);
         }
 
+        set(changes, key, value);
         this.notifyPropertyChange(CHANGES);
+        this.notifyPropertyChange(key);
 
-        return set(changes, key, value);
-      } else {
-        return this.addError(key, { value, validation });
+        return value;
       }
+
+      return this.addError(key, { value, validation });
     },
 
     /**
