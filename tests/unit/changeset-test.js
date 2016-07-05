@@ -315,6 +315,19 @@ test('#validate works correctly with changeset values', function(assert) {
   });
 });
 
+test('#addError adds an error to the changeset', function(assert) {
+  let dummyChangeset = new Changeset(dummyModel);
+  dummyChangeset.addError('email', {
+    value: 'jim@bob.com',
+    validation: 'Email already taken'
+  });
+
+  assert.ok(get(dummyChangeset, 'isInvalid'), 'should be invalid');
+  assert.equal(get(dummyChangeset, 'error.email.validation'), 'Email already taken', 'should add the error');
+  dummyChangeset.set('email', 'unique@email.com');
+  assert.ok(get(dummyChangeset, 'isValid'), 'should be valid');
+});
+
 // Behavior
 test('it works with setProperties', function(assert) {
   let dummyChangeset = new Changeset(dummyModel);
