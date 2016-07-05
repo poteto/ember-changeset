@@ -115,7 +115,7 @@ On rollback, all changes are dropped and the underlying Object is left untouched
   + [`error`](#error)
   + [`change`](#change)
   + [`errors`](#errors)
-  + [`changes`](#errors)
+  + [`changes`](#changes)
   + [`isValid`](#isvalid)
   + [`isInvalid`](#isinvalid)
   + [`isPristine`](#ispristine)
