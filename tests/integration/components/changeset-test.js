@@ -89,10 +89,31 @@ test('it can be used with 1 argument', function(assert) {
   assert.notOk(this.$('p:contains("There were one or more errors in your form.")').length, 'does not turn invalid');
 });
 
-test('it updates when set', function(assert) {
+test('it updates when set without a validator', function(assert) {
   this.set('dummyModel', { firstName: 'Jim', lastName: 'Bob' });
   this.render(hbs`
     {{#with (changeset dummyModel) as |changeset|}}
+      <h1>{{changeset.firstName}} {{changeset.lastName}}</h1>
+      <input
+        id="first-name"
+        type="text"
+        value={{changeset.firstName}}
+        onchange={{action (mut changeset.firstName) value="target.value"}}>
+      {{input id="last-name" value=changeset.lastName}}
+    {{/with}}
+  `);
+
+  assert.ok(this.$('h1:contains("Jim Bob")'), 'precondition');
+  run(() => this.$('#first-name').val('foo').trigger('change'));
+  run(() => this.$('#last-name').val('foo').trigger('change'));
+  assert.ok(this.$('h1:contains("foo bar")'), 'should update observable value');
+});
+
+test('it updates when set with a validator', function(assert) {
+  this.set('dummyModel', { firstName: 'Jim', lastName: 'Bob' });
+  this.on('validate', (() => true));
+  this.render(hbs`
+    {{#with (changeset dummyModel (action "validate")) as |changeset|}}
       <h1>{{changeset.firstName}} {{changeset.lastName}}</h1>
       <input
         id="first-name"
