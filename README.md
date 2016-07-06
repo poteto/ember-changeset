@@ -8,7 +8,7 @@ ember install ember-changeset
 
 ## Philosophy
 
-The idea behind a changeset is simple: it represents a set of valid changes to be applied onto any Object (`Ember.Object`, `DS.Model`, POJOs, etc). Each change is tested against an optional validation, and if valid, the change is stored and applied when executed. 
+The idea behind a changeset is simple: it represents a set of valid changes to be applied onto any Object (`Ember.Object`, `DS.Model`, POJOs, etc). Each change is tested against an optional validation, and if valid, the change is stored and applied when executed.
 
 Given Ember's Data Down, Actions Up (DDAU) approach, a changeset is more appropriate compared to implicit 2 way bindings. Other validation libraries only validate a property *after* it is set on an Object, which means that your Object can enter an invalid state.
 
@@ -92,7 +92,7 @@ export default Controller.extend({
 });
 ```
 
-Then, in your favorite form library, simply pass in the `changeset` in place of the original model. 
+Then, in your favorite form library, simply pass in the `changeset` in place of the original model.
 
 ```hbs
 {{! dummy-form/template.hbs}}
@@ -105,7 +105,7 @@ Then, in your favorite form library, simply pass in the `changeset` in place of 
 </form>
 ```
 
-In the above example, when the input changes, only the changeset's internal values are updated. When the submit button is clicked, the changes are only executed if *all changes* are valid. 
+In the above example, when the input changes, only the changeset's internal values are updated. When the submit button is clicked, the changes are only executed if *all changes* are valid.
 
 On rollback, all changes are dropped and the underlying Object is left untouched.
 
@@ -136,11 +136,11 @@ On rollback, all changes are dropped and the underlying Object is left untouched
 Returns the error object.
 
 ```js
-{ 
+{
   firstName: {
-    value: 'Jim', 
+    value: 'Jim',
     validation: 'First name must be greater than 7 characters'
-  } 
+  }
 }
 ```
 
@@ -180,10 +180,10 @@ Returns an array of errors. If your `validate` function returns a non-boolean va
 
 ```js
 [
-  { 
-    key: 'firstName', 
-    value: 'Jim', 
-    validation: 'First name must be greater than 7 characters' 
+  {
+    key: 'firstName',
+    value: 'Jim',
+    validation: 'First name must be greater than 7 characters'
   }
 ]
 ```
@@ -209,8 +209,8 @@ Returns an array of changes to be executed. Only valid changes will be stored on
 
 ```js
 [
-  { 
-    key: 'firstName', 
+  {
+    key: 'firstName',
     value: 'Jim'
   }
 ]
@@ -326,11 +326,11 @@ Provides a function to run before emitting changes to the model. The callback fu
 changeset.prepare((changes) => {
   // changes = { firstName: "Jim", lastName: "Bob" };
   let modified = {};
-  
+
   for (let key in changes) {
     modified[underscore(key)] = changes[key];
   }
-  
+
   // don't forget to return, the original changes object is not mutated
   return modified; // { first_name: "Jim", last_name: "Bob" }
 }); // returns changeset
@@ -338,7 +338,7 @@ changeset.prepare((changes) => {
 
 The callback function is **not validated** – if you modify a value, it is your responsibility to ensure that it is valid.
 
-Returns the changeset. 
+Returns the changeset.
 
 **[⬆️ back to top](#api)**
 
@@ -433,7 +433,7 @@ changeset.addError('email', {
 });
 ```
 
-Adding an error manually does not require any special setup. The error will be cleared if the value for the `key` is subsequently set to a valid value. 
+Adding an error manually does not require any special setup. The error will be cleared if the value for the `key` is subsequently set to a valid value.
 
 **[⬆️ back to top](#api)**
 
@@ -456,6 +456,7 @@ export default Controller.extend({
   }
 });
 ```
+
 
 ```hbs
 {{! application/template.hbs}}
