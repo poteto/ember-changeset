@@ -362,10 +362,12 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
     _valueFor(key) {
       let changes = get(this, CHANGES);
       let content = get(this, CONTENT);
-      let changedValue = get(changes, key);
-      let originalValue = get(content, key);
 
-      return isPresent(changedValue) ? changedValue : originalValue;
+      if (changes.hasOwnProperty(key)) {
+        return get(changes, key);
+      } else {
+        return get(content, key);
+      }
     }
   });
 }

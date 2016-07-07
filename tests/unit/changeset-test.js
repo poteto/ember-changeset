@@ -66,6 +66,15 @@ test('#get returns change if present', function(assert) {
   assert.equal(result, 'Milton Waddams', 'should proxy to change');
 });
 
+test('#get returns change that is a blank value', function(assert) {
+  set(dummyModel, 'name', 'Jim Bob');
+  let dummyChangeset = new Changeset(dummyModel);
+  set(dummyChangeset, 'name', '');
+  let result = get(dummyChangeset, 'name');
+
+  assert.equal(result, '', 'should proxy to change');
+});
+
 test('#set adds a change if valid', function(assert) {
   let expectedChanges = [{ key: 'name', value: 'foo' }];
   let dummyChangeset = new Changeset(dummyModel);
