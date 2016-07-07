@@ -257,7 +257,8 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
     },
 
     /**
-     * Manually add an error to the changeset.
+     * Manually add an error to the changeset.  If there is an existing error
+     * for `key`, it will be overwritten.
      *
      * @public
      * @param {String} key

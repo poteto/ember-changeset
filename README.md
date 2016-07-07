@@ -433,7 +433,7 @@ changeset.addError('email', {
 });
 ```
 
-Adding an error manually does not require any special setup. The error will be cleared if the value for the `key` is subsequently set to a valid value.
+Adding an error manually does not require any special setup. The error will be cleared if the value for the `key` is subsequently set to a valid value.  Adding an error will overwrite any existing error for `key`.
 
 **[⬆️ back to top](#api)**
 
