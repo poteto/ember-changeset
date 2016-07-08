@@ -1,5 +1,5 @@
 import Ember from 'ember';
-import objectToArray from 'ember-changeset/utils/object-to-array';
+import objectToArray from 'ember-changeset/utils/computed/object-to-array';
 import { module, test } from 'qunit';
 
 const { Object: EmberObject } = Ember;
