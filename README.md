@@ -467,19 +467,16 @@ Your action will receive a single POJO containing the `key`, `newValue`, `oldVal
 
 ## Handling Server Errors
 
-When you run `changeset.save()`, under the hood this executes the changeset, and then runs the save method on your original content object, passing its return value back to you.  You are then free to use this result to add additional errors to the changeset if applicable.
+When you run `changeset.save()`, under the hood this executes the changeset, and then runs the save method on your original content object, passing its return value back to you. You are then free to use this result to add additional errors to the changeset via the `addError` method, if applicable.
 
-For example, if you are using an Ember Data model in your route, saving the changeset will effectively save the model.  If the save rejects, Ember Data will add errors to the model for you.  To copy the model errors over to your changeset, add a handler like this:
+For example, if you are using an Ember Data model in your route, saving the changeset will effectively save the model. If the save rejects, Ember Data will add errors to the model for you. To copy the model errors over to your changeset, add a handler like this:
 
 ```js
 changeset.save()
-  .then(() => { console.log('Success!'); })
+  .then(() => { /* ... */ })
   .catch(() => {
-    let errors = get(this, 'model.errors');
-    errors.forEach(error => {
-      let key = error.attribute;
-      let validation = error.message;
-      changeset.addError(key, { validation });
+    get(this, 'model.errors').forEach(({ attribute, message }) => {
+      changeset.addError(attribute, { validation: message });
     });
   });
 ```
