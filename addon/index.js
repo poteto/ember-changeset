@@ -1,16 +1,16 @@
 import Ember from 'ember';
-import objectToArray from 'ember-changeset/utils/object-to-array';
+import objectToArray from 'ember-changeset/utils/computed/object-to-array';
+import isEmptyObject from 'ember-changeset/utils/computed/is-empty-object';
 import isPromise from 'ember-changeset/utils/is-promise';
 import isObject from 'ember-changeset/utils/is-object';
 import pureAssign from 'ember-changeset/utils/assign';
 import { CHANGESET, isChangeset } from 'ember-changeset/-private/internals';
 
 const {
-  RSVP: { all, resolve },
   Object: EmberObject,
+  RSVP: { all, resolve },
   computed: { not, readOnly },
   assert,
-  computed,
   get,
   isArray,
   isNone,
@@ -41,26 +41,28 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
   assert('Underlying object for changeset is missing', isPresent(obj));
 
   return EmberObject.extend({
+    /**
+     * Internal descriptor for changeset identification
+     *
+     * @private
+     * @property __changeset__
+     * @type {String}
+     */
     __changeset__: CHANGESET,
+
     changes: objectToArray(CHANGES),
     errors: objectToArray(ERRORS),
     change: readOnly(CHANGES),
     error: readOnly(ERRORS),
 
+    isValid: isEmptyObject(ERRORS),
+    isPristine: isEmptyObject(CHANGES),
     isInvalid: not('isValid').readOnly(),
-    isPristine: not('isDirty').readOnly(),
-
-    isValid: computed(ERRORS, function() {
-      return keys(get(this, ERRORS)).length === 0;
-    }).readOnly(),
-
-    isDirty: computed(CHANGES, function() {
-      return keys(get(this, CHANGES)).length !== 0;
-    }).readOnly(),
+    isDirty: not('isPristine').readOnly(),
 
     init() {
       this._super(...arguments);
-      this[CONTENT] = obj || null;
+      this[CONTENT] = obj;
       this[CHANGES] = {};
       this[ERRORS] = {};
       this[VALIDATOR] = validateFn;
@@ -335,8 +337,13 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      * @return {Any}
      */
     _setProperty(content, changes, errors, validation, { key, value } = {}) {
-      if (validation === true || isArray(validation) && validation[0] === true) {
-        if (isPresent(get(errors, key))) {
+      let isSingleValidationArray =
+        isArray(validation) &&
+        validation.length === 1 &&
+        validation[0] === true;
+
+      if (validation === true || isSingleValidationArray) {
+        if (errors.hasOwnProperty(key)) {
           delete errors[key];
           this.notifyPropertyChange(`${ERRORS}.${key}`);
           this.notifyPropertyChange(ERRORS);
@@ -365,9 +372,9 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
 
       if (changes.hasOwnProperty(key)) {
         return get(changes, key);
-      } else {
-        return get(content, key);
       }
+
+      return get(content, key);
     }
   });
 }
