@@ -368,7 +368,12 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      */
     _valueFor(key) {
       let changes = get(this, CHANGES);
+      let errors = get(this, ERRORS);
       let content = get(this, CONTENT);
+
+      if (errors.hasOwnProperty(key)) {
+        return get(errors, `${key}.value`);
+      }
 
       if (changes.hasOwnProperty(key)) {
         return get(changes, key);
