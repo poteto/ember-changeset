@@ -154,6 +154,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
     /**
      * Executes the changeset and saves the underlying content.
      *
+     * @async
      * @public
      * @param  {Object} options optional object to pass to content save method
      * @return {Promise}
@@ -237,6 +238,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      * validationMap and set errors accordingly. Will throw an error if no
      * validationMap is present.
      *
+     * @async
      * @public
      * @param  {String|Undefined} key
      * @return {Promise}
@@ -270,6 +272,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
     addError(key, { value, validation }) {
       let errors = get(this, ERRORS);
       this.notifyPropertyChange(ERRORS);
+      this.notifyPropertyChange(key);
 
       return set(errors, key, { value, validation });
     },
