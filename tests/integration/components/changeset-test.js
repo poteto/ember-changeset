@@ -133,39 +133,62 @@ test('it updates when set with a validator', function(assert) {
 
 test('it does not rollback when validating', function(assert) {
   let dummyValidations = {
-    number(value) {
-      return value % 2 === 0 || 'must be even';
-    }
+    even(value) { return value % 2 === 0 || 'must be even'; },
+    odd(value) { return value % 2 !== 0 || 'must be odd'; }
   };
-  let lookupValidator = () => {
-    return ({ key, newValue }) => {
-      return dummyValidations[key](newValue);
-    };
+  let lookupValidator = (validationMap) => {
+    return ({ key, newValue }) => [validationMap[key](newValue)];
   };
-  let changeset = new Changeset({ number: 4 }, lookupValidator(dummyValidations), dummyValidations);
+  let changeset = new Changeset({ even: 4, odd: 4 }, lookupValidator(dummyValidations), dummyValidations);
   this.set('changeset', changeset);
   this.on('validateProperty', (changeset, property) => changeset.validate(property));
   this.render(hbs`
-    <h1>{{changeset.number}}</h1>
-    <input
-      id="number"
-      type="number"
-      value={{changeset.number}}
-      oninput={{action (mut changeset.number) value="target.value"}}
-      onblur={{action "validateProperty" changeset "number"}}>
-    {{#if changeset.error.number}}
-      <small>{{changeset.error.number.validation}}</small>
-    {{/if}}
+    <fieldset class="even">
+      <label for="even">Even Number</label>
+      <input
+        id="even"
+        type="even"
+        value={{changeset.even}}
+        oninput={{action (mut changeset.even) value="target.value"}}
+        onblur={{action "validateProperty" changeset "even"}}>
+      {{#if changeset.error.even}}
+        <small class="even">{{changeset.error.even.validation}}</small>
+      {{/if}}
+      <code class="even">{{changeset.even}}</code>
+    </fieldset>
+
+    <fieldset class="odd">
+      <label for="odd">Odd Number</label>
+      <input
+        id="odd"
+        type="odd"
+        value={{changeset.odd}}
+        oninput={{action (mut changeset.odd) value="target.value"}}
+        onblur={{action "validateProperty" changeset "odd"}}>
+      {{#if changeset.error.odd}}
+        <small class="odd">{{changeset.error.odd.validation}}</small>
+      {{/if}}
+      <code class="odd">{{changeset.odd}}</code>
+    </fieldset>
   `);
 
-  run(() => this.$('#number').val(3).trigger('input'));
+  run(() => this.$('#even').val(9).trigger('input'));
+  run(() => this.$('#odd').trigger('blur'));
   run(() => {
-    assert.equal(this.$('small').text().trim(), 'must be even', 'should display error message');
-    assert.equal(this.$('#number').val(), '3', 'should not rollback');
+    assert.equal(this.$('small.even').text().trim(), 'must be even', 'should display error message');
+    assert.equal(this.$('small.odd').text().trim(), 'must be odd', 'should display error message');
+    assert.equal(this.$('#even').val(), '9', 'should not rollback');
+    assert.equal(this.$('code.even').text().trim(), '9', 'should not rollback');
+    assert.equal(this.$('#odd').val(), '4', 'should not rollback');
   });
-  run(() => this.$('#number').trigger('blur'));
+  run(() => this.$('#even').trigger('blur'));
+  // there is a scenario where going from valid to invalid would cause values to
+  // go out of sync
+  run(() => this.$('#odd').val(10).trigger('input').trigger('blur'));
   run(() => {
-    assert.equal(this.$('small').text().trim(), 'must be even', 'should display error message');
-    assert.equal(this.$('#number').val(), '3', 'should not rollback');
+    assert.equal(this.$('small.even').text().trim(), 'must be even', 'should display error message');
+    assert.equal(this.$('small.odd').text().trim(), 'must be odd', 'should display error message');
+    assert.equal(this.$('#odd').val(), '10', 'should not rollback');
+    assert.equal(this.$('code.odd').text().trim(), '10', 'should not rollback');
   });
 });
