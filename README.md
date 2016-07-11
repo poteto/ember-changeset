@@ -284,7 +284,7 @@ get(changeset, 'isDirty'); // true
 
 #### `get`
 
-Exactly the same semantics as `Ember.get`. This proxies to the underlying Object, or the changed value if present.
+Exactly the same semantics as `Ember.get`. This proxies first to the error value, the changed value, and finally to the underlying Object.
 
 ```js
 get(changeset, 'firstName'); // "Jim"

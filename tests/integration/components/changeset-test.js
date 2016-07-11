@@ -1,4 +1,5 @@
 import Ember from 'ember';
+import Changeset from 'ember-changeset';
 import { moduleForComponent, test } from 'ember-qunit';
 import hbs from 'htmlbars-inline-precompile';
 
@@ -111,7 +112,7 @@ test('it updates when set without a validator', function(assert) {
 
 test('it updates when set with a validator', function(assert) {
   this.set('dummyModel', { firstName: 'Jim', lastName: 'Bob' });
-  this.on('validate', (() => true));
+  this.on('validate', () => true);
   this.render(hbs`
     {{#with (changeset dummyModel (action "validate")) as |changeset|}}
       <h1>{{changeset.firstName}} {{changeset.lastName}}</h1>
@@ -128,4 +129,43 @@ test('it updates when set with a validator', function(assert) {
   run(() => this.$('#first-name').val('foo').trigger('change'));
   run(() => this.$('#last-name').val('foo').trigger('change'));
   assert.ok(this.$('h1:contains("foo bar")'), 'should update observable value');
+});
+
+test('it does not rollback when validating', function(assert) {
+  let dummyValidations = {
+    number(value) {
+      return value % 2 === 0 || 'must be even';
+    }
+  };
+  let lookupValidator = () => {
+    return ({ key, newValue }) => {
+      return dummyValidations[key](newValue);
+    };
+  };
+  let changeset = new Changeset({ number: 4 }, lookupValidator(dummyValidations), dummyValidations);
+  this.set('changeset', changeset);
+  this.on('validateProperty', (changeset, property) => changeset.validate(property));
+  this.render(hbs`
+    <h1>{{changeset.number}}</h1>
+    <input
+      id="number"
+      type="number"
+      value={{changeset.number}}
+      oninput={{action (mut changeset.number) value="target.value"}}
+      onblur={{action "validateProperty" changeset "number"}}>
+    {{#if changeset.error.number}}
+      <small>{{changeset.error.number.validation}}</small>
+    {{/if}}
+  `);
+
+  run(() => this.$('#number').val(3).trigger('input'));
+  run(() => {
+    assert.equal(this.$('small').text().trim(), 'must be even', 'should display error message');
+    assert.equal(this.$('#number').val(), '3', 'should not rollback');
+  });
+  run(() => this.$('#number').trigger('blur'));
+  run(() => {
+    assert.equal(this.$('small').text().trim(), 'must be even', 'should display error message');
+    assert.equal(this.$('#number').val(), '3', 'should not rollback');
+  });
 });
