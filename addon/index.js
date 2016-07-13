@@ -172,17 +172,18 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
     },
 
     /**
-     * Returns the changeset to its pristine state, and discards changes.
+     * Returns the changeset to its pristine state, and discards changes and
+     * errors.
      *
      * @public
      * @return {Changeset}
      */
     rollback() {
       // notify virtual properties
-      let changeKeys = keys(get(this, CHANGES));
+      let rollbackKeys = [...keys(get(this, CHANGES)), ...keys(get(this, ERRORS))];
 
-      for (let i = 0; i < changeKeys.length; i++) {
-        this.notifyPropertyChange(changeKeys[i]);
+      for (let i = 0; i < rollbackKeys.length; i++) {
+        this.notifyPropertyChange(rollbackKeys[i]);
       }
 
       set(this, CHANGES, {});

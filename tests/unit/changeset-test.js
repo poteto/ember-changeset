@@ -172,17 +172,21 @@ test('#save proxies to content', function(assert) {
 });
 
 test('#rollback restores old values', function(assert) {
-  let dummyChangeset = new Changeset(dummyModel);
-  let expectedResult = [
+  let dummyChangeset = new Changeset(dummyModel, dummyValidator);
+  let expectedChanges = [
     { key: 'firstName', value: 'foo' },
     { key: 'lastName', value: 'bar' }
   ];
+  let expectedErrors = [{ key: 'name', validation: 'too short', value: '' }];
   dummyChangeset.set('firstName', 'foo');
   dummyChangeset.set('lastName', 'bar');
+  dummyChangeset.set('name', '');
 
-  assert.deepEqual(get(dummyChangeset, 'changes'), expectedResult, 'precondition');
+  assert.deepEqual(get(dummyChangeset, 'changes'), expectedChanges, 'precondition');
+  assert.deepEqual(get(dummyChangeset, 'errors'), expectedErrors, 'precondition');
   dummyChangeset.rollback();
   assert.deepEqual(get(dummyChangeset, 'changes'), [], 'should rollback');
+  assert.deepEqual(get(dummyChangeset, 'errors'), [], 'should rollback');
 });
 
 test('#rollback resets valid state', function(assert) {
