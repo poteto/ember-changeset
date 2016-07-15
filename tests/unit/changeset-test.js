@@ -341,6 +341,35 @@ test('#addError adds an error to the changeset', function(assert) {
   assert.ok(get(dummyChangeset, 'isValid'), 'should be valid');
 });
 
+test('#snapshot creates a snapshot of the changeset', function(assert) {
+  let dummyChangeset = new Changeset(dummyModel, dummyValidator);
+  dummyChangeset.set('name', 'Pokemon Go');
+  dummyChangeset.set('password', false);
+  let snapshot = dummyChangeset.snapshot();
+  let expectedResult = {
+    changes: { name: 'Pokemon Go' },
+    errors: { password: { validation: ['foo', 'bar'], value: false } }
+  };
+
+  assert.deepEqual(snapshot, expectedResult, 'should return snapshot');
+  dummyChangeset.set('name', "Gotta catch'em all");
+  assert.deepEqual(snapshot, expectedResult, 'should not be mutated');
+});
+
+test('#restore restores a snapshot of the changeset', function(assert) {
+  let dummyChangesetA = new Changeset(dummyModel, dummyValidator);
+  let dummyChangesetB = new Changeset(dummyModel, dummyValidator);
+  dummyChangesetA.set('name', 'Pokemon Go');
+  dummyChangesetA.set('password', false);
+  let snapshot = dummyChangesetA.snapshot();
+
+  assert.ok(get(dummyChangesetB, 'isValid'), 'precondition - should be valid');
+  dummyChangesetB.restore(snapshot);
+  assert.ok(get(dummyChangesetB, 'isInvalid'), 'should be invalid');
+  assert.equal(get(dummyChangesetB, 'change.name'), 'Pokemon Go', 'should restore changes');
+  assert.deepEqual(get(dummyChangesetB, 'error.password'), { validation: ['foo', 'bar'], value: false }, 'should restore errors');
+});
+
 // Behavior
 test('it works with setProperties', function(assert) {
   let dummyChangeset = new Changeset(dummyModel);

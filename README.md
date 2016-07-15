@@ -130,6 +130,8 @@ On rollback, all changes are dropped and the underlying Object is left untouched
   + [`rollback`](#rollback)
   + [`validate`](#validate)
   + [`addError`](#adderror)
+  + [`snapshot`](#snapshot)
+  + [`restore`](#restore)
 
 #### `error`
 
@@ -434,6 +436,33 @@ changeset.addError('email', {
 ```
 
 Adding an error manually does not require any special setup. The error will be cleared if the value for the `key` is subsequently set to a valid value.  Adding an error will overwrite any existing error for `key`.
+
+**[⬆️ back to top](#api)**
+
+#### `snapshot`
+
+Creates a snapshot of the changeset's errors and changes. This can be used to `restore` the changeset at a later time.
+
+```js
+let snapshot = changeset.snapshot(); // snapshot
+```
+
+**[⬆️ back to top](#api)**
+
+#### `restore`
+
+Restores a snapshot of changes and errors to the changeset. This overrides existing changes and errors.
+
+```js
+let user = { name: 'Adam' };
+let changeset = new Changeset(user, validatorFn);
+changeset.set('name', 'Jim Bob');
+
+let snapshot = changeset.snapshot();
+changeset.set('name', 'Potato');
+changeset.restore(snapshot);
+changeset.get('name', 'Jim Bob');
+```
 
 **[⬆️ back to top](#api)**
 
