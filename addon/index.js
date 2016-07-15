@@ -179,13 +179,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      * @return {Changeset}
      */
     rollback() {
-      // notify virtual properties
-      let rollbackKeys = [...keys(get(this, CHANGES)), ...keys(get(this, ERRORS))];
-
-      for (let i = 0; i < rollbackKeys.length; i++) {
-        this.notifyPropertyChange(rollbackKeys[i]);
-      }
-
+      this._notifyVirtualProperties();
       set(this, CHANGES, {});
       set(this, ERRORS, {});
 
@@ -262,7 +256,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
     },
 
     /**
-     * Manually add an error to the changeset.  If there is an existing error
+     * Manually add an error to the changeset. If there is an existing error
      * for `key`, it will be overwritten.
      *
      * @public
@@ -276,6 +270,34 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
       this.notifyPropertyChange(key);
 
       return set(errors, key, { value, validation });
+    },
+
+    /**
+     * Creates a snapshot of the changeset's errors and changes.
+     *
+     * @return {Object} snapshot
+     */
+    snapshot() {
+      return {
+        changes: pureAssign(get(this, CHANGES)),
+        errors: pureAssign(get(this, ERRORS))
+      };
+    },
+
+    /**
+     * Restores a snapshot of changes and errors. This overrides existing
+     * changes and errors.
+     *
+     * @param  {Object} options.changes
+     * @param  {Object} options.errors
+     * @return {Changeset}
+     */
+    restore({ changes, errors }) {
+      set(this, CHANGES, changes);
+      set(this, ERRORS, errors);
+      this._notifyVirtualProperties();
+
+      return this;
     },
 
     /**
@@ -384,6 +406,14 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
       }
 
       return get(content, key);
+    },
+
+    _notifyVirtualProperties() {
+      let rollbackKeys = [...keys(get(this, CHANGES)), ...keys(get(this, ERRORS))];
+
+      for (let i = 0; i < rollbackKeys.length; i++) {
+        this.notifyPropertyChange(rollbackKeys[i]);
+      }
     }
   });
 }
