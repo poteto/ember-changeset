@@ -309,19 +309,21 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      * @return {Any}
      */
     _validateAndSet(key, value) {
-      let changes = get(this, CHANGES);
-      let errors = get(this, ERRORS);
       let content = get(this, CONTENT);
       let oldValue = get(content, key);
       let validation = this._validate(key, value, oldValue);
 
+      if (isArray(validation) && validation.length === 1) {
+        validation = validation[0];
+      }
+
       if (isPromise(validation)) {
         return validation.then((resolvedValidation) => {
-          return this._setProperty(content, changes, errors, resolvedValidation, { key, value });
+          return this._setProperty(resolvedValidation, { key, value });
         });
       }
 
-      return this._setProperty(content, changes, errors, validation, { key, value });
+      return this._setProperty(validation, { key, value });
     },
 
     /**
@@ -355,14 +357,14 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      * Sets property or error on the changeset.
      *
      * @private
-     * @param {Object} changes
-     * @param {Object} errors
      * @param {Boolean|Array|String} validation
      * @param {String} options.key
      * @param {Any} options.value
      * @return {Any}
      */
-    _setProperty(content, changes, errors, validation, { key, value } = {}) {
+    _setProperty(validation, { key, value } = {}) {
+      let changes = get(this, CHANGES);
+      let errors = get(this, ERRORS);
       let isSingleValidationArray =
         isArray(validation) &&
         validation.length === 1 &&
