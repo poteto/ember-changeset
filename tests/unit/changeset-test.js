@@ -388,9 +388,9 @@ test('it accepts async validations', function(assert) {
   let expectedChanges = [{ key: 'async', value: true }];
   let expectedError = { async: { validation: 'is invalid', value: 'is invalid' } };
   run(() => dummyChangeset.set('async', true));
+  run(() => assert.deepEqual(get(dummyChangeset, 'changes'), expectedChanges, 'should set change'));
   run(() => dummyChangeset.set('async', 'is invalid'));
   run(() => {
-    assert.deepEqual(get(dummyChangeset, 'changes'), expectedChanges, 'should set change');
     assert.deepEqual(get(dummyChangeset, 'error'), expectedError, 'should set error');
     done();
   });

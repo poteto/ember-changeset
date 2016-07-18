@@ -256,8 +256,8 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
     },
 
     /**
-     * Manually add an error to the changeset. If there is an existing error
-     * for `key`, it will be overwritten.
+     * Manually add an error to the changeset. If there is an existing error or
+     * change for `key`, it will be overwritten.
      *
      * @public
      * @param {String} key
@@ -266,6 +266,8 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      */
     addError(key, { value, validation }) {
       let errors = get(this, ERRORS);
+
+      this._deleteKey(CHANGES, key);
       this.notifyPropertyChange(ERRORS);
       this.notifyPropertyChange(key);
 
@@ -360,19 +362,13 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      */
     _setProperty(validation, { key, value } = {}) {
       let changes = get(this, CHANGES);
-      let errors = get(this, ERRORS);
       let isSingleValidationArray =
         isArray(validation) &&
         validation.length === 1 &&
         validation[0] === true;
 
       if (validation === true || isSingleValidationArray) {
-        if (errors.hasOwnProperty(key)) {
-          delete errors[key];
-          this.notifyPropertyChange(`${ERRORS}.${key}`);
-          this.notifyPropertyChange(ERRORS);
-        }
-
+        this._deleteKey(ERRORS, key);
         set(changes, key, value);
         this.notifyPropertyChange(CHANGES);
         this.notifyPropertyChange(key);
@@ -406,11 +402,39 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
       return get(content, key);
     },
 
+    /**
+     * Notifies all virtual properties set on the changeset of a change.
+     *
+     * @private
+     * @return {Void}
+     */
     _notifyVirtualProperties() {
       let rollbackKeys = [...keys(get(this, CHANGES)), ...keys(get(this, ERRORS))];
 
       for (let i = 0; i < rollbackKeys.length; i++) {
         this.notifyPropertyChange(rollbackKeys[i]);
+      }
+    },
+
+    /**
+     * Deletes a key off an object and notifies observers.
+     *
+     * @private
+     * @param  {String} objName
+     * @param  {String} key
+     * @return {Void}
+     */
+    _deleteKey(objName, key) {
+      let obj = get(this, objName);
+
+      if (isNone(obj)) {
+        return;
+      }
+
+      if (obj.hasOwnProperty(key)) {
+        delete obj[key];
+        this.notifyPropertyChange(`${objName}.${key}`);
+        this.notifyPropertyChange(objName);
       }
     }
   });
