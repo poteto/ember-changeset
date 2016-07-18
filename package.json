@@ -1,6 +1,6 @@
 {
   "name": "ember-changeset",
-  "version": "0.13.1",
+  "version": "0.13.2",
   "description": "Changesets for Ember",
   "directories": {
     "doc": "doc",
