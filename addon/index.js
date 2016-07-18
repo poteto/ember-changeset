@@ -313,10 +313,6 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
       let oldValue = get(content, key);
       let validation = this._validate(key, value, oldValue);
 
-      if (isArray(validation) && validation.length === 1) {
-        validation = validation[0];
-      }
-
       if (isPromise(validation)) {
         return validation.then((resolvedValidation) => {
           return this._setProperty(resolvedValidation, { key, value });
