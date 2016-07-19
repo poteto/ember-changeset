@@ -206,7 +206,6 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      *
      * @public
      * @param  {Changeset} changeset
-     * @param  {Boolean} forceMerge
      * @return {Changeset}
      */
     merge(changeset) {
