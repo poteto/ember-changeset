@@ -380,7 +380,7 @@ changeset.rollback(); // returns changeset
 
 #### `merge`
 
-Merges 2 valid changesets and returns a new changeset with the same underlying content and validator as the origin. Both changesets must point to the same underlying object. For example:
+Merges 2 changesets and returns a new changeset with the same underlying content and validator as the origin. Both changesets must point to the same underlying object. For example:
 
 ```js
 let changesetA = new Changeset(user, validatorFn);
@@ -393,6 +393,8 @@ changesetC.execute();
 user.get('firstName'); // "Jimmy"
 user.get('lastName'); // "Fallon"
 ```
+
+Note that by default only valid changesets can be merged. To merge invalid changesets you must supply `true` as the second argument to merge, to allow invalid.
 
 Note that both changesets `A` and `B` are not destroyed by the merge, so you might want to call `destroy()` on them to avoid memory leaks.
 
