@@ -4,6 +4,7 @@ import isEmptyObject from 'ember-changeset/utils/computed/is-empty-object';
 import isPromise from 'ember-changeset/utils/is-promise';
 import isObject from 'ember-changeset/utils/is-object';
 import pureAssign from 'ember-changeset/utils/assign';
+import objectWithout from 'ember-changeset/utils/object-without';
 import { CHANGESET, isChangeset } from 'ember-changeset/-private/internals';
 
 const {
@@ -205,16 +206,13 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      *
      * @public
      * @param  {Changeset} changeset
+     * @param  {Boolean} forceMerge
      * @return {Changeset}
      */
-    merge(changeset, allowInvalid = false) {
+    merge(changeset) {
       let content = get(this, CONTENT);
       assert('Cannot merge with a non-changeset', isChangeset(changeset));
       assert('Cannot merge with a changeset of different content', get(changeset, CONTENT) === content);
-
-      if (!allowInvalid) {
-        assert('Cannot merge invalid changesets', get(this, 'isValid') && get(changeset, 'isValid'));
-      }
 
       if (get(this, 'isPristine') && get(changeset, 'isPristine')) {
         return this;
@@ -222,18 +220,21 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
 
       let changesA = get(this, CHANGES);
       let changesB = get(changeset, CHANGES);
-      let mergedChanges = pureAssign(changesA, changesB);
-      let newChangeset = new Changeset(content, get(this, VALIDATOR));
-      newChangeset[CHANGES] = mergedChanges;
-      newChangeset.notifyPropertyChange(CHANGES);
 
-      if (allowInvalid) {
-        let errorsA = get(this, ERRORS);
-        let errorsB = get(changeset, ERRORS);
-        let mergedErrors = pureAssign(errorsA, errorsB);
-        newChangeset[ERRORS] = mergedErrors;
-        newChangeset.notifyPropertyChange(ERRORS);
-      }
+      let errorsA = get(this, ERRORS);
+      let errorsB = get(changeset, ERRORS);
+
+      let newChangeset = new Changeset(content, get(this, VALIDATOR));
+
+      errorsA = objectWithout(keys(changesB), errorsA);
+      changesA = objectWithout(keys(errorsB), changesA);
+
+      let mergedChanges = pureAssign(changesA, changesB);
+      let mergedErrors = pureAssign(errorsA, errorsB);
+
+      newChangeset[CHANGES] = mergedChanges;
+      newChangeset[ERRORS] = mergedErrors;
+      newChangeset._notifyVirtualProperties();
 
       return newChangeset;
     },

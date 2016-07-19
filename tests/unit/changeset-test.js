@@ -227,32 +227,27 @@ test('#merge merges 2 valid changesets', function(assert) {
   assert.deepEqual(get(dummyChangesetB, 'changes'), [{ key: 'lastName', value: 'Bob' }], 'should not mutate second changeset');
 });
 
-test('#merge does not merge invalid changesets', function(assert) {
+test('#merge merges invalid changesets', function(assert) {
   let dummyChangesetA = new Changeset(dummyModel, dummyValidator);
   let dummyChangesetB = new Changeset(dummyModel, dummyValidator);
-  dummyChangesetA.set('name', 'a');
-  dummyChangesetB.set('name', 'b');
-
-  assert.throws(() => dummyChangesetA.merge(dummyChangesetB), ({ message }) => {
-    return message === 'Assertion Failed: Cannot merge invalid changesets';
-  }, 'should throw error');
-});
-
-test('#merge can merge invalid changesets with `allowInvalid` option', function(assert) {
-  let dummyChangesetA = new Changeset(dummyModel, dummyValidator);
-  let dummyChangesetB = new Changeset(dummyModel, dummyValidator);
+  let dummyChangesetC = new Changeset(dummyModel, dummyValidator);
   dummyChangesetA.set('age', 21);
   dummyChangesetA.set('name', 'a');
-  dummyChangesetB.set('name', 'b');
+  dummyChangesetB.set('name', 'Tony Stark');
+  dummyChangesetC.set('name', 'b');
 
-  let dummyChangesetC = dummyChangesetA.merge(dummyChangesetB, true);
+  let dummyChangesetD = dummyChangesetA.merge(dummyChangesetB);
+  dummyChangesetD = dummyChangesetD.merge(dummyChangesetC);
 
   let expectedChanges = [{key: "age", value: 21}];
   let expectedErrors = [{"key": "name","validation": "too short","value": "b"}];
 
-  assert.deepEqual(get(dummyChangesetC, 'changes'), expectedChanges, 'should not merge invalid changes');
-  assert.deepEqual(get(dummyChangesetC, 'isInvalid'), true, 'should make new changeset invalid');
-  assert.deepEqual(get(dummyChangesetC, 'errors'), expectedErrors, 'should assign errors from both changesets');
+  assert.deepEqual(get(dummyChangesetA, 'isInvalid'), true, 'changesetA is not valid becuase of name');
+  assert.deepEqual(get(dummyChangesetB, 'isValid'), true, 'changesetB should be invalid');
+  assert.deepEqual(get(dummyChangesetC, 'isInvalid'), true, 'changesetC should be invalid');
+  assert.deepEqual(get(dummyChangesetD, 'isInvalid'), true, 'changesetD should be invalid');
+  assert.deepEqual(get(dummyChangesetD, 'changes'), expectedChanges, 'should not merge invalid changes');
+  assert.deepEqual(get(dummyChangesetD, 'errors'), expectedErrors, 'should assign errors from both changesets');
 
 });
 
