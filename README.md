@@ -386,7 +386,9 @@ Merges 2 changesets and returns a new changeset with the same underlying content
 let changesetA = new Changeset(user, validatorFn);
 let changesetB = new Changeset(user, validatorFn);
 changesetA.set('firstName', 'Jim');
+changesetA.get('errors') // [{key: 'firstName', value: 'Jim', validations: ['Firstname cannot be Jim, sorry Jim']}]
 changesetB.set('firstName', 'Jimmy');
+changesetB.get('errors') // []
 changesetB.set('lastName', 'Fallon');
 let changesetC = changesetA.merge(changesetB);
 changesetC.execute();
@@ -394,7 +396,7 @@ user.get('firstName'); // "Jimmy"
 user.get('lastName'); // "Fallon"
 ```
 
-Note that by default only valid changesets can be merged. To merge invalid changesets you must supply `true` as the second argument to merge, to allow invalid.
+Changes are merged using the same heuristics as Object.assign, such that `changesetB` will replace `changesetA` in `changesetA.merge(changesetB)`. Neither changeset is actually mutated, instead a clean changeset is created from `changesetA` and `changesetB` which contains `errors` from `changesetA` and `changesetB` where `errors` on `changesetA` do not include valid keys on `changesetB`, and valid keys on `changesetA` do not include errors on `changesetB`.
 
 Note that both changesets `A` and `B` are not destroyed by the merge, so you might want to call `destroy()` on them to avoid memory leaks.
 
