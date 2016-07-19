@@ -207,11 +207,14 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      * @param  {Changeset} changeset
      * @return {Changeset}
      */
-    merge(changeset) {
+    merge(changeset, allowInvalid = false) {
       let content = get(this, CONTENT);
       assert('Cannot merge with a non-changeset', isChangeset(changeset));
       assert('Cannot merge with a changeset of different content', get(changeset, CONTENT) === content);
-      assert('Cannot merge invalid changesets', get(this, 'isValid') && get(changeset, 'isValid'));
+
+      if (!allowInvalid) {
+        assert('Cannot merge invalid changesets', get(this, 'isValid') && get(changeset, 'isValid'));
+      }
 
       if (get(this, 'isPristine') && get(changeset, 'isPristine')) {
         return this;
@@ -223,6 +226,14 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
       let newChangeset = new Changeset(content, get(this, VALIDATOR));
       newChangeset[CHANGES] = mergedChanges;
       newChangeset.notifyPropertyChange(CHANGES);
+
+      if (allowInvalid) {
+        let errorsA = get(this, ERRORS);
+        let errorsB = get(changeset, ERRORS);
+        let mergedErrors = pureAssign(errorsA, errorsB);
+        newChangeset[ERRORS] = mergedErrors;
+        newChangeset.notifyPropertyChange(ERRORS);
+      }
 
       return newChangeset;
     },
