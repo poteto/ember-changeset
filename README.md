@@ -396,7 +396,7 @@ user.get('firstName'); // "Jimmy"
 user.get('lastName'); // "Fallon"
 ```
 
-Changes are merged using similar heuristics to [`Object.assign`](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Object/assign), such that `B` will replace `A` in `changesetA.merge(changesetB)`. Neither changeset is actually mutated, instead a clean changeset is created from `A` and `B` which contains `errors` from `A` and `B` where `errors` on `A` do not include valid keys on `B`, and valid keys on `A` do not include errors on `B`.
+When merging, the changeset being merged in takes precedence. For example: if `B` contains errors, the errors from `B` will be merged, and the invalid attributes on `B` will not be merged from `A` even if they're valid on `A`. Likewise, if `A` contains errors on attributes which are valid on `B`, the value from `B` will be used and the errors for those keys will not be merged from `A`. This is to prevent the new changeset from containing `changes` and `errors` on the same keys, which is a guarantee of a normal changeset.
 
 Note that both changesets `A` and `B` are not destroyed by the merge, so you might want to call `destroy()` on them to avoid memory leaks.
 
