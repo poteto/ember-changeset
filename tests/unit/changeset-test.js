@@ -239,8 +239,8 @@ test('#merge merges invalid changesets', function(assert) {
   let dummyChangesetD = dummyChangesetA.merge(dummyChangesetB);
   dummyChangesetD = dummyChangesetD.merge(dummyChangesetC);
 
-  let expectedChanges = [{key: "age", value: 21}];
-  let expectedErrors = [{"key": "name","validation": "too short","value": "b"}];
+  let expectedChanges = [{ key: 'age', value: 21 }];
+  let expectedErrors = [{ key: 'name', 'validation': 'too short', value: 'b' }];
 
   assert.deepEqual(get(dummyChangesetA, 'isInvalid'), true, 'changesetA is not valid becuase of name');
   assert.deepEqual(get(dummyChangesetB, 'isValid'), true, 'changesetB should be invalid');
@@ -248,7 +248,6 @@ test('#merge merges invalid changesets', function(assert) {
   assert.deepEqual(get(dummyChangesetD, 'isInvalid'), true, 'changesetD should be invalid');
   assert.deepEqual(get(dummyChangesetD, 'changes'), expectedChanges, 'should not merge invalid changes');
   assert.deepEqual(get(dummyChangesetD, 'errors'), expectedErrors, 'should assign errors from both changesets');
-
 });
 
 test('#merge does not merge a changeset with a non-changeset', function(assert) {
