@@ -505,7 +505,7 @@ changeset.save()
   .then(() => { /* ... */ })
   .catch(() => {
     get(this, 'model.errors').forEach(({ attribute, message }) => {
-      changeset.addError(attribute, { validation: message });
+      changeset.addError(attribute, { value: get(changeset, attribute), validation: message });
     });
   });
 ```
