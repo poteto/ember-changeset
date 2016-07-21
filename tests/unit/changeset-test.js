@@ -341,6 +341,18 @@ test('#addError adds an error to the changeset', function(assert) {
   assert.ok(get(dummyChangeset, 'isValid'), 'should be valid');
 });
 
+test('#addError adds an error to the changeset using the shortcut', function (assert) {
+  let dummyChangeset = new Changeset(dummyModel);
+  dummyChangeset.set('email', 'jim@bob.com');
+  dummyChangeset.addError('email', 'Email already taken');
+
+  assert.ok(get(dummyChangeset, 'isInvalid'), 'should be invalid');
+  assert.equal(get(dummyChangeset, 'error.email.validation'), 'Email already taken', 'should add the error');
+  assert.equal(get(dummyChangeset, 'error.email.value'), 'jim@bob.com', 'addError uses already present value');
+  dummyChangeset.set('email', 'unique@email.com');
+  assert.ok(get(dummyChangeset, 'isValid'), 'should be valid');
+});
+
 test('#snapshot creates a snapshot of the changeset', function(assert) {
   let dummyChangeset = new Changeset(dummyModel, dummyValidator);
   dummyChangeset.set('name', 'Pokemon Go');
