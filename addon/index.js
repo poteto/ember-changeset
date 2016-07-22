@@ -219,15 +219,11 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
 
       let changesA = get(this, CHANGES);
       let changesB = get(changeset, CHANGES);
-
       let errorsA = get(this, ERRORS);
       let errorsB = get(changeset, ERRORS);
-
       let newChangeset = new Changeset(content, get(this, VALIDATOR));
-
       let newErrors = objectWithout(keys(changesB), errorsA);
       let newChanges = objectWithout(keys(errorsB), changesA);
-
       let mergedChanges = pureAssign(newChanges, changesB);
       let mergedErrors = pureAssign(newErrors, errorsB);
 
