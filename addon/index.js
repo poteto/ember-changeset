@@ -4,6 +4,7 @@ import isEmptyObject from 'ember-changeset/utils/computed/is-empty-object';
 import isPromise from 'ember-changeset/utils/is-promise';
 import isObject from 'ember-changeset/utils/is-object';
 import pureAssign from 'ember-changeset/utils/assign';
+import objectWithout from 'ember-changeset/utils/object-without';
 import { CHANGESET, isChangeset } from 'ember-changeset/-private/internals';
 
 const {
@@ -211,7 +212,6 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
       let content = get(this, CONTENT);
       assert('Cannot merge with a non-changeset', isChangeset(changeset));
       assert('Cannot merge with a changeset of different content', get(changeset, CONTENT) === content);
-      assert('Cannot merge invalid changesets', get(this, 'isValid') && get(changeset, 'isValid'));
 
       if (get(this, 'isPristine') && get(changeset, 'isPristine')) {
         return this;
@@ -219,10 +219,17 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
 
       let changesA = get(this, CHANGES);
       let changesB = get(changeset, CHANGES);
-      let mergedChanges = pureAssign(changesA, changesB);
+      let errorsA = get(this, ERRORS);
+      let errorsB = get(changeset, ERRORS);
       let newChangeset = new Changeset(content, get(this, VALIDATOR));
+      let newErrors = objectWithout(keys(changesB), errorsA);
+      let newChanges = objectWithout(keys(errorsB), changesA);
+      let mergedChanges = pureAssign(newChanges, changesB);
+      let mergedErrors = pureAssign(newErrors, errorsB);
+
       newChangeset[CHANGES] = mergedChanges;
-      newChangeset.notifyPropertyChange(CHANGES);
+      newChangeset[ERRORS] = mergedErrors;
+      newChangeset._notifyVirtualProperties();
 
       return newChangeset;
     },

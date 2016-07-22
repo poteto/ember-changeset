@@ -380,7 +380,7 @@ changeset.rollback(); // returns changeset
 
 #### `merge`
 
-Merges 2 valid changesets and returns a new changeset with the same underlying content and validator as the origin. Both changesets must point to the same underlying object. For example:
+Merges 2 changesets and returns a new changeset with the same underlying content and validator as the origin. Both changesets must point to the same underlying object. For example:
 
 ```js
 let changesetA = new Changeset(user, validatorFn);
