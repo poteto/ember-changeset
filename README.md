@@ -386,9 +386,7 @@ Merges 2 changesets and returns a new changeset with the same underlying content
 let changesetA = new Changeset(user, validatorFn);
 let changesetB = new Changeset(user, validatorFn);
 changesetA.set('firstName', 'Jim');
-changesetA.get('errors') // [{key: 'firstName', value: 'Jim', validations: ['Firstname cannot be Jim, sorry Jim']}]
 changesetB.set('firstName', 'Jimmy');
-changesetB.get('errors') // []
 changesetB.set('lastName', 'Fallon');
 let changesetC = changesetA.merge(changesetB);
 changesetC.execute();
