@@ -433,9 +433,14 @@ changeset.addError('email', {
   value: 'jim@bob.com',
   validation: 'Email already taken'
 });
+
+// shortcut
+changeset.addError('email', 'Email already taken');
 ```
 
 Adding an error manually does not require any special setup. The error will be cleared if the value for the `key` is subsequently set to a valid value.  Adding an error will overwrite any existing error or change for `key`.
+
+If using the shortcut method, the value in the changeset will be used as the value for the error.
 
 **[⬆️ back to top](#api)**
 

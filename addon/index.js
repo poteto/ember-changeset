@@ -264,14 +264,19 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      * @param {Any} options.value
      * @param {Any} options.validation Validation message
      */
-    addError(key, { value, validation }) {
+    addError(key, options) {
       let errors = get(this, ERRORS);
+
+      if (!isObject(options)) {
+        let value = get(this, key);
+        options = { value, validation: options };
+      }
 
       this._deleteKey(CHANGES, key);
       this.notifyPropertyChange(ERRORS);
       this.notifyPropertyChange(key);
 
-      return set(errors, key, { value, validation });
+      return set(errors, key, options);
     },
 
     /**
