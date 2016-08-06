@@ -368,16 +368,6 @@ The `save` method will also remove the internal list of changes if the `save` is
 
 **[⬆️ back to top](#api)**
 
-#### `rollback`
-
-Rollsback all unsaved changes and resets all errors.
-
-```js
-changeset.rollback(); // returns changeset
-```
-
-**[⬆️ back to top](#api)**
-
 #### `merge`
 
 Merges 2 changesets and returns a new changeset with the same underlying content and validator as the origin. Both changesets must point to the same underlying object. For example:
