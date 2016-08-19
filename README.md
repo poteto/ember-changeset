@@ -1,4 +1,4 @@
-# ember-changeset [![Build Status](https://travis-ci.org/DockYard/ember-changeset.svg?branch=master)](https://travis-ci.org/DockYard/ember-changeset) [![CircleCI](https://circleci.com/gh/DockYard/ember-changeset.svg?style=shield)](https://circleci.com/gh/DockYard/ember-changeset) [![npm version](https://badge.fury.io/js/ember-changeset.svg)](https://badge.fury.io/js/ember-changeset) [![Ember Observer Score](http://emberobserver.com/badges/ember-changeset.svg)](http://emberobserver.com/addons/ember-changeset)
+# ember-changeset [![CircleCI](https://circleci.com/gh/DockYard/ember-changeset.svg?style=shield)](https://circleci.com/gh/DockYard/ember-changeset) [![npm version](https://badge.fury.io/js/ember-changeset.svg)](https://badge.fury.io/js/ember-changeset) [![Ember Observer Score](http://emberobserver.com/badges/ember-changeset.svg)](http://emberobserver.com/addons/ember-changeset)
 
 Ember.js flavored changesets, inspired by [Ecto](https://github.com/elixir-lang/ecto). To install:
 
@@ -495,7 +495,7 @@ Your action will receive a single POJO containing the `key`, `newValue`, `oldVal
 
 When you run `changeset.save()`, under the hood this executes the changeset, and then runs the save method on your original content object, passing its return value back to you. You are then free to use this result to add additional errors to the changeset via the `addError` method, if applicable.
 
-For example, if you are using an Ember Data model in your route, saving the changeset will effectively save the model. If the save rejects, Ember Data will add errors to the model for you. To copy the model errors over to your changeset, add a handler like this:
+For example, if you are using an Ember Data model in your route, saving the changeset will save the model. If the save rejects, Ember Data will add errors to the model for you. To copy the model errors over to your changeset, add a handler like this:
 
 ```js
 changeset.save()
