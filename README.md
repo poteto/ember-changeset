@@ -6,6 +6,8 @@ Ember.js flavored changesets, inspired by [Ecto](https://github.com/elixir-lang/
 ember install ember-changeset
 ```
 
+[Watch a free video intro presented by EmberScreencasts](https://www.emberscreencasts.com/posts/168-introduction-to-ember-changeset)
+
 ## Philosophy
 
 The idea behind a changeset is simple: it represents a set of valid changes to be applied onto any Object (`Ember.Object`, `DS.Model`, POJOs, etc). Each change is tested against an optional validation, and if valid, the change is stored and applied when executed.
