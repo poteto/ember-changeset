@@ -1,4 +1,4 @@
-import objectWithout from 'dummy/utils/object-without';
+import objectWithout from 'ember-changeset/utils/object-without';
 import { module, test } from 'qunit';
 
 module('Unit | Utility | object without');
