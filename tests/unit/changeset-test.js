@@ -171,7 +171,7 @@ test('#save proxies to content', function(assert) {
   assert.equal(options, 'test options', 'should proxy options when saving');
 });
 
-test('#save proxyes to content even if it does not implement #save', function(assert) {
+test('#save proxies to content even if it does not implement #save', function(assert) {
   let person = {name: 'Jim'};
   let dummyChangeset = new Changeset(person);
   dummyChangeset.set('name', 'foo');
