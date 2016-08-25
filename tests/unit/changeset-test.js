@@ -171,6 +171,16 @@ test('#save proxies to content', function(assert) {
   assert.equal(options, 'test options', 'should proxy options when saving');
 });
 
+test('#save proxyes to content even if it does not implement #save', function(assert) {
+  let person = {name: 'Jim'};
+  let dummyChangeset = new Changeset(person);
+  dummyChangeset.set('name', 'foo');
+
+  return dummyChangeset.save().then(() => {
+    assert.equal(get(person, 'name'), 'foo', 'persist changes to content');
+  });
+});
+
 test('#rollback restores old values', function(assert) {
   let dummyChangeset = new Changeset(dummyModel, dummyValidator);
   let expectedChanges = [
