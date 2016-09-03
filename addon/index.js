@@ -5,12 +5,15 @@ import isPromise from 'ember-changeset/utils/is-promise';
 import isObject from 'ember-changeset/utils/is-object';
 import pureAssign from 'ember-changeset/utils/assign';
 import objectWithout from 'ember-changeset/utils/object-without';
+import includes from 'ember-changeset/utils/includes';
+import take from 'ember-changeset/utils/take';
 import { CHANGESET, isChangeset } from 'ember-changeset/-private/internals';
 
 const {
   Object: EmberObject,
   RSVP: { all, resolve },
   computed: { not, readOnly },
+  A: emberArray,
   assert,
   get,
   isArray,
@@ -121,6 +124,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      * ```
      *
      * @public
+     * @chainable
      * @param  {Function} prepareChangesFn
      * @return {Changeset}
      */
@@ -140,6 +144,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      * Executes the changeset if in a valid state.
      *
      * @public
+     * @chainable
      * @return {Changeset}
      */
     execute() {
@@ -177,6 +182,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      * errors.
      *
      * @public
+     * @chainable
      * @return {Changeset}
      */
     rollback() {
@@ -205,6 +211,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      * ```
      *
      * @public
+     * @chainable
      * @param  {Changeset} changeset
      * @return {Changeset}
      */
@@ -289,6 +296,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
     /**
      * Creates a snapshot of the changeset's errors and changes.
      *
+     * @public
      * @return {Object} snapshot
      */
     snapshot() {
@@ -302,6 +310,8 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      * Restores a snapshot of changes and errors. This overrides existing
      * changes and errors.
      *
+     * @public
+     * @chainable
      * @param  {Object} options.changes
      * @param  {Object} options.errors
      * @return {Changeset}
@@ -310,6 +320,33 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
       set(this, CHANGES, changes);
       set(this, ERRORS, errors);
       this._notifyVirtualProperties();
+
+      return this;
+    },
+
+    /**
+     * Unlike `Ecto.Changeset.cast`, `cast` will take allowed keys and
+     * remove unwanted keys off of the changeset. For example, this method
+     * can be used to only allow specified changes through prior to saving.
+     *
+     * @public
+     * @chainable
+     * @param  {Array} allowed Array of allowed keys
+     * @return {Changeset}
+     */
+    cast(allowed = []) {
+      let changes = get(this, CHANGES);
+
+      if (isArray(allowed) && allowed.length === 0) {
+        return changes;
+      }
+
+      let changeKeys = keys(changes);
+      let validKeys = emberArray(changeKeys).filter((key) => includes(allowed, key));
+      let casted = take(changes, validKeys);
+
+      this[CHANGES] = casted;
+      this.notifyPropertyChange(CHANGES);
 
       return this;
     },

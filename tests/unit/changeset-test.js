@@ -394,6 +394,37 @@ test('#restore restores a snapshot of the changeset', function(assert) {
   assert.deepEqual(get(dummyChangesetB, 'error.password'), { validation: ['foo', 'bar'], value: false }, 'should restore errors');
 });
 
+test('#cast allows only specified keys to exist on the changeset', function(assert) {
+  let dummyChangeset = new Changeset(dummyModel, dummyValidator);
+  let expectedResult = [
+    { 'key': 'name', 'value': 'Pokemon Go' },
+    { 'key': 'password', 'value': true }
+  ];
+  let allowed = ['name', 'password'];
+  dummyChangeset.set('name', 'Pokemon Go');
+  dummyChangeset.set('password', true);
+  dummyChangeset.set('unwantedProp', 123);
+  dummyChangeset.cast(allowed);
+
+  assert.deepEqual(dummyChangeset.get('changes'), expectedResult, 'should drop `unwantedProp');
+  assert.equal(dummyChangeset.get('unwantedProp'), undefined, 'should remove unwanted changes');
+});
+
+test('#cast noops if no keys are passed', function(assert) {
+  let dummyChangeset = new Changeset(dummyModel, dummyValidator);
+  let expectedResult = [
+    { 'key': 'name', 'value': 'Pokemon Go' },
+    { 'key': 'password', 'value': true },
+    { 'key': 'unwantedProp', 'value': 123 }
+  ];
+  dummyChangeset.set('name', 'Pokemon Go');
+  dummyChangeset.set('password', true);
+  dummyChangeset.set('unwantedProp', 123);
+  dummyChangeset.cast();
+
+  assert.deepEqual(dummyChangeset.get('changes'), expectedResult, 'should drop `unwantedProp');
+});
+
 // Behavior
 test('it works with setProperties', function(assert) {
   let dummyChangeset = new Changeset(dummyModel);
