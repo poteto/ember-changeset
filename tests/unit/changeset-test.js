@@ -172,12 +172,14 @@ test('#save proxies to content', function(assert) {
 });
 
 test('#save proxies to content even if it does not implement #save', function(assert) {
-  let person = {name: 'Jim'};
+  let done = assert.async();
+  let person = { name: 'Jim' };
   let dummyChangeset = new Changeset(person);
   dummyChangeset.set('name', 'foo');
 
   return dummyChangeset.save().then(() => {
     assert.equal(get(person, 'name'), 'foo', 'persist changes to content');
+    done();
   });
 });
 

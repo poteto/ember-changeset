@@ -167,16 +167,15 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      */
     save(options) {
       let content = get(this, CONTENT);
+      let savePromise = resolve(this);
 
       this.execute();
-      let savePromise = resolve(this);
+
       if (typeOf(content.save) === 'function') {
-        savePromise = content
-          .save(options);
+        savePromise = content.save(options);
       }
 
-      return savePromise
-        .then(() => this.rollback());
+      return savePromise.then(() => this.rollback());
     },
 
     /**
