@@ -168,13 +168,15 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
     save(options) {
       let content = get(this, CONTENT);
 
+      this.execute();
+      let savePromise = resolve(this);
       if (typeOf(content.save) === 'function') {
-        this.execute();
-
-        return content
-          .save(options)
-          .then(() => this.rollback());
+        savePromise = content
+          .save(options);
       }
+
+      return savePromise
+        .then(() => this.rollback());
     },
 
     /**
