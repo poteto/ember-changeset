@@ -134,6 +134,7 @@ On rollback, all changes are dropped and the underlying Object is left untouched
   + [`addError`](#adderror)
   + [`snapshot`](#snapshot)
   + [`restore`](#restore)
+  + [`cast`](#cast)
 
 #### `error`
 
@@ -459,6 +460,52 @@ let snapshot = changeset.snapshot();
 changeset.set('name', 'Potato');
 changeset.restore(snapshot);
 changeset.get('name', 'Jim Bob');
+```
+
+**[⬆️ back to top](#api)**
+
+#### `cast`
+
+Unlike `Ecto.Changeset.cast`, `cast` will take an array of allowed keys and remove unwanted keys off of the changeset.
+
+```js
+let allowed = ['name', 'password']
+let changeset = new Changeset(user, validatorFn);
+changeset.set('name', 'Jim Bob');
+changeset.set('unwantedProp', 123);
+
+changeset.get('unwantedProp'); // 123
+changeset.cast(allowed); // returns changeset
+changeset.get('unwantedProp'); // undefined
+```
+
+For example, this method can be used to only allow specified changes through prior to saving. This is especially useful if you also setup a `schema` object for your model (using Ember Data), which can then be exported and used as a list of allowed keys:
+
+```js
+// models/user.js
+export const schema = {
+  name: attr('string'),
+  password: attr('string')
+};
+
+export default Model.extend(schema);
+```
+
+```js
+// controllers/foo.js
+import { schema } from '../models/user';
+const { keys } = Object;
+
+export default Controller.extend({
+  // ...
+  actions: {
+    save(changeset) {
+      return changeset
+        .cast(keys(schema))
+        .save();
+    }
+  }
+});
 ```
 
 **[⬆️ back to top](#api)**
