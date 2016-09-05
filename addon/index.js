@@ -346,8 +346,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
       let validKeys = emberArray(changeKeys).filter((key) => includes(allowed, key));
       let casted = take(changes, validKeys);
 
-      this[CHANGES] = casted;
-      this.notifyPropertyChange(CHANGES);
+      set(this, CHANGES, casted);
 
       return this;
     },
