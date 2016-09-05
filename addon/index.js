@@ -1,6 +1,7 @@
 import Ember from 'ember';
 import objectToArray from 'ember-changeset/utils/computed/object-to-array';
 import isEmptyObject from 'ember-changeset/utils/computed/is-empty-object';
+import objectEqual from 'ember-changeset/utils/computed/object-equal';
 import isPromise from 'ember-changeset/utils/is-promise';
 import isObject from 'ember-changeset/utils/is-object';
 import pureAssign from 'ember-changeset/utils/assign';
@@ -60,7 +61,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
     error: readOnly(ERRORS),
 
     isValid: isEmptyObject(ERRORS),
-    isPristine: isEmptyObject(CHANGES),
+    isPristine: objectEqual(CHANGES, CONTENT),
     isInvalid: not('isValid').readOnly(),
     isDirty: not('isPristine').readOnly(),
 

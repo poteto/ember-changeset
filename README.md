@@ -275,6 +275,17 @@ Returns a Boolean value of the changeset's state. A pristine changeset is one wi
 get(changeset, 'isPristine'); // true
 ```
 
+If changes present on the changeset are equal to the content's, this will return `true`. However, note that key/value pairs in the list of changes must all be present and equal on the content, but not vice versa:
+
+```js
+let user = { name: 'Bobby', age: 21 };
+changeset.set('name', 'Bobby');
+changeset.get('isPristine'); // true
+
+changeset.set('foo', 'bar');
+changeset.get('isPristine'); // false
+```
+
 **[⬆️ back to top](#api)**
 
 #### `isDirty`
