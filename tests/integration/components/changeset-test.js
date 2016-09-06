@@ -4,6 +4,7 @@ import { moduleForComponent, test } from 'ember-qunit';
 import hbs from 'htmlbars-inline-precompile';
 
 const {
+  RSVP: { resolve },
   isPresent,
   run,
   typeOf
@@ -14,12 +15,16 @@ moduleForComponent('changeset', 'Integration | Helper | changeset', {
 });
 
 test('it validates changes', function(assert) {
+  let done = assert.async();
   let validations = {
     firstName(value) {
       return isPresent(value) && value.length > 3 || 'too short';
     },
     lastName(value) {
       return isPresent(value) && value.length > 3 || 'too short';
+    },
+    email(value) {
+      return resolve(value !== 'reserved@example.com' || 'email is taken');
     }
   };
   this.set('dummyModel', { firstName: 'Jim', lastName: 'Bob' });
@@ -39,18 +44,30 @@ test('it validates changes', function(assert) {
       {{/if}}
       {{input id="first-name" value=changeset.firstName}}
       {{input id="last-name" value=changeset.lastName}}
+      {{input id="email" value=changeset.email}}
       <button {{action "submit" changeset}}>Submit</button>
       <button {{action "reset" changeset}}>Reset</button>
     {{/with}}
   `);
 
-  this.$('#first-name').val('A').trigger('change');
+  run(() => this.$('#first-name').val('A').trigger('change'));
   run(() => this.$('button:contains("Submit")').click());
-  assert.ok(this.$('p:contains("There were one or more errors in your form.")').length, 'should be invalid');
+  run(() => assert.ok(this.$('p:contains("There were one or more errors in your form.")').length, 'should be invalid'));
 
-  this.$('#first-name').val('Billy').trigger('change');
+  run(() => this.$('#first-name').val('Billy').trigger('change'));
   run(() => this.$('button:contains("Submit")').click());
-  assert.notOk(this.$('p:contains("There were one or more errors in your form.")').length, 'should be valid');
+  run(() => assert.notOk(this.$('p:contains("There were one or more errors in your form.")').length, 'should be valid'));
+
+  run(() => this.$('#email').val('reserved@example.com').trigger('change'));
+  run(() => this.$('button:contains("Submit")').click());
+  run(() => assert.ok(this.$('p:contains("There were one or more errors in your form.")').length, 'should be invalid'));
+
+  run(() => this.$('#email').val('ok@example.com').trigger('change'));
+  run(() => this.$('button:contains("Submit")').click());
+  run(() => {
+    assert.notOk(this.$('p:contains("There were one or more errors in your form.")').length, 'should be valid');
+    done();
+  });
 });
 
 test('it rollsback changes', function(assert) {

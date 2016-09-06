@@ -118,6 +118,7 @@ On rollback, all changes are dropped and the underlying Object is left untouched
   + [`change`](#change)
   + [`errors`](#errors)
   + [`changes`](#changes)
+  + [`isErrorFree`](#iserrorfree)
   + [`isValid`](#isvalid)
   + [`isInvalid`](#isinvalid)
   + [`isPristine`](#ispristine)
@@ -231,6 +232,16 @@ You can use this property to render a list of changes:
     <li>{{change.key}}: {{change.value}}</li>
   {{/each}}
 </ul>
+```
+
+**[⬆️ back to top](#api)**
+
+#### `isErrorFree`
+
+Returns a Boolean value of the changeset's current errors. This does not take into account async validators that are still pending.
+
+```js
+changeset.get('isErrorFree'); // true
 ```
 
 **[⬆️ back to top](#api)**
