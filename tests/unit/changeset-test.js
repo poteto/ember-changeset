@@ -463,6 +463,22 @@ test('it accepts async validations', function(assert) {
   });
 });
 
+test('it sets pending/fulfilled/valid states when an async validator is run', function(assert) {
+  let done = assert.async();
+  let dummyChangeset = new Changeset(dummyModel, dummyValidator);
+  run(() => {
+    dummyChangeset.set('async', true);
+    assert.ok(dummyChangeset.get('isPending'), 'should be pending until promise resolves');
+    assert.notOk(dummyChangeset.get('isValid'), 'should be invalid until promise resolves');
+  });
+  run(() => {
+    assert.notOk(get(dummyChangeset, 'isPending'), 'should not be pending when promise resolves');
+    assert.ok(get(dummyChangeset, 'isFulfilled'), 'should be fulfilled when promise resolves');
+    assert.ok(dummyChangeset.get('isValid'), 'should be valid when promise resolves');
+    done();
+  });
+});
+
 test('it clears errors when setting to original value', function(assert) {
   set(dummyModel, 'name', 'Jim Bob');
   let dummyChangeset = new Changeset(dummyModel, dummyValidator);

@@ -12,7 +12,7 @@ import { CHANGESET, isChangeset } from 'ember-changeset/-private/internals';
 const {
   Object: EmberObject,
   RSVP: { all, resolve },
-  computed: { not, readOnly },
+  computed: { and, not, readOnly },
   A: emberArray,
   assert,
   get,
@@ -28,6 +28,7 @@ const CONTENT = '_content';
 const CHANGES = '_changes';
 const ERRORS = '_errors';
 const VALIDATOR = '_validator';
+const PENDING = '_isPending';
 
 function defaultValidatorFn() {
   return true;
@@ -59,8 +60,12 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
     change: readOnly(CHANGES),
     error: readOnly(ERRORS),
 
-    isValid: isEmptyObject(ERRORS),
+    isErrorFree: isEmptyObject(ERRORS),
     isPristine: isEmptyObject(CHANGES),
+    isPending: readOnly(PENDING),
+
+    isValid: and('isErrorFree', 'isFulfilled').readOnly(),
+    isFulfilled: not('isPending').readOnly(),
     isInvalid: not('isValid').readOnly(),
     isDirty: not('isPristine').readOnly(),
 
@@ -70,6 +75,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
       this[CHANGES] = {};
       this[ERRORS] = {};
       this[VALIDATOR] = validateFn;
+      this[PENDING] = false;
     },
 
     /**
@@ -352,7 +358,9 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
     },
 
     /**
-     * For a given key and value, set error or change.
+     * For a given key and value, set error or change. If the validator is
+     * async, a side-effect is introduced: the changeset will be marked as
+     * `pending` until the promise fulfills.
      *
      * @private
      * @param  {String} key
@@ -365,9 +373,12 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
       let validation = this._validate(key, value, oldValue);
 
       if (isPromise(validation)) {
-        return validation.then((resolvedValidation) => {
-          return this._setProperty(resolvedValidation, { key, value });
-        });
+        set(this, PENDING, true);
+        return validation
+          .then((resolvedValidation) => {
+            return this._setProperty(resolvedValidation, { key, value });
+          })
+          .finally(() => set(this, PENDING, false));
       }
 
       return this._setProperty(validation, { key, value });

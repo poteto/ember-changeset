@@ -122,6 +122,8 @@ On rollback, all changes are dropped and the underlying Object is left untouched
   + [`isInvalid`](#isinvalid)
   + [`isPristine`](#ispristine)
   + [`isDirty`](#isdirty)
+  + [`isPending`](#ispending)
+  + [`isFulfilled`](#isfulfilled)
 * Methods
   + [`get`](#get)
   + [`set`](#set)
@@ -235,7 +237,7 @@ You can use this property to render a list of changes:
 
 #### `isValid`
 
-Returns a Boolean value of the changeset's validity.
+Returns a Boolean value of the changeset's validity. A changeset is valid if all updates to it are valid, and all async validators have finished running.
 
 ```js
 get(changeset, 'isValid'); // true
@@ -253,7 +255,7 @@ You can use this property in the template:
 
 #### `isInvalid`
 
-Returns a Boolean value of the changeset's (in)validity.
+Returns a Boolean value of the changeset's (in)validity. If a changeset is pending, it will be considered invalid.
 
 ```js
 get(changeset, 'isInvalid'); // true
@@ -283,6 +285,30 @@ Returns a Boolean value of the changeset's state. A dirty changeset is one with 
 
 ```js
 get(changeset, 'isDirty'); // true
+```
+
+**[⬆️ back to top](#api)**
+
+#### `isPending`
+
+Returns a Boolean if any async validator is pending/fulfilled. A pending changeset is one where an async validator is still pending.
+
+```js
+get(changeset, 'isPending'); // false
+set(changeset, 'someAsyncValidator', 'foo');
+get(changeset, 'isPending'); // true
+```
+
+**[⬆️ back to top](#api)**
+
+#### `isFulfilled`
+
+Returns a Boolean if any async validator is pending/fulfilled. A fulfilled changeset is one where an async validator is no longer pending.
+
+```js
+set(changeset, 'someAsyncValidator', 'foo');
+// some indeterminate amount of time later
+get(changeset, 'isFulfilled'); // true
 ```
 
 **[⬆️ back to top](#api)**
