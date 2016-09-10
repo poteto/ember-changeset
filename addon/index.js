@@ -134,8 +134,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
 
       assert('Callback to `changeset.prepare` must return an object', isObject(preparedChanges));
 
-      this[CHANGES] = preparedChanges;
-      this.notifyPropertyChange(CHANGES);
+      set(this, CHANGES, preparedChanges);
 
       return this;
     },
