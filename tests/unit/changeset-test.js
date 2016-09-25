@@ -160,15 +160,19 @@ test('#save proxies to content', function(assert) {
   set(dummyModel, 'save', (dummyOptions) => {
     result = 'ok';
     options = dummyOptions;
-    return resolve(true);
+    return resolve('saveResult');
   });
   let dummyChangeset = new Changeset(dummyModel);
   dummyChangeset.set('name', 'foo');
 
   assert.equal(result, undefined, 'precondition');
-  dummyChangeset.save('test options');
+  let promise = dummyChangeset.save('test options');
   assert.equal(result, 'ok', 'should save');
   assert.equal(options, 'test options', 'should proxy options when saving');
+  assert.ok(!!promise && typeof promise.then === 'function', 'save returns a promise');
+  promise.then((saveResult) => {
+    assert.equal(saveResult, 'saveResult', 'save proxies to save promise of content');
+  });
 });
 
 test('#save proxies to content even if it does not implement #save', function(assert) {
