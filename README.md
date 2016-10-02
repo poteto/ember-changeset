@@ -61,6 +61,7 @@ const { Component, get } = Ember;
 
 export default Component.extend({
   init() {
+    this._super(...arguments);
     let model = get(this, 'model');
     let validator = get(this, 'validate');
     this.changeset = new Changeset(model, validator);
