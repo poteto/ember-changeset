@@ -385,13 +385,15 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
     _validate(key, newValue, oldValue) {
       let changes = get(this, CHANGES);
       let validator = get(this, VALIDATOR);
+      let content = get(this, CONTENT);
 
       if (typeOf(validator) === 'function') {
         let isValid = validator({
           key,
           newValue,
           oldValue,
-          changes: pureAssign(changes)
+          changes: pureAssign(changes),
+          content,
         });
 
         return isPresent(isValid) ? isValid : true;

@@ -21,19 +21,19 @@ let dummyValidations = {
   password(value) {
     return value || ['foo', 'bar'];
   },
-  passwordConfirmation(newValue, _oldValue, { password }) {
-    return isPresent(newValue) && password === newValue || "password doesn't match";
+  passwordConfirmation(newValue, _oldValue, { password: changedPassword }, { password } = {}) {
+    return isPresent(newValue) && (changedPassword === newValue || password === newValue) || "password doesn't match";
   },
   async(value) {
     return resolve(value);
-  }
+  },
 };
 
-function dummyValidator({ key, newValue, oldValue, changes }) {
+function dummyValidator({ key, newValue, oldValue, changes, content }) {
   let validatorFn = dummyValidations[key];
 
   if (typeOf(validatorFn) === 'function') {
-    return validatorFn(newValue, oldValue, changes);
+    return validatorFn(newValue, oldValue, changes, content);
   }
 }
 
@@ -340,7 +340,18 @@ test('#validate works correctly with changeset values', function(assert) {
   run(() => {
     dummyChangeset.set('name', 'Jim Bob');
     dummyChangeset.validate().then(() => {
+      assert.equal(get(dummyChangeset, 'errors.length'), 1, 'should have 1 error');
+      assert.equal(get(dummyChangeset, 'errors.0.key'), 'password');
+      assert.ok(get(dummyChangeset, 'isInvalid'), 'should be invalid');
+    });
+  });
+
+  run(() => {
+    dummyChangeset.set('passwordConfirmation', true);
+    dummyChangeset.validate().then(() => {
       assert.equal(get(dummyChangeset, 'errors.length'), 2, 'should have 2 errors');
+      assert.equal(get(dummyChangeset, 'errors.0.key'), 'password');
+      assert.equal(get(dummyChangeset, 'errors.1.key'), 'passwordConfirmation');
       assert.ok(get(dummyChangeset, 'isInvalid'), 'should be invalid');
     });
   });

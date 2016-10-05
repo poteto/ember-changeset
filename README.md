@@ -87,7 +87,7 @@ export default Controller.extend({
       return changeset.rollback();
     },
 
-    validate({ key, newValue, oldValue, changes }) {
+    validate({ key, newValue, oldValue, changes, object }) {
       // lookup a validator function on your favorite validation library
       // should return a Boolean
     }
@@ -523,7 +523,7 @@ const { Controller } = Ember;
 
 export default Controller.extend({
   actions: {
-    validate({ key, newValue, oldValue, changes }) {
+    validate({ key, newValue, oldValue, changes, object }) {
       // lookup a validator function on your favorite validation library
       // should return a Boolean
     }
