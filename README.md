@@ -460,7 +460,7 @@ changeset.set('name', 'Jim Bob');
 let snapshot = changeset.snapshot();
 changeset.set('name', 'Potato');
 changeset.restore(snapshot);
-changeset.get('name', 'Jim Bob');
+changeset.get('name'); // "Jim Bob"
 ```
 
 **[⬆️ back to top](#api)**
