@@ -21,12 +21,12 @@ let dummyValidations = {
   password(value) {
     return value || ['foo', 'bar'];
   },
-  passwordConfirmation(newValue, _oldValue, { password: changedPassword }, { password } = {}) {
+  passwordConfirmation(newValue, _oldValue, { password: changedPassword }, { password }) {
     return isPresent(newValue) && (changedPassword === newValue || password === newValue) || "password doesn't match";
   },
   async(value) {
     return resolve(value);
-  },
+  }
 };
 
 function dummyValidator({ key, newValue, oldValue, changes, content }) {
