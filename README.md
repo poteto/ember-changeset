@@ -173,9 +173,7 @@ Returns the change object.
 You can use this property to locate a single change:
 
 ```hbs
-{{#if changeset.change.firstName}}
-  <p>You changed {{changeset.firstName}} to {{changeset.change.firstName}}!</p>
-{{/if}}
+{{changeset.change.firstName}}
 ```
 
 **[⬆️ back to top](#api)**
