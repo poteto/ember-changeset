@@ -568,6 +568,7 @@ changeset.save()
 
 ## Plugins
 
+- [`ember-changeset-validations`] – Pure, functional validations without CPs or Observers
 - [`ember-changeset-cp-validations`](https://github.com/offirgolan/ember-changeset-cp-validations) - Work with `ember-cp-validations`
 - [`ember-changeset-hofs`](https://github.com/nucleartide/ember-changeset-hofs) – Higher-order validation functions
 - [`ember-bootstrap-changeset-validations`](https://github.com/kaliber5/ember-bootstrap-changeset-validations) – Adds support for changeset validations to `ember-bootstrap`
