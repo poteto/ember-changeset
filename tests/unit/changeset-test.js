@@ -452,6 +452,40 @@ test('#cast noops if no keys are passed', function(assert) {
   assert.deepEqual(dummyChangeset.get('changes'), expectedResult, 'should drop `unwantedProp');
 });
 
+test("isPristine returns true if changes are equal to content's values", function(assert) {
+  dummyModel.set('name', 'Bobby');
+  dummyModel.set('thing', 123);
+  dummyModel.set('nothing', null);
+  let dummyChangeset = new Changeset(dummyModel, dummyValidator);
+  dummyChangeset.set('name', 'Bobby');
+  dummyChangeset.set('nothing', null);
+
+  assert.ok(dummyChangeset.get('isPristine'), 'should be pristine');
+});
+
+test("isPristine returns false if changes are not equal to content's values", function(assert) {
+  dummyModel.set('name', 'Bobby');
+  let dummyChangeset = new Changeset(dummyModel, dummyValidator);
+  dummyChangeset.set('name', 'Bobby');
+  dummyChangeset.set('thing', 123);
+
+  assert.notOk(dummyChangeset.get('isPristine'), 'should not be pristine');
+});
+
+test('isPristine works with `null` values', function(assert) {
+  dummyModel.set('name', null);
+  dummyModel.set('age', 15);
+  let dummyChangeset = new Changeset(dummyModel);
+
+  assert.ok(dummyChangeset.get('isPristine'), 'should be pristine');
+
+  dummyChangeset.set('name', 'Kenny');
+  assert.notOk(dummyChangeset.get('isPristine'), 'should not be pristine');
+
+  dummyChangeset.set('name', null);
+  assert.ok(dummyChangeset.get('isPristine'), 'should be pristine');
+});
+
 // Behavior
 test('it works with setProperties', function(assert) {
   let dummyChangeset = new Changeset(dummyModel);
