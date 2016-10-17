@@ -18,6 +18,8 @@ Given Ember's Data Down, Actions Up (DDAU) approach, a changeset is more appropr
 
 The simplest way to incorporate validations is to use [`ember-changeset-validations`](https://github.com/DockYard/ember-changeset-validations/), a companion addon to this one. It has a simple mental model, and there are no Observers or CPs involved – just pure functions.
 
+See also the [plugins](#plugins) section for addons that extend `ember-changeset`.
+
 #### tl;dr
 
 ```js
@@ -563,6 +565,12 @@ changeset.save()
     });
   });
 ```
+
+## Plugins
+
+- [`ember-changeset-cp-validations`](https://github.com/offirgolan/ember-changeset-cp-validations) - Work with `ember-cp-validations`
+- [`ember-changeset-hofs`](https://github.com/nucleartide/ember-changeset-hofs) – Higher-order validation functions
+- [`ember-bootstrap-changeset-validations`](https://github.com/kaliber5/ember-bootstrap-changeset-validations) – Adds support for changeset validations to `ember-bootstrap`
 
 ## Installation
 
