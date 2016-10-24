@@ -279,6 +279,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      * @param {String} key
      * @param {Any} options.value
      * @param {Any} options.validation Validation message
+     * @return {Any}
      */
     addError(key, options) {
       let errors = get(this, ERRORS);
@@ -293,6 +294,33 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
       this.notifyPropertyChange(key);
 
       return set(errors, key, options);
+    },
+
+    /**
+     * Manually push multiple errors to the changeset as an array. If there is
+     * an existing error or change for `key`. it will be overwritten.
+     *
+     * @param  {String} key
+     * @param  {...[String]} newErrors
+     * @return {Any}
+     */
+    pushErrors(key, ...newErrors) {
+      let errors = get(this, ERRORS);
+      let existingError = get(errors, key) || { validation: [] };
+      let { validation } = existingError;
+      let value = get(this, key);
+
+      if (!isArray(validation) && isPresent(validation)) {
+        existingError.validation = [existingError.validation];
+      }
+
+      validation = [...existingError.validation, ...newErrors];
+
+      this._deleteKey(CHANGES, key);
+      this.notifyPropertyChange(ERRORS);
+      this.notifyPropertyChange(key);
+
+      return set(errors, key, { value, validation });
     },
 
     /**
