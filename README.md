@@ -135,6 +135,7 @@ On rollback, all changes are dropped and the underlying Object is left untouched
   + [`rollback`](#rollback)
   + [`validate`](#validate)
   + [`addError`](#adderror)
+  + [`pushErrors`](#pusherrors)
   + [`snapshot`](#snapshot)
   + [`restore`](#restore)
   + [`cast`](#cast)
@@ -447,6 +448,16 @@ Adding an error manually does not require any special setup. The error will be c
 
 If using the shortcut method, the value in the changeset will be used as the value for the error.
 
+#### `pushErrors`
+
+Manually push errors to the changeset.
+
+```js
+changeset.pushErrors('age', 'Too short', 'Not a valid number', 'Must be greater than 18');
+```
+
+This is compatible with `ember-changeset-validations`, and allows you to either add a new error with multiple validations messages or push to an existing array of validation messages.
+
 **[⬆️ back to top](#api)**
 
 #### `snapshot`
@@ -561,7 +572,7 @@ changeset.save()
   .then(() => { /* ... */ })
   .catch(() => {
     get(this, 'model.errors').forEach(({ attribute, message }) => {
-      changeset.addError(attribute, message);
+      changeset.pushErrors(attribute, message);
     });
   });
 ```
