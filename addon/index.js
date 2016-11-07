@@ -151,9 +151,17 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
       if (get(this, 'isValid') && get(this, 'isDirty')) {
         let content = get(this, CONTENT);
         let changes = get(this, CHANGES);
+        Object.keys(changes).forEach(function(property){
+          let relationship = content.get(property); 
+          if(relationship){
+            if(relationship.get('content') && relationship.get('content.relationship') && relationship.get('content.relationship.relationshipMeta.kind') === 'hasMany'){
+              content.get(property).pushObjects(changes[property]);
+              delete changes[property];
+            }
+          }
+        });
         setProperties(content, changes);
       }
-
       return this;
     },
 
