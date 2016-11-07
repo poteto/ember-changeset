@@ -152,7 +152,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
         let content = get(this, CONTENT);
         let changes = get(this, CHANGES);
         Object.keys(changes).forEach(function(property){
-          let relationship = content.get(property); 
+          let relationship = content.get ? content.get(property) : false;
           if(relationship){
             if(relationship.get('content') && relationship.get('content.relationship') && relationship.get('content.relationship.relationshipMeta.kind') === 'hasMany'){
               content.get(property).pushObjects(changes[property]);
