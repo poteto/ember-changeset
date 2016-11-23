@@ -175,6 +175,26 @@ test('#save proxies to content', function(assert) {
   });
 });
 
+test('#save handles rejected proxy content', function(assert) {
+  let done = assert.async();
+  let dummyChangeset = new Changeset(dummyModel);
+
+  assert.expect(1);
+
+  set(dummyModel, 'save', () => {
+    return new Ember.RSVP.Promise(function (resolve, reject) {
+      Ember.run.next(null, reject, new Error('some ember data error'));
+    });
+  });
+
+  Ember.run(() => {
+    dummyChangeset.save().catch((error) => {
+        assert.equal(error.message, 'some ember data error');
+      })
+      .finally(() => done());
+  });
+});
+
 test('#save proxies to content even if it does not implement #save', function(assert) {
   let done = assert.async();
   let person = { name: 'Jim' };
