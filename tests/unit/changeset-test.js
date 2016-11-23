@@ -191,7 +191,9 @@ test('#save handles rejected proxy content', function(assert) {
     dummyChangeset.save().catch((error) => {
         assert.equal(error.message, 'some ember data error');
       })
-      .finally(() => done());
+      .finally(() => {
+        done();
+      });
   });
 });
 
