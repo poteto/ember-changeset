@@ -175,8 +175,10 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
         savePromise = content.save(options);
       }
 
-      savePromise.then(() => this.rollback());
-      return savePromise;
+      return savePromise.then((result) => {
+        this.rollback();
+        return result;
+      });
     },
 
     /**

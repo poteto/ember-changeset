@@ -4,7 +4,7 @@ import { module, test } from 'qunit';
 
 const {
   Object: EmberObject,
-  RSVP: { resolve },
+  RSVP: { resolve, Promise },
   String: { dasherize },
   run,
   get,
@@ -12,6 +12,10 @@ const {
   set,
   typeOf
 } = Ember;
+
+const {
+  next
+} = run;
 
 let dummyModel;
 let dummyValidations = {
@@ -172,6 +176,26 @@ test('#save proxies to content', function(assert) {
   assert.ok(!!promise && typeof promise.then === 'function', 'save returns a promise');
   promise.then((saveResult) => {
     assert.equal(saveResult, 'saveResult', 'save proxies to save promise of content');
+  });
+});
+
+test('#save handles rejected proxy content', function(assert) {
+  let done = assert.async();
+  let dummyChangeset = new Changeset(dummyModel);
+
+  assert.expect(1);
+
+  set(dummyModel, 'save', () => {
+    return new Promise((resolve, reject) => {
+      next(null, reject, new Error('some ember data error'));
+    });
+  });
+
+  run(() => {
+    dummyChangeset.save().catch((error) => {
+        assert.equal(error.message, 'some ember data error');
+      })
+      .finally(() => done());
   });
 });
 
