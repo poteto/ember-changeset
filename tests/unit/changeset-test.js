@@ -4,7 +4,7 @@ import { module, test } from 'qunit';
 
 const {
   Object: EmberObject,
-  RSVP: { resolve },
+  RSVP: { resolve, Promise },
   String: { dasherize },
   run,
   get,
@@ -12,6 +12,10 @@ const {
   set,
   typeOf
 } = Ember;
+
+const {
+  next
+} = run;
 
 let dummyModel;
 let dummyValidations = {
@@ -182,18 +186,16 @@ test('#save handles rejected proxy content', function(assert) {
   assert.expect(1);
 
   set(dummyModel, 'save', () => {
-    return new Ember.RSVP.Promise(function (resolve, reject) {
-      Ember.run.next(null, reject, new Error('some ember data error'));
+    return new Promise((resolve, reject) => {
+      next(null, reject, new Error('some ember data error'));
     });
   });
 
-  Ember.run(() => {
+  run(() => {
     dummyChangeset.save().catch((error) => {
         assert.equal(error.message, 'some ember data error');
       })
-      .finally(() => {
-        done();
-      });
+      .finally(() => done());
   });
 });
 
