@@ -93,6 +93,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      * @return {Any}
      */
     setUnknownProperty(key, value) {
+      // debugger;
       return this._validateAndSet(key, value);
     },
 
@@ -449,7 +450,8 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
 
       if (validation === true || isSingleValidationArray) {
         this._deleteKey(ERRORS, key);
-        set(changes, key, value);
+        // set(changes, key, value);
+        changes[key] = value;
         this.notifyPropertyChange(CHANGES);
         this.notifyPropertyChange(key);
 
@@ -476,10 +478,35 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
       }
 
       if (changes.hasOwnProperty(key)) {
-        return get(changes, key);
+        return changes[key];
       }
 
-      return get(content, key);
+      const value = get(content, key);
+      const valueType = typeOf(value);
+      const isNotNested = valueType !== 'array' && valueType !== 'object';
+      // const isNotNested = valueType !== 'object';
+
+      if (isNotNested) {
+        return value;
+      }
+
+      const self = this;
+      const extender = {
+        unknownProperty(nextKey) {
+          return self.unknownProperty(key + '.' + nextKey);
+        },
+        setUnknownProperty(nextKey, value) {
+          return self.setUnknownProperty(key + '.' + nextKey, value);
+        }
+      };
+      if(valueType === 'array'){
+        extender._length = function(){
+          return value.length;
+        };
+      }
+      const Pathfinder = Ember.Object.extend(extender);
+
+      return Pathfinder.create();
     },
 
     /**
