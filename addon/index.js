@@ -93,7 +93,6 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      * @return {Any}
      */
     setUnknownProperty(key, value) {
-      // debugger;
       return this._validateAndSet(key, value);
     },
 
@@ -453,7 +452,8 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
         // set(changes, key, value);
         changes[key] = value;
         this.notifyPropertyChange(CHANGES);
-        this.notifyPropertyChange(key);
+        // this.notifyPropertyChange(key);
+        this.notifyPropertyChange(key.split('.')[0]);
 
         return value;
       }
@@ -483,30 +483,50 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
 
       const value = get(content, key);
       const valueType = typeOf(value);
-      const isNotNested = valueType !== 'array' && valueType !== 'object';
-      // const isNotNested = valueType !== 'object';
-
-      if (isNotNested) {
-        return value;
-      }
 
       const self = this;
-      const extender = {
-        unknownProperty(nextKey) {
-          return self.unknownProperty(key + '.' + nextKey);
-        },
-        setUnknownProperty(nextKey, value) {
-          return self.setUnknownProperty(key + '.' + nextKey, value);
-        }
-      };
-      if(valueType === 'array'){
-        extender._length = function(){
-          return value.length;
-        };
-      }
-      const Pathfinder = Ember.Object.extend(extender);
 
-      return Pathfinder.create();
+      if (valueType === 'object') {
+        const extender = {
+          unknownProperty(nextKey) {
+            return self.unknownProperty(key + '.' + nextKey);
+          },
+          setUnknownProperty(nextKey, value) {
+            return self.setUnknownProperty(key + '.' + nextKey, value);
+          }
+        };
+        const ObjectPathFinder = Ember.Object.extend(extender);
+        return ObjectPathFinder.create();
+      }
+      if (valueType === 'array') {
+        // only arrays of objects supported
+        return Ember.ArrayProxy.create({
+          content: Ember.A(value),
+          objectAtContent: function(idx) {
+            /*
+            const value = this.get('content').objectAt(idx);
+            const valueType = typeOf(value);
+            */
+            const extender = {
+              unknownProperty(nextKey) {
+                /*
+                 * Attempt to support simple types, but gives up changeset control
+                if(valueType !== 'array' && valueType !== 'object'){
+                  return self.unknownProperty(key + '.' + idx);
+                }
+                */
+                return self.unknownProperty(key + '.' + idx + '.' + nextKey);
+              },
+              setUnknownProperty(nextKey, value) {
+                return self.setUnknownProperty(key + '.' + idx + '.' + nextKey, value);
+              }
+            };
+            const ArrayPathFinder = Ember.Object.extend(extender);
+            return ArrayPathFinder.create();
+          }
+        });
+      }
+      return value;
     },
 
     /**
@@ -516,7 +536,8 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      * @return {Void}
      */
     _notifyVirtualProperties() {
-      let rollbackKeys = [...keys(get(this, CHANGES)), ...keys(get(this, ERRORS))];
+      // let rollbackKeys = [...keys(get(this, CHANGES)), ...keys(get(this, ERRORS))];
+      let rollbackKeys = [...(keys(get(this, CHANGES)).map(k => k.split('.')[0])), ...keys(get(this, ERRORS))];
 
       for (let i = 0; i < rollbackKeys.length; i++) {
         this.notifyPropertyChange(rollbackKeys[i]);
