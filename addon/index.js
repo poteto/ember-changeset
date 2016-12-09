@@ -487,42 +487,34 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
       const self = this;
 
       if (valueType === 'object') {
-        const extender = {
+        // using closures so that no properties are defined on the proxy classes
+        const ChangesetObjectProxy = Ember.Object.extend({
           unknownProperty(nextKey) {
             return self.unknownProperty(key + '.' + nextKey);
           },
           setUnknownProperty(nextKey, value) {
             return self.setUnknownProperty(key + '.' + nextKey, value);
           }
-        };
-        const ObjectPathFinder = Ember.Object.extend(extender);
-        return ObjectPathFinder.create();
+        });
+        return ChangesetObjectProxy.create();
       }
       if (valueType === 'array') {
-        // only arrays of objects supported
+        // arrays containing primitives not supported
+        // might be able to use a proxy for them
+        // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy
+        // https://github.com/GoogleChrome/proxy-polyfill
         return Ember.ArrayProxy.create({
           content: Ember.A(value),
           objectAtContent: function(idx) {
-            /*
-            const value = this.get('content').objectAt(idx);
-            const valueType = typeOf(value);
-            */
-            const extender = {
+            const ChangesetArrayElementProxy = Ember.Object.extend({
               unknownProperty(nextKey) {
-                /*
-                 * Attempt to support simple types, but gives up changeset control
-                if(valueType !== 'array' && valueType !== 'object'){
-                  return self.unknownProperty(key + '.' + idx);
-                }
-                */
                 return self.unknownProperty(key + '.' + idx + '.' + nextKey);
               },
               setUnknownProperty(nextKey, value) {
                 return self.setUnknownProperty(key + '.' + idx + '.' + nextKey, value);
               }
-            };
-            const ArrayPathFinder = Ember.Object.extend(extender);
-            return ArrayPathFinder.create();
+            });
+            return ChangesetArrayElementProxy.create();
           }
         });
       }
