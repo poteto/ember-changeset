@@ -486,7 +486,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
 
       const self = this;
 
-      if (valueType === 'object') {
+      if (valueType === 'object'|| valueType === 'instance') {
         // using closures so that no properties are defined on the proxy classes
         const ChangesetObjectProxy = Ember.Object.extend({
           unknownProperty(nextKey) {
