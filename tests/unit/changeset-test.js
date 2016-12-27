@@ -408,6 +408,45 @@ test('#validate works correctly with complex values', function(assert) {
   });
 });
 
+test('#validate marks actual valid changes', function(assert) {
+  let done = assert.async();
+  dummyModel.setProperties({ name: 'Jim Bob', password: true, passwordConfirmation: true, async: true });
+  let dummyChangeset = new Changeset(dummyModel, dummyValidator, dummyValidations);
+
+  dummyChangeset.set('name', 'foo bar');
+  dummyChangeset.set('password', false);
+
+  run(() => {
+    dummyChangeset.validate().then(() => {
+      assert.deepEqual(get(dummyChangeset, 'changes'), [{ key: 'name', value: 'foo bar' }]);
+      done();
+    });
+  });
+});
+
+test('#validate does not mark changes when nothing has changed', function(assert) {
+  let done = assert.async();
+  let options = {
+    persist: true,
+    // test isEqual to ensure we're using Ember.isEqual for comparison
+    isEqual(other) {
+      return this.persist === other.persist;
+    }
+  };
+  dummyModel.setProperties({ name: 'Jim Bob', password: true, passwordConfirmation: true, async: true, options});
+  let dummyChangeset = new Changeset(dummyModel, dummyValidator, dummyValidations);
+
+  dummyChangeset.set('options', options);
+
+  run(() => {
+    dummyChangeset.validate().then(() => {
+      assert.deepEqual(get(dummyChangeset, 'error'), {});
+      assert.deepEqual(get(dummyChangeset, 'changes'), []);
+      done();
+    });
+  });
+});
+
 test('#addError adds an error to the changeset', function(assert) {
   let dummyChangeset = new Changeset(dummyModel);
   dummyChangeset.addError('email', {
