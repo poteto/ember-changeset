@@ -293,7 +293,8 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
       this.notifyPropertyChange(ERRORS);
       this.notifyPropertyChange(key);
 
-      return set(errors, key, options);
+      // return set(errors, key, options);
+      return errors[key] = options;
     },
 
     /**
@@ -306,7 +307,8 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      */
     pushErrors(key, ...newErrors) {
       let errors = get(this, ERRORS);
-      let existingError = get(errors, key) || { validation: [] };
+      // let existingError = get(errors, key) || { validation: [] };
+      let existingError = errors[key] || { validation: [] };
       let { validation } = existingError;
       let value = get(this, key);
 
@@ -320,7 +322,8 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
       this.notifyPropertyChange(ERRORS);
       this.notifyPropertyChange(key);
 
-      return set(errors, key, { value, validation });
+      // return set(errors, key, { value, validation });
+      return errors[key] = { value, validation };
     },
 
     /**
@@ -474,7 +477,8 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
       let content = get(this, CONTENT);
 
       if (errors.hasOwnProperty(key)) {
-        return get(errors, `${key}.value`);
+        // return get(errors, `${key}.value`);
+        return errors[key].value;
       }
 
       if (changes.hasOwnProperty(key)) {
