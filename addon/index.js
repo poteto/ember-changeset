@@ -291,7 +291,8 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
 
       this._deleteKey(CHANGES, key);
       this.notifyPropertyChange(ERRORS);
-      this.notifyPropertyChange(key);
+      // this.notifyPropertyChange(key);
+      this.notifyPropertyChange(key.split('.')[0]);
 
       // return set(errors, key, options);
       return errors[key] = options;
@@ -320,7 +321,8 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
 
       this._deleteKey(CHANGES, key);
       this.notifyPropertyChange(ERRORS);
-      this.notifyPropertyChange(key);
+      // this.notifyPropertyChange(key);
+      this.notifyPropertyChange(key.split('.')[0]);
 
       // return set(errors, key, { value, validation });
       return errors[key] = { value, validation };
