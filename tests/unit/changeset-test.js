@@ -107,6 +107,16 @@ test('#set does not add a change if invalid', function(assert) {
   assert.ok(isInvalid, 'should be invalid');
 });
 
+test('#set adds the change without validation if `skipValidationsOnSet` option is set', function(assert) {
+  let expectedChanges = [{ key: 'password', value: false }];
+  
+  let dummyChangeset = new Changeset(dummyModel, dummyValidator, null, {skipValidationsOnSet: true});
+  dummyChangeset.set('password', false);
+  let changes = get(dummyChangeset, 'changes');
+  
+  assert.deepEqual(changes, expectedChanges, 'should add change');
+});
+
 test('#prepare provides callback to modify changes', function(assert) {
   let date = new Date();
   let dummyChangeset = new Changeset(dummyModel);
