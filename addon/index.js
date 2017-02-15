@@ -8,7 +8,7 @@ import pureAssign from 'ember-changeset/utils/assign';
 import objectWithout from 'ember-changeset/utils/object-without';
 import includes from 'ember-changeset/utils/includes';
 import take from 'ember-changeset/utils/take';
-import { CHANGESET, isChangeset } from 'ember-changeset/-private/internals';
+import isChangeset, { CHANGESET } from 'ember-changeset/utils/is-changeset';
 
 const {
   Object: EmberObject,

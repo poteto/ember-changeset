@@ -1,6 +1,6 @@
 import Ember from 'ember';
 import Changeset from 'ember-changeset';
-import { isChangeset } from 'ember-changeset/-private/internals';
+import isChangeset from 'ember-changeset/utils/is-changeset';
 
 const { Helper: { helper } } = Ember;
 
