@@ -55,8 +55,8 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      */
     __changeset__: CHANGESET,
 
-    changes: objectToArray(CHANGES),
-    errors: objectToArray(ERRORS),
+    changes: objectToArray(CHANGES, false),
+    errors: objectToArray(ERRORS, true),
     change: readOnly(CHANGES),
     error: readOnly(ERRORS),
 
