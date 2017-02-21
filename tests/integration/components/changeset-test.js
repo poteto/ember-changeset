@@ -4,6 +4,7 @@ import { moduleForComponent, test } from 'ember-qunit';
 import hbs from 'htmlbars-inline-precompile';
 
 const {
+  RSVP: { resolve },
   isPresent,
   run,
   typeOf
@@ -191,4 +192,24 @@ test('it does not rollback when validating', function(assert) {
     assert.equal(this.$('#odd').val(), '10', 'should not rollback');
     assert.equal(this.$('code.odd').text().trim(), '10', 'should not rollback');
   });
+});
+
+test('it handles models that are promises', function(assert) {
+  this.set('dummyModel', resolve({ firstName: 'Jim', lastName: 'Bob' }));
+  this.render(hbs`
+    {{#with (changeset dummyModel) as |changeset|}}
+      <h1>{{changeset.firstName}} {{changeset.lastName}}</h1>
+      <input
+        id="first-name"
+        type="text"
+        value={{changeset.firstName}}
+        onchange={{action (mut changeset.firstName) value="target.value"}}>
+      {{input id="last-name" value=changeset.lastName}}
+    {{/with}}
+  `);
+
+  assert.ok(this.$('h1:contains("Jim Bob")'), 'precondition');
+  run(() => this.$('#first-name').val('foo').trigger('change'));
+  run(() => this.$('#last-name').val('foo').trigger('change'));
+  assert.ok(this.$('h1:contains("foo bar")'), 'should update observable value');
 });
