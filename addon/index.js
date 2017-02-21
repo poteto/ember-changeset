@@ -35,7 +35,7 @@ function defaultValidatorFn() {
   return true;
 }
 
-const defaultOptions = { skipValidationsOnSet: false };
+const defaultOptions = { skipValidate: false };
 
 /**
  * Creates new changesets.
@@ -99,14 +99,12 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      */
     setUnknownProperty(key, value) {
       let changesetOptions = get(this, OPTIONS);
-      let skipValidationsOnSet = get(changesetOptions, 'skipValidationsOnSet');
+      let skipValidate = get(changesetOptions, 'skipValidate');
       
-      if (skipValidationsOnSet) {
+      if (skipValidate) {
         return this._setProperty(true, { key, value });
       }
-      else {
-        return this._validateAndSet(key, value);
-      }
+      return this._validateAndSet(key, value);
     },
 
     /**

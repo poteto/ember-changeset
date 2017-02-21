@@ -107,10 +107,10 @@ test('#set does not add a change if invalid', function(assert) {
   assert.ok(isInvalid, 'should be invalid');
 });
 
-test('#set adds the change without validation if `skipValidationsOnSet` option is set', function(assert) {
+test('#set adds the change without validation if `skipValidate` option is set', function(assert) {
   let expectedChanges = [{ key: 'password', value: false }];
   
-  let dummyChangeset = new Changeset(dummyModel, dummyValidator, null, {skipValidationsOnSet: true});
+  let dummyChangeset = new Changeset(dummyModel, dummyValidator, null, {skipValidate: true});
   dummyChangeset.set('password', false);
   let changes = get(dummyChangeset, 'changes');
   
