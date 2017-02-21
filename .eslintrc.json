@@ -1,0 +1,6 @@
+{
+  "root": true,
+    "parserOptions": {
+        "sourceType": "module"
+    }
+}
