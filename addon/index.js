@@ -75,7 +75,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
       this[CHANGES] = {};
       this[ERRORS] = {};
       this[VALIDATOR] = validateFn;
-      this[OPTIONS] = Object.assign({}, defaultOptions, options);
+      this[OPTIONS] = pureAssign(defaultOptions, options);
     },
 
     /**
