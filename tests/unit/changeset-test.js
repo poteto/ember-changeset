@@ -30,6 +30,9 @@ let dummyValidations = {
   },
   async(value) {
     return resolve(value);
+  },
+  options(value) {
+    return isPresent(value);
   }
 };
 
@@ -328,14 +331,14 @@ test('#merge preserves content and validator of origin changeset', function(asse
 
 test('#validate/0 validates all fields immediately', function(assert) {
   let done = assert.async();
-  dummyModel.setProperties({ name: 'J', password: false });
+  dummyModel.setProperties({ name: 'J', password: false, options: null });
   let dummyChangeset = new Changeset(dummyModel, dummyValidator, dummyValidations);
 
   run(() => {
     dummyChangeset.validate().then(() => {
       assert.deepEqual(get(dummyChangeset, 'error.password'), { validation: ['foo', 'bar'], value: false }, 'should validate immediately');
       assert.deepEqual(get(dummyChangeset, 'changes'), [], 'should not set changes');
-      assert.equal(get(dummyChangeset, 'errors.length'), 4, 'should have 4 errors');
+      assert.equal(get(dummyChangeset, 'errors.length'), 5, 'should have 5 errors');
       done();
     });
   });
@@ -358,7 +361,7 @@ test('#validate/1 validates a single field immediately', function(assert) {
 
 test('#validate works correctly with changeset values', function(assert) {
   let done = assert.async();
-  dummyModel.setProperties({ name: undefined, password: false, async: true, passwordConfirmation: false });
+  dummyModel.setProperties({ name: undefined, password: false, async: true, passwordConfirmation: false, options: {}});
   let dummyChangeset = new Changeset(dummyModel, dummyValidator, dummyValidations);
 
   run(() => {
@@ -386,6 +389,59 @@ test('#validate works correctly with changeset values', function(assert) {
     dummyChangeset.validate().then(() => {
       assert.equal(get(dummyChangeset, 'errors.length'), 0, 'should have no errors');
       assert.ok(get(dummyChangeset, 'isValid'), 'should be valid');
+      done();
+    });
+  });
+});
+
+test('#validate works correctly with complex values', function(assert) {
+  let done = assert.async();
+  dummyModel.setProperties({});
+  let dummyChangeset = new Changeset(dummyModel, dummyValidator, dummyValidations);
+
+  run(() => {
+    dummyChangeset.set('options', { persist: true });
+    dummyChangeset.validate().then(() => {
+      assert.deepEqual(get(dummyChangeset, 'changes.0'), { key: 'options', value: { persist: true }});
+      done();
+    });
+  });
+});
+
+test('#validate marks actual valid changes', function(assert) {
+  let done = assert.async();
+  dummyModel.setProperties({ name: 'Jim Bob', password: true, passwordConfirmation: true, async: true });
+  let dummyChangeset = new Changeset(dummyModel, dummyValidator, dummyValidations);
+
+  dummyChangeset.set('name', 'foo bar');
+  dummyChangeset.set('password', false);
+
+  run(() => {
+    dummyChangeset.validate().then(() => {
+      assert.deepEqual(get(dummyChangeset, 'changes'), [{ key: 'name', value: 'foo bar' }]);
+      done();
+    });
+  });
+});
+
+test('#validate does not mark changes when nothing has changed', function(assert) {
+  let done = assert.async();
+  let options = {
+    persist: true,
+    // test isEqual to ensure we're using Ember.isEqual for comparison
+    isEqual(other) {
+      return this.persist === other.persist;
+    }
+  };
+  dummyModel.setProperties({ name: 'Jim Bob', password: true, passwordConfirmation: true, async: true, options});
+  let dummyChangeset = new Changeset(dummyModel, dummyValidator, dummyValidations);
+
+  dummyChangeset.set('options', options);
+
+  run(() => {
+    dummyChangeset.validate().then(() => {
+      assert.deepEqual(get(dummyChangeset, 'error'), {});
+      assert.deepEqual(get(dummyChangeset, 'changes'), []);
       done();
     });
   });

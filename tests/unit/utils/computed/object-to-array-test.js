@@ -23,7 +23,7 @@ test('it converts an object into an array', function(assert) {
   assert.deepEqual(result, expectedResult, 'should convert to array');
 });
 
-test('it works with values as shallow objects', function(assert) {
+test('it maintains shallow objects when flattenObjects is false', function(assert) {
   let Dummy = EmberObject.extend({
     _object: {
       firstName: {
@@ -32,7 +32,23 @@ test('it works with values as shallow objects', function(assert) {
       }
     },
 
-    values: objectToArray('_object')
+    values: objectToArray('_object', false)
+  });
+  let result = Dummy.create().get('values');
+  let expectedResult = [{ key: 'firstName', value: { value: 'Jim', validation: 'Too short' }}];
+  assert.deepEqual(result, expectedResult, 'should convert to array');
+});
+
+test('it flattens shallow object values when flattenObjects is true', function(assert) {
+  let Dummy = EmberObject.extend({
+    _object: {
+      firstName: {
+        value: 'Jim',
+        validation: 'Too short'
+      }
+    },
+
+    values: objectToArray('_object', true)
   });
   let result = Dummy.create().get('values');
   let expectedResult = [{ key: 'firstName', value: 'Jim', validation: 'Too short' }];
