@@ -593,6 +593,19 @@ changeset.save()
   });
 ```
 
+## Detecting Changesets
+
+If you're uncertain whether or not you're dealing with a `Changeset`, you can use the `isChangeset` util.
+
+```js
+import isChangeset from 'ember-changeset/utils/is-changeset';
+
+if (isChangeset(model)) {
+  model.execute();
+  // other changeset-specific code...
+}
+```
+
 ## Plugins
 
 - [`ember-changeset-validations`](https://github.com/DockYard/ember-changeset-validations) - Pure, functional validations without CPs or Observers

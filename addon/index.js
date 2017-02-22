@@ -1,14 +1,13 @@
 import Ember from 'ember';
 import objectToArray from 'ember-changeset/utils/computed/object-to-array';
 import isEmptyObject from 'ember-changeset/utils/computed/is-empty-object';
-import objectEqual from 'ember-changeset/utils/computed/object-equal';
 import isPromise from 'ember-changeset/utils/is-promise';
 import isObject from 'ember-changeset/utils/is-object';
 import pureAssign from 'ember-changeset/utils/assign';
 import objectWithout from 'ember-changeset/utils/object-without';
 import includes from 'ember-changeset/utils/includes';
 import take from 'ember-changeset/utils/take';
-import { CHANGESET, isChangeset } from 'ember-changeset/-private/internals';
+import isChangeset, { CHANGESET } from 'ember-changeset/utils/is-changeset';
 
 const {
   Object: EmberObject,
@@ -18,6 +17,7 @@ const {
   assert,
   get,
   isArray,
+  isEqual,
   isNone,
   isPresent,
   set,
@@ -59,13 +59,13 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      */
     __changeset__: CHANGESET,
 
-    changes: objectToArray(CHANGES),
-    errors: objectToArray(ERRORS),
+    changes: objectToArray(CHANGES, false),
+    errors: objectToArray(ERRORS, true),
     change: readOnly(CHANGES),
     error: readOnly(ERRORS),
 
     isValid: isEmptyObject(ERRORS),
-    isPristine: objectEqual(CHANGES, CONTENT),
+    isPristine: isEmptyObject(CHANGES),
     isInvalid: not('isValid').readOnly(),
     isDirty: not('isPristine').readOnly(),
 
@@ -408,11 +408,11 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
 
       if (isPromise(validation)) {
         return validation.then((resolvedValidation) => {
-          return this._setProperty(resolvedValidation, { key, value });
+          return this._setProperty(resolvedValidation, { key, value, oldValue });
         });
       }
 
-      return this._setProperty(validation, { key, value });
+      return this._setProperty(validation, { key, value, oldValue });
     },
 
     /**
@@ -453,7 +453,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      * @param {Any} options.value
      * @return {Any}
      */
-    _setProperty(validation, { key, value } = {}) {
+    _setProperty(validation, { key, value, oldValue } = {}) {
       let changes = get(this, CHANGES);
       let isSingleValidationArray =
         isArray(validation) &&
@@ -462,7 +462,12 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
 
       if (validation === true || isSingleValidationArray) {
         this._deleteKey(ERRORS, key);
-        set(changes, key, value);
+
+        if (!isEqual(oldValue, value)) {
+          set(changes, key, value);
+        } else if (obj.hasOwnProperty(key)) {
+          delete changes[key];
+        }
         this.notifyPropertyChange(CHANGES);
         this.notifyPropertyChange(key);
 
