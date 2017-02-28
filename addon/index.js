@@ -17,6 +17,7 @@ const {
   assert,
   get,
   isArray,
+  isEmpty,
   isEqual,
   isNone,
   isPresent,
@@ -30,6 +31,7 @@ const CHANGES = '_changes';
 const ERRORS = '_errors';
 const VALIDATOR = '_validator';
 const OPTIONS = '_options';
+const RUNNING_VALIDATIONS = '_runningValidations';
 
 function defaultValidatorFn() {
   return true;
@@ -76,6 +78,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
       this[ERRORS] = {};
       this[VALIDATOR] = validateFn;
       this[OPTIONS] = pureAssign(defaultOptions, options);
+      this[RUNNING_VALIDATIONS] = {};
     },
 
     /**
@@ -283,6 +286,23 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
       return resolve(this._validateAndSet(key, this._valueFor(key)));
     },
 
+    
+    /**
+     * Checks to see if async validator for a given key has not resolved.
+     * If no key is provided it will check to see if any async validator is running.
+     *
+     * @public
+     * @param  {String|Undefined} key
+     * @return {boolean}
+     */
+    isValidating(key) {
+      let runningValidations = get(this, RUNNING_VALIDATIONS);
+      let ks = emberArray(keys(runningValidations));
+      if(key) { return ks.includes(key); }
+      
+      return !isEmpty(ks);
+    },
+
     /**
      * Manually add an error to the changeset. If there is an existing error or
      * change for `key`, it will be overwritten.
@@ -404,9 +424,11 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
       let content = get(this, CONTENT);
       let oldValue = get(content, key);
       let validation = this._validate(key, value, oldValue);
-
+    
       if (isPromise(validation)) {
+        this._setIsValidating(key, true);
         return validation.then((resolvedValidation) => {
+          this._setIsValidating(key, false);
           return this._setProperty(resolvedValidation, { key, value, oldValue });
         });
       }
@@ -480,6 +502,29 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
       }
 
       return this.addError(key, { value, validation });
+    },
+
+    /**
+     * Updates the cache that stores the number of running validations
+     * for a given key.
+     *
+     * @private
+     * @param {String} key 
+     * @param {Boolean} value
+     */
+    _setIsValidating(key, value) {
+      let runningValidations = get(this, RUNNING_VALIDATIONS);
+      let count = get(runningValidations, key) || 0;
+
+      if(value) {
+        set(runningValidations, key, count + 1);
+      }else {
+        if(count === 1) {
+          delete runningValidations[key];
+        } else {
+          set(runningValidations, key, count - 1);
+        }
+      }
     },
 
     /**
