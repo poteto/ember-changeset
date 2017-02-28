@@ -1,4 +1,5 @@
 import Ember from 'ember';
+// import { Evented } from 'ember-runtime';
 import objectToArray from 'ember-changeset/utils/computed/object-to-array';
 import isEmptyObject from 'ember-changeset/utils/computed/is-empty-object';
 import isPromise from 'ember-changeset/utils/is-promise';
@@ -13,6 +14,7 @@ const {
   Object: EmberObject,
   RSVP: { all, resolve },
   computed: { not, readOnly },
+  Evented,
   A: emberArray,
   assert,
   get,
@@ -33,6 +35,9 @@ const VALIDATOR = '_validator';
 const OPTIONS = '_options';
 const RUNNING_VALIDATIONS = '_runningValidations';
 
+const BEFORE_VALIDATION_EVENT = 'beforeValidation';
+const AFTER_VALIDATION_EVENT = 'afterValidation';
+
 function defaultValidatorFn() {
   return true;
 }
@@ -42,6 +47,7 @@ const defaultOptions = { skipValidate: false };
 /**
  * Creates new changesets.
  *
+ * @uses Ember.Evented
  * @param  {Object} obj
  * @param  {Function} validateFn
  * @param  {Object} validationMap
@@ -51,7 +57,7 @@ const defaultOptions = { skipValidate: false };
 export function changeset(obj, validateFn = defaultValidatorFn, validationMap = {}, options = {}) {
   assert('Underlying object for changeset is missing', isPresent(obj));
 
-  return EmberObject.extend({
+  return EmberObject.extend(Evented, {
     /**
      * Internal descriptor for changeset identification
      *
@@ -298,8 +304,8 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
     isValidating(key) {
       let runningValidations = get(this, RUNNING_VALIDATIONS);
       let ks = emberArray(keys(runningValidations));
-      if(key) { return ks.includes(key); }
-      
+      if (key) { return ks.includes(key); }
+
       return !isEmpty(ks);
     },
 
@@ -424,15 +430,19 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
       let content = get(this, CONTENT);
       let oldValue = get(content, key);
       let validation = this._validate(key, value, oldValue);
-    
+
       if (isPromise(validation)) {
         this._setIsValidating(key, true);
+        this.trigger(BEFORE_VALIDATION_EVENT, key);
         return validation.then((resolvedValidation) => {
           this._setIsValidating(key, false);
+          this.trigger(AFTER_VALIDATION_EVENT, key);
           return this._setProperty(resolvedValidation, { key, value, oldValue });
         });
       }
 
+      this.trigger(BEFORE_VALIDATION_EVENT, key);
+      this.trigger(AFTER_VALIDATION_EVENT, key);
       return this._setProperty(validation, { key, value, oldValue });
     },
 
@@ -516,10 +526,10 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
       let runningValidations = get(this, RUNNING_VALIDATIONS);
       let count = get(runningValidations, key) || 0;
 
-      if(value) {
+      if (value) {
         set(runningValidations, key, count + 1);
-      }else {
-        if(count === 1) {
+      } else {
+        if (count === 1) {
           delete runningValidations[key];
         } else {
           set(runningValidations, key, count - 1);
