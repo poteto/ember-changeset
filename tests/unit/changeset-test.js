@@ -33,11 +33,14 @@ let dummyValidations = {
   },
   options(value) {
     return isPresent(value);
+  },
+  'org.usa.ny'(value) {
+    debugger // this should hit (but it's not)
   }
 };
 
 function dummyValidator({ key, newValue, oldValue, changes, content }) {
-  let validatorFn = dummyValidations[key];
+  let validatorFn = get(dummyValidations, key);
 
   if (typeOf(validatorFn) === 'function') {
     return validatorFn(newValue, oldValue, changes, content);
@@ -821,6 +824,41 @@ test('it clears errors when setting to original value', function(assert) {
   dummyChangeset.set('name', 'Jim Bob');
   assert.ok(get(dummyChangeset, 'isValid'), 'should be valid');
   assert.notOk(get(dummyChangeset, 'isInvalid'), 'should be valid');
+});
+
+test('it works with nested keys', function(assert) {
+  let expectedResult = {
+    org: {
+      // asia: { sg: 'sg' },
+      usa: {
+        ca: 'ca',
+        // ny: 'ny',
+        ma: { name: 'Massachusetts' }
+      }
+    }
+  };
+  set(dummyModel, 'org', {
+    // asia: { sg: null },
+    usa: {
+      ca: null,
+      ny: null,
+      ma: { name: null }
+    }
+  });
+  let dummyChangeset = new Changeset(dummyModel, dummyValidator);
+  // dummyChangeset.set('org.asia.sg', 'sg'); // WIP - this is broken
+  dummyChangeset.set('org.usa.ca', 'ca');
+  dummyChangeset.set('org.usa.ny', '');
+  dummyChangeset.set('org.usa.ma', { name: 'Massachusetts' });
+  dummyChangeset.execute();
+  assert.deepEqual(get(dummyChangeset, 'change'), expectedResult, 'should have correct shape');
+  assert.deepEqual(get(dummyModel, 'org'), expectedResult.org, 'should set value');
+  assert.deepEqual(get(dummyModel, 'org.asia'), expectedResult.org.asia, 'should set value');
+  assert.deepEqual(get(dummyModel, 'org.usa'), expectedResult.org.usa, 'should set value');
+  assert.deepEqual(get(dummyModel, 'org.usa.ca'), expectedResult.org.usa.ca, 'should set value');
+  assert.deepEqual(get(dummyModel, 'org.usa.ny'), expectedResult.org.usa.ny, 'should set value');
+  assert.deepEqual(get(dummyModel, 'org.usa.ma'), expectedResult.org.usa.ma, 'should set value');
+  assert.deepEqual(get(dummyModel, 'org.usa.ma.name'), expectedResult.org.usa.ma.name, 'should set value');
 });
 
 test('content can be an empty hash', function(assert) {
