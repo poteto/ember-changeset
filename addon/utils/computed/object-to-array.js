@@ -1,9 +1,9 @@
 import Ember from 'ember';
+import isObject from '../is-object';
 
 const {
   computed,
-  get,
-  typeOf
+  get
 } = Ember;
 const { keys } = Object;
 const assign = Ember.assign || Ember.merge;
@@ -15,7 +15,7 @@ export default function objectToArray(objKey, flattenObjects) {
     return keys(obj).map((key) => {
       let value = obj[key];
 
-      if (flattenObjects && typeOf(value) === 'object') {
+      if (flattenObjects && isObject(value)) {
         return assign({ key }, value);
       }
 
