@@ -29,10 +29,13 @@ const CONTENT = '_content';
 const CHANGES = '_changes';
 const ERRORS = '_errors';
 const VALIDATOR = '_validator';
+const OPTIONS = '_options';
 
 function defaultValidatorFn() {
   return true;
 }
+
+const defaultOptions = { skipValidate: false };
 
 /**
  * Creates new changesets.
@@ -40,9 +43,10 @@ function defaultValidatorFn() {
  * @param  {Object} obj
  * @param  {Function} validateFn
  * @param  {Object} validationMap
+ * @param  {Object}  options
  * @return {Ember.Object}
  */
-export function changeset(obj, validateFn = defaultValidatorFn, validationMap = {}) {
+export function changeset(obj, validateFn = defaultValidatorFn, validationMap = {}, options = {}) {
   assert('Underlying object for changeset is missing', isPresent(obj));
 
   return EmberObject.extend({
@@ -71,6 +75,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
       this[CHANGES] = {};
       this[ERRORS] = {};
       this[VALIDATOR] = validateFn;
+      this[OPTIONS] = pureAssign(defaultOptions, options);
     },
 
     /**
@@ -93,6 +98,12 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      * @return {Any}
      */
     setUnknownProperty(key, value) {
+      let changesetOptions = get(this, OPTIONS);
+      let skipValidate = get(changesetOptions, 'skipValidate');
+      
+      if (skipValidate) {
+        return this._setProperty(true, { key, value });
+      }
       return this._validateAndSet(key, value);
     },
 

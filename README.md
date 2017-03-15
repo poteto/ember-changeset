@@ -114,6 +114,22 @@ In the above example, when the input changes, only the changeset's internal valu
 
 On rollback, all changes are dropped and the underlying Object is left untouched.
 
+## Disabling Automatic Validation
+
+The default behavior of `Changeset` is to automatically validate a field when it is set. Automatic validation can be disabled by passing `skipValidate` as on option when creating a changeset.
+
+```js
+let changeset = new Changeset(model, validatorFn, validationMap, { skipValidate: true });
+```
+
+```hbs
+{{#with (changeset model (action "validate") skipValidate=true) as |changeset|}}
+  ...
+{{/with}}
+```
+
+Be sure to call `validate()` on the `changeset` before saving or committing changes.
+
 ## API
 
 * Properties

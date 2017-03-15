@@ -213,3 +213,24 @@ test('it handles models that are promises', function(assert) {
   run(() => this.$('#last-name').val('foo').trigger('change'));
   assert.ok(this.$('h1:contains("foo bar")'), 'should update observable value');
 });
+
+test('it skips validation when skipValidate is passed as an option', function(assert) {
+  this.set('dummyModel', { firstName: 'Jim', lastName: 'Bob' });
+  this.on('validate', () => false);
+  this.render(hbs`
+    {{#with (changeset dummyModel (action "validate") skipValidate=true) as |changeset|}}
+      <h1>{{changeset.firstName}} {{changeset.lastName}}</h1>
+      {{input id="first-name" value=changeset.firstName}}
+      {{input id="last-name" value=changeset.lastName}}
+      {{#if changeset.isInvalid}}
+        <p>There were one or more errors in your form.</p>
+      {{/if}}
+    {{/with}}
+  `);
+  
+  assert.ok(this.$('h1:contains("Jim Bob")'), 'precondition');
+  run(() => this.$('#first-name').val('J').trigger('change'));
+  run(() => this.$('#last-name').val('B').trigger('change'));
+  assert.ok(this.$('h1:contains("J B")'), 'should update observable value');
+  assert.notOk(this.$('p:contains("There were one or more errors in your form.")').length, 'should skip validation');
+});
