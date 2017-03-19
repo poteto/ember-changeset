@@ -100,7 +100,6 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
     setUnknownProperty(key, value) {
       let changesetOptions = get(this, OPTIONS);
       let skipValidate = get(changesetOptions, 'skipValidate');
-
       if (skipValidate) {
         return this._setProperty(true, { key, value });
       }
