@@ -1,5 +1,4 @@
 import Ember from 'ember';
-// import { Evented } from 'ember-runtime';
 import objectToArray from 'ember-changeset/utils/computed/object-to-array';
 import isEmptyObject from 'ember-changeset/utils/computed/is-empty-object';
 import isPromise from 'ember-changeset/utils/is-promise';
@@ -34,7 +33,6 @@ const ERRORS = '_errors';
 const VALIDATOR = '_validator';
 const OPTIONS = '_options';
 const RUNNING_VALIDATIONS = '_runningValidations';
-
 const BEFORE_VALIDATION_EVENT = 'beforeValidation';
 const AFTER_VALIDATION_EVENT = 'afterValidation';
 
