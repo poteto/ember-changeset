@@ -130,7 +130,6 @@ let changeset = new Changeset(model, validatorFn, validationMap, { skipValidate:
 
 Be sure to call `validate()` on the `changeset` before saving or committing changes.
 
-
 ## API
 
 * Properties
