@@ -155,6 +155,10 @@ Be sure to call `validate()` on the `changeset` before saving or committing chan
   + [`snapshot`](#snapshot)
   + [`restore`](#restore)
   + [`cast`](#cast)
+  + [`isValidating`](#isvalidating)
+* Events
+  + [`beforeValidation`](#beforevalidation)
+  + [`afterValidation`](#aftervalidation)
 
 #### `error`
 
@@ -544,6 +548,63 @@ export default Controller.extend({
         .save();
     }
   }
+});
+```
+
+**[⬆️ back to top](#api)**
+
+#### `isValidating`
+
+Checks to see if async validator for a given key has not resolved.  If no key is provided it will check to see if any async validator is running.
+
+```js
+changeset.set('lastName', 'Appleseed');
+changeset.validate('lastName');
+changeset.isValidating('lastName'); // would return true if lastName validation is async and still running
+changeset.validate().then(() => {
+  changeset.isValidating('lastName'); // false since validations are complete
+});
+```
+
+```js
+changeset.set('lastName', 'Appleseed');
+changeset.set('firstName', 'Johnny');
+changeset.validate();
+changeset.isValidating(); // returns true if any async validation is still running
+changeset.isValidating('lastName'); // returns true if lastName validation is async and still running
+changeset.validate().then(() => {
+  changeset.isValidating(); // returns false since validations are complete
+});
+```
+
+**[⬆️ back to top](#api)**
+
+#### `beforeValidation`
+
+This event is triggered after isValidating is set to true for a key, but before the validation is complete.
+
+```js
+changeset.on('beforeValidation', key => {
+  console.log(`${key} is validating...`);
+});
+changeset.validate();
+changeset.isValidating(); // true
+// console output: lastName is validating...
+```
+
+**[⬆️ back to top](#api)**
+
+#### `afterValidation`
+
+This event is triggered after async validations are complete and isValidating is set to false for a key.
+
+```js
+changeset.on('afterValidation', key => {
+  console.log(`${key} has completed validating`);
+});
+changeset.validate().then(() => {
+  changeset.isValidating(); // false
+  // console output: lastName has completed validating
 });
 ```
 

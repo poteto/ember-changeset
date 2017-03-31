@@ -601,6 +601,130 @@ test('isPristine works with `null` values', function(assert) {
   assert.ok(dummyChangeset.get('isPristine'), 'should be pristine');
 });
 
+test('isValidating returns true when validations have not resolved', function(assert) {
+  let dummyChangeset;
+  let _validator = () => new Promise(() => {});
+  let _validations = {
+    reservations() {
+      return _validator();
+    }
+  };
+
+  set(dummyModel, 'reservations', 'ABC12345');
+  dummyChangeset = new Changeset(dummyModel, _validator, _validations);
+
+  dummyChangeset.validate();
+  assert.ok(dummyChangeset.isValidating(),
+    'isValidating should be true when no key is passed in and something is validating');
+  assert.ok(dummyChangeset.isValidating('reservations'),
+    'isValidating should be true when the key that is passed is validating');
+});
+
+test('isValidating returns false when validations have resolved', function(assert) {
+  let dummyChangeset;
+  let _validator = () => resolve(true);
+  let _validations = {
+    reservations() {
+      return _validator();
+    }
+  };
+
+  set(dummyModel, 'reservations', 'ABC12345');
+  dummyChangeset = new Changeset(dummyModel, _validator, _validations);
+
+  dummyChangeset.validate();
+  assert.ok(dummyChangeset.isValidating(),
+    'isValidating should be false when no key is passed in and nothing is validating');
+  assert.ok(dummyChangeset.isValidating('reservations'),
+    'isValidating should be false when the key that is passed in is not validating');
+});
+
+test('beforeValidation event is fired before validation', function(assert) {
+  let dummyChangeset;
+  let _validator = () => new Promise(() => {});
+  let _validations = {
+    reservations() {
+      return _validator();
+    }
+  };
+  let hasFired = false;
+
+  set(dummyModel, 'reservations', 'ABC12345');
+  dummyChangeset = new Changeset(dummyModel, _validator, _validations);
+  dummyChangeset.on('beforeValidation', () => { hasFired = true; });
+
+  dummyChangeset.validate();
+  assert.ok(hasFired, 'beforeValidation should be triggered');
+});
+
+test('afterValidation event is fired after validation', function(assert) {
+  let dummyChangeset;
+  let _validator = () => resolve(true);
+  let _validations = {
+    reservations() {
+      return _validator();
+    }
+  };
+  let hasFired = false;
+
+  set(dummyModel, 'reservations', 'ABC12345');
+  dummyChangeset = new Changeset(dummyModel, _validator, _validations);
+  dummyChangeset.on('afterValidation', () => { hasFired = true; });
+
+  run(() => {
+    dummyChangeset.validate().then(() => {
+      assert.ok(hasFired, 'afterValidation should be triggered');
+    });
+  });
+});
+
+test('beforeValidation event is triggered with the key', function(assert) {
+  let dummyChangeset;
+  let _validator = () => new Promise(() => {});
+  let _validations = {
+    reservations() {
+      return _validator();
+    }
+  };
+  let hasFired = false;
+
+  set(dummyModel, 'reservations', 'ABC12345');
+  dummyChangeset = new Changeset(dummyModel, _validator, _validations);
+  dummyChangeset.on('beforeValidation', key => {
+    if(key === 'reservations') {
+      hasFired = true;
+    }
+  });
+
+  dummyChangeset.validate();
+  assert.ok(hasFired, 'beforeValidation should be triggered with the key');
+});
+
+test('afterValidation event is triggered with the key', function(assert) {
+  let dummyChangeset;
+  let _validator = () => resolve(true);
+  let _validations = {
+    reservations() {
+      return _validator();
+    }
+  };
+  let hasFired = false;
+
+  set(dummyModel, 'reservations', 'ABC12345');
+  dummyChangeset = new Changeset(dummyModel, _validator, _validations);
+  dummyChangeset.on('afterValidation', key => {
+    if(key === 'reservations') {
+      hasFired = true;
+    }
+  });
+
+  run(() => {
+    dummyChangeset.validate().then(() => {
+      assert.ok(hasFired, 'afterValidation should be triggered with the key');
+    });
+  });
+});
+
 // Behavior
 test('it works with setProperties', function(assert) {
   let dummyChangeset = new Changeset(dummyModel);
