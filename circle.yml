@@ -2,8 +2,11 @@ machine:
   node:
     version: "stable"
 dependencies:
+  pre:
+    - npm install -g bower
   post:
     - npm install
+    - bower install
 test:
   override:
     - npm test

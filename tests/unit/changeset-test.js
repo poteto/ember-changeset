@@ -174,6 +174,7 @@ test('#execute does not apply changes to content if invalid', function(assert) {
 test('#save proxies to content', function(assert) {
   let result;
   let options;
+  let done = assert.async();
   set(dummyModel, 'save', (dummyOptions) => {
     result = 'ok';
     options = dummyOptions;
@@ -189,7 +190,7 @@ test('#save proxies to content', function(assert) {
   assert.ok(!!promise && typeof promise.then === 'function', 'save returns a promise');
   promise.then((saveResult) => {
     assert.equal(saveResult, 'saveResult', 'save proxies to save promise of content');
-  });
+  }).finally(() => done());
 });
 
 test('#save handles rejected proxy content', function(assert) {
