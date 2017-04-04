@@ -27,7 +27,10 @@ module.exports = {
       name: 'ember-lts',
       bower: {
         dependencies: {
-          "ember": "~2.4.0"
+          "ember": "components/ember#lts-2-4"
+        },
+        resolutions: {
+          "ember": "lts-2-4"
         }
       }
     },
