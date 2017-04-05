@@ -762,3 +762,12 @@ test('it clears errors when setting to original value', function(assert) {
   assert.ok(get(dummyChangeset, 'isValid'), 'should be valid');
   assert.notOk(get(dummyChangeset, 'isInvalid'), 'should be valid');
 });
+
+test('content can be an empty hash', function(assert) {
+  assert.expect(1);
+
+  let emptyObject = Object.create(null);
+  let dummyChangeset = new Changeset(emptyObject, dummyValidator);
+
+  assert.equal(dummyChangeset.toString(), 'changeset:[object Object]');
+})

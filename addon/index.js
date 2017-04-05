@@ -120,7 +120,8 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      * @return {String}
      */
     toString() {
-      return `changeset:${get(this, CONTENT).toString()}`;
+      let normalisedContent = pureAssign(get(this, CONTENT), {});
+      return `changeset:${normalisedContent.toString()}`;
     },
 
     /**
