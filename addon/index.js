@@ -580,7 +580,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
     },
 
     /**
-     * TODO
+     * Value for change or the original value.
      *
      * @private
      * @param {String} key

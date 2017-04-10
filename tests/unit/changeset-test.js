@@ -826,6 +826,15 @@ test('it clears errors when setting to original value', function(assert) {
   assert.notOk(get(dummyChangeset, 'isInvalid'), 'should be valid');
 });
 
+test('content can be an empty hash', function(assert) {
+  assert.expect(1);
+
+  let emptyObject = Object.create(null);
+  let dummyChangeset = new Changeset(emptyObject, dummyValidator);
+
+  assert.equal(dummyChangeset.toString(), 'changeset:[object Object]');
+});
+
 test('it works with nested keys', function(assert) {
   let expectedResult = {
     org: {
