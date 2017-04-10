@@ -5,16 +5,16 @@ import isPromise from 'ember-changeset/utils/is-promise';
 
 const { Helper: { helper } } = Ember;
 
-export function changeset([obj, validations]) {
+export function changeset([obj, validations], options = {}) {
   if (isChangeset(obj)) {
     return obj;
   }
 
   if (isPromise(obj)) {
-    return obj.then((resolved) => new Changeset(resolved, validations));
+    return obj.then((resolved) => new Changeset(resolved, validations, {}, options));
   }
 
-  return new Changeset(obj, validations);
+  return new Changeset(obj, validations, {}, options);
 }
 
 export default helper(changeset);

@@ -14,10 +14,12 @@ const {
   Object: EmberObject,
   RSVP: { all, resolve },
   computed: { not, readOnly },
+  Evented,
   A: emberArray,
   assert,
   get,
   isArray,
+  isEmpty,
   isEqual,
   isNone,
   isPresent,
@@ -31,23 +33,31 @@ const CHANGES = '_changes';
 const ERRORS = '_errors';
 const VALIDATOR = '_validator';
 const RELAY_CACHE = '_relayCache';
+const OPTIONS = '_options';
+const RUNNING_VALIDATIONS = '_runningValidations';
+const BEFORE_VALIDATION_EVENT = 'beforeValidation';
+const AFTER_VALIDATION_EVENT = 'afterValidation';
 
 function defaultValidatorFn() {
   return true;
 }
 
+const defaultOptions = { skipValidate: false };
+
 /**
  * Creates new changesets.
  *
+ * @uses Ember.Evented
  * @param  {Object} obj
  * @param  {Function} validateFn
  * @param  {Object} validationMap
+ * @param  {Object}  options
  * @return {Ember.Object}
  */
-export function changeset(obj, validateFn = defaultValidatorFn, validationMap = {}) {
+export function changeset(obj, validateFn = defaultValidatorFn, validationMap = {}, options = {}) {
   assert('Underlying object for changeset is missing', isPresent(obj));
 
-  return EmberObject.extend({
+  return EmberObject.extend(Evented, {
     /**
      * Internal descriptor for changeset identification
      *
@@ -74,6 +84,8 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
       this[ERRORS] = {};
       this[RELAY_CACHE] = {};
       this[VALIDATOR] = validateFn;
+      this[OPTIONS] = pureAssign(defaultOptions, options);
+      this[RUNNING_VALIDATIONS] = {};
     },
 
     /**
@@ -96,6 +108,13 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      * @return {Any}
      */
     setUnknownProperty(key, value) {
+      let changesetOptions = get(this, OPTIONS);
+      let skipValidate = get(changesetOptions, 'skipValidate');
+
+      if (skipValidate) {
+        return this._setProperty(true, { key, value });
+      }
+
       return this.validateAndSet(key, value);
     },
 
@@ -106,7 +125,8 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      * @return {String}
      */
     toString() {
-      return `changeset:${get(this, CONTENT).toString()}`;
+      let normalisedContent = pureAssign(get(this, CONTENT), {});
+      return `changeset:${normalisedContent.toString()}`;
     },
 
     /**
@@ -287,6 +307,22 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
     },
 
     /**
+     * Checks to see if async validator for a given key has not resolved.
+     * If no key is provided it will check to see if any async validator is running.
+     *
+     * @public
+     * @param  {String|Undefined} key
+     * @return {boolean}
+     */
+    isValidating(key) {
+      let runningValidations = get(this, RUNNING_VALIDATIONS);
+      let ks = emberArray(keys(runningValidations));
+      if (key) { return ks.includes(key); }
+
+      return !isEmpty(ks);
+    },
+
+    /**
      * Manually add an error to the changeset. If there is an existing error or
      * change for `key`, it will be overwritten.
      *
@@ -409,11 +445,17 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
       let validation = this._validate(key, value, oldValue);
 
       if (isPromise(validation)) {
+        this._setIsValidating(key, true);
+        this.trigger(BEFORE_VALIDATION_EVENT, key);
         return validation.then((resolvedValidation) => {
+          this._setIsValidating(key, false);
+          this.trigger(AFTER_VALIDATION_EVENT, key);
           return this._setProperty(resolvedValidation, { key, value, oldValue });
         });
       }
 
+      this.trigger(BEFORE_VALIDATION_EVENT, key);
+      this.trigger(AFTER_VALIDATION_EVENT, key);
       return this._setProperty(validation, { key, value, oldValue });
     },
 
@@ -500,8 +542,15 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
         } else if (obj.hasOwnProperty(key)) {
           delete changes[key];
         }
+
         this.notifyPropertyChange(CHANGES);
         this.notifyPropertyChange(root);
+
+        let errors = get(this, ERRORS);
+        if (errors['__ember_meta__'] && errors['__ember_meta__']['values']) {
+          delete errors['__ember_meta__']['values'][key];
+          set(this, ERRORS, errors);
+        }
 
         return value;
       }
@@ -510,7 +559,30 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
     },
 
     /**
-     * TODO
+     * Updates the cache that stores the number of running validations
+     * for a given key.
+     *
+     * @private
+     * @param {String} key
+     * @param {Boolean} value
+     */
+    _setIsValidating(key, value) {
+      let runningValidations = get(this, RUNNING_VALIDATIONS);
+      let count = get(runningValidations, key) || 0;
+
+      if (value) {
+        set(runningValidations, key, count + 1);
+      } else {
+        if (count === 1) {
+          delete runningValidations[key];
+        } else {
+          set(runningValidations, key, count - 1);
+        }
+      }
+    },
+
+    /**
+     * Value for change or the original value.
      *
      * @private
      * @param {String} key
