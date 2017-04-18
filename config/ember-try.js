@@ -96,23 +96,6 @@ module.exports = {
           'ember-source': null
         }
       }
-    },
-    {
-      name: 'ember-alpha',
-      allowedToFail: true,
-      bower: {
-        dependencies: {
-          "ember": "components/ember#alpha"
-        },
-        resolutions: {
-          "ember": "alpha"
-        }
-      },
-      npm: {
-        devDependencies: {
-          'ember-source': null
-        }
-      }
     }
   ]
 };
