@@ -291,7 +291,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
       return resolve(this._validateAndSet(key, this._valueFor(key)));
     },
 
-    
+
     /**
      * Checks to see if async validator for a given key has not resolved.
      * If no key is provided it will check to see if any async validator is running.
@@ -495,7 +495,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
 
         if (!isEqual(oldValue, value)) {
           set(changes, key, value);
-        } else if (key in obj) {
+        } else if (key in changes) {
           delete changes[key];
         }
         this.notifyPropertyChange(CHANGES);
@@ -518,7 +518,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      * for a given key.
      *
      * @private
-     * @param {String} key 
+     * @param {String} key
      * @param {Boolean} value
      */
     _setIsValidating(key, value) {
