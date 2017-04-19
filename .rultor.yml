@@ -1,0 +1,16 @@
+architect:
+  - poteto
+
+install:
+  - "sudo apt-get install google-chrome-stable"
+  - "export DISPLAY=:99.0"
+  - "sh -e /etc/init.d/xvfb start"
+  - npm config set spin false
+  - npm install -g bower
+  - npm install -g npm@^3
+  - npm install
+  - bower install
+
+merge:
+  script:
+    - ember try $EMBER_TRY_SCENARIO test --skip-cleanup
