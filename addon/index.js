@@ -230,6 +230,20 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
     },
 
     /**
+     * Discards changes/errors for the specified properly only.
+     *
+     * @public
+     * @chainable
+     * @return {Changeset}
+     */
+    rollbackProperty(key) {
+      this._deleteKey(CHANGES, key);
+      this._deleteKey(ERRORS, key);
+
+      return this;
+    },
+
+    /**
      * Merges 2 valid changesets and returns a new changeset. Both changesets
      * must point to the same underlying object. The changeset target is the
      * origin. For example:

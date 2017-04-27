@@ -317,6 +317,47 @@ test('#rollbackInvalid resets valid state', function(assert) {
   assert.ok(get(dummyChangeset, 'isValid'), 'should be valid');
 });
 
+test('#rollbackProperty restores old value for specified property only', function(assert) {
+  set(dummyModel, 'firstName', 'Jim');
+  set(dummyModel, 'lastName', 'Bob');
+  let dummyChangeset = new Changeset(dummyModel, dummyValidator);
+  let expectedChanges = [
+    { key: 'lastName', value: 'bar' }
+  ];
+  dummyChangeset.set('firstName', 'foo');
+  dummyChangeset.set('lastName', 'bar');
+
+  dummyChangeset.rollbackProperty('firstName');
+  assert.deepEqual(get(dummyChangeset, 'changes'), expectedChanges, 'should rollback single property');
+});
+
+test('#rollbackProperty clears errors for specified property', function(assert) {
+  let dummyChangeset = new Changeset(dummyModel, dummyValidator);
+  let expectedChanges = [
+    { key: 'firstName', value: 'foo' },
+    { key: 'lastName', value: 'bar' }
+  ];
+  let expectedErrors = [{ key: 'name', validation: 'too short', value: '' }];
+  dummyChangeset.set('firstName', 'foo');
+  dummyChangeset.set('lastName', 'bar');
+  dummyChangeset.set('name', '');
+
+  assert.deepEqual(get(dummyChangeset, 'changes'), expectedChanges, 'precondition');
+  assert.deepEqual(get(dummyChangeset, 'errors'), expectedErrors, 'precondition');
+  dummyChangeset.rollbackProperty('name');
+  assert.deepEqual(get(dummyChangeset, 'changes'), expectedChanges, 'should not rollback');
+  assert.deepEqual(get(dummyChangeset, 'errors'), [], 'should rollback');
+});
+
+test('#rollbackProperty resets valid state', function(assert) {
+  let dummyChangeset = new Changeset(dummyModel, dummyValidator);
+  dummyChangeset.set('name', 'a');
+
+  assert.ok(get(dummyChangeset, 'isInvalid'), 'should be invalid');
+  dummyChangeset.rollbackProperty('name');
+  assert.ok(get(dummyChangeset, 'isValid'), 'should be valid');
+});
+
 test('#error returns the error object', function(assert) {
   let dummyChangeset = new Changeset(dummyModel, dummyValidator);
   let expectedResult = { name: { validation: 'too short', value: 'a' } };
