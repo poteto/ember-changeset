@@ -216,6 +216,20 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
     },
 
     /**
+     * Discards any errors, keeping only valid changes.
+     *
+     * @public
+     * @chainable
+     * @return {Changeset}
+     */
+    rollbackInvalid() {
+      this._notifyVirtualProperties();
+      set(this, ERRORS, {});
+
+      return this;
+    },
+
+    /**
      * Merges 2 valid changesets and returns a new changeset. Both changesets
      * must point to the same underlying object. The changeset target is the
      * origin. For example:

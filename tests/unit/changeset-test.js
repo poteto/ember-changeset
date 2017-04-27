@@ -290,6 +290,33 @@ test('#rollback resets valid state', function(assert) {
   assert.ok(get(dummyChangeset, 'isValid'), 'should be valid');
 });
 
+test('#rollbackInvalid clears errors and keeps valid values', function(assert) {
+  let dummyChangeset = new Changeset(dummyModel, dummyValidator);
+  let expectedChanges = [
+    { key: 'firstName', value: 'foo' },
+    { key: 'lastName', value: 'bar' }
+  ];
+  let expectedErrors = [{ key: 'name', validation: 'too short', value: '' }];
+  dummyChangeset.set('firstName', 'foo');
+  dummyChangeset.set('lastName', 'bar');
+  dummyChangeset.set('name', '');
+
+  assert.deepEqual(get(dummyChangeset, 'changes'), expectedChanges, 'precondition');
+  assert.deepEqual(get(dummyChangeset, 'errors'), expectedErrors, 'precondition');
+  dummyChangeset.rollbackInvalid();
+  assert.deepEqual(get(dummyChangeset, 'changes'), expectedChanges, 'should not rollback');
+  assert.deepEqual(get(dummyChangeset, 'errors'), [], 'should rollback');
+});
+
+test('#rollbackInvalid resets valid state', function(assert) {
+  let dummyChangeset = new Changeset(dummyModel, dummyValidator);
+  dummyChangeset.set('name', 'a');
+
+  assert.ok(get(dummyChangeset, 'isInvalid'), 'should be invalid');
+  dummyChangeset.rollbackInvalid();
+  assert.ok(get(dummyChangeset, 'isValid'), 'should be valid');
+});
+
 test('#error returns the error object', function(assert) {
   let dummyChangeset = new Changeset(dummyModel, dummyValidator);
   let expectedResult = { name: { validation: 'too short', value: 'a' } };
