@@ -426,10 +426,37 @@ Note that both changesets `A` and `B` are not destroyed by the merge, so you mig
 
 #### `rollback`
 
-Rollsback all unsaved changes and resets all errors.
+Rolls back all unsaved changes and resets all errors.
 
 ```js
 changeset.rollback(); // returns changeset
+```
+
+**[⬆️ back to top](#api)**
+
+#### `rollbackInvalid`
+
+Rolls back all invalid unsaved changes and resets all errors. Valid changes will be kept on the changeset.
+
+```js
+changeset.rollbackInvalid(); // returns changeset
+```
+
+**[⬆️ back to top](#api)**
+
+#### `rollbackProperty`
+
+Rolls back unsaved changes for the specified property only. All other changes will be kept on the changeset.
+
+```js
+// user = { firstName: "Jim", lastName: "Bob" };
+let changeset = new Changeset(user);
+changeset.set('firstName', 'Jimmy');
+changeset.set('lastName', 'Fallon');
+changeset.rollbackProperty('lastName'); // returns changeset
+changeset.execute();
+user.get('firstName'); // "Jimmy"
+user.get('lastName'); // "Bob"
 ```
 
 **[⬆️ back to top](#api)**
