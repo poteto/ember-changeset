@@ -181,8 +181,6 @@ You can use this property to locate a single error:
 {{/if}}
 ```
 
-**[⬆️ back to top](#api)**
-
 #### `change`
 
 Returns the change object.
@@ -198,8 +196,6 @@ You can use this property to locate a single change:
 ```hbs
 {{changeset.change.firstName}}
 ```
-
-**[⬆️ back to top](#api)**
 
 #### `errors`
 
@@ -228,8 +224,6 @@ You can use this property to render a list of errors:
 {{/if}}
 ```
 
-**[⬆️ back to top](#api)**
-
 #### `changes`
 
 Returns an array of changes to be executed. Only valid changes will be stored on this property.
@@ -253,8 +247,6 @@ You can use this property to render a list of changes:
 </ul>
 ```
 
-**[⬆️ back to top](#api)**
-
 #### `isValid`
 
 Returns a Boolean value of the changeset's validity.
@@ -270,8 +262,6 @@ You can use this property in the template:
   <p>Good job!</p>
 {{/if}}
 ```
-
-**[⬆️ back to top](#api)**
 
 #### `isInvalid`
 
@@ -308,8 +298,6 @@ changeset.set('foo', 'bar');
 changeset.get('isPristine'); // false
 ```
 
-**[⬆️ back to top](#api)**
-
 #### `isDirty`
 
 Returns a Boolean value of the changeset's state. A dirty changeset is one with changes.
@@ -317,8 +305,6 @@ Returns a Boolean value of the changeset's state. A dirty changeset is one with 
 ```js
 get(changeset, 'isDirty'); // true
 ```
-
-**[⬆️ back to top](#api)**
 
 #### `get`
 
@@ -336,8 +322,6 @@ You can use and bind this property in the template:
 {{input value=changeset.firstName}}
 ```
 
-**[⬆️ back to top](#api)**
-
 #### `set`
 
 Exactly the same semantics as `Ember.set`. This stores the change on the changeset.
@@ -353,8 +337,6 @@ You can use and bind this property in the template:
 ```
 
 Any updates on this value will only store the change on the changeset, even with 2 way binding.
-
-**[⬆️ back to top](#api)**
 
 #### `prepare`
 
@@ -378,8 +360,6 @@ The callback function is **not validated** – if you modify a value, it is your
 
 Returns the changeset.
 
-**[⬆️ back to top](#api)**
-
 #### `execute`
 
 Applies the valid changes to the underlying Object.
@@ -390,8 +370,6 @@ changeset.execute(); // returns changeset
 
 Note that executing the changeset will not remove the internal list of changes - instead, you should do so explicitly with `rollback` or `save` if that is desired.
 
-**[⬆️ back to top](#api)**
-
 #### `save`
 
 Executes changes, then proxies to the underlying Object's `save` method, if one exists. If it does, it expects the method to return a `Promise`.
@@ -401,8 +379,6 @@ changeset.save(); // returns Promise
 ```
 
 The `save` method will also remove the internal list of changes if the `save` is successful.
-
-**[⬆️ back to top](#api)**
 
 #### `merge`
 
@@ -422,8 +398,6 @@ user.get('lastName'); // "Fallon"
 
 Note that both changesets `A` and `B` are not destroyed by the merge, so you might want to call `destroy()` on them to avoid memory leaks.
 
-**[⬆️ back to top](#api)**
-
 #### `rollback`
 
 Rollsback all unsaved changes and resets all errors.
@@ -431,8 +405,6 @@ Rollsback all unsaved changes and resets all errors.
 ```js
 changeset.rollback(); // returns changeset
 ```
-
-**[⬆️ back to top](#api)**
 
 #### `validate`
 
@@ -447,8 +419,6 @@ changeset.validate().then(() => {
   changeset.get('errors'); // [{ key: 'lastName', validation: 'too short', value: 'B' }]
 }); // validate all fields; returns Promise
 ```
-
-**[⬆️ back to top](#api)**
 
 #### `addError`
 
@@ -478,8 +448,6 @@ changeset.pushErrors('age', 'Too short', 'Not a valid number', 'Must be greater 
 
 This is compatible with `ember-changeset-validations`, and allows you to either add a new error with multiple validations messages or push to an existing array of validation messages.
 
-**[⬆️ back to top](#api)**
-
 #### `snapshot`
 
 Creates a snapshot of the changeset's errors and changes. This can be used to `restore` the changeset at a later time.
@@ -487,8 +455,6 @@ Creates a snapshot of the changeset's errors and changes. This can be used to `r
 ```js
 let snapshot = changeset.snapshot(); // snapshot
 ```
-
-**[⬆️ back to top](#api)**
 
 #### `restore`
 
@@ -504,8 +470,6 @@ changeset.set('name', 'Potato');
 changeset.restore(snapshot);
 changeset.get('name'); // "Jim Bob"
 ```
-
-**[⬆️ back to top](#api)**
 
 #### `cast`
 
@@ -551,8 +515,6 @@ export default Controller.extend({
 });
 ```
 
-**[⬆️ back to top](#api)**
-
 #### `isValidating`
 
 Checks to see if async validator for a given key has not resolved.  If no key is provided it will check to see if any async validator is running.
@@ -577,8 +539,6 @@ changeset.validate().then(() => {
 });
 ```
 
-**[⬆️ back to top](#api)**
-
 #### `beforeValidation`
 
 This event is triggered after isValidating is set to true for a key, but before the validation is complete.
@@ -591,8 +551,6 @@ changeset.validate();
 changeset.isValidating(); // true
 // console output: lastName is validating...
 ```
-
-**[⬆️ back to top](#api)**
 
 #### `afterValidation`
 
@@ -607,8 +565,6 @@ changeset.validate().then(() => {
   // console output: lastName has completed validating
 });
 ```
-
-**[⬆️ back to top](#api)**
 
 ## Validation signature
 
