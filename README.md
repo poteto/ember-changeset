@@ -149,6 +149,8 @@ Be sure to call `validate()` on the `changeset` before saving or committing chan
   + [`save`](#save)
   + [`merge`](#merge)
   + [`rollback`](#rollback)
+  + [`rollbackInvalid`](#rollbackInvalid)
+  + [`rollbackProperty`](#rollbackProperty)
   + [`validate`](#validate)
   + [`addError`](#adderror)
   + [`pushErrors`](#pusherrors)
