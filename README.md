@@ -424,16 +424,6 @@ Note that both changesets `A` and `B` are not destroyed by the merge, so you mig
 
 **[⬆️ back to top](#api)**
 
-#### `rollback`
-
-Rollsback all unsaved changes and resets all errors.
-
-```js
-changeset.rollback(); // returns changeset
-```
-
-**[⬆️ back to top](#api)**
-
 #### `validate`
 
 Validates all or a single field on the changeset. This will also validate the property on the underlying object, and is a useful method if you require the changeset to validate immediately on render. Requires a validation map to be passed in when the changeset is first instantiated.
