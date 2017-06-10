@@ -234,3 +234,40 @@ test('it skips validation when skipValidate is passed as an option', function(as
   assert.ok(this.$('h1:contains("J B")'), 'should update observable value');
   assert.notOk(this.$('p:contains("There were one or more errors in your form.")').length, 'should skip validation');
 });
+
+test('it supports nested objects', function(assert) {
+  // I have a huge form that needs to edit a large composite object
+  let dummyModel = {
+    user: {
+      firstName: 'Jim',
+      lastName: 'Bob'
+    },
+    //other composite sub objects
+    interests: [
+      //...
+    ],
+    blogs: [
+      //...
+    ],
+  };
+  let dummyValidations = {
+    "user.firstName": (value) => { return value.length >= 3 || 'must have at least three characters'; }
+  };
+  let lookupValidator = (validationMap) => {
+    return ({ key, newValue }) => [validationMap[key](newValue)];
+  };
+  let changeset = new Changeset(dummyModel, lookupValidator(dummyValidations), dummyValidations);
+  this.set('changeset', changeset);
+  this.render(hbs`
+    {{input id="first-name" value=changeset.user.firstName}}
+    {{#if changeset.error.firstName}}
+      <span id="first-name-msg">{{changeset.error.user.firstName.validation}}</span>
+    {{/if}}
+    <!-- Other fields of the large composite object... -->
+  `);
+
+  run(() => this.$('#first-name').val("J").trigger('input'));
+  run(() => {
+    assert.equal(this.$('#first-name-msg').text().trim(), 'must have at least three characters', 'should display error message');
+  });
+});
