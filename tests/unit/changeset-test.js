@@ -300,6 +300,30 @@ test('#set adds a change if valid', function(assert) {
   assert.deepEqual(changes, expectedChanges, 'should add change');
 });
 
+test('#set does not add a change if new value equals old value', function(assert) {
+  let model = EmberObject.create({ name: 'foo' });
+  let dummyChangeset = new Changeset(model);
+
+  dummyChangeset.set('name', 'foo');
+  assert.deepEqual(
+    get(dummyChangeset, 'changes'),
+    [],
+    'change is not added if new value equals old value'
+  );
+});
+
+test('#set does not add a change if new value equals old value and `skipValidate` is true', function(assert) {
+  let model = EmberObject.create({ name: 'foo' });
+  let dummyChangeset = new Changeset(model, {}, null, {skipValidate: true});
+
+  dummyChangeset.set('name', 'foo');
+  assert.deepEqual(
+    get(dummyChangeset, 'changes'),
+    [],
+    'change is not added if new value equals old value'
+  );
+});
+
 test('#set removes a change if set back to original value', function(assert) {
   let model = EmberObject.create({ name: 'foo' });
   let dummyChangeset = new Changeset(model);
