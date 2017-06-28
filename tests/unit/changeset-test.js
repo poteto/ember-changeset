@@ -94,6 +94,18 @@ test('#change returns the changes object', function(assert) {
   assert.deepEqual(get(dummyChangeset, 'change'), expectedResult, 'should return changes object');
 });
 
+test('#change supports `undefined`', function(assert) {
+  let model = { name: 'a' };
+  let dummyChangeset = new Changeset(model);
+  let expectedResult = { name: undefined };
+  dummyChangeset.set('name', undefined);
+
+  assert.deepEqual(
+    get(dummyChangeset, 'change'), expectedResult,
+    'property changed to `undefined` should be included in change object'
+  );
+});
+
 /**
  * #errors
  */
@@ -205,6 +217,15 @@ test('#get returns change that is a blank value', function(assert) {
   assert.equal(result, '', 'should proxy to change');
 });
 
+test('#get returns change that is has undefined as value', function(assert) {
+  set(dummyModel, 'name', 'Jim Bob');
+  let dummyChangeset = new Changeset(dummyModel);
+  set(dummyChangeset, 'name', undefined);
+  let result = get(dummyChangeset, 'name');
+
+  assert.equal(result, undefined, 'should proxy to change');
+});
+
 test('nested objects will return correct values', function(assert) {
   set(dummyModel, 'org', {
     asia: { sg: '_initial' },  // for the sake of disambiguating nulls
@@ -298,6 +319,23 @@ test('#set adds a change if valid', function(assert) {
   let changes = get(dummyChangeset, 'changes');
 
   assert.deepEqual(changes, expectedChanges, 'should add change');
+});
+
+test('#set supports `undefined`', function(assert) {
+  let model = EmberObject.create({ name: 'foo' });
+  let dummyChangeset = new Changeset(model);
+
+  dummyChangeset.set('name', undefined);
+  assert.equal(
+    get(dummyChangeset, 'name'),
+    undefined,
+    'should return changed value'
+  );
+  assert.deepEqual(
+    get(dummyChangeset, 'changes'),
+    [{ key: 'name', value: undefined }],
+    'should add change'
+  );
 });
 
 test('#set does not add a change if new value equals old value', function(assert) {
