@@ -11,7 +11,7 @@ import isChangeset, { CHANGESET } from 'ember-changeset/utils/is-changeset';
 
 const {
   Object: EmberObject,
-  RSVP: { all, resolve },
+  RSVP: { all, allSettled, resolve },
   computed: { not, readOnly },
   A: emberArray,
   assert,
@@ -29,6 +29,8 @@ const CONTENT = '_content';
 const CHANGES = '_changes';
 const ERRORS = '_errors';
 const VALIDATOR = '_validator';
+const MODELNAME = 'modelName';
+const STORE = 'store';
 
 function defaultValidatorFn() {
   return true;
@@ -55,15 +57,56 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      */
     __changeset__: CHANGESET,
 
+    content: Ember.computed.alias(CONTENT),
+
     changes: objectToArray(CHANGES, false),
     errors: objectToArray(ERRORS, true),
     change: readOnly(CHANGES),
     error: readOnly(ERRORS),
+    executed: false,
+
+    subChangesets: Ember.computed('changes', function() {
+      let c = this.get('changes');
+      let out = Ember.A();
+
+      c.forEach((item) => {
+        if(isChangeset(item.value)){
+          out.pushObject(item.value);
+        }else if(Ember.typeOf(item.value.forEach) === 'function'){
+          item.value.forEach((iitem) => {
+            if(isChangeset(iitem)){
+              out.pushObject(iitem);
+            }
+          });
+        }
+      });
+
+      return out;
+    }),
 
     isValid: isEmptyObject(ERRORS),
     isPristine: isEmptyObject(CHANGES),
     isInvalid: not('isValid').readOnly(),
     isDirty: not('isPristine').readOnly(),
+
+    isAllValid: Ember.computed('isValid', 'subChangesets.@each.isAllValid', function() {
+      if(!this.get('isValid')){
+        return false;
+      }
+      return this.get('subChangesets').isEvery('isAllValid', true);
+    }),
+
+    isAllPristine: Ember.computed('isPristine', 'subChangesets.@each.isAllPristine', function() {
+      if(!this.get('isPristine')){
+        return false;
+      }
+      return this.get('subChangesets').isEvery('isAllPristine', true);
+    }),
+
+    isAllInvalid: not('isAllValid').readOnly(),
+    isSomeDirty: not('isAllPristine').readOnly(),
+
+
 
     init() {
       this._super(...arguments);
@@ -148,9 +191,31 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      * @return {Changeset}
      */
     execute() {
-      if (get(this, 'isValid') && get(this, 'isDirty')) {
+      if (get(this, 'isAllValid') && get(this, 'isSomeDirty') && !get(this, 'executed')) { //TODO what happens when after execution something gets changed befor a rollback happens
+        set(this, 'executed', true);
         let content = get(this, CONTENT);
+        if(typeOf(content.createRecordFromChangeSet) === 'function'){
+          content = content.createRecordFromChangeSet();
+          set(this, CONTENT, content);
+        }
         let changes = get(this, CHANGES);
+        let changesA = this.get('changes');
+        changesA.forEach((item) => {
+          if(isChangeset(item.value)){
+            item.value.execute();
+            set(changes, item.key, item.value.get('content'));
+          }else if(Ember.typeOf(item.value.forEach) === 'function'){
+            let itemMapped = item.value.map((iitem) => {
+              if(isChangeset(iitem)){
+                iitem.execute();
+                return iitem.get('content');
+              }else{
+                return iitem;
+              }
+            });
+            set(changes, item.key, itemMapped);
+          }
+        });
         setProperties(content, changes);
       }
 
@@ -166,19 +231,31 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      * @return {Promise}
      */
     save(options) {
+      //TODO same ifs as in execute here?
       let content = get(this, CONTENT);
       let savePromise = resolve(this);
 
       this.execute();
 
+      let promises = this.get('subChangesets').invoke('save', options); //TODO Test and return Hash of all promises
+
       if (typeOf(content.save) === 'function') {
         savePromise = content.save(options);
       }
 
-      return savePromise.then((result) => {
+      let mainPromis = savePromise.then((result) => {
         this.rollback();
         return result;
       });
+
+      if(promises.length > 0){
+        promises.pushObject(mainPromis);
+        return allSettled(promises);
+      }else {
+        return mainPromis;
+      }
+
+
     },
 
     /**
@@ -193,6 +270,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
       this._notifyVirtualProperties();
       set(this, CHANGES, {});
       set(this, ERRORS, {});
+      set(this, 'executed', false);
 
       return this;
     },
@@ -392,7 +470,10 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      */
     _validateAndSet(key, value) {
       let content = get(this, CONTENT);
-      let oldValue = get(content, key);
+      let oldValue = null;
+      if(typeOf(content.createRecordFromChangeSet) !== 'function'){
+          oldValue =  get(content, key);
+      }
       let validation = this._validate(key, value, oldValue);
 
       if (isPromise(validation)) {
@@ -486,6 +567,10 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
         return get(changes, key);
       }
 
+      if(typeOf(content.createRecordFromChangeSet) === 'function'){
+        return null;
+      }
+
       return get(content, key);
     },
 
@@ -536,5 +621,50 @@ export default class Changeset {
    */
   constructor() {
     return changeset(...arguments).create();
+  }
+}
+
+
+/**
+ * Creates new newedmodel.
+ *
+ * @param  {String} modelName
+ * @param  {Object} store
+ * @return {Ember.Object}
+ */
+export function newedmodel(modelName, store) {
+  assert('Model name is missing', isPresent(modelName));
+  assert('Store name is missing', isPresent(store));
+
+  return EmberObject.extend({
+
+    init() {
+      this._super(...arguments);
+      this[MODELNAME] = modelName;
+      this[STORE] = store;
+    },
+
+    /**
+     * Create the record
+     *
+     * @private
+     * @param  {Object} args
+     * @return {Object}
+     */
+    createRecordFromChangeSet(args=[]) {
+      return get(this, STORE).createRecord(get(this, MODELNAME), args);
+    }
+  });
+}
+
+export class NewEDModel {
+  /**
+   * NewEdModel factory
+   *
+   * @class NewEDModel
+   * @constructor
+   */
+  constructor() {
+    return newedmodel(...arguments).create();
   }
 }
