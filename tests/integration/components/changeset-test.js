@@ -111,6 +111,46 @@ test('it updates when set without a validator', async function(assert) {
   assert.equal(find('h1').textContent.trim(), 'foo bar', 'should update observable value');
 });
 
+test('a passed down nested object updates when set without a validator', async function(assert) {
+  let data = { person: { firstName: 'Jim', lastName: 'Bob' } };
+  let changeset = new Changeset(data);
+  this.set('childChangeset', changeset.get('person'));
+  this.render(hbs`
+      <h1>{{childChangeset.firstName}} {{childChangeset.lastName}}</h1>
+      <input
+        id="first-name"
+        type="text"
+        value={{childChangeset.firstName}}
+        onchange={{action (mut childChangeset.firstName) value="target.value"}}>
+      {{input id="last-name" value=childChangeset.lastName}}
+  `);
+
+  assert.equal(find('h1').textContent.trim(), 'Jim Bob', 'precondition');
+  await fillIn('#first-name', 'foo');
+  await fillIn('#last-name', 'bar');
+  assert.equal(find('h1').textContent.trim(), 'foo bar', 'should update observable value');
+});
+
+test('nested object updates when set without a validator', async function(assert) {
+  let data = { person: { firstName: 'Jim', lastName: 'Bob' } };
+  let changeset = new Changeset(data);
+  this.set('changeset', changeset);
+  this.render(hbs`
+      <h1>{{changeset.person.firstName}} {{changeset.person.lastName}}</h1>
+      <input
+        id="first-name"
+        type="text"
+        value={{changeset.person.firstName}}
+        onchange={{action (mut changeset.person.firstName) value="target.value"}}>
+      {{input id="last-name" value=changeset.person.lastName}}
+  `);
+
+  assert.equal(find('h1').textContent.trim(), 'Jim Bob', 'precondition');
+  await fillIn('#first-name', 'foo');
+  await fillIn('#last-name', 'bar');
+  assert.equal(find('h1').textContent.trim(), 'foo bar', 'should update observable value');
+});
+
 test('it updates when set with a validator', async function(assert) {
   this.set('dummyModel', { firstName: 'Jim', lastName: 'Bob' });
   this.on('validate', () => true);

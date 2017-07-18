@@ -34,8 +34,12 @@ let dummyValidations = {
   options(value) {
     return isPresent(value);
   },
-  'org.usa.ny'(value) {
-    debugger // this should hit (but it's not)
+  org: {
+    usa: {
+      ny(value) {
+        return isPresent(value) || "must be present";
+      }
+    }
   }
 };
 
@@ -816,16 +820,16 @@ test('content can be an empty hash', function(assert) {
 test('it works with nested keys', function(assert) {
   let expectedResult = {
     org: {
-      // asia: { sg: 'sg' },
+      asia: { sg: 'sg' },
       usa: {
         ca: 'ca',
-        // ny: 'ny',
+        ny: 'ny',
         ma: { name: 'Massachusetts' }
       }
     }
   };
   set(dummyModel, 'org', {
-    // asia: { sg: null },
+    asia: { sg: null },
     usa: {
       ca: null,
       ny: null,
@@ -833,9 +837,9 @@ test('it works with nested keys', function(assert) {
     }
   });
   let dummyChangeset = new Changeset(dummyModel, dummyValidator);
-  // dummyChangeset.set('org.asia.sg', 'sg'); // WIP - this is broken
+  dummyChangeset.set('org.asia.sg', 'sg');
   dummyChangeset.set('org.usa.ca', 'ca');
-  dummyChangeset.set('org.usa.ny', '');
+  dummyChangeset.set('org.usa.ny', 'ny');
   dummyChangeset.set('org.usa.ma', { name: 'Massachusetts' });
   dummyChangeset.execute();
   assert.deepEqual(get(dummyChangeset, 'change'), expectedResult, 'should have correct shape');
@@ -846,4 +850,85 @@ test('it works with nested keys', function(assert) {
   assert.deepEqual(get(dummyModel, 'org.usa.ny'), expectedResult.org.usa.ny, 'should set value');
   assert.deepEqual(get(dummyModel, 'org.usa.ma'), expectedResult.org.usa.ma, 'should set value');
   assert.deepEqual(get(dummyModel, 'org.usa.ma.name'), expectedResult.org.usa.ma.name, 'should set value');
+  expectedResult.org.usa.or = 'or';
+  dummyChangeset.rollback();
+  dummyChangeset.set('org.usa.or', 'or');
+  dummyChangeset.execute();
+  assert.deepEqual(get(dummyModel, 'org.usa.or'), expectedResult.org.usa.or, 'should reset value');
+  assert.deepEqual(get(dummyModel, 'org.usa.ny'), expectedResult.org.usa.ny, 'should reset value');
+  assert.deepEqual(get(dummyModel, 'org.asia'), expectedResult.org.asia, 'should reset value');
+});
+
+test('can update nested keys after rollback changes.', function(assert) {
+  let expectedResult = {
+    org: {
+      asia: { sg: 'sg' },
+      usa: {
+        ny: 'ny',
+        ma: { name: 'Massachusetts' }
+      }
+    }
+  };
+  set(dummyModel, 'org', {
+    asia: { sg: null },
+    usa: {
+      ny: null,
+      ma: { name: null }
+    }
+  });
+  let dummyChangeset = new Changeset(dummyModel, dummyValidator);
+  dummyChangeset.set('org.asia.sg', 'sg');
+  dummyChangeset.set('org.usa.ny', 'ny');
+  dummyChangeset.set('org.usa.ma', { name: 'Massachusetts' });
+  dummyChangeset.execute();
+  assert.deepEqual(get(dummyModel, 'org'), expectedResult.org, 'should set value');
+  assert.deepEqual(get(dummyModel, 'org.usa.ny'), expectedResult.org.usa.ny, 'should set value');
+  assert.deepEqual(get(dummyModel, 'org.asia'), expectedResult.org.asia, 'should have updated value');
+  assert.deepEqual(get(dummyModel, 'org.usa.ma.name'), expectedResult.org.usa.ma.name, 'should set value');
+  expectedResult.org.usa.or = 'or';
+  dummyChangeset.rollback();
+  dummyChangeset.set('org.usa.or', 'or');
+  dummyChangeset.execute();
+  assert.deepEqual(get(dummyModel, 'org'), expectedResult.org, 'should set value');
+  assert.deepEqual(get(dummyModel, 'org.usa.or'), expectedResult.org.usa.or, 'should have updated value');
+  assert.deepEqual(get(dummyModel, 'org.usa.ny'), expectedResult.org.usa.ny, 'should have updated value');
+  assert.deepEqual(get(dummyModel, 'org.asia'), expectedResult.org.asia, 'should have updated value');
+  assert.deepEqual(get(dummyModel, 'org.usa.ma.name'), expectedResult.org.usa.ma.name, 'should set value');
+});
+
+
+test('#validate/nested validates nested fields immediately', function(assert) {
+  let done = assert.async();
+  set(dummyModel, 'org', {
+    usa: {
+      ny: null,
+    }
+  });
+  let dummyChangeset = new Changeset(dummyModel, dummyValidator, dummyValidations);
+
+    dummyChangeset.validate('org.usa.ny').then(() => {
+      assert.deepEqual(get(dummyChangeset, 'error.org.usa.ny'), { validation: 'must be present', value: null }, 'should validate immediately');
+      assert.deepEqual(get(dummyChangeset, 'changes'), [], 'should not set changes');
+      assert.equal(get(dummyChangeset, 'errors.length'), 1, 'should only have 1 error');
+      done();
+    });
+});
+
+test('nested objects will return changesets', function(assert) {
+  set(dummyModel, 'org', {
+    asia: { sg: '_initial' },  // for the sake of disambiguating nulls
+    usa: {
+      ca: null,
+      ny: null,
+      ma: { name: null }
+    }
+  });
+  let dummyChangeset = new Changeset(dummyModel, dummyValidator);
+  assert.equal(dummyChangeset.get('org.asia.sg'), '_initial', 'returns initial value');
+  dummyChangeset.set('org.asia.sg', 'sg');
+  assert.equal(dummyChangeset.get('org.asia.sg'), 'sg', 'returns newly set value');
+  let childChangeset = dummyChangeset.get('org.asia');
+  assert.equal(childChangeset.get('sg'), 'sg', 'child changeseet sees changed value');
+  childChangeset.set('sg', 'sing');
+  assert.equal(dummyChangeset.get('org.asia.sg'), 'sing', 'changes in child should reflect on parent');
 });
