@@ -94,6 +94,44 @@ test('#set adds a change if valid', function(assert) {
   assert.deepEqual(changes, expectedChanges, 'should add change');
 });
 
+test('#set removes a change if set back to original value', function(assert) {
+  let model = Ember.Object.create({ name: 'foo' });
+  let dummyChangeset = new Changeset(model);
+
+  dummyChangeset.set('name', 'bar');
+  assert.deepEqual(
+    get(dummyChangeset, 'changes'),
+    [{ key: 'name', value: 'bar' }],
+    'change is added when value is different than original value'
+  );
+
+  dummyChangeset.set('name', 'foo');
+  assert.deepEqual(
+    get(dummyChangeset, 'changes'),
+    [],
+    'change is removed when new value matches original value'
+  );
+});
+
+test('#set removes a change if set back to original value when obj is ProxyObject', function(assert) {
+  let model = Ember.ObjectProxy.create({ content: { name: 'foo' } });
+  let dummyChangeset = new Changeset(model);
+
+  dummyChangeset.set('name', 'bar');
+  assert.deepEqual(
+    get(dummyChangeset, 'changes'),
+    [{ key: 'name', value: 'bar' }],
+    'change is added when value is different than original value'
+  );
+
+  dummyChangeset.set('name', 'foo');
+  assert.deepEqual(
+    get(dummyChangeset, 'changes'),
+    [],
+    'change is removed when new value matches original value'
+  );
+});
+
 test('#set does not add a change if invalid', function(assert) {
   let expectedErrors = [
     { key: 'name', validation: 'too short', value: 'a' },
@@ -115,11 +153,11 @@ test('#set does not add a change if invalid', function(assert) {
 
 test('#set adds the change without validation if `skipValidate` option is set', function(assert) {
   let expectedChanges = [{ key: 'password', value: false }];
-  
+
   let dummyChangeset = new Changeset(dummyModel, dummyValidator, null, {skipValidate: true});
   dummyChangeset.set('password', false);
   let changes = get(dummyChangeset, 'changes');
-  
+
   assert.deepEqual(changes, expectedChanges, 'should add change');
 });
 

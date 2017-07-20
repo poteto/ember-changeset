@@ -539,7 +539,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
 
         if (!isEqual(oldValue, value)) {
           this._recursivelySet(key, value, changes);
-        } else if (obj.hasOwnProperty(key)) {
+        } else if (key in changes) {
           delete changes[key];
         }
 
