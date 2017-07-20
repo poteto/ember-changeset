@@ -231,6 +231,28 @@ test('#save proxies to content', function(assert) {
   }).finally(() => done());
 });
 
+test('#save handles non-promise proxy content', function(assert) {
+  let result;
+  let options;
+  let done = assert.async();
+  set(dummyModel, 'save', (dummyOptions) => {
+    result = 'ok';
+    options = dummyOptions;
+    return 'saveResult';
+  });
+  let dummyChangeset = new Changeset(dummyModel);
+  dummyChangeset.set('name', 'foo');
+
+  assert.equal(result, undefined, 'precondition');
+  let promise = dummyChangeset.save('test options');
+  assert.equal(result, 'ok', 'should save');
+  assert.equal(options, 'test options', 'should proxy options when saving');
+  assert.ok(!!promise && typeof promise.then === 'function', 'save returns a promise');
+  promise.then((saveResult) => {
+    assert.equal(saveResult, 'saveResult', 'save proxies to save promise of content');
+  }).finally(() => done());
+});
+
 test('#save handles rejected proxy content', function(assert) {
   let done = assert.async();
   let dummyChangeset = new Changeset(dummyModel);
