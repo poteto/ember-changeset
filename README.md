@@ -396,7 +396,8 @@ Note that executing the changeset will not remove the internal list of changes -
 
 #### `save`
 
-Executes changes, then proxies to the underlying Object's `save` method, if one exists. If it does, it expects the method to return a `Promise`.
+Executes changes, then proxies to the underlying Object's `save` method, if one exists. If it does, the method can either return a `Promise` or a non-`Promise` value. Either way, the changeset's `save` method will return
+a promise.
 
 ```js
 changeset.save(); // returns Promise
