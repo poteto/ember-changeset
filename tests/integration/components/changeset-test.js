@@ -235,7 +235,7 @@ test('it skips validation when skipValidate is passed as an option', async funct
   assert.notOk(find('#error-paragraph'), 'should skip validation');
 });
 
-test('it skips validation when skipValidate is passed as an option', function(assert) {
+test('it skips validation when skipValidate is passed as an option', async function(assert) {
   this.set('dummyModel', { firstName: 'Jim', lastName: 'Bob' });
   this.on('validate', () => false);
   this.render(hbs`
@@ -244,14 +244,16 @@ test('it skips validation when skipValidate is passed as an option', function(as
       {{input id="first-name" value=changeset.firstName}}
       {{input id="last-name" value=changeset.lastName}}
       {{#if changeset.isInvalid}}
-        <p>There were one or more errors in your form.</p>
+        <p id="error-paragraph">There were one or more errors in your form.</p>
       {{/if}}
     {{/with}}
   `);
-  
-  assert.ok(this.$('h1:contains("Jim Bob")'), 'precondition');
-  run(() => this.$('#first-name').val('J').trigger('change'));
-  run(() => this.$('#last-name').val('B').trigger('change'));
-  assert.ok(this.$('h1:contains("J B")'), 'should update observable value');
-  assert.notOk(this.$('p:contains("There were one or more errors in your form.")').length, 'should skip validation');
+
+  assert.equal(find('h1').textContent.trim(), 'Jim Bob', 'precondition');
+  await fillIn('#first-name', 'J');
+  await blur('#first-name')
+  await fillIn('#last-name', 'B');
+  await blur('#last-name')
+  assert.equal(find('h1').textContent.trim(), 'J B', 'should update observable value');
+  assert.notOk(find('#error-paragraph'), 'should skip validation');
 });
