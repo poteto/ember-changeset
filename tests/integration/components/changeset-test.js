@@ -151,6 +151,30 @@ test('nested object updates when set without a validator', async function(assert
   assert.equal(find('h1').textContent.trim(), 'foo bar', 'should update observable value');
 });
 
+test('a rollback propagates binding to deeply nested changesets', async function(assert) {
+  let data = { person: { firstName: 'Jim', lastName: 'Bob' } };
+  let changeset = new Changeset(data);
+  this.set('childChangeset', changeset.get('person'));
+  this.on('reset', () => changeset.rollback());
+  this.render(hbs`
+      <h1>{{childChangeset.firstName}} {{childChangeset.lastName}}</h1>
+      <input
+        id="first-name"
+        type="text"
+        value={{childChangeset.firstName}}
+        onchange={{action (mut childChangeset.firstName) value="target.value"}}>
+      {{input id="last-name" value=childChangeset.lastName}}
+      <button id="reset-btn" {{action "reset"}}>Reset</button>
+  `);
+
+  assert.equal(find('h1').textContent.trim(), 'Jim Bob', 'precondition');
+  await fillIn('#first-name', 'foo');
+  await fillIn('#last-name', 'bar');
+  assert.equal(find('h1').textContent.trim(), 'foo bar', 'should update observable value');
+  await click('#reset-btn');
+  assert.equal(find('h1').textContent.trim(), 'Jim Bob', 'should rollback values');
+});
+
 test('it updates when set with a validator', async function(assert) {
   this.set('dummyModel', { firstName: 'Jim', lastName: 'Bob' });
   this.on('validate', () => true);

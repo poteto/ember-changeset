@@ -9,17 +9,26 @@ export default EmberObject.extend({
   changeset: null,
   key: null,
 
+  init() {
+    this._changedKeys = [];
+  },
+
   unknownProperty(key) {
     return this.changeset._valueFor(`${get(this, 'key')}.${key}`);
   },
 
   setUnknownProperty(key, value) {
-    const selfKey = get(this, 'key');
-    this.changeset._validateAndSet(`${selfKey}.${key}`, value);
-    if (!/\./.test(selfKey)) {
+    this._changedKeys.push(key);
+    this.changeset._validateAndSet(`${get(this, 'key')}.${key}`, value);
+    this.notifyPropertyChange(key);
+    return value;
+  },
+
+  rollback() {
+    for (let key of this._changedKeys) {
       this.notifyPropertyChange(key);
     }
-    return value;
+    this._changedKeys = [];
   },
 
   destroy() {

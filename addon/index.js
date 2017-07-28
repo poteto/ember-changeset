@@ -131,6 +131,19 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
     },
 
     /**
+     * Teardown relays from cache.
+     *
+     * @public
+     * @return {Void}
+     */
+    willDestroy() {
+      let relayCache = get(this, RELAY_CACHE);
+      for (let key in relayCache) {
+        relayCache[key].destroy();
+      }
+    },
+
+    /**
      * Provides a function to run before emitting changes to the model. The
      * callback function must return a hash in the same shape:
      *
@@ -231,9 +244,15 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      */
     rollback() {
       this._notifyVirtualProperties();
+      let relayCache = get(this, RELAY_CACHE);
+
+      for (let key in relayCache) {
+        relayCache[key].rollback();
+      }
+
+      set(this, RELAY_CACHE, {});
       set(this, CHANGES, {});
       set(this, ERRORS, {});
-
       return this;
     },
 
@@ -272,14 +291,18 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
       let changesB = get(changeset, CHANGES);
       let errorsA = get(this, ERRORS);
       let errorsB = get(changeset, ERRORS);
+      let relayA = get(this, RELAY_CACHE);
+      let relayB = get(changeset, RELAY_CACHE);
       let newChangeset = new Changeset(content, get(this, VALIDATOR));
       let newErrors = objectWithout(keys(changesB), errorsA);
       let newChanges = objectWithout(keys(errorsB), changesA);
       let mergedChanges = pureAssign(newChanges, changesB);
       let mergedErrors = pureAssign(newErrors, errorsB);
+      let mergedRelays = pureAssign(relayA, relayB);
 
       newChangeset[CHANGES] = mergedChanges;
       newChangeset[ERRORS] = mergedErrors;
+      newChangeset[RELAY_CACHE] = mergedRelays;
       newChangeset._notifyVirtualProperties();
 
       return newChangeset;
