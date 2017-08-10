@@ -10,6 +10,7 @@ const {
   get,
   isPresent,
   set,
+  setProperties,
   typeOf
 } = Ember;
 
@@ -896,7 +897,6 @@ test('can update nested keys after rollback changes.', function(assert) {
   assert.deepEqual(get(dummyModel, 'org.usa.ma.name'), expectedResult.org.usa.ma.name, 'should set value');
 });
 
-
 test('#validate/nested validates nested fields immediately', function(assert) {
   let done = assert.async();
   set(dummyModel, 'org', {
@@ -931,4 +931,26 @@ test('nested objects will return changesets', function(assert) {
   assert.equal(childChangeset.get('sg'), 'sg', 'child changeseet sees changed value');
   childChangeset.set('sg', 'sing');
   assert.equal(dummyChangeset.get('org.asia.sg'), 'sing', 'changes in child should reflect on parent');
+});
+
+test('nested objects can contain arrays', function(assert) {
+  assert.expect(7);
+  setProperties(dummyModel, {
+    name: 'Bob',
+    contact: {
+      emails: [ 'bob@email.com', 'the_bob@email.com' ]
+    }
+  });
+  assert.deepEqual(dummyModel.get('contact.emails'), [ 'bob@email.com', 'the_bob@email.com' ], 'returns initial model value');
+  let dummyChangeset = new Changeset(dummyModel, dummyValidator);
+  assert.equal(dummyChangeset.get('name'), 'Bob', 'returns changeset initial value');
+  assert.deepEqual(dummyChangeset.get('contact.emails'), [ 'bob@email.com', 'the_bob@email.com' ], 'returns changeset initial value');
+  dummyChangeset.set('contact.emails', [ 'fred@email.com', 'the_fred@email.com' ]);
+  assert.deepEqual(dummyChangeset.get('contact.emails'), [ 'fred@email.com', 'the_fred@email.com' ], 'returns changeset changed value');
+  dummyChangeset.rollback();
+  assert.deepEqual(dummyChangeset.get('contact.emails'), [ 'bob@email.com', 'the_bob@email.com' ], 'returns changeset rolledback value');
+  dummyChangeset.set('contact.emails', [ 'fred@email.com', 'the_fred@email.com' ]);
+  assert.deepEqual(dummyChangeset.get('contact.emails'), [ 'fred@email.com', 'the_fred@email.com' ], 'returns changeset changed value');
+  dummyChangeset.execute();
+  assert.deepEqual(dummyModel.get('contact.emails'), [ 'fred@email.com', 'the_fred@email.com' ], 'returns model saved value');
 });
