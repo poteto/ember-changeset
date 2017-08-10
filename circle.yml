@@ -3,7 +3,7 @@ machine:
     version: "6"
 dependencies:
   pre:
-    - yarn global addons bower
+    - yarn global add bower
   post:
     - yarn install
 test:
