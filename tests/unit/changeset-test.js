@@ -954,3 +954,28 @@ test('nested objects can contain arrays', function(assert) {
   dummyChangeset.execute();
   assert.deepEqual(dummyModel.get('contact.emails'), [ 'fred@email.com', 'the_fred@email.com' ], 'returns model saved value');
 });
+
+test('nested objects can contain arrays from a child changeset', function(assert) {
+  assert.expect(8);
+  setProperties(dummyModel, {
+    name: 'Bob',
+    contact: {
+      emails: [ 'bob@email.com', 'the_bob@email.com' ]
+    }
+  });
+  assert.deepEqual(dummyModel.get('contact.emails'), [ 'bob@email.com', 'the_bob@email.com' ], 'returns initial model value');
+  let dummyChangeset = new Changeset(dummyModel, dummyValidator);
+  assert.equal(dummyChangeset.get('name'), 'Bob', 'returns changeset initial value');
+  assert.deepEqual(dummyChangeset.get('contact.emails'), [ 'bob@email.com', 'the_bob@email.com' ], 'returns changeset initial value');
+
+  let childChangeset = dummyChangeset.get('contact');
+  assert.deepEqual(childChangeset.get('emails'), [ 'bob@email.com', 'the_bob@email.com' ], 'returns child changeset initial value');
+  childChangeset.set('emails', [ 'fred@email.com', 'the_fred@email.com' ]);
+  assert.deepEqual(childChangeset.get('emails'), [ 'fred@email.com', 'the_fred@email.com' ], 'returns child changeset changed value');
+  dummyChangeset.rollback();
+  assert.deepEqual(childChangeset.get('emails'), [ 'bob@email.com', 'the_bob@email.com' ], 'returns child changeset rolledback value');
+  childChangeset.set('emails', [ 'fred@email.com', 'the_fred@email.com' ]);
+  assert.deepEqual(childChangeset.get('emails'), [ 'fred@email.com', 'the_fred@email.com' ], 'returns child changeset changed value');
+  dummyChangeset.execute();
+  assert.deepEqual(dummyModel.get('contact.emails'), [ 'fred@email.com', 'the_fred@email.com' ], 'returns model saved value');
+});
