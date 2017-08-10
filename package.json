@@ -22,7 +22,7 @@
   "homepage": "https://github.com/DockYard/ember-changeset",
   "dependencies": {
     "ember-cli-babel": "^5.1.7",
-    "ember-deep-set": "^0.1.2",
+    "ember-deep-set": "^0.1.2"
   },
   "devDependencies": {
     "broccoli-asset-rev": "^2.4.5",
