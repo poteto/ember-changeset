@@ -8,7 +8,6 @@ export default function startApp(attrs) {
 
   return Ember.run(() => {
     let application = Application.create(attributes);
-    application = Application.create(attributes);
     application.setupForTesting();
     application.injectTestHelpers();
     return application;
