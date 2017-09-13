@@ -9,6 +9,7 @@ import objectWithout from 'ember-changeset/utils/object-without';
 import includes from 'ember-changeset/utils/includes';
 import take from 'ember-changeset/utils/take';
 import isChangeset, { CHANGESET } from 'ember-changeset/utils/is-changeset';
+import deepSet from 'ember-deep-set';
 
 const {
   Object: EmberObject,
@@ -96,7 +97,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      * @return {Any}
      */
     unknownProperty(key) {
-      return this.valueFor(key);
+      return this._valueFor(key);
     },
 
     /**
@@ -113,6 +114,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
       if (skipValidate) {
         return this._setProperty(true, { key, value });
       }
+
       return this._validateAndSet(key, value);
     },
 
@@ -134,7 +136,10 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      * @return {Void}
      */
     willDestroy() {
-      // TODO destroy all relays
+      let relayCache = get(this, RELAY_CACHE);
+      for (let key in relayCache) {
+        relayCache[key].destroy();
+      }
     },
 
     /**
@@ -182,9 +187,25 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
       if (get(this, 'isValid') && get(this, 'isDirty')) {
         let content = get(this, CONTENT);
         let changes = get(this, CHANGES);
-        setProperties(content, changes);
-      }
 
+        let changedKeys = this._allKeys(changes);
+        let resetProperties = {};
+
+        changedKeys.forEach(function(key) {
+          let [root] = key.split('.');
+          if (!resetProperties[root]) {
+            resetProperties[root] = get(content, root);
+          }
+        });
+
+        setProperties(content, changes);
+
+        this._allKeys(resetProperties).forEach(function(key) {
+          if (!changedKeys.includes(key)) {
+            deepSet(content, key, get(resetProperties, key));
+          }
+        });
+      }
       return this;
     },
 
@@ -222,9 +243,15 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      */
     rollback() {
       this._notifyVirtualProperties();
+      let relayCache = get(this, RELAY_CACHE);
+
+      for (let key in relayCache) {
+        relayCache[key].rollback();
+      }
+
+      set(this, RELAY_CACHE, {});
       set(this, CHANGES, {});
       set(this, ERRORS, {});
-
       return this;
     },
 
@@ -263,14 +290,18 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
       let changesB = get(changeset, CHANGES);
       let errorsA = get(this, ERRORS);
       let errorsB = get(changeset, ERRORS);
+      let relayA = get(this, RELAY_CACHE);
+      let relayB = get(changeset, RELAY_CACHE);
       let newChangeset = new Changeset(content, get(this, VALIDATOR));
       let newErrors = objectWithout(keys(changesB), errorsA);
       let newChanges = objectWithout(keys(errorsB), changesA);
       let mergedChanges = pureAssign(newChanges, changesB);
       let mergedErrors = pureAssign(newErrors, errorsB);
+      let mergedRelays = pureAssign(relayA, relayB);
 
       newChangeset[CHANGES] = mergedChanges;
       newChangeset[ERRORS] = mergedErrors;
+      newChangeset[RELAY_CACHE] = mergedRelays;
       newChangeset._notifyVirtualProperties();
 
       return newChangeset;
@@ -295,7 +326,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
       if (isNone(key)) {
         let maybePromise = keys(validationMap)
           .map((validationKey) => {
-            return this._validateAndSet(validationKey, this._valueFor(validationKey));
+            return this._validateAndSet(validationKey, this._valueFor(validationKey, true));
           });
 
         return all(maybePromise);
@@ -303,7 +334,6 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
 
       return resolve(this._validateAndSet(key, this._valueFor(key)));
     },
-
 
     /**
      * Checks to see if async validator for a given key has not resolved.
@@ -333,7 +363,6 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      */
     addError(key, options) {
       let errors = get(this, ERRORS);
-
       if (!isObject(options)) {
         let value = get(this, key);
         options = { value, validation: options };
@@ -343,7 +372,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
       this.notifyPropertyChange(ERRORS);
       this.notifyPropertyChange(key);
 
-      return set(errors, key, options);
+      return deepSet(errors, key, options);
     },
 
     /**
@@ -431,6 +460,25 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
     },
 
     /**
+     * Executes the changeset and saves the underlying content.
+     *
+     * @private
+     * @param  {Array} [keys=[]] Array of keys to push to
+     * @param  {String} [scope=''] A sring that can be prepended to the key.
+     * @return {Array}
+     */
+    _allKeys(object, keys = [], scope = '') {
+      for (let [key, value] of Object.entries(object)) {
+        if (isObject(value)) {
+          this._allKeys(value, keys, scope + key + '.');
+        } else {
+          keys.push(scope + key);
+        }
+      }
+      return keys;
+    },
+
+    /**
      * For a given key and value, set error or change.
      *
      * @private
@@ -456,35 +504,6 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
       this.trigger(BEFORE_VALIDATION_EVENT, key);
       this.trigger(AFTER_VALIDATION_EVENT, key);
       return this._setProperty(validation, { key, value, oldValue });
-    },
-
-    /**
-     * Value for change or the original value.
-     *
-     * @public
-     * @param  {String} key
-     * @return {Any}
-     */
-    _valueFor(key) {
-      let changes = get(this, CHANGES);
-      let errors = get(this, ERRORS);
-      let content = get(this, CONTENT);
-
-      if (errors.hasOwnProperty(key)) {
-        return get(errors, `${key}.value`);
-      }
-
-      if (changes.hasOwnProperty(key)) {
-        return get(changes, key);
-      }
-
-      let oldValue = get(content, key);
-
-      if (isObject(oldValue)) {
-        return this._relayFor(key);
-      }
-
-      return oldValue;
     },
 
     /**
@@ -537,18 +556,12 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
         this._deleteKey(ERRORS, key);
 
         if (!isEqual(oldValue, value)) {
-          this._recursivelySet(key, value, changes);
+          deepSet(changes, key, value);
         } else if (key in changes) {
           delete changes[key];
         }
         this.notifyPropertyChange(CHANGES);
         this.notifyPropertyChange(root);
-
-        let errors = get(this, ERRORS);
-        if (errors['__ember_meta__'] && errors['__ember_meta__']['values']) {
-          delete errors['__ember_meta__']['values'][key];
-          set(this, ERRORS, errors);
-        }
 
         return value;
       }
@@ -583,27 +596,53 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      * Value for change or the original value.
      *
      * @private
-     * @param {String} key
-     * @param {Any} value
-     * @param {Object} obj
-     * @return {Void}
+     * @param  {String} key
+     * @param {Boolean} [plainValue=false]
+     * @return {Any}
      */
-    _recursivelySet(key, value, obj) {
-      let keys = key.split('.');
-      let prev;
-      while (keys.length > 1) {
-        let next = keys.shift();
-        if (prev) {
-          next = `${prev}.${next}`;
-        }
-        set(obj, next, get(obj, next) || {});
-        prev = next;
+    _valueFor(key, plainValue = false) {
+      let changes = get(this, CHANGES);
+      let errors = get(this, ERRORS);
+      let content = get(this, CONTENT);
+      let relay = get(this, RELAY_CACHE);
+
+      if (errors.hasOwnProperty(key)) {
+        return get(errors, `${key}.value`);
       }
-      set(obj, key, value);
+
+      if (relay.hasOwnProperty(key)) {
+        return relay[key];
+      }
+
+      if (this._hasOwnNestedProperty(changes, key)) {
+        return get(changes, key);
+      }
+
+      let oldValue = get(content, key);
+
+      if (isObject(oldValue) && !plainValue) {
+        return this._relayFor(key);
+      }
+
+      return oldValue;
+    },
+
+    _hasOwnNestedProperty(object, key) {
+      let keyParts = key.split('.');
+      let nextKey = keyParts.shift();
+      if (nextKey in object) {
+        if (isObject(object[nextKey]) && keyParts.length) {
+          return this._hasOwnNestedProperty(object[nextKey], keyParts.join('.'));
+        } else {
+          return true;
+        }
+      } else {
+        return false;
+      }
     },
 
     /**
-     * TODO
+     * Setup a small changeset relay for sub objects.
      *
      * @private
      * @param {String} key
