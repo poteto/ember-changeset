@@ -327,10 +327,12 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
       }
 
       this._deleteKey(CHANGES, key);
+      set(errors, key, options);
+      
       this.notifyPropertyChange(ERRORS);
       this.notifyPropertyChange(key);
 
-      return set(errors, key, options);
+      return options;
     },
 
     /**
