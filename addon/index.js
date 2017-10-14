@@ -469,7 +469,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      */
     _allKeys(object, keys = [], scope = '') {
       for (let [key, value] of Object.entries(object)) {
-        if (isObject(value)) {
+        if (isObject(value) && !(value instanceof Ember.Object)) {
           this._allKeys(value, keys, scope + key + '.');
         } else {
           keys.push(scope + key);
