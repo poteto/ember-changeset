@@ -620,7 +620,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
 
       let oldValue = get(content, key);
 
-      if (isObject(oldValue) && !plainValue) {
+      if (isObject(oldValue) && !plainValue && !(oldValue instanceof EmberObject)) {
         return this._relayFor(key);
       }
 
