@@ -21,7 +21,8 @@
   "bugs": "https://github.com/DockYard/ember-changeset/issues",
   "homepage": "https://github.com/DockYard/ember-changeset",
   "dependencies": {
-    "ember-cli-babel": "^6.8.2"
+    "ember-cli-babel": "^6.8.2",
+    "ember-deep-set": "^0.1.2"
   },
   "devDependencies": {
     "broccoli-asset-rev": "^2.4.5",
