@@ -859,6 +859,7 @@ test('it works with nested keys', function(assert) {
       ma: { name: null }
     }
   });
+
   let dummyChangeset = new Changeset(dummyModel, dummyValidator);
   dummyChangeset.set('org.asia.sg', 'sg');
   dummyChangeset.set('org.usa.ca', 'ca');
@@ -886,6 +887,7 @@ test('can update nested keys after rollback changes.', function(assert) {
       ma: { name: null }
     }
   });
+
   let dummyChangeset = new Changeset(dummyModel, dummyValidator);
   dummyChangeset.set('org.asia.sg', 'sg');
   dummyChangeset.set('org.usa.ny', 'ny');
@@ -907,8 +909,8 @@ test('#validate/nested validates nested fields immediately', function(assert) {
       ny: null,
     }
   });
-  let dummyChangeset = new Changeset(dummyModel, dummyValidator, dummyValidations);
 
+  let dummyChangeset = new Changeset(dummyModel, dummyValidator, dummyValidations);
   dummyChangeset.validate('org.usa.ny').then(() => {
     assert.deepEqual(get(dummyChangeset, 'error.org.usa.ny'), { validation: 'must be present', value: null }, 'should validate immediately');
     assert.deepEqual(get(dummyChangeset, 'changes'), [], 'should not set changes');
