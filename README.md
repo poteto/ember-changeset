@@ -1,5 +1,7 @@
 # ember-changeset ![Download count all time](https://img.shields.io/npm/dt/ember-changeset.svg) [![CircleCI](https://circleci.com/gh/DockYard/ember-changeset.svg?style=shield)](https://circleci.com/gh/DockYard/ember-changeset) [![npm version](https://badge.fury.io/js/ember-changeset.svg)](https://badge.fury.io/js/ember-changeset) [![Ember Observer Score](http://emberobserver.com/badges/ember-changeset.svg)](http://emberobserver.com/addons/ember-changeset)
 
+**[ember-changeset is built and maintained by DockYard, contact us for expert Ember.js consulting](https://dockyard.com/ember-consulting)**.
+
 Ember.js flavored changesets, inspired by [Ecto](https://github.com/elixir-lang/ecto). To install:
 
 ```
@@ -394,7 +396,8 @@ Note that executing the changeset will not remove the internal list of changes -
 
 #### `save`
 
-Executes changes, then proxies to the underlying Object's `save` method, if one exists. If it does, it expects the method to return a `Promise`.
+Executes changes, then proxies to the underlying Object's `save` method, if one exists. If it does, the method can either return a `Promise` or a non-`Promise` value. Either way, the changeset's `save` method will return
+a promise.
 
 ```js
 changeset.save(); // returns Promise
