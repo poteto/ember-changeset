@@ -137,13 +137,13 @@ test('a passed down nested object updates when set without a validator', async f
   let changeset = new Changeset(data);
   this.set('childChangeset', changeset.get('person'));
   this.render(hbs`
-      <h1>{{childChangeset.firstName}} {{childChangeset.lastName}}</h1>
-      <input
-        id="first-name"
-        type="text"
-        value={{childChangeset.firstName}}
-        onchange={{action (mut childChangeset.firstName) value="target.value"}}>
-      {{input id="last-name" value=childChangeset.lastName}}
+    <h1>{{childChangeset.firstName}} {{childChangeset.lastName}}</h1>
+    <input
+      id="first-name"
+      type="text"
+      value={{childChangeset.firstName}}
+      onchange={{action (mut childChangeset.firstName) value="target.value"}}>
+    {{input id="last-name" value=childChangeset.lastName}}
   `);
 
   assert.equal(find('h1').textContent.trim(), 'Jim Bob', 'precondition');
@@ -157,13 +157,13 @@ test('nested object updates when set without a validator', async function(assert
   let changeset = new Changeset(data);
   this.set('changeset', changeset);
   this.render(hbs`
-      <h1>{{changeset.person.firstName}} {{changeset.person.lastName}}</h1>
-      <input
-        id="first-name"
-        type="text"
-        value={{changeset.person.firstName}}
-        onchange={{action (mut changeset.person.firstName) value="target.value"}}>
-      {{input id="last-name" value=changeset.person.lastName}}
+    <h1>{{changeset.person.firstName}} {{changeset.person.lastName}}</h1>
+    <input
+      id="first-name"
+      type="text"
+      value={{changeset.person.firstName}}
+      onchange={{action (mut changeset.person.firstName) value="target.value"}}>
+    {{input id="last-name" value=changeset.person.lastName}}
   `);
 
   assert.equal(find('h1').textContent.trim(), 'Jim Bob', 'precondition');
@@ -178,14 +178,14 @@ test('a rollback propagates binding to deeply nested changesets', async function
   this.set('childChangeset', changeset.get('person'));
   this.on('reset', () => changeset.rollback());
   this.render(hbs`
-      <h1>{{childChangeset.firstName}} {{childChangeset.lastName}}</h1>
-      <input
-        id="first-name"
-        type="text"
-        value={{childChangeset.firstName}}
-        onchange={{action (mut childChangeset.firstName) value="target.value"}}>
-      {{input id="last-name" value=childChangeset.lastName}}
-      <button id="reset-btn" {{action "reset"}}>Reset</button>
+    <h1>{{childChangeset.firstName}} {{childChangeset.lastName}}</h1>
+    <input
+      id="first-name"
+      type="text"
+      value={{childChangeset.firstName}}
+      onchange={{action (mut childChangeset.firstName) value="target.value"}}>
+    {{input id="last-name" value=childChangeset.lastName}}
+    <button id="reset-btn" {{action "reset"}}>Reset</button>
   `);
 
   assert.equal(find('h1').textContent.trim(), 'Jim Bob', 'precondition');
