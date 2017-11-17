@@ -867,19 +867,6 @@ test('it works with nested keys', function(assert) {
   dummyChangeset.execute();
   assert.deepEqual(get(dummyChangeset, 'change'), expectedResult, 'should have correct shape');
   assert.deepEqual(get(dummyModel, 'org'), expectedResult.org, 'should set value');
-  assert.deepEqual(get(dummyModel, 'org.asia'), expectedResult.org.asia, 'should set value');
-  assert.deepEqual(get(dummyModel, 'org.usa'), expectedResult.org.usa, 'should set value');
-  assert.deepEqual(get(dummyModel, 'org.usa.ca'), expectedResult.org.usa.ca, 'should set value');
-  assert.deepEqual(get(dummyModel, 'org.usa.ny'), expectedResult.org.usa.ny, 'should set value');
-  assert.deepEqual(get(dummyModel, 'org.usa.ma'), expectedResult.org.usa.ma, 'should set value');
-  assert.deepEqual(get(dummyModel, 'org.usa.ma.name'), expectedResult.org.usa.ma.name, 'should set value');
-  expectedResult.org.usa.or = 'or';
-  dummyChangeset.rollback();
-  dummyChangeset.set('org.usa.or', 'or');
-  dummyChangeset.execute();
-  assert.deepEqual(get(dummyModel, 'org.usa.or'), expectedResult.org.usa.or, 'should reset value');
-  assert.deepEqual(get(dummyModel, 'org.usa.ny'), expectedResult.org.usa.ny, 'should reset value');
-  assert.deepEqual(get(dummyModel, 'org.asia'), expectedResult.org.asia, 'should reset value');
 });
 
 test('can update nested keys after rollback changes.', function(assert) {
@@ -905,18 +892,12 @@ test('can update nested keys after rollback changes.', function(assert) {
   dummyChangeset.set('org.usa.ma', { name: 'Massachusetts' });
   dummyChangeset.execute();
   assert.deepEqual(get(dummyModel, 'org'), expectedResult.org, 'should set value');
-  assert.deepEqual(get(dummyModel, 'org.usa.ny'), expectedResult.org.usa.ny, 'should set value');
-  assert.deepEqual(get(dummyModel, 'org.asia'), expectedResult.org.asia, 'should have updated value');
-  assert.deepEqual(get(dummyModel, 'org.usa.ma.name'), expectedResult.org.usa.ma.name, 'should set value');
+
   expectedResult.org.usa.or = 'or';
   dummyChangeset.rollback();
   dummyChangeset.set('org.usa.or', 'or');
   dummyChangeset.execute();
   assert.deepEqual(get(dummyModel, 'org'), expectedResult.org, 'should set value');
-  assert.deepEqual(get(dummyModel, 'org.usa.or'), expectedResult.org.usa.or, 'should have updated value');
-  assert.deepEqual(get(dummyModel, 'org.usa.ny'), expectedResult.org.usa.ny, 'should have updated value');
-  assert.deepEqual(get(dummyModel, 'org.asia'), expectedResult.org.asia, 'should have updated value');
-  assert.deepEqual(get(dummyModel, 'org.usa.ma.name'), expectedResult.org.usa.ma.name, 'should set value');
 });
 
 test('#validate/nested validates nested fields immediately', function(assert) {
