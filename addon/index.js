@@ -470,9 +470,9 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      * @return {Array}
      */
     _allKeys(object, keys = [], scope = '') {
-      for (let [key, value] of Object.entries(object)) {
-        if (isObject(value)) {
-          this._allKeys(value, keys, scope + key + '.');
+      for (let key in object) {
+        if (isObject(object[key])) {
+          this._allKeys(object[key], keys, scope + key + '.');
         } else {
           keys.push(scope + key);
         }
