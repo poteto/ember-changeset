@@ -24,7 +24,6 @@
     "ember-cli-babel": "^6.8.2"
   },
   "devDependencies": {
-    "bower": "^1.8.2",
     "broccoli-asset-rev": "^2.4.5",
     "ember-ajax": "^3.0.0",
     "ember-cli": "~2.16.2",
