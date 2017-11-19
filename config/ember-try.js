@@ -108,12 +108,6 @@ module.exports = {
           'ember-source': null
         }
       }
-    },
-    {
-      name: 'ember-default',
-      name: {
-        devDependencies: {}
-      }
     }
   ]
 };
