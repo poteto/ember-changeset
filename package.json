@@ -12,14 +12,14 @@
     "doc": "doc",
     "test": "tests"
   },
-  "repository": "https://github.com/DockYard/ember-changeset",
+  "repository": "https://github.com/poteto/ember-changeset",
   "scripts": {
     "build": "ember build",
     "start": "ember server",
     "test": "ember try:each"
   },
-  "bugs": "https://github.com/DockYard/ember-changeset/issues",
-  "homepage": "https://github.com/DockYard/ember-changeset",
+  "bugs": "https://github.com/poteto/ember-changeset/issues",
+  "homepage": "https://github.com/poteto/ember-changeset",
   "dependencies": {
     "ember-cli-babel": "^6.8.2",
     "ember-deep-set": "^0.1.2"

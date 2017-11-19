@@ -1,6 +1,4 @@
-# ember-changeset ![Download count all time](https://img.shields.io/npm/dt/ember-changeset.svg) [![CircleCI](https://circleci.com/gh/DockYard/ember-changeset.svg?style=shield)](https://circleci.com/gh/DockYard/ember-changeset) [![npm version](https://badge.fury.io/js/ember-changeset.svg)](https://badge.fury.io/js/ember-changeset) [![Ember Observer Score](http://emberobserver.com/badges/ember-changeset.svg)](http://emberobserver.com/addons/ember-changeset)
-
-**[ember-changeset is built and maintained by DockYard, contact us for expert Ember.js consulting](https://dockyard.com/ember-consulting)**.
+# ember-changeset ![Download count all time](https://img.shields.io/npm/dt/ember-changeset.svg) [![CircleCI](https://circleci.com/gh/poteto/ember-changeset.svg?style=shield)](https://circleci.com/gh/poteto/ember-changeset) [![npm version](https://badge.fury.io/js/ember-changeset.svg)](https://badge.fury.io/js/ember-changeset) [![Ember Observer Score](http://emberobserver.com/badges/ember-changeset.svg)](http://emberobserver.com/addons/ember-changeset)
 
 Ember.js flavored changesets, inspired by [Ecto](https://github.com/elixir-lang/ecto). To install:
 
@@ -18,7 +16,7 @@ Given Ember's Data Down, Actions Up (DDAU) approach, a changeset is more appropr
 
 `ember-changeset` only allows valid changes to be set, so your Objects will never become invalid (assuming you have 100% validation coverage). Additionally, this addon is designed to be un-opinionated about your choice of form and/or validation library, so you can easily integrate it into an existing solution.
 
-The simplest way to incorporate validations is to use [`ember-changeset-validations`](https://github.com/DockYard/ember-changeset-validations/), a companion addon to this one. It has a simple mental model, and there are no Observers or CPs involved – just pure functions.
+The simplest way to incorporate validations is to use [`ember-changeset-validations`](https://github.com/poteto/ember-changeset-validations/), a companion addon to this one. It has a simple mental model, and there are no Observers or CPs involved – just pure functions.
 
 See also the [plugins](#plugins) section for addons that extend `ember-changeset`.
 
@@ -672,7 +670,7 @@ if (isChangeset(model)) {
 
 ## Plugins
 
-- [`ember-changeset-validations`](https://github.com/DockYard/ember-changeset-validations) - Pure, functional validations without CPs or Observers
+- [`ember-changeset-validations`](https://github.com/poteto/ember-changeset-validations) - Pure, functional validations without CPs or Observers
 - [`ember-changeset-cp-validations`](https://github.com/offirgolan/ember-changeset-cp-validations) - Work with `ember-cp-validations`
 - [`ember-changeset-hofs`](https://github.com/nucleartide/ember-changeset-hofs) - Higher-order validation functions
 - [`ember-bootstrap-changeset-validations`](https://github.com/kaliber5/ember-bootstrap-changeset-validations) - Adds support for changeset validations to `ember-bootstrap`
