@@ -471,6 +471,10 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      */
     _allKeys(object, keys = [], scope = '') {
       for (let key in object) {
+        if (!object.hasOwnProperty(key)) {
+          continue;
+        }
+
         if (isObject(object[key])) {
           this._allKeys(object[key], keys, scope + key + '.');
         } else {
