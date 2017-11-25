@@ -569,6 +569,12 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
         this.notifyPropertyChange(CHANGES);
         this.notifyPropertyChange(root);
 
+        let errors = get(this, ERRORS);
+        if (errors['__ember_meta__'] && errors['__ember_meta__']['values']) {
+          delete errors['__ember_meta__']['values'][key];
+          set(this, ERRORS, errors);
+        }
+
         return value;
       }
 
