@@ -619,7 +619,8 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
       let relay = get(this, RELAY_CACHE);
 
       if (errors.hasOwnProperty(key)) {
-        return get(errors, `${key}.value`);
+        let v = get(errors, `${key}.value`);
+        if (!isNone(v)) return v;
       }
 
       if (relay.hasOwnProperty(key)) {
