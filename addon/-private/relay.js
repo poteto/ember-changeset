@@ -10,7 +10,7 @@ export default EmberObject.extend({
   key: null,
 
   init() {
-    this._changedKeys = [];
+    this._changedKeys = {};
   },
 
   unknownProperty(key) {
@@ -18,17 +18,18 @@ export default EmberObject.extend({
   },
 
   setUnknownProperty(key, value) {
-    this._changedKeys.push(key);
+    this._changedKeys[key] = null;
     this.changeset._validateAndSet(`${get(this, 'key')}.${key}`, value);
     this.notifyPropertyChange(key);
     return value;
   },
 
   rollback() {
-    for (let key of this._changedKeys) {
+    for (let key of Object.keys(this._changedKeys)) {
       this.notifyPropertyChange(key);
     }
-    this._changedKeys = [];
+
+    this._changedKeys = {};
   },
 
   destroy() {
