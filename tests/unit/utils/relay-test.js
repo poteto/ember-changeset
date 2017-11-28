@@ -8,8 +8,8 @@ const { get, set } = Ember;
 module('Unit | Utility | Relay');
 
 test("it shouldn't leak memory", function(assert) {
-  let c = new Changeset({ someKey: '' });
-  let r = Relay.create({ changeset: c, key: 'someKey' });
+  let c = new Changeset({});
+  let r = Relay.create({ changeset: c });
 
   let n = 100;
   while (n--) set(r, 'invalidKey', 'test');
