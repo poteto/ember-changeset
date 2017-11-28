@@ -992,3 +992,17 @@ test('nested objects can contain arrays from a child changeset', function(assert
   dummyChangeset.execute();
   assert.deepEqual(dummyModel.get('contact.emails'), [ 'fred@email.com', 'the_fred@email.com' ], 'returns model saved value');
 });
+
+test('can set nested keys after validate', function(assert) {
+  assert.expect(0);
+
+  let done = assert.async();
+  set(dummyModel, 'org', {
+    usa: { ny: null }
+  });
+
+  let c = new Changeset(dummyModel, dummyValidator, dummyValidations);
+  c.validate('org.usa.ny')
+    .then(() => c.set('org.usa.ny', 'should not fail'))
+    .finally(done);
+});
