@@ -4,6 +4,7 @@ import objectToArray from 'ember-changeset/utils/computed/object-to-array';
 import isEmptyObject from 'ember-changeset/utils/computed/is-empty-object';
 import isPromise from 'ember-changeset/utils/is-promise';
 import isObject from 'ember-changeset/utils/is-object';
+import recursiveKeys from 'ember-changeset/utils/recursive-keys';
 import pureAssign from 'ember-changeset/utils/assign';
 import objectWithout from 'ember-changeset/utils/object-without';
 import includes from 'ember-changeset/utils/includes';
@@ -189,7 +190,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
         let content = get(this, CONTENT);
         let changes = get(this, CHANGES);
 
-        let changedKeys = this._allKeys(changes);
+        let changedKeys = recursiveKeys(changes);
         let resetProperties = {};
 
         changedKeys.forEach(function(key) {
@@ -201,7 +202,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
 
         setProperties(content, changes);
 
-        this._allKeys(resetProperties).forEach(function(key) {
+        recursiveKeys(resetProperties).forEach(function(key) {
           if (!changedKeys.includes(key)) {
             deepSet(content, key, get(resetProperties, key));
           }
@@ -459,29 +460,6 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
       set(this, CHANGES, casted);
 
       return this;
-    },
-
-    /**
-     * Executes the changeset and saves the underlying content.
-     *
-     * @private
-     * @param  {Array} [keys=[]] Array of keys to push to
-     * @param  {String} [scope=''] A sring that can be prepended to the key.
-     * @return {Array}
-     */
-    _allKeys(object, keys = [], scope = '') {
-      for (let key in object) {
-        if (!object.hasOwnProperty(key)) {
-          continue;
-        }
-
-        if (isObject(object[key])) {
-          this._allKeys(object[key], keys, scope + key + '.');
-        } else {
-          keys.push(scope + key);
-        }
-      }
-      return keys;
     },
 
     /**
