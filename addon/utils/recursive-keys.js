@@ -37,7 +37,7 @@ const recursiveKeys = function(object = {}, scope = '') {
     const value = object[key];
     let newKeys = [scope + key];
 
-    if (!isArray(value) && isObject(value) && Object.keys(value).length) {
+    if (isObject(value) && !isArray(value) && Object.keys(value).length) {
       newKeys = recursiveKeys(value, scope + key + '.');
     }
 
