@@ -1,9 +1,9 @@
-import recursiveKeys from 'ember-changeset/utils/recursive-keys';
+import leafKeys from 'ember-changeset/utils/leaf-keys';
 import { module, test } from 'qunit';
 
 import EmberObject from '@ember/object';
 
-module('Unit | Utility | recursive-keys');
+module('Unit | Utility | leaf-keys');
 
 test('it returns an array with keys as nested strings', function(assert) {
   const nestedObject = {
@@ -30,7 +30,7 @@ test('it returns an array with keys as nested strings', function(assert) {
     'item.innerItem.nest.other',
   ];
 
-  const result = recursiveKeys(nestedObject);
+  const result = leafKeys(nestedObject);
 
   assert.deepEqual(result, expectedResult, 'it returns an array with keys as nested strings');
 });
@@ -60,7 +60,7 @@ test('it returns an array with keys as nested strings, can work with an ember ob
     'item.innerItem.nest.other',
   ];
 
-  const result = recursiveKeys(nestedObject);
+  const result = leafKeys(nestedObject);
 
   assert.deepEqual(result, expectedResult, 'it returns an array with keys as nested strings');
 });
@@ -86,7 +86,7 @@ test('it returns an only keys that are available, even if they have no conect', 
     'item.innerItem.nest',
   ];
 
-  const result = recursiveKeys(nestedObject);
+  const result = leafKeys(nestedObject);
 
   assert.deepEqual(result, expectedResult, 'it returns an array with keys as nested strings');
 });
@@ -116,7 +116,7 @@ test('it treats null and empty objects as null values', function(assert) {
     'item.innerItem.emberNest',
   ];
 
-  const result = recursiveKeys(nestedObject);
+  const result = leafKeys(nestedObject);
 
   assert.deepEqual(result, expectedResult, 'it returns an array with keys as nested strings');
 });
@@ -146,7 +146,7 @@ test('it skips object inside of arrays, and only returns the arrays key', functi
     'item.innerItem.nest',
   ];
 
-  const result = recursiveKeys(nestedObject);
+  const result = leafKeys(nestedObject);
 
   assert.deepEqual(result, expectedResult, 'it returns an array with keys as nested strings');
 });

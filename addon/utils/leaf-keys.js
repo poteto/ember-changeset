@@ -32,17 +32,17 @@ import { isArray } from '@ember/array';
  * @param  {String} [scope=''] A sring that can be prepended to the key.
  * @return {Array}
  */
-const recursiveKeys = function(object = {}, scope = '') {
+const leafKeys = function(object = {}, scope = '') {
   return Object.keys(object).reduce(function(keys, key) {
     const value = object[key];
     let newKeys = [scope + key];
 
     if (isObject(value) && !isArray(value) && Object.keys(value).length) {
-      newKeys = recursiveKeys(value, scope + key + '.');
+      newKeys = leafKeys(value, scope + key + '.');
     }
 
     return keys.concat(newKeys);
   }, []);
 }
 
-export default recursiveKeys;
+export default leafKeys;
