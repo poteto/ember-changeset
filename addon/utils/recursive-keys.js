@@ -28,8 +28,7 @@ import { isArray } from '@ember/array';
  *   'item.innerItem.nest.other',
  * ]
  *
- * @private
- * @param  {Array} [keys=[]] Array of keys to push to
+ * @param  {Object} [object={}] Object whos keys to iterate over.
  * @param  {String} [scope=''] A sring that can be prepended to the key.
  * @return {Array}
  */
