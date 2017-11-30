@@ -121,7 +121,37 @@ const TEST_DATA = [{
     'item.innerItem.other',
     'item.innerItem.nest',
   ],
+}, {
+  desc: 'it can hanlde null created objects',
+  input: nullCreatedObjects(),
+  expected: [
+    'topValue',
+    'item.secondValue',
+    'item.innerItem.thing',
+    'item.innerItem.other',
+    'item.innerItem.nest.thing',
+    'item.innerItem.nest.other',
+  ],
 }];
+
+function nullCreatedObjects() {
+  const input = Object.create(null);
+  const item = Object.create(null);
+  const innerItem = Object.create(null);
+  const nest = Object.create(null);
+
+  input.topValue = -1;
+  input.item = item;
+    item.secondValue = 0;
+    item.innerItem = innerItem;
+      innerItem.thing = 1;
+      innerItem.other = '2222';
+      innerItem.nest = nest;
+        nest.thing = 3;
+        nest.other = 4;
+
+  return input;
+}
 
 TEST_DATA.forEach(function({ desc, input, expected }) {
   test(desc, function(assert) {
