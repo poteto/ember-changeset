@@ -5,8 +5,9 @@ import EmberObject from '@ember/object';
 
 module('Unit | Utility | leaf-keys');
 
-test('it returns an array with keys as nested strings', function(assert) {
-  const nestedObject = {
+const TEST_DATA = [{
+  desc: 'it returns an array with keys as nested strings',
+  input: {
     topValue: -1,
     item: {
       secondValue: 0,
@@ -18,25 +19,19 @@ test('it returns an array with keys as nested strings', function(assert) {
           other: 4
         }
       }
-    }
-  };
-
-  const expectedResult = [
+    },
+  },
+  expected: [
     'topValue',
     'item.secondValue',
     'item.innerItem.thing',
     'item.innerItem.other',
     'item.innerItem.nest.thing',
     'item.innerItem.nest.other',
-  ];
-
-  const result = leafKeys(nestedObject);
-
-  assert.deepEqual(result, expectedResult, 'it returns an array with keys as nested strings');
-});
-
-test('it returns an array with keys as nested strings, can work with an ember object', function(assert) {
-  const nestedObject = EmberObject.create({
+  ],
+}, {
+  desc: 'it returns an array with keys as nested strings, can work with an ember object',
+  input: EmberObject.create({
     topValue: -1,
     item: EmberObject.create({
       secondValue: 0,
@@ -49,24 +44,18 @@ test('it returns an array with keys as nested strings, can work with an ember ob
         })
       })
     })
-  });
-
-  const expectedResult = [
+  }),
+  expected: [
     'topValue',
     'item.secondValue',
     'item.innerItem.thing',
     'item.innerItem.other',
     'item.innerItem.nest.thing',
     'item.innerItem.nest.other',
-  ];
-
-  const result = leafKeys(nestedObject);
-
-  assert.deepEqual(result, expectedResult, 'it returns an array with keys as nested strings');
-});
-
-test('it returns an only keys that are available, even if they have no conect', function(assert) {
-  const nestedObject = {
+  ],
+}, {
+  desc: 'it returns an only keys that are available, even if they have no conect',
+  input: {
     topValue: -1,
     item: {
       secondValue: 0,
@@ -75,24 +64,18 @@ test('it returns an only keys that are available, even if they have no conect', 
         other: 2,
         nest: null
       }
-    }
-  };
-
-  const expectedResult = [
+    },
+  },
+  expected: [
     'topValue',
     'item.secondValue',
     'item.innerItem.thing',
     'item.innerItem.other',
     'item.innerItem.nest',
-  ];
-
-  const result = leafKeys(nestedObject);
-
-  assert.deepEqual(result, expectedResult, 'it returns an array with keys as nested strings');
-});
-
-test('it treats null and empty objects as null values', function(assert) {
-  const nestedObject = {
+  ],
+}, {
+  desc: 'it treats null and empty objects as null values',
+  input: {
     topValue: -1,
     item: {
       secondValue: 0,
@@ -104,9 +87,8 @@ test('it treats null and empty objects as null values', function(assert) {
         emberNest: EmberObject.create(null)
       }
     }
-  };
-
-  const expectedResult = [
+  },
+  expected: [
     'topValue',
     'item.secondValue',
     'item.innerItem.thing',
@@ -114,15 +96,10 @@ test('it treats null and empty objects as null values', function(assert) {
     'item.innerItem.empty',
     'item.innerItem.nest',
     'item.innerItem.emberNest',
-  ];
-
-  const result = leafKeys(nestedObject);
-
-  assert.deepEqual(result, expectedResult, 'it returns an array with keys as nested strings');
-});
-
-test('it skips object inside of arrays, and only returns the arrays key', function(assert) {
-  const nestedObject = {
+  ],
+}, {
+  desc: 'it skips object inside of arrays, and only returns the arrays key',
+  input: {
     topValue: -1,
     item: {
       secondValue: 0,
@@ -136,17 +113,18 @@ test('it skips object inside of arrays, and only returns the arrays key', functi
         }]
       }
     }
-  };
-
-  const expectedResult = [
+  },
+  expected: [
     'topValue',
     'item.secondValue',
     'item.innerItem.thing',
     'item.innerItem.other',
     'item.innerItem.nest',
-  ];
+  ],
+}];
 
-  const result = leafKeys(nestedObject);
-
-  assert.deepEqual(result, expectedResult, 'it returns an array with keys as nested strings');
+TEST_DATA.forEach(function({ desc, input, expected }) {
+  test(desc, function(assert) {
+    assert.deepEqual(leafKeys(input), expected, desc);
+  });
 });
