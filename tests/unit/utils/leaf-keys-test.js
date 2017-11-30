@@ -13,7 +13,7 @@ const TEST_DATA = [{
       secondValue: 0,
       innerItem: {
         thing: 1,
-        other: 2,
+        other: '2222',
         nest: {
           thing: 3,
           other: 4
@@ -37,7 +37,7 @@ const TEST_DATA = [{
       secondValue: 0,
       innerItem: EmberObject.create({
         thing: 1,
-        other: 2,
+        other: '2222',
         nest: EmberObject.create({
           thing: 3,
           other: 4
@@ -61,7 +61,7 @@ const TEST_DATA = [{
       secondValue: 0,
       innerItem: {
         thing: 1,
-        other: 2,
+        other: '2222',
         nest: null
       }
     },
@@ -81,7 +81,7 @@ const TEST_DATA = [{
       secondValue: 0,
       innerItem: {
         thing: 1,
-        other: 2,
+        other: '2222',
         empty: {},
         nest: Object.create(null),
         emberNest: EmberObject.create(null)
@@ -105,7 +105,7 @@ const TEST_DATA = [{
       secondValue: 0,
       innerItem: {
         thing: 1,
-        other: 2,
+        other: '2222',
         nest: [{
           a: 3
         }, {
