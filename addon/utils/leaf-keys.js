@@ -2,34 +2,11 @@ import isObject from 'ember-changeset/utils/is-object';
 import { isArray } from '@ember/array';
 
 /**
- * Recursivly loops over all sub object and
- * returns an array of keys in nesteted string format.
+ * Given an object, return an array of the leaf-most keys
+ * in nested string format.
  *
- * eg. this object
- *  {
- *    item: {
- *      innerItem: {
- *        thing: 1,
- *        other: 2,
- *        nest: {
- *          thing: 3,
- *          other: 4
- *        }
- *      }
- *    }
- *  }
- *
- * into in array of keys
- *
- * [
- *   'item.innerItem.thing',
- *   'item.innerItem.other',
- *   'item.innerItem.nest.thing',
- *   'item.innerItem.nest.other',
- * ]
- *
- * @param  {Object} [object={}] Object whos keys to iterate over.
- * @param  {String} [scope=''] A sring that can be prepended to the key.
+ * @param  {Object} [object={}] Object to inspect.
+ * @param  {String} [scope=''] A string that can be prepended to the object's keys.
  * @return {Array}
  */
 const leafKeys = function(object = {}, scope = '') {
