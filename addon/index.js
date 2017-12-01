@@ -681,18 +681,28 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      * @param  {String} key
      * @return {Void}
      */
-    _deleteKey(objName, key) {
+    _deleteKey(objName, key = '') {
       let obj = get(this, objName);
 
       if (isNone(obj)) {
         return;
       }
 
-      if (obj.hasOwnProperty(key)) {
+      let keyPath = key.split('.');
+      let isNestedKey = keyPath.length > 1;
+
+      if (isNestedKey) {
+        let path = keyPath.slice(0, -1).join('.');
+        let leaf = keyPath.slice(-1)[0];
+        let branch = get(obj, path);
+        branch && delete branch[leaf];
+        return;
+      } else if (obj.hasOwnProperty(key)) {
         delete obj[key];
-        this.notifyPropertyChange(`${objName}.${key}`);
-        this.notifyPropertyChange(objName);
       }
+
+      this.notifyPropertyChange(`${objName}.${key}`);
+      this.notifyPropertyChange(objName);
     }
   });
 }
