@@ -172,6 +172,42 @@ test('nested object updates when set without a validator', async function(assert
   assert.equal(find('h1').textContent.trim(), 'foo bar', 'should update observable value');
 });
 
+test('nested key error clears after entering valid input', async function(assert) {
+  let data = { person: { firstName: 'Jim' } };
+  let validator = ({ newValue }) => isPresent(newValue) || 'need a first name';
+  let c = new Changeset(data, validator);
+  this.set('c', c);
+
+  this.render(hbs`
+    <h1>{{c.person.firstName}}</h1>
+    <input
+      id="first-name"
+      type="text"
+      value={{c.person.firstName}}
+      onchange={{action (mut c.person.firstName) value="target.value"}}>
+    {{input id="first-name" value=c.person.firstName}}
+    <small id="first-name-error">{{c.error.person.firstName.validation}}</small>
+  `);
+
+  assert.equal(find('h1').textContent.trim(), 'Jim', 'precondition');
+  await fillIn('#first-name', 'foo');
+  await fillIn('#first-name', '');
+
+  {
+    let actual = find('#first-name-error').textContent.trim();
+    let expectedResult = 'need a first name';
+    assert.equal(actual, expectedResult, 'shows error message');
+  }
+
+  await fillIn('#first-name', 'foo');
+
+  {
+    let actual = find('#first-name-error').textContent.trim();
+    let expectedResult = '';
+    assert.equal(actual, expectedResult, 'hides error message');
+  }
+});
+
 test('a rollback propagates binding to deeply nested changesets', async function(assert) {
   let data = { person: { firstName: 'Jim', lastName: 'Bob' } };
   let changeset = new Changeset(data);
