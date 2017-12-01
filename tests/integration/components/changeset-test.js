@@ -185,7 +185,6 @@ test('nested key error clears after entering valid input', async function(assert
       type="text"
       value={{c.person.firstName}}
       onchange={{action (mut c.person.firstName) value="target.value"}}>
-    {{input id="first-name" value=c.person.firstName}}
     <small id="first-name-error">{{c.error.person.firstName.validation}}</small>
   `);
 
