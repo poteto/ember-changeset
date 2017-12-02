@@ -556,7 +556,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
             let branch = path.slice(0, -1).join('.');
             let [leaf] = path.slice(-1);
             let obj = get(errors, `__ember_meta__.values.${branch}`);
-            delete obj[leaf];
+            if (obj) delete obj['__ember_meta__']['values'][leaf];
           }
           set(this, ERRORS, errors);
         }
@@ -704,7 +704,6 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
         let [leaf] = keyPath.slice(-1);
         let branch = get(obj, path);
         branch && delete branch[leaf];
-        return;
       } else if (obj.hasOwnProperty(key)) {
         delete obj[key];
       }
