@@ -693,7 +693,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
 
       if (isNestedKey) {
         let path = keyPath.slice(0, -1).join('.');
-        let leaf = keyPath.slice(-1)[0];
+        let [leaf] = keyPath.slice(-1);
         let branch = get(obj, path);
         branch && delete branch[leaf];
         return;
