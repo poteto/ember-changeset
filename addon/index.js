@@ -549,7 +549,15 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
 
         let errors = get(this, ERRORS);
         if (errors['__ember_meta__'] && errors['__ember_meta__']['values']) {
-          delete errors['__ember_meta__']['values'][key];
+          let path = key.split('.');
+          if (path.length === 1) {
+            delete errors['__ember_meta__']['values'][key];
+          } else {
+            let branch = path.slice(0, -1).join('.');
+            let [leaf] = path.slice(-1);
+            let obj = get(errors, `__ember_meta__.values.${branch}`);
+            delete obj[leaf];
+          }
           set(this, ERRORS, errors);
         }
 
