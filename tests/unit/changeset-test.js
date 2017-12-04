@@ -322,7 +322,7 @@ test('#rollback resets valid state', function(assert) {
 
 test('observing #rollback values', function(assert) {
   let res;
-  const changeset = new Changeset(dummyModel, dummyValidator);
+  let changeset = new Changeset(dummyModel, dummyValidator);
   changeset.addObserver('name', function() { res = this.get('name') });
   changeset.get('name');
   assert.equal(undefined, changeset.get('name'), 'initial value');

@@ -251,7 +251,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
       }
 
       // Get keys before resetting
-      const keys = this._rollbackKeys()
+      let keys = this._rollbackKeys();
 
       set(this, RELAY_CACHE, {});
       set(this, CHANGES, {});
@@ -678,7 +678,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
     },
 
     /**
-     * Gets the changes and error keys
+     * Gets the changes and error keys.
      *
      * @private
      * @return {Array}
