@@ -244,16 +244,20 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      * @return {Changeset}
      */
     rollback() {
-      this._notifyVirtualProperties();
       let relayCache = get(this, RELAY_CACHE);
 
       for (let key in relayCache) {
         relayCache[key].rollback();
       }
 
+      // Get keys before resetting
+      const keys = this._rollbackKeys()
+
       set(this, RELAY_CACHE, {});
       set(this, CHANGES, {});
       set(this, ERRORS, {});
+      this._notifyVirtualProperties(keys)
+
       return this;
     },
 
@@ -660,17 +664,30 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
     },
 
     /**
-     * Notifies all virtual properties set on the changeset of a change.
+     * Notifies virtual properties set on the changeset of a change.
+     * You can specify which keys are notified by passing in an array.
      *
      * @private
+     * @param {Array} keys
      * @return {Void}
      */
-    _notifyVirtualProperties() {
-      let rollbackKeys = [...keys(get(this, CHANGES)), ...keys(get(this, ERRORS))];
-
-      for (let i = 0; i < rollbackKeys.length; i++) {
-        this.notifyPropertyChange(rollbackKeys[i]);
+    _notifyVirtualProperties(keys = this._rollbackKeys()) {
+      for (let i = 0; i < keys.length; i++) {
+        this.notifyPropertyChange(keys[i]);
       }
+    },
+
+    /**
+     * Gets the changes and error keys
+     *
+     * @private
+     * @return {Array}
+     */
+    _rollbackKeys() {
+      return [
+        ...keys(get(this, CHANGES)),
+        ...keys(get(this, ERRORS))
+      ];
     },
 
     /**

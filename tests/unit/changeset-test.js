@@ -320,6 +320,18 @@ test('#rollback resets valid state', function(assert) {
   assert.ok(get(dummyChangeset, 'isValid'), 'should be valid');
 });
 
+test('observing #rollback values', function(assert) {
+  let res;
+  const changeset = new Changeset(dummyModel, dummyValidator);
+  changeset.addObserver('name', function() { res = this.get('name') });
+  changeset.get('name');
+  assert.equal(undefined, changeset.get('name'), 'initial value');
+  changeset.set('name', 'Jack');
+  assert.equal('Jack', res, 'observer fired when setting value');
+  changeset.rollback();
+  assert.equal(undefined, res, 'observer fired with the value name was rollback to');
+});
+
 test('#error returns the error object', function(assert) {
   let dummyChangeset = new Changeset(dummyModel, dummyValidator);
   let expectedResult = { name: { validation: 'too short', value: 'a' } };
