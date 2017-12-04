@@ -549,7 +549,15 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
 
         let errors = get(this, ERRORS);
         if (errors['__ember_meta__'] && errors['__ember_meta__']['values']) {
-          delete errors['__ember_meta__']['values'][key];
+          let path = key.split('.');
+          if (path.length === 1) {
+            delete errors['__ember_meta__']['values'][key];
+          } else {
+            let branch = path.slice(0, -1).join('.');
+            let [leaf] = path.slice(-1);
+            let obj = get(errors, `__ember_meta__.values.${branch}`);
+            if (obj) delete obj['__ember_meta__']['values'][leaf];
+          }
           set(this, ERRORS, errors);
         }
 
@@ -681,18 +689,27 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      * @param  {String} key
      * @return {Void}
      */
-    _deleteKey(objName, key) {
+    _deleteKey(objName, key = '') {
       let obj = get(this, objName);
 
       if (isNone(obj)) {
         return;
       }
 
-      if (obj.hasOwnProperty(key)) {
+      let keyPath = key.split('.');
+      let isNestedKey = keyPath.length > 1;
+
+      if (isNestedKey) {
+        let path = keyPath.slice(0, -1).join('.');
+        let [leaf] = keyPath.slice(-1);
+        let branch = get(obj, path);
+        branch && delete branch[leaf];
+      } else if (obj.hasOwnProperty(key)) {
         delete obj[key];
-        this.notifyPropertyChange(`${objName}.${key}`);
-        this.notifyPropertyChange(objName);
       }
+
+      this.notifyPropertyChange(`${objName}.${key}`);
+      this.notifyPropertyChange(objName);
     }
   });
 }
