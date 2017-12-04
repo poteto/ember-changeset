@@ -324,7 +324,6 @@ test('observing #rollback values', function(assert) {
   let res;
   let changeset = new Changeset(dummyModel, dummyValidator);
   changeset.addObserver('name', function() { res = this.get('name') });
-  changeset.get('name');
   assert.equal(undefined, changeset.get('name'), 'initial value');
   changeset.set('name', 'Jack');
   assert.equal('Jack', res, 'observer fired when setting value');
