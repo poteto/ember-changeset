@@ -1,6 +1,5 @@
-import Ember from 'ember';
 import hasOwnNestedProperty from 'ember-changeset/utils/has-own-nested-property';
-import { module, test, skip } from 'qunit';
+import { module, test } from 'qunit';
 
 module('Unit | Utility | has own nested property');
 
