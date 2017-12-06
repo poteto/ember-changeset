@@ -10,6 +10,7 @@ import objectWithout from 'ember-changeset/utils/object-without';
 import includes from 'ember-changeset/utils/includes';
 import take from 'ember-changeset/utils/take';
 import isChangeset, { CHANGESET } from 'ember-changeset/utils/is-changeset';
+import hasOwnNestedProperty from 'ember-changeset/utils/has-own-nested-property';
 import deepSet from 'ember-deep-set';
 
 const {
@@ -617,7 +618,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
         return relay[key];
       }
 
-      if (this._hasOwnNestedProperty(changes, key)) {
+      if (hasOwnNestedProperty(changes, key)) {
         return get(changes, key);
       }
 
@@ -628,20 +629,6 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
       }
 
       return oldValue;
-    },
-
-    _hasOwnNestedProperty(object, key) {
-      let keyParts = key.split('.');
-      let nextKey = keyParts.shift();
-      if (nextKey in object) {
-        if (isObject(object[nextKey]) && keyParts.length) {
-          return this._hasOwnNestedProperty(object[nextKey], keyParts.join('.'));
-        } else {
-          return true;
-        }
-      } else {
-        return false;
-      }
     },
 
     /**
