@@ -90,6 +90,15 @@ test('#get returns change that is a blank value', function(assert) {
   assert.equal(result, '', 'should proxy to change');
 });
 
+test('#get with nested key returns correct value', function(assert) {
+  let date = {};
+  let foo = { date };
+  let dummyModel = EmberObject.create({ foo });
+  let changeset = new Changeset(dummyModel);
+  assert.equal(changeset.get('foo'), foo);
+  assert.equal(changeset.get('foo.date'), date);
+});
+
 test('#set adds a change if valid', function(assert) {
   let expectedChanges = [{ key: 'name', value: 'foo' }];
   let dummyChangeset = new Changeset(dummyModel);
