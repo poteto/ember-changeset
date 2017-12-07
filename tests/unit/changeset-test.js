@@ -1,7 +1,6 @@
 import Ember from 'ember';
 import Changeset from 'ember-changeset';
 import { module, test } from 'qunit';
-import Relay from 'ember-changeset/-private/relay';
 
 const {
   Object: EmberObject,
@@ -91,22 +90,13 @@ test('#get returns change that is a blank value', function(assert) {
   assert.equal(result, '', 'should proxy to change');
 });
 
-test('#get returns relay when plain object', function(assert) {
+test('#get with nested key returns correct value', function(assert) {
   let date = {};
-  let Dummy = EmberObject.extend({});
-  let dummyModel = Dummy.create({ date });
+  let foo = { date };
+  let dummyModel = EmberObject.create({ foo });
   let changeset = new Changeset(dummyModel);
-  assert.ok(changeset.get('date') instanceof Relay);
-});
-
-test('#get returns original object when not a plain object', function(assert) {
-  let Moment = () => {};
-  let moment = () => new Moment();
-  let Dummy = EmberObject.extend({});
-  let date = moment();
-  let dummyModel = Dummy.create({ date });
-  let changeset = new Changeset(dummyModel);
-  assert.equal(changeset.get('date'), date);
+  assert.equal(changeset.get('foo'), foo);
+  assert.equal(changeset.get('foo.date'), date);
 });
 
 test('#set adds a change if valid', function(assert) {

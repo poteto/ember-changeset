@@ -11,7 +11,6 @@ import includes from 'ember-changeset/utils/includes';
 import take from 'ember-changeset/utils/take';
 import isChangeset, { CHANGESET } from 'ember-changeset/utils/is-changeset';
 import deepSet from 'ember-deep-set';
-import { isPlainObject } from 'lodash';
 
 const {
   Object: EmberObject,
@@ -624,7 +623,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
 
       let oldValue = get(content, key);
 
-      if (isPlainObject(oldValue) && !plainValue) {
+      if (isObject(oldValue) && !plainValue) {
         return this._relayFor(key);
       }
 

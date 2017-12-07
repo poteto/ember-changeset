@@ -22,8 +22,7 @@
   "homepage": "https://github.com/poteto/ember-changeset",
   "dependencies": {
     "ember-cli-babel": "^6.8.2",
-    "ember-deep-set": "^0.1.2",
-    "ember-lodash": "^4.17.6"
+    "ember-deep-set": "^0.1.2"
   },
   "devDependencies": {
     "broccoli-asset-rev": "^2.4.5",
