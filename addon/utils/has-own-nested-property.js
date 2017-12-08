@@ -8,8 +8,7 @@ import isObject from './is-object';
  * @return {Boolean}
  */
 export default function hasOwnNestedProperty(object, key) {
-  let keyParts = key.split('.');
-  let nextKey = keyParts.shift();
+  let [nextKey, ...keyParts] = key.split('.');
 
   if (nextKey in object) {
     /*
