@@ -10,7 +10,7 @@ import isObject from './is-object';
 export default function hasOwnNestedProperty(object, key) {
   let [nextKey, ...keyParts] = key.split('.');
 
-  if (nextKey in object) {
+  if (object.hasOwnProperty(nextKey)) {
     /*
      * If there are no more keys to test we have reached
      * the end of the path and the key is present
