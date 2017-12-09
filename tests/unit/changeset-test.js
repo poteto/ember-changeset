@@ -166,6 +166,24 @@ test('#set adds the change without validation if `skipValidate` option is set', 
   assert.deepEqual(changes, expectedChanges, 'should add change');
 });
 
+test('#set should remove nested changes when setting roots', function(assert) {
+  set(dummyModel, 'org', {
+    usa: {
+      ny: 'ny',
+      ca: 'ca',
+    },
+  });
+
+  let c = new Changeset(dummyModel);
+  c.set('org.usa.ny', 'foo');
+  c.set('org.usa.ca', 'bar');
+  c.set('org', 'no usa for you')
+
+  let actual = get(c, 'changes');
+  let expectedResult = [{ key: 'org', value: 'no usa for you' }];
+  assert.deepEqual(actual, expectedResult, 'removes nested changes');
+});
+
 test('#prepare provides callback to modify changes', function(assert) {
   let date = new Date();
   let dummyChangeset = new Changeset(dummyModel);
