@@ -46,7 +46,7 @@
     "ember-native-dom-helpers": "^0.4.1",
     "ember-resolver": "^4.0.0",
     "ember-source": "~2.16.0",
-    "jsverify": "^0.8.3",
+    "jsverify": "jsverify/jsverify#03767b9e5cf014f6ec5e0c0f1d84b6a868dab943",
     "loader.js": "^4.2.3"
   },
   "engines": {

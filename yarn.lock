@@ -3955,9 +3955,9 @@ jsprim@^1.2.2:
     json-schema "0.2.3"
     verror "1.10.0"
 
-jsverify@^0.8.3:
+jsverify@jsverify/jsverify#03767b9e5cf014f6ec5e0c0f1d84b6a868dab943:
   version "0.8.3"
-  resolved "https://registry.yarnpkg.com/jsverify/-/jsverify-0.8.3.tgz#02e9178e1924b5aaf959c0239af84ed5c6d0738c"
+  resolved "https://codeload.github.com/jsverify/jsverify/tar.gz/03767b9e5cf014f6ec5e0c0f1d84b6a868dab943"
   dependencies:
     lazy-seq "^1.0.0"
     rc4 "~0.1.5"
