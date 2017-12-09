@@ -217,6 +217,25 @@ test('#execute does not apply changes to content if invalid', function(assert) {
   assert.equal(get(dummyModel, 'name'), undefined, 'should not apply changes');
 });
 
+test('#execute does not remove original nested objects', function(assert) {
+  class Dog {
+    tag() {}
+  }
+
+  let d = new Dog;
+  d.info = {};
+  d.info.name = 'mishka';
+  d.info.breed = 'husky';
+
+  let c = new Changeset(d);
+  c.set('info.name', 'laika');
+  c.execute();
+
+  let actual = get(c, 'info');
+  let expectedResult = d;
+  assert.equal(actual, expectedResult, 'should not remove original object');
+});
+
 test('#save proxies to content', function(assert) {
   let result;
   let options;
