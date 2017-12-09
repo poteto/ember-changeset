@@ -1,6 +1,9 @@
 /* eslint-env node */
 'use strict';
 
-module.exports = {
+const emberRollup = require('ember-rollup');
+const runtimeDeps = ['testcheck'];
+
+module.exports = emberRollup(runtimeDeps, {
   name: 'ember-changeset'
-};
+});
