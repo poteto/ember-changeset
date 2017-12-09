@@ -251,6 +251,48 @@ test('#execute does not remove original nested objects', function(a) {
   a.ok(condition, 'should not remove original object');
 });
 
+[
+  {
+    model: () => ({ org: { usa: { ny: '', ca: '' } } }),
+    setCalls: [
+      ['org.usa.ny', 'foo'],
+      ['org.usa.ca', 'bar'],
+      ['org', 'no usa for you'],
+    ],
+    result: () => ({ org: 'no usa for you' }),
+  },
+  {
+    model: () => ({ org: { usa: { ny: '', ca: '' } } }),
+    setCalls: [
+      ['org.usa.ny', 'foo'],
+      ['org', 'no usa for you'],
+      ['org.usa.ca', 'bar'],
+    ],
+    result: () => ({ org: { usa: { ny: '', ca: 'bar' } } }),
+  },
+  {
+    model: () => ({ org: { usa: { ny: '', ca: '' } } }),
+    setCalls: [
+      ['org', 'no usa for you'],
+      ['org.usa.ny', 'foo'],
+      ['org.usa.ca', 'bar'],
+    ],
+    result: () => ({ org: { usa: { ny: 'foo', ca: 'bar' } } }),
+  },
+].forEach(({ model, setCalls, result }, i) => {
+  test(`#execute - table-driven test ${i+1}`, function(assert) {
+    let m = model();
+    let c = new Changeset(m);
+
+    setCalls.forEach(([k, v]) => c.set(k, v));
+    c.execute();
+
+    let actual = m;
+    let expectedResult = result();
+    assert.deepEqual(actual, expectedResult, `table driven test ${i+1}`);
+  });
+});
+
 test('#save proxies to content', function(assert) {
   let result;
   let options;
