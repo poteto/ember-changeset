@@ -546,8 +546,8 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
 
         if (!isEqual(oldValue, value)) {
           deepSet(changes, key, value);
-        } else if (key in changes) {
-          delete changes[key];
+        } else if (hasOwnNestedProperty(changes, key)) {
+          this._deleteKey(CHANGES, key);
         }
         this.notifyPropertyChange(CHANGES);
         this.notifyPropertyChange(root);
@@ -560,7 +560,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
           } else {
             let branch = path.slice(0, -1).join('.');
             let [leaf] = path.slice(-1);
-            let obj = get(errors, `__ember_meta__.values.${branch}`);
+            let obj = get(errors, branch);
             if (obj) delete obj['__ember_meta__']['values'][leaf];
           }
           set(this, ERRORS, errors);

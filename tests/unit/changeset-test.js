@@ -1017,3 +1017,17 @@ test('can set nested keys after validate', function(assert) {
     .then(() => c.set('org.usa.ny', 'should not fail'))
     .finally(done);
 });
+
+test('#set should delete nested changes when equal', function(assert) {
+  set(dummyModel, 'org', {
+    usa: { ny: 'i need a vacation' }
+  });
+
+  let c = new Changeset(dummyModel, dummyValidator, dummyValidations);
+  c.set('org.usa.ny', 'whoop');
+  c.set('org.usa.ny', 'i need a vacation');
+
+  let actual = get(c, 'change.org.usa.ny');
+  let expectedResult = undefined;
+  assert.equal(actual, expectedResult, 'should clear nested key');
+});
