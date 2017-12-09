@@ -10,6 +10,8 @@ module.exports = function(defaults) {
     options.vendorFiles = { 'jquery.js': null };
   }
   let app = new EmberAddon(defaults, options);
+  app.import('node_modules/jsverify/dist/jsverify.standalone.js');
+  app.import('vendor/shims/jsverify.js');
 
   /*
     This build file specifies the options for the dummy test app of this
