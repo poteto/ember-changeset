@@ -45,6 +45,7 @@
     "ember-native-dom-event-dispatcher": "^0.6.1",
     "ember-native-dom-helpers": "^0.4.1",
     "ember-resolver": "^4.0.0",
+    "ember-rollup": "^0.3.8",
     "ember-source": "~2.16.0",
     "jsverify": "jsverify/jsverify#03767b9e5cf014f6ec5e0c0f1d84b6a868dab943",
     "loader.js": "^4.2.3"
