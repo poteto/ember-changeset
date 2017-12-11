@@ -209,6 +209,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
           }
         });
       }
+
       return this;
     },
 
@@ -545,6 +546,13 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
         this._deleteKey(ERRORS, key);
 
         if (!isEqual(oldValue, value)) {
+          // Ensure each key leading up to leaf key is an object.
+          // Example: for `foo.bar.baz`, `foo` and `foo.bar` should be objects.
+          key.split('.').forEach((_, i, parts) => {
+            let key = parts.slice(0, i+1).join('.');
+            if (!isObject(get(changes, key))) deepSet(changes, key, {});
+          });
+
           deepSet(changes, key, value);
         } else if (hasOwnNestedProperty(changes, key)) {
           this._deleteKey(CHANGES, key);
