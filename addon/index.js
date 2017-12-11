@@ -27,8 +27,8 @@ const {
   isNone,
   isPresent,
   set,
-  setProperties,
-  typeOf
+  typeOf,
+  runInDebug
 } = Ember;
 const { keys } = Object;
 const CONTENT = '_content';
@@ -99,6 +99,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      * @return {Any}
      */
     unknownProperty(key) {
+      console.log('unknown property', key, this._valueFor(key))
       return this._valueFor(key);
     },
 
@@ -111,6 +112,8 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      * @return {Any}
      */
     setUnknownProperty(key, value) {
+      console.log('set unknown property', key, value)
+
       let changesetOptions = get(this, OPTIONS);
       let skipValidate = get(changesetOptions, 'skipValidate');
 
@@ -190,24 +193,22 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
       if (get(this, 'isValid') && get(this, 'isDirty')) {
         let content = get(this, CONTENT);
         let changes = get(this, CHANGES);
+        let keys = leafKeys(changes);
 
-        let changedKeys = leafKeys(changes);
-        let resetProperties = {};
-
-        changedKeys.forEach(function(key) {
-          let [root] = key.split('.');
-          if (!resetProperties[root]) {
-            resetProperties[root] = get(content, root);
-          }
+        // `keys` should only contain leaf keys. For example, `foo` and
+        // `foo.bar` should not be in `keys` at the same time.
+        runInDebug(() => {
+          let test = keys
+            .slice()
+            .sort()
+            .reduce((prev, curr) => prev && curr.indexOf(prev) !== 0, true);
+          assert(`List of changes has some non-leaf keys: ${changes}`, test);
         });
 
-        setProperties(content, changes);
-
-        leafKeys(resetProperties).forEach(function(key) {
-          if (!changedKeys.includes(key)) {
-            deepSet(content, key, get(resetProperties, key));
-          }
-        });
+        for (let i = 0; i < keys.length; i++) {
+          let k = keys[i];
+          deepSet(content, k, get(this, `${CHANGES}.${k}`));
+        }
       }
 
       return this;
