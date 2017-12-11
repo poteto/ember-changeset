@@ -352,6 +352,38 @@ test('observing #rollback values', function(assert) {
   })
 });
 
+test('observing #rollback only notifies properties once when errors and changes have the same keys', function(assert) {
+  let changeset = new Changeset(dummyModel, dummyValidator);
+  let count = 0;
+
+  /**
+   * It would be nice not to have to it this way but
+   * it's forcing changes and errors to have the same keys
+   */
+  changeset._changes['name'] = 'J';
+  changeset._errors['name'] = 'too short';
+
+  assert.deepEqual(
+    changeset.get('changes'),
+    [{ key: 'name', value: 'J' }],
+    'Precondition - Name should appear changed'
+  );
+
+  assert.deepEqual(
+    changeset.get('errors'),
+    [{ key: 'name', value: 'too short' }],
+    'Precondition - Name should have an error'
+  );
+
+  // Add observer AFTER setting values
+  changeset.addObserver('name', function() {
+    count++;
+  });
+
+  changeset.rollback();
+  assert.equal(count, 1, 'Name property should be notified once');
+});
+
 test('#error returns the error object', function(assert) {
   let dummyChangeset = new Changeset(dummyModel, dummyValidator);
   let expectedResult = { name: { validation: 'too short', value: 'a' } };
