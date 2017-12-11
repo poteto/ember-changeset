@@ -321,14 +321,35 @@ test('#rollback resets valid state', function(assert) {
 });
 
 test('observing #rollback values', function(assert) {
-  let res;
+  set(dummyModel, 'nested', { name: undefined })
   let changeset = new Changeset(dummyModel, dummyValidator);
-  changeset.addObserver('name', function() { res = this.get('name') });
-  assert.equal(undefined, changeset.get('name'), 'initial value');
-  changeset.set('name', 'Jack');
-  assert.equal('Jack', res, 'observer fired when setting value');
-  changeset.rollback();
-  assert.equal(undefined, res, 'observer fired with the value name was rollback to');
+
+  [
+    {
+      desc: 'shallow',
+      path: 'name',
+      value: 'Jack'
+    },
+    {
+      desc: 'nested',
+      path: 'nested.name',
+      value: 'Jack'
+    },
+  ].forEach(function({ desc, path, value }){
+    let res;
+
+    changeset.addObserver(path, function() {
+      res = this.get(path);
+    });
+
+    assert.equal(changeset.get(path), undefined, `Precondition - ${desc} initial value`);
+
+    changeset.set(path, value);
+    assert.equal(value, res, `Confirmation - ${desc} observer fired when setting value`);
+
+    changeset.rollback();
+    assert.equal(res, undefined, `Result - ${desc} observer fired with the value it was rollback to`);
+  })
 });
 
 test('#error returns the error object', function(assert) {
