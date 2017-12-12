@@ -9,7 +9,6 @@ import pureAssign from 'ember-changeset/utils/assign';
 import objectWithout from 'ember-changeset/utils/object-without';
 import includes from 'ember-changeset/utils/includes';
 import take from 'ember-changeset/utils/take';
-import uniq from 'ember-changeset/utils/uniq';
 import isChangeset, { CHANGESET } from 'ember-changeset/utils/is-changeset';
 import deepSet from 'ember-deep-set';
 
@@ -693,10 +692,10 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      * @return {Array}
      */
     _rollbackKeys() {
-      return uniq([
+      return emberArray([
         ...leafKeys(get(this, CHANGES)),
         ...leafKeys(get(this, ERRORS))
-      ]);
+      ]).uniq();
     },
 
     /**
