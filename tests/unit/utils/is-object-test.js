@@ -1,8 +1,7 @@
-import Ember from 'ember';
+import EmberObject from '@ember/object';
+import ObjectProxy from '@ember/object/proxy';
 import isObject from 'ember-changeset/utils/is-object';
 import { module, test } from 'qunit';
-
-const { Object: EmberObject, ObjectProxy } = Ember;
 
 module('Unit | Utility | is object');
 

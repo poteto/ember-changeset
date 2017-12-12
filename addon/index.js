@@ -1,4 +1,4 @@
-import Ember from 'ember';
+//import Ember from 'ember';
 import Relay from 'ember-changeset/-private/relay';
 import objectToArray from 'ember-changeset/utils/computed/object-to-array';
 import isEmptyObject from 'ember-changeset/utils/computed/is-empty-object';
@@ -13,23 +13,15 @@ import isChangeset, { CHANGESET } from 'ember-changeset/utils/is-changeset';
 import hasOwnNestedProperty from 'ember-changeset/utils/has-own-nested-property';
 import deepSet from 'ember-deep-set';
 
-const {
-  Object: EmberObject,
-  RSVP: { all, resolve },
-  computed: { not, readOnly },
-  Evented,
-  A: emberArray,
-  assert,
-  get,
-  isArray,
-  isEmpty,
-  isEqual,
-  isNone,
-  isPresent,
-  set,
-  setProperties,
-  typeOf
-} = Ember;
+import EmberObject from '@ember/object';
+import Evented from '@ember/object/evented';
+import { A as emberArray, isArray } from '@ember/array';
+import { all, resolve } from 'rsvp';
+import { assert } from '@ember/debug';
+import { isEmpty, isEqual, isNone, isPresent, typeOf } from '@ember/utils';
+import { not, readOnly } from '@ember/object/computed';
+import { get, set, setProperties } from '@ember/object';
+
 const { keys } = Object;
 const CONTENT = '_content';
 const CHANGES = '_changes';

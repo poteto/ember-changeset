@@ -1,8 +1,6 @@
-import Ember from 'ember';
+import EmberObject from '@ember/object';
 import objectToArray from 'ember-changeset/utils/computed/object-to-array';
 import { module, test } from 'qunit';
-
-const { Object: EmberObject } = Ember;
 
 module('Unit | Utility | object to array');
 

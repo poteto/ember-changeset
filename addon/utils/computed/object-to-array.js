@@ -1,10 +1,7 @@
 import Ember from 'ember';
+import { computed, get } from '@ember/object';
+import { typeOf } from '@ember/utils';
 
-const {
-  computed,
-  get,
-  typeOf
-} = Ember;
 const { keys } = Object;
 const assign = Ember.assign || Ember.merge;
 
