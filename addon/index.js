@@ -40,6 +40,7 @@ const OPTIONS = '_options';
 const RUNNING_VALIDATIONS = '_runningValidations';
 const BEFORE_VALIDATION_EVENT = 'beforeValidation';
 const AFTER_VALIDATION_EVENT = 'afterValidation';
+const KEY_SCOPE = '_keyScope'
 
 function defaultValidatorFn() {
   return true;
@@ -599,36 +600,47 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      * Value for change or the original value.
      *
      * @private
-     * @param  {String} key
-     * @param {Boolean} [plainValue=false]
-     * @return {Any}
+     * @param {String} key
+     * @return {Error|Change|Relay|Any}
      */
-    _valueFor(key, plainValue = false) {
+    _valueFor(key) {
       let changes = get(this, CHANGES);
       let errors = get(this, ERRORS);
       let content = get(this, CONTENT);
-      let relay = get(this, RELAY_CACHE);
 
+      // Goal: client should never see relays.
+
+      // TODO: Fix condition.
+      // 1. hasOwnProperty(errors, key)
+      // 2. Fix _deleteKey such that object referred to by hasOwnNestedProperty
+      // is always { __error__, value, validation }. The object should never be
+      // empty, and we shouldn't have to do an `isNone` check here.
+      // Example: `runInDebug(() => (
+      //   assert('__error__' in obj, 'value' in obj && 'validation' in obj)
+      // ))`
       if (errors.hasOwnProperty(key)) {
         let v = get(errors, `${key}.value`);
         if (!isNone(v)) return v;
       }
 
-      if (relay.hasOwnProperty(key)) {
-        return relay[key];
-      }
-
-      if (hasOwnNestedProperty(changes, key)) {
+      // TODO: Fix condition.
+      // 1. hasOwnProperty(changes, key)
+      // 2. A change should be changed to `{ __change__, value }`. This will
+      // make it easy to identify changes.
+      if (hasOwnProperty(changes, key)) {
         return get(changes, key);
       }
 
-      let oldValue = get(content, key);
+      let original = get(content, key);
 
-      if (isObject(oldValue) && !plainValue) {
+      if (isObject(original) && !plainValue) {
         return this._relayFor(key);
       }
 
-      return oldValue;
+      // TODO: have relay extend object proxy
+      // TODO: support arrays with arrayproxy?
+
+      return original;
     },
 
     /**
