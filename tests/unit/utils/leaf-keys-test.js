@@ -1,6 +1,6 @@
 import leafKeys from 'ember-changeset/utils/leaf-keys';
 import { module, test } from 'qunit';
-
+import RSVP from 'rsvp';
 import EmberObject from '@ember/object';
 
 module('Unit | Utility | leaf-keys');
@@ -132,6 +132,16 @@ const TEST_DATA = [{
     'item.innerItem.nest.thing',
     'item.innerItem.nest.other',
   ],
+}, {
+  desc: 'it ignores promises',
+  input: {
+    foo: {
+      bar: new RSVP.Promise(() => {})
+    }
+  },
+  expected: [
+    'foo.bar',
+  ]
 }];
 
 function nullCreatedObjects() {
