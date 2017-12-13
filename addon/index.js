@@ -502,7 +502,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      * @param {String} key
      * @param {Any} newValue
      * @param {Any} oldValue
-     * @return {Boolean|String}
+     * @return {Boolean|String|Promise}
      */
     _validate(key, newValue, oldValue) {
       let changes = get(this, CHANGES);
