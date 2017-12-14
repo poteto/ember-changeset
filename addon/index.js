@@ -11,6 +11,8 @@ import includes from 'ember-changeset/utils/includes';
 import take from 'ember-changeset/utils/take';
 import isChangeset, { CHANGESET } from 'ember-changeset/utils/is-changeset';
 import hasOwnNestedProperty from 'ember-changeset/utils/has-own-nested-property';
+import Err from 'ember-changeset/-private/err';
+import Change from 'ember-changeset/-private/change';
 import deepSet from 'ember-deep-set';
 
 const {
