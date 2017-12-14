@@ -13,6 +13,8 @@ const {
  *
  * Property accesses on a Relay object delegate to the changeset, optionally
  * prefixed by a key scope.
+ *
+ * TODO: Relay should extend ObjectProxy.
  */
 export default EmberObject.extend({
   changeset: null,
