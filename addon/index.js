@@ -40,22 +40,12 @@ const OPTIONS = '_options';
 const RUNNING_VALIDATIONS = '_runningValidations';
 const BEFORE_VALIDATION_EVENT = 'beforeValidation';
 const AFTER_VALIDATION_EVENT = 'afterValidation';
-const KEY_SCOPE = '_keyScope'
 
 function defaultValidatorFn() {
   return true;
 }
 
 const defaultOptions = { skipValidate: false };
-
-class Change {
-}
-
-class Err {
-}
-
-class RunningValidation {
-}
 
 /**
  * Creates new changesets.
