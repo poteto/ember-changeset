@@ -48,6 +48,15 @@ function defaultValidatorFn() {
 
 const defaultOptions = { skipValidate: false };
 
+class Change {
+}
+
+class Err {
+}
+
+class RunningValidation {
+}
+
 /**
  * Creates new changesets.
  *
@@ -608,27 +617,31 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
       let errors = get(this, ERRORS);
       let content = get(this, CONTENT);
 
-      // Goal: client should never see relays.
+      // TODO: move classes out of function
 
-      // TODO: Fix condition.
-      // 1. hasOwnProperty(errors, key)
-      // 2. Fix _deleteKey such that object referred to by hasOwnNestedProperty
-      // is always { __error__, value, validation }. The object should never be
-      // empty, and we shouldn't have to do an `isNone` check here.
-      // Example: `runInDebug(() => (
-      //   assert('__error__' in obj, 'value' in obj && 'validation' in obj)
-      // ))`
-      if (errors.hasOwnProperty(key)) {
-        let v = get(errors, `${key}.value`);
-        if (!isNone(v)) return v;
+      class Err {
+        constructor(value, validation) {
+          this.value = value;
+          this.validation = validation;
+        }
       }
 
-      // TODO: Fix condition.
-      // 1. hasOwnProperty(changes, key)
-      // 2. A change should be changed to `{ __change__, value }`. This will
-      // make it easy to identify changes.
-      if (hasOwnProperty(changes, key)) {
-        return get(changes, key);
+      class Change {
+        constructor(value) {
+          this.value = value;
+        }
+      }
+
+      // If `errors` has a nested property at `key` that is an `Err`,
+      if (hasOwnNestedProperty(errors, key, Err)) {
+        // Return the value of that `Err`.
+        return get(errors, `${key}.value`);
+      }
+
+      // If `changes` has a nested property at `key` that is a `Change`,
+      if (hasOwnNestedProperty(changes, key, Change)) {
+        // Return the value of that `Change`.
+        return get(changes, `${key}.value`);
       }
 
       let original = get(content, key);
@@ -638,7 +651,6 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
       }
 
       // TODO: have relay extend object proxy
-      // TODO: support arrays with arrayproxy?
 
       return original;
     },
