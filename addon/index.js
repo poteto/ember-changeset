@@ -617,21 +617,6 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
       let errors = get(this, ERRORS);
       let content = get(this, CONTENT);
 
-      // TODO: move classes out of function
-
-      class Err {
-        constructor(value, validation) {
-          this.value = value;
-          this.validation = validation;
-        }
-      }
-
-      class Change {
-        constructor(value) {
-          this.value = value;
-        }
-      }
-
       // If `errors` has a nested property at `key` that is an `Err`,
       if (hasOwnNestedProperty(errors, key, Err)) {
         // Return the value of that `Err`.
