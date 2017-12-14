@@ -547,7 +547,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
         this._deleteKey(ERRORS, key);
 
         if (!isEqual(oldValue, value)) {
-          deepSet(changes, key, value);
+          deepSet(changes, key, new Change(value));
         } else if (hasOwnNestedProperty(changes, key)) {
           this._deleteKey(CHANGES, key);
         }
