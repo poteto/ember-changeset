@@ -19,6 +19,7 @@ const {
 export default EmberObject.extend({
   changeset: null,
   key: null,
+  content: null,
 
   init() {
     this._changedKeys = {};
@@ -46,5 +47,6 @@ export default EmberObject.extend({
   destroy() {
     this._super(...arguments);
     this.changeset = null;
+    this.content = null;
   }
 });

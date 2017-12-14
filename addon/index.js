@@ -610,9 +610,10 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      *
      * @private
      * @param {String} key
+     * @param {Boolean} [plainValue=false]
      * @return {Error|Change|Relay|Any}
      */
-    _valueFor(key) {
+    _valueFor(key, plainValue = false) {
       let changes = get(this, CHANGES);
       let errors = get(this, ERRORS);
       let content = get(this, CONTENT);
@@ -632,10 +633,8 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
       let original = get(content, key);
 
       if (isObject(original) && !plainValue) {
-        return this._relayFor(key);
+        return this._relayFor(key, original);
       }
-
-      // TODO: have relay extend object proxy
 
       return original;
     },
@@ -649,7 +648,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      * @param {Boolean} [shouldInvalidate=false]
      * @return {Any}
      */
-    _relayFor(key, shouldInvalidate = false) {
+    _relayFor(key, value, shouldInvalidate = false) {
       let cache = get(this, RELAY_CACHE);
       let found = cache[key];
 
@@ -662,7 +661,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
         return found;
       }
 
-      let relay = Relay.create({ key, changeset: this });
+      let relay = Relay.create({ key, changeset: this, content: value });
       cache[key] = relay;
       return relay;
     },
