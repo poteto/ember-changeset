@@ -178,9 +178,9 @@ Note that keys can be arbitrarily nested:
 ```js
 {
   address: {
-    country: {
-      value: 'Atlantis',
-      validation: 'Must be a real country'
+    zipCode: {
+      value: 123,
+      validation: 'Zip code must have 5 digits'
     }
   }
 }
@@ -193,8 +193,8 @@ You can use this property to locate a single error:
   <p>{{changeset.error.firstName.validation}}</p>
 {{/if}}
 
-{{#if changeset.error.address.country}}
-  <p>{{changeset.error.address.country.validation}}</p>
+{{#if changeset.error.address.zipCode}}
+  <p>{{changeset.error.address.zipCode.validation}}</p>
 {{/if}}
 ```
 
@@ -215,7 +215,7 @@ Note that keys can be arbitrarily nested:
 ```js
 {
   address: {
-    country: 'Atlantis'
+    zipCode: 10001
   }
 }
 ```
@@ -224,7 +224,7 @@ You can use this property to locate a single change:
 
 ```hbs
 {{changeset.change.firstName}}
-{{changeset.change.address.country}}
+{{changeset.change.address.zipCode}}
 ```
 
 **[⬆️ back to top](#api)**
@@ -241,9 +241,9 @@ Returns an array of errors. If your `validate` function returns a non-boolean va
     validation: 'First name must be greater than 7 characters'
   },
   {
-    key: 'address.country',
-    value: 'Atlantis',
-    validation: 'Must be a real country'
+    key: 'address.zipCode',
+    value: 10001,
+    validation: 'Zip code must have 5 digits'
   }
 ]
 ```
@@ -274,8 +274,8 @@ Returns an array of changes to be executed. Only valid changes will be stored on
     value: 'Jim'
   },
   {
-    key: 'address.country',
-    value: 'Atlantis'
+    key: 'address.zipCode',
+    value: 10001
   }
 ]
 ```
