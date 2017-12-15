@@ -425,15 +425,17 @@ Provides a function to run before emitting changes to the model. The callback fu
 
 ```js
 changeset.prepare((changes) => {
-  // changes = { firstName: "Jim", lastName: "Bob" };
+  // changes = { firstName: "Jim", lastName: "Bob", 'address.zipCode': 07030 };
   let modified = {};
 
   for (let key in changes) {
-    modified[underscore(key)] = changes[key];
+    let newKey = key.split('.').map(underscore).join('.')
+    modified[newKey] = changes[key];
   }
 
   // don't forget to return, the original changes object is not mutated
-  return modified; // { first_name: "Jim", last_name: "Bob" }
+  // modified = { first_name: "Jim", last_name: "Bob", 'address.zip_code': 07030 };
+  return modified;
 }); // returns changeset
 ```
 
@@ -475,13 +477,20 @@ Merges 2 changesets and returns a new changeset with the same underlying content
 ```js
 let changesetA = new Changeset(user, validatorFn);
 let changesetB = new Changeset(user, validatorFn);
+
 changesetA.set('firstName', 'Jim');
+changesetA.set('address.city', 'Pyongyang');
+
 changesetB.set('firstName', 'Jimmy');
 changesetB.set('lastName', 'Fallon');
+changesetB.set('address.city', 'New York');
+
 let changesetC = changesetA.merge(changesetB);
 changesetC.execute();
+
 user.get('firstName'); // "Jimmy"
 user.get('lastName'); // "Fallon"
+user.get('address.city'); // "New York"
 ```
 
 Note that both changesets `A` and `B` are not destroyed by the merge, so you might want to call `destroy()` on them to avoid memory leaks.
@@ -505,11 +514,14 @@ Validates all or a single field on the changeset. This will also validate the pr
 ```js
 user.set('lastName', 'B');
 changeset.get('isValid'); // true
+
 changeset.validate('lastName'); // validate single field; returns Promise
 changeset.validate().then(() => {
   changeset.get('isInvalid'); // true
   changeset.get('errors'); // [{ key: 'lastName', validation: 'too short', value: 'B' }]
 }); // validate all fields; returns Promise
+
+changeset.validate('address.country'); // can also validate nested keys
 ```
 
 **[⬆️ back to top](#api)**
@@ -526,6 +538,10 @@ changeset.addError('email', {
 
 // shortcut
 changeset.addError('email', 'Email already taken');
+
+// nested key
+changeset.addError('address.line', { value: '', validation: 'Line is empty' });
+changeset.addError('address.line', 'Line is empty');
 ```
 
 Adding an error manually does not require any special setup. The error will be cleared if the value for the `key` is subsequently set to a valid value.  Adding an error will overwrite any existing error or change for `key`.
@@ -538,6 +554,7 @@ Manually push errors to the changeset.
 
 ```js
 changeset.pushErrors('age', 'Too short', 'Not a valid number', 'Must be greater than 18');
+changeset.pushErrors('dogYears.age', 'Too short', 'Not a valid number', 'Must be greater than 2.5');
 ```
 
 This is compatible with `ember-changeset-validations`, and allows you to either add a new error with multiple validations messages or push to an existing array of validation messages.
@@ -559,14 +576,19 @@ let snapshot = changeset.snapshot(); // snapshot
 Restores a snapshot of changes and errors to the changeset. This overrides existing changes and errors.
 
 ```js
-let user = { name: 'Adam' };
+let user = { name: 'Adam', address: { country: 'United States' } };
 let changeset = new Changeset(user, validatorFn);
-changeset.set('name', 'Jim Bob');
 
+changeset.set('name', 'Jim Bob');
+changeset.set('address.country', 'North Korea');
 let snapshot = changeset.snapshot();
-changeset.set('name', 'Potato');
+
+changeset.set('name', 'Poteto');
+changeset.set('address.country', 'Australia')
+
 changeset.restore(snapshot);
 changeset.get('name'); // "Jim Bob"
+changeset.get('address.country'); // "North Korea"
 ```
 
 **[⬆️ back to top](#api)**
