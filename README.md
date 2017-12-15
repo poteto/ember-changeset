@@ -598,14 +598,18 @@ changeset.get('address.country'); // "North Korea"
 Unlike `Ecto.Changeset.cast`, `cast` will take an array of allowed keys and remove unwanted keys off of the changeset.
 
 ```js
-let allowed = ['name', 'password']
+let allowed = ['name', 'password', 'address.country']
 let changeset = new Changeset(user, validatorFn);
+
 changeset.set('name', 'Jim Bob');
 changeset.set('unwantedProp', 123);
+changeset.set('another.unwantedProp', 'foo');
 
 changeset.get('unwantedProp'); // 123
+changeset.get('another.unwantedProp'); // 'foo'
 changeset.cast(allowed); // returns changeset
 changeset.get('unwantedProp'); // undefined
+changeset.get('another.unwantedProp'); // undefined
 ```
 
 For example, this method can be used to only allow specified changes through prior to saving. This is especially useful if you also setup a `schema` object for your model (using Ember Data), which can then be exported and used as a list of allowed keys:
@@ -645,19 +649,20 @@ Checks to see if async validator for a given key has not resolved.  If no key is
 
 ```js
 changeset.set('lastName', 'Appleseed');
-changeset.validate('lastName');
-changeset.isValidating('lastName'); // would return true if lastName validation is async and still running
-changeset.validate().then(() => {
-  changeset.isValidating('lastName'); // false since validations are complete
-});
-```
-
-```js
-changeset.set('lastName', 'Appleseed');
 changeset.set('firstName', 'Johnny');
 changeset.validate();
 changeset.isValidating(); // returns true if any async validation is still running
 changeset.isValidating('lastName'); // returns true if lastName validation is async and still running
+changeset.validate().then(() => {
+  changeset.isValidating(); // returns false since validations are complete
+});
+```
+
+```js
+changeset.set('address.city', 'Anchorage');
+changeset.validate();
+changeset.isValidating(); // returns true if any async validation is still running
+changeset.isValidating('address.city'); // returns true if address.city validation is async and still running
 changeset.validate().then(() => {
   changeset.isValidating(); // returns false since validations are complete
 });
@@ -763,7 +768,6 @@ if (isChangeset(model)) {
 ## Installation
 
 * `git clone` this repository
-* `npm install`
 * `bower install`
 
 ## Running
