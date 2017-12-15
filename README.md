@@ -371,6 +371,10 @@ Exactly the same semantics as `Ember.get`. This proxies first to the error value
 get(changeset, 'firstName'); // "Jim"
 set(changeset, 'firstName', 'Billy'); // "Billy"
 get(changeset, 'firstName'); // "Billy"
+
+get(changeset, 'address.country'); // "US"
+set(changeset, 'address.country', 'North Korea'); // "North Korea"
+get(changeset, 'address.country'); // "North Korea"
 ```
 
 You can use and bind this property in the template:
@@ -383,7 +387,14 @@ Fetching keys that have child keys will return a sub-changeset:
 
 ```js
 let subset = get(changeset, 'address');
-get(subset, 'country'); // "Australia"
+get(subset, 'country'); // "North Korea"
+```
+
+Because `ember-changeset` treats Object values as sub-changesets, you should always use `Ember.get` when expecting an Object. A sub-changeset proxies method calls to the original object:
+
+```js
+let momentDate = get(changeset, 'momentDate');
+get(momentDate, 'format')('dddd'); // "Friday"
 ```
 
 **[⬆️ back to top](#api)**
@@ -394,12 +405,14 @@ Exactly the same semantics as `Ember.set`. This stores the change on the changes
 
 ```js
 set(changeset, 'firstName', 'Milton'); // "Milton"
+set(changeset, 'address.country', 'North Korea'); // "North Korea"
 ```
 
 You can use and bind this property in the template:
 
 ```hbs
 {{input value=changeset.firstName}}
+{{input value=changeset.address.country}}
 ```
 
 Any updates on this value will only store the change on the changeset, even with 2 way binding.
