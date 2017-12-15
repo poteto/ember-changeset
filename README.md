@@ -173,11 +173,28 @@ Returns the error object.
 }
 ```
 
+Note that keys can be arbitrarily nested:
+
+```js
+{
+  address: {
+    country: {
+      value: 'Atlantis',
+      validation: 'Must be a real country'
+    }
+  }
+}
+```
+
 You can use this property to locate a single error:
 
 ```hbs
 {{#if changeset.error.firstName}}
   <p>{{changeset.error.firstName.validation}}</p>
+{{/if}}
+
+{{#if changeset.error.address.country}}
+  <p>{{changeset.error.address.country.validation}}</p>
 {{/if}}
 ```
 
@@ -193,10 +210,21 @@ Returns the change object.
 }
 ```
 
+Note that keys can be arbitrarily nested:
+
+```js
+{
+  address: {
+    country: 'Atlantis'
+  }
+}
+```
+
 You can use this property to locate a single change:
 
 ```hbs
 {{changeset.change.firstName}}
+{{changeset.change.address.country}}
 ```
 
 **[⬆️ back to top](#api)**
@@ -211,6 +239,11 @@ Returns an array of errors. If your `validate` function returns a non-boolean va
     key: 'firstName',
     value: 'Jim',
     validation: 'First name must be greater than 7 characters'
+  },
+  {
+    key: 'address.country',
+    value: 'Atlantis',
+    validation: 'Must be a real country'
   }
 ]
 ```
@@ -239,6 +272,10 @@ Returns an array of changes to be executed. Only valid changes will be stored on
   {
     key: 'firstName',
     value: 'Jim'
+  },
+  {
+    key: 'address.country',
+    value: 'Atlantis'
   }
 ]
 ```
@@ -288,6 +325,8 @@ You can use this property in the template:
   <p>There were one or more errors in your form</p>
 {{/if}}
 ```
+
+**[⬆️ back to top](#api)**
 
 #### `isPristine`
 
