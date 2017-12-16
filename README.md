@@ -182,7 +182,7 @@ Note that keys can be arbitrarily nested:
 {
   address: {
     zipCode: {
-      value: 123,
+      value: '123',
       validation: 'Zip code must have 5 digits'
     }
   }
@@ -218,7 +218,7 @@ Note that keys can be arbitrarily nested:
 ```js
 {
   address: {
-    zipCode: 10001
+    zipCode: '10001'
   }
 }
 ```
@@ -245,7 +245,7 @@ Returns an array of errors. If your `validate` function returns a non-boolean va
   },
   {
     key: 'address.zipCode',
-    value: 10001,
+    value: '123',
     validation: 'Zip code must have 5 digits'
   }
 ]
