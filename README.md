@@ -1,4 +1,6 @@
-# ember-changeset [![Download count all time](https://img.shields.io/npm/dt/ember-changeset.svg)](https://badge.fury.io/js/ember-changeset) [![TravisCI Build Status](https://img.shields.io/travis/poteto/ember-changeset/master.svg)](https://travis-ci.org/poteto/ember-changeset) [![npm version](https://badge.fury.io/js/ember-changeset.svg)](https://badge.fury.io/js/ember-changeset) [![Ember Observer Score](https://emberobserver.com/badges/ember-changeset.svg)](https://emberobserver.com/addons/ember-changeset)
+# ![ember-changeset](https://user-images.githubusercontent.com/914228/34072699-2536e494-e25a-11e7-8406-38ca4e5a5d42.png)
+
+[![Download count all time](https://img.shields.io/npm/dt/ember-changeset.svg)](https://badge.fury.io/js/ember-changeset) [![TravisCI Build Status](https://img.shields.io/travis/poteto/ember-changeset/master.svg)](https://travis-ci.org/poteto/ember-changeset) [![npm version](https://badge.fury.io/js/ember-changeset.svg)](https://badge.fury.io/js/ember-changeset) [![Ember Observer Score](https://emberobserver.com/badges/ember-changeset.svg)](https://emberobserver.com/addons/ember-changeset)
 
 Ember.js flavored changesets, inspired by [Ecto](https://github.com/elixir-lang/ecto). To install:
 
@@ -6,7 +8,9 @@ Ember.js flavored changesets, inspired by [Ecto](https://github.com/elixir-lang/
 ember install ember-changeset
 ```
 
-[Watch a free video intro presented by EmberScreencasts](https://www.emberscreencasts.com/posts/168-introduction-to-ember-changeset)
+> [Watch a free video intro presented by EmberScreencasts](https://www.emberscreencasts.com/posts/168-introduction-to-ember-changeset)
+>
+> <img alt="" src="https://user-images.githubusercontent.com/914228/34072730-9d2d0bcc-e25a-11e7-9ab5-405ddce05303.gif" width="25"> <img alt="" src="https://user-images.githubusercontent.com/914228/34072749-07a8ab50-e25b-11e7-80ba-d0f6250aad11.png" width="20.5">
 
 ## Philosophy
 
