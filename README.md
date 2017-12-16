@@ -52,18 +52,19 @@ First, create a new `Changeset` using the `changeset` helper or through JavaScri
 
 ```hbs
 {{! application/template.hbs}}
-{{dummy-form
-    changeset=(changeset model (action "validate"))
-    submit=(action "submit")
-    rollback=(action "rollback")
-}}
+{{#with (changeset model (action "validate")) as |changeset|}}
+  {{dummy-form
+      changeset=changeset
+      submit=(action "submit")
+      rollback=(action "rollback")
+  }}
+{{/with}}
 ```
 
 ```js
-import Ember from 'ember';
+import Component from '@ember/component';
+import { get }   from '@ember/object';
 import Changeset from 'ember-changeset';
-
-const { Component, get } = Ember;
 
 export default Component.extend({
   init() {
@@ -79,9 +80,7 @@ The helper receives any Object (including `DS.Model`, `Ember.Object`, or even PO
 
 ```js
 // application/controller.js
-import Ember from 'ember';
-
-const { Controller } = Ember;
+import Controller from '@ember/controller';
 
 export default Controller.extend({
   actions: {
