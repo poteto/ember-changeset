@@ -1,5 +1,5 @@
 <h1>
-  <img alt="ember-changeset" src="assets/title.svg" width="470px">
+  <img alt="ember-changeset" src="assets/title.png" width="500px">
   <br>
   <a href="https://badge.fury.io/js/ember-changeset"><img alt="Download count all time" src="https://img.shields.io/npm/dt/ember-changeset.svg"></a>
   <a href="https://travis-ci.org/poteto/ember-changeset"><img alt="TravisCI Build Status" src="https://img.shields.io/travis/poteto/ember-changeset/master.svg"></a>
