@@ -1,4 +1,5 @@
 import isObject from 'ember-changeset/utils/is-object';
+import isPromise from 'ember-changeset/utils/is-promise';
 import { isArray } from '@ember/array';
 
 /**
@@ -11,13 +12,18 @@ const _leafKeys = function(object = {}, scope = '') {
     const value = object[key];
     let newKeys = [scope + key];
 
-    if (isObject(value) && !isArray(value) && Object.keys(value).length) {
+    if (
+      isObject(value) &&
+      !isPromise(value) &&
+      !isArray(value) &&
+      Object.keys(value).length
+    ) {
       newKeys = _leafKeys(value, scope + key + '.');
     }
 
     return keys.concat(newKeys);
   }, []);
-}
+};
 
 /**
  * Given an object, return an array of the leaf-most keys
