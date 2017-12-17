@@ -10,6 +10,8 @@ import includes from 'ember-changeset/utils/includes';
 import take from 'ember-changeset/utils/take';
 import isChangeset, { CHANGESET } from 'ember-changeset/utils/is-changeset';
 import hasOwnNestedProperty from 'ember-changeset/utils/has-own-nested-property';
+import Err from 'ember-changeset/-private/err';
+import Change from 'ember-changeset/-private/change';
 import deepSet from 'ember-deep-set';
 
 import EmberObject from '@ember/object';
@@ -536,7 +538,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
         this._deleteKey(ERRORS, key);
 
         if (!isEqual(oldValue, value)) {
-          deepSet(changes, key, value);
+          deepSet(changes, key, new Change(value));
         } else if (hasOwnNestedProperty(changes, key)) {
           this._deleteKey(CHANGES, key);
         }
@@ -590,36 +592,34 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      * Value for change or the original value.
      *
      * @private
-     * @param  {String} key
+     * @param {String} key
      * @param {Boolean} [plainValue=false]
-     * @return {Any}
+     * @return {Error|Change|Relay|Any}
      */
     _valueFor(key, plainValue = false) {
       let changes = get(this, CHANGES);
       let errors = get(this, ERRORS);
       let content = get(this, CONTENT);
-      let relay = get(this, RELAY_CACHE);
 
-      if (errors.hasOwnProperty(key)) {
-        let v = get(errors, `${key}.value`);
-        if (!isNone(v)) return v;
+      // If `errors` has a nested property at `key` that is an `Err`,
+      if (hasOwnNestedProperty(errors, key, Err)) {
+        // Return the value of that `Err`.
+        return get(errors, `${key}.value`);
       }
 
-      if (relay.hasOwnProperty(key)) {
-        return relay[key];
+      // If `changes` has a nested property at `key` that is a `Change`,
+      if (hasOwnNestedProperty(changes, key, Change)) {
+        // Return the value of that `Change`.
+        return get(changes, `${key}.value`);
       }
 
-      if (hasOwnNestedProperty(changes, key)) {
-        return get(changes, key);
+      let original = get(content, key);
+
+      if (isObject(original) && !plainValue) {
+        return this._relayFor(key, original);
       }
 
-      let oldValue = get(content, key);
-
-      if (isObject(oldValue) && !plainValue) {
-        return this._relayFor(key);
-      }
-
-      return oldValue;
+      return original;
     },
 
     /**
@@ -631,7 +631,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      * @param {Boolean} [shouldInvalidate=false]
      * @return {Any}
      */
-    _relayFor(key, shouldInvalidate = false) {
+    _relayFor(key, value, shouldInvalidate = false) {
       let cache = get(this, RELAY_CACHE);
       let found = cache[key];
 
@@ -644,7 +644,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
         return found;
       }
 
-      let relay = Relay.create({ key, changeset: this });
+      let relay = Relay.create({ key, changeset: this, content: value });
       cache[key] = relay;
       return relay;
     },
