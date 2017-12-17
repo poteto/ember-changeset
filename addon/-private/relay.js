@@ -1,9 +1,4 @@
-import Ember from 'ember';
-
-const {
-  Object: EmberObject,
-  get
-} = Ember;
+import EmberObject, { get } from '@ember/object';
 
 export default EmberObject.extend({
   changeset: null,

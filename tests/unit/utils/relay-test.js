@@ -1,9 +1,7 @@
-import Ember from 'ember';
-import Relay from 'ember-changeset/-private/relay';
 import Changeset from 'ember-changeset';
+import Relay from 'ember-changeset/-private/relay';
+import { get, set } from '@ember/object';
 import { module, test } from 'qunit';
-
-const { get, set } = Ember;
 
 module('Unit | Utility | Relay');
 

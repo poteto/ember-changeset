@@ -1,6 +1,6 @@
-import Ember from 'ember';
-
-const { A: emberArray, assert, typeOf } = Ember;
+import { A as emberArray } from '@ember/array';
+import { assert } from '@ember/debug';
+import { typeOf } from '@ember/utils';
 
 export default function includes(arr, ...args) {
   assert('must be array', typeOf(arr) === 'array');

@@ -1,8 +1,7 @@
-import Ember from 'ember';
+import EmberObject from '@ember/object';
 import isEmptyObject from 'ember-changeset/utils/computed/is-empty-object';
 import { module, test } from 'qunit';
 
-const { Object: EmberObject } = Ember;
 
 module('Unit | Utility | is empty object');
 

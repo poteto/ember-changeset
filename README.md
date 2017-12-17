@@ -56,10 +56,9 @@ First, create a new `Changeset` using the `changeset` helper or through JavaScri
 ```
 
 ```js
-import Ember from 'ember';
 import Changeset from 'ember-changeset';
-
-const { Component, get } = Ember;
+import Component from '@ember/component';
+import { get } from '@ember/object';
 
 export default Component.extend({
   init() {
@@ -75,9 +74,7 @@ The helper receives any Object (including `DS.Model`, `Ember.Object`, or even PO
 
 ```js
 // application/controller.js
-import Ember from 'ember';
-
-const { Controller } = Ember;
+import Controller '@ember/controller';
 
 export default Controller.extend({
   actions: {
