@@ -1,4 +1,4 @@
-import { computed, get} from '@ember/object';
+import { computed, get } from '@ember/object';
 
 const { keys } = Object;
 
