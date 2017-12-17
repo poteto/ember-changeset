@@ -740,9 +740,7 @@ To use with your favorite validation library, you should create a custom `valida
 
 ```js
 // application/controller.js
-import Ember from 'ember';
-
-const { Controller } = Ember;
+import Controller from '@ember/controller';
 
 export default Controller.extend({
   actions: {
@@ -753,7 +751,6 @@ export default Controller.extend({
   }
 });
 ```
-
 
 ```hbs
 {{! application/template.hbs}}
