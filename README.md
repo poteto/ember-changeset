@@ -672,6 +672,34 @@ if (isChangeset(model)) {
 - [`ember-changeset-hofs`](https://github.com/nucleartide/ember-changeset-hofs) - Higher-order validation functions
 - [`ember-bootstrap-changeset-validations`](https://github.com/kaliber5/ember-bootstrap-changeset-validations) - Adds support for changeset validations to `ember-bootstrap`
 
+## Alternative Use Cases
+
+If you wish to use a changeset from a template without a component you can use the `with` helper:
+
+```hbs
+{{#with (changeset model (action "validate")) as |changeset|}}
+  Name: <input value={{changeset.name}}>
+  <button {{action "saveThings" chageset}}>Save</button>
+{{/with}}
+```
+
+If you have a very complicated save stratagy and want to throwout the changeset and rebuild you can leverage Ember's computed property caching:
+
+```js
+changeset: computed('model', {
+  get() {
+    return new Changeset(this.get('model'));
+  }
+}),
+
+save() {
+  let changeset = this.get('changeset');
+  doSomethingFancyWith(changeset);
+  // Invalidate Ember's cache and have a new changeset recalculated
+  this.notifyPropertyChange('changeset');
+}
+```
+
 ## Installation
 
 * `git clone` this repository
