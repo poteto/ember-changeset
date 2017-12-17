@@ -1,8 +1,4 @@
-<h1 align="center">
-  <br><br>
-  <a href="https://github.com/elixir-lang/ecto"><img alt="ember-changeset" src="assets/title.svg" width="350px"></a>
-  <br><br><br>
-</h1>
+<h1 align="center"><br><br><a href="https://github.com/elixir-lang/ecto"><img alt="ember-changeset" src="assets/title.svg" width="350px"></a><br><br><br></h1>
 
 <a href="https://badge.fury.io/js/ember-changeset"><img alt="Download count all time" src="https://img.shields.io/npm/dt/ember-changeset.svg"></a>
 <a href="https://travis-ci.org/poteto/ember-changeset"><img alt="TravisCI Build Status" src="https://img.shields.io/travis/poteto/ember-changeset/master.svg"></a>
