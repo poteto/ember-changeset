@@ -1,5 +1,7 @@
-<h1>
-  <img alt="ember-changeset" src="assets/title.png">
+<h1 align="center">
+  <br><br>
+  <a href="https://github.com/elixir-lang/ecto"><img alt="ember-changeset" src="assets/title.svg" width="350px"></a>
+  <br><br><br>
 </h1>
 
 <a href="https://badge.fury.io/js/ember-changeset"><img alt="Download count all time" src="https://img.shields.io/npm/dt/ember-changeset.svg"></a>
@@ -7,7 +9,7 @@
 <a href="https://badge.fury.io/js/ember-changeset"><img alt="npm version" src="https://badge.fury.io/js/ember-changeset.svg"></a>
 <a href="https://emberobserver.com/addons/ember-changeset"><img alt="Ember Observer Score" src="https://emberobserver.com/badges/ember-changeset.svg"></a>
 
-Ember.js flavored changesets, inspired by [Ecto](https://github.com/elixir-lang/ecto). To install:
+To install:
 
 ```
 ember install ember-changeset
