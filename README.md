@@ -342,12 +342,12 @@ get(changeset, 'isPristine'); // true
 If changes present on the changeset are equal to the content's, this will return `true`. However, note that key/value pairs in the list of changes must all be present and equal on the content, but not necessarily vice versa:
 
 ```js
-let user = { name: 'Bobby', age: 21, address: { country: 'Australia' } };
+let user = { name: 'Bobby', age: 21, address: { zipCode: '10001' } };
 
 changeset.set('name', 'Bobby');
 changeset.get('isPristine'); // true
 
-changeset.set('address.country', 'Australia');
+changeset.set('address.zipCode', '10001');
 changeset.get('isPristine'); // true
 
 changeset.set('foo', 'bar');
@@ -375,9 +375,9 @@ get(changeset, 'firstName'); // "Jim"
 set(changeset, 'firstName', 'Billy'); // "Billy"
 get(changeset, 'firstName'); // "Billy"
 
-get(changeset, 'address.country'); // "US"
-set(changeset, 'address.country', 'North Korea'); // "North Korea"
-get(changeset, 'address.country'); // "North Korea"
+get(changeset, 'address.zipCode'); // "10001"
+set(changeset, 'address.zipCode', '94016'); // "94016"
+get(changeset, 'address.zipCode'); // "94016"
 ```
 
 You can use and bind this property in the template:
@@ -386,14 +386,14 @@ You can use and bind this property in the template:
 {{input value=changeset.firstName}}
 ```
 
-Fetching keys that have child keys will return a sub-changeset:
+Fetching a key that is tied to an Object will return a sub-changeset:
 
 ```js
 let subset = get(changeset, 'address');
-get(subset, 'country'); // "North Korea"
+get(subset, 'zipCode'); // "94016"
 ```
 
-Because `ember-changeset` treats Object values as sub-changesets, you should always use `Ember.get` when expecting an Object. A sub-changeset proxies method calls to the original object:
+Because `ember-changeset` treats Objects as sub-changesets, you should always use `Ember.get` when expecting an Object. A sub-changeset proxies method calls to the original object:
 
 ```js
 let momentDate = get(changeset, 'momentDate');
@@ -408,7 +408,7 @@ Exactly the same semantics as `Ember.set`. This stores the change on the changes
 
 ```js
 set(changeset, 'firstName', 'Milton'); // "Milton"
-set(changeset, 'address.country', 'North Korea'); // "North Korea"
+set(changeset, 'address.zipCode', '10001'); // "10001"
 ```
 
 You can use and bind this property in the template:
@@ -428,7 +428,7 @@ Provides a function to run before emitting changes to the model. The callback fu
 
 ```js
 changeset.prepare((changes) => {
-  // changes = { firstName: "Jim", lastName: "Bob", 'address.zipCode': 07030 };
+  // changes = { firstName: "Jim", lastName: "Bob", 'address.zipCode': "07030" };
   let modified = {};
 
   for (let key in changes) {
@@ -437,7 +437,7 @@ changeset.prepare((changes) => {
   }
 
   // don't forget to return, the original changes object is not mutated
-  // modified = { first_name: "Jim", last_name: "Bob", 'address.zip_code': 07030 };
+  // modified = { first_name: "Jim", last_name: "Bob", 'address.zip_code': "07030" };
   return modified;
 }); // returns changeset
 ```
@@ -482,18 +482,18 @@ let changesetA = new Changeset(user, validatorFn);
 let changesetB = new Changeset(user, validatorFn);
 
 changesetA.set('firstName', 'Jim');
-changesetA.set('address.city', 'Pyongyang');
+changesetA.set('address.zipCode', '94016');
 
 changesetB.set('firstName', 'Jimmy');
 changesetB.set('lastName', 'Fallon');
-changesetB.set('address.city', 'New York');
+changesetB.set('address.zipCode', '10112');
 
 let changesetC = changesetA.merge(changesetB);
 changesetC.execute();
 
 user.get('firstName'); // "Jimmy"
 user.get('lastName'); // "Fallon"
-user.get('address.city'); // "New York"
+user.get('address.city'); // "10112"
 ```
 
 Note that both changesets `A` and `B` are not destroyed by the merge, so you might want to call `destroy()` on them to avoid memory leaks.
@@ -512,19 +512,41 @@ changeset.rollback(); // returns changeset
 
 #### `validate`
 
-Validates all or a single field on the changeset. This will also validate the property on the underlying object, and is a useful method if you require the changeset to validate immediately on render. Requires a validation map to be passed in when the changeset is first instantiated.
+Validates all or a single field on the changeset. This will also validate the property on the underlying object, and is a useful method if you require the changeset to validate immediately on render.
+
+**Note:** This method requires a validation map to be passed in when the changeset is first instantiated.
 
 ```js
 user.set('lastName', 'B');
+user.set('address.zipCode', '123');
+
+let validationMap = {
+  lastName: validateLength({ min: 8 }),
+
+  // specify nested keys with dot delimiters
+  'address.zipCode': validateLength({ is: 5 }),
+
+  // nested objects will also work
+  address: {
+    zipCode: validateLength({ is: 5 })
+  }
+};
+
+let changeset = new Changeset(user, validatorFn, validationMap);
 changeset.get('isValid'); // true
 
-changeset.validate('lastName'); // validate single field; returns Promise
+// validate single field; returns Promise
+changeset.validate('lastName');
+changeset.validate('address.zipCode');
+
+// validate all fields; returns Promise
 changeset.validate().then(() => {
   changeset.get('isInvalid'); // true
-  changeset.get('errors'); // [{ key: 'lastName', validation: 'too short', value: 'B' }]
-}); // validate all fields; returns Promise
 
-changeset.validate('address.country'); // can also validate nested keys
+  // [{ key: 'lastName', validation: 'too short', value: 'B' },
+  //  { key: 'address.zipCode', validation: 'too short', value: '123' }]
+  changeset.get('errors');
+});
 ```
 
 **[⬆️ back to top](#api)**
@@ -539,17 +561,21 @@ changeset.addError('email', {
   validation: 'Email already taken'
 });
 
+changeset.addError('address.zip', {
+  value: '123',
+  validation: 'Must be 5 digits'
+});
+
 // shortcut
 changeset.addError('email', 'Email already taken');
-
-// nested key
-changeset.addError('address.line', { value: '', validation: 'Line is empty' });
-changeset.addError('address.line', 'Line is empty');
+changeset.addError('address.zip', 'Must be 5 digits');
 ```
 
 Adding an error manually does not require any special setup. The error will be cleared if the value for the `key` is subsequently set to a valid value.  Adding an error will overwrite any existing error or change for `key`.
 
 If using the shortcut method, the value in the changeset will be used as the value for the error.
+
+**[⬆️ back to top](#api)**
 
 #### `pushErrors`
 
@@ -560,7 +586,7 @@ changeset.pushErrors('age', 'Too short', 'Not a valid number', 'Must be greater 
 changeset.pushErrors('dogYears.age', 'Too short', 'Not a valid number', 'Must be greater than 2.5');
 ```
 
-This is compatible with `ember-changeset-validations`, and allows you to either add a new error with multiple validations messages or push to an existing array of validation messages.
+This is compatible with `ember-changeset-validations`, and allows you to either add a new error with multiple validation messages or push to an existing array of validation messages.
 
 **[⬆️ back to top](#api)**
 
@@ -601,17 +627,20 @@ changeset.get('address.country'); // "North Korea"
 Unlike `Ecto.Changeset.cast`, `cast` will take an array of allowed keys and remove unwanted keys off of the changeset.
 
 ```js
-let allowed = ['name', 'password', 'address.country']
+let allowed = ['name', 'password', 'address.country'];
 let changeset = new Changeset(user, validatorFn);
 
 changeset.set('name', 'Jim Bob');
-changeset.set('unwantedProp', 123);
-changeset.set('another.unwantedProp', 'foo');
+changeset.set('address.country', 'United States');
 
-changeset.get('unwantedProp'); // 123
-changeset.get('another.unwantedProp'); // 'foo'
+changeset.set('unwantedProp', 'foo');
+changeset.set('address.unwantedProp', 123);
+changeset.get('unwantedProp'); // "foo"
+changeset.get('address.unwantedProp'); // 123
+
 changeset.cast(allowed); // returns changeset
 changeset.get('unwantedProp'); // undefined
+changeset.get('address.country'); // "United States"
 changeset.get('another.unwantedProp'); // undefined
 ```
 
@@ -634,6 +663,7 @@ const { keys } = Object;
 
 export default Controller.extend({
   // ...
+
   actions: {
     save(changeset) {
       return changeset
@@ -653,21 +683,15 @@ Checks to see if async validator for a given key has not resolved.  If no key is
 ```js
 changeset.set('lastName', 'Appleseed');
 changeset.set('firstName', 'Johnny');
-changeset.validate();
-changeset.isValidating(); // returns true if any async validation is still running
-changeset.isValidating('lastName'); // returns true if lastName validation is async and still running
-changeset.validate().then(() => {
-  changeset.isValidating(); // returns false since validations are complete
-});
-```
-
-```js
 changeset.set('address.city', 'Anchorage');
 changeset.validate();
-changeset.isValidating(); // returns true if any async validation is still running
-changeset.isValidating('address.city'); // returns true if address.city validation is async and still running
+
+changeset.isValidating(); // true if any async validation is still running
+changeset.isValidating('lastName'); // true if lastName validation is async and still running
+changeset.isValidating('address.city'); // true if address.city validation is async and still running
+
 changeset.validate().then(() => {
-  changeset.isValidating(); // returns false since validations are complete
+  changeset.isValidating(); // false since validations are complete
 });
 ```
 
@@ -684,6 +708,7 @@ changeset.on('beforeValidation', key => {
 changeset.validate();
 changeset.isValidating(); // true
 // console output: lastName is validating...
+// console output: address.city is validating...
 ```
 
 **[⬆️ back to top](#api)**
@@ -699,6 +724,7 @@ changeset.on('afterValidation', key => {
 changeset.validate().then(() => {
   changeset.isValidating(); // false
   // console output: lastName has completed validating
+  // console output: address.city has completed validating
 });
 ```
 
@@ -771,7 +797,7 @@ if (isChangeset(model)) {
 ## Installation
 
 * `git clone` this repository
-* `bower install`
+* `npm install`
 
 ## Running
 
