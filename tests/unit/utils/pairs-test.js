@@ -1,4 +1,4 @@
-import traverseObj, { Node } from 'ember-changeset/utils/traverse-obj';
+import pairs, { Node } from 'ember-changeset/utils/pairs';
 import { module, test, only } from 'qunit';
 import { sample, check, gen, property } from 'ember-changeset/testcheck';
 import { A as emberArray } from '@ember/array';
@@ -15,16 +15,6 @@ const genEmberObject = gen.nested(
   gen.object,
   gen.JSON.then(j => EmberObject.create(j))
 );
-
-/**
- * Given a Generator, collect the values of the Generator into an array
- * and return the array.
- */
-function collect(gen) {
-  const a = [];
-  for (const v of gen) a.push(v);
-  return a;
-}
 
 /**
  * Define a reference implementation for traversing an object.
@@ -62,12 +52,10 @@ function deepEqual(actual, expected) {
 test('returned keys are unique', function(a) {
   const p = property(genEmberObject, json => {
     // json
-    // |> traverseObj
-    // |> collect
+    // |> pairs
     // |> map(o => o.key)
     // |> emberArray
-    const pairs = collect(traverseObj(json));
-    const keys = emberArray(pairs.map(p => p.key));
+    const keys = emberArray(pairs(json).map(p => p.key));
 
     // Get rid of Ember array methods with `slice`.
     const actual = keys.slice();
@@ -82,9 +70,7 @@ test('returned keys are unique', function(a) {
 
 test('keys are correct', function(a) {
   const p = property(genEmberObject, json => {
-    const pairs = collect(traverseObj(json));
-    const keys = pairs.map(p => p.key);
-
+    const keys = pairs(json).map(p => p.key);
     const actual = keys.sort();
     const expectedResult = Object.keys(flatten(json)).sort();
     return deepEqual(actual, expectedResult);
@@ -97,8 +83,7 @@ test('keys are correct', function(a) {
 
 test('values are correct', function(a) {
   function actual(json) {
-    const pairs = collect(traverseObj(json));
-    const keys = pairs.map(p => p.key).sort();
+    const keys = pairs(json).map(p => p.key).sort();
     const values = keys.map(k => get(json, k));
     return values;
   }
@@ -132,7 +117,7 @@ test('works with circular dependencies', function(a) {
   o.foo.bar.baz = o;
   o.hello = o.foo.bar;
 
-  let actual = collect(traverseObj(o))
+  let actual = pairs(o)
   actual = emberArray(actual).sortBy('key').slice();
 
   const expected = emberArray([

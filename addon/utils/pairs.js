@@ -14,7 +14,7 @@ export class Node {
 /**
  * Traverse `obj` in depth-first order.
  */
-export default function* traverse(obj = {}) {
+export function* traverse(obj = {}) {
   const stack = [new Node('', obj)];
   const seen  = [];
 
@@ -46,4 +46,14 @@ export default function* traverse(obj = {}) {
       stack.push(n);
     });
   }
+}
+
+/**
+ * Given an object, collect all key-value pairs of the object into an
+ * array and return the array.
+ */
+export default function pairs(obj) {
+  const a = [];
+  for (const v of traverse(obj)) a.push(v);
+  return a;
 }
