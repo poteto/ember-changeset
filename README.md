@@ -1,9 +1,9 @@
-# ember-changeset ![Download count all time](https://img.shields.io/npm/dt/ember-changeset.svg) [![CircleCI](https://circleci.com/gh/poteto/ember-changeset.svg?style=shield)](https://circleci.com/gh/poteto/ember-changeset) [![npm version](https://badge.fury.io/js/ember-changeset.svg)](https://badge.fury.io/js/ember-changeset) [![Ember Observer Score](http://emberobserver.com/badges/ember-changeset.svg)](http://emberobserver.com/addons/ember-changeset)
+# ember-changeset ![Download count all time](https://img.shields.io/npm/dt/ember-changeset.svg) [![TravisCI Build Status](https://img.shields.io/travis/poteto/ember-changeset/master.svg)](https://travis-ci.org/poteto/ember-changeset) [![npm version](https://badge.fury.io/js/ember-changeset.svg)](https://badge.fury.io/js/ember-changeset) [![Ember Observer Score](http://emberobserver.com/badges/ember-changeset.svg)](http://emberobserver.com/addons/ember-changeset)
 
 Ember.js flavored changesets, inspired by [Ecto](https://github.com/elixir-lang/ecto). To install:
 
 ```
-ember install ember-changeset
+ember install ember-changeset@1.3.0
 ```
 
 [Watch a free video intro presented by EmberScreencasts](https://www.emberscreencasts.com/posts/168-introduction-to-ember-changeset)
