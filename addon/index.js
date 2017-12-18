@@ -2,6 +2,7 @@ import Ember from 'ember';
 import Relay from 'ember-changeset/-private/relay';
 import objectToArray from 'ember-changeset/utils/computed/object-to-array';
 import isEmptyObject from 'ember-changeset/utils/computed/is-empty-object';
+import facade from 'ember-changeset/utils/computed/facade';
 import isPromise from 'ember-changeset/utils/is-promise';
 import isObject from 'ember-changeset/utils/is-object';
 import leafKeys from 'ember-changeset/utils/leaf-keys';
@@ -74,7 +75,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
 
     changes: objectToArray(CHANGES, false),
     errors: objectToArray(ERRORS, true),
-    change: readOnly(CHANGES),
+    change: facade(CHANGES, Change, ({ value }) => value),
     error: readOnly(ERRORS),
 
     isValid: isEmptyObject(ERRORS),
