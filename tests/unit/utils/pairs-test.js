@@ -63,7 +63,7 @@ test('returned keys are unique', function(a) {
     return deepEqual(actual, expectedResult);
   });
 
-  const output = check(p, { numTests: 30 });
+  const output = check(p, { numTests: 15 });
   console.log(output); // eslint-disable-line
   a.ok(output.result);
 });
@@ -76,7 +76,7 @@ test('keys are correct', function(a) {
     return deepEqual(actual, expectedResult);
   });
 
-  const output = check(p, { numTests: 30 });
+  const output = check(p, { numTests: 15 });
   console.log(output); // eslint-disable-line
   a.ok(output.result);
 });
@@ -98,7 +98,7 @@ test('values are correct', function(a) {
     deepEqual(actual(json), expected(json))
   ));
 
-  const output = check(p, { numTests: 30 });
+  const output = check(p, { numTests: 15 });
   console.log(output); // eslint-disable-line
   a.ok(output.result);
 });
