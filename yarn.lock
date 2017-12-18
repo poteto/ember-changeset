@@ -2560,9 +2560,9 @@ ember-cli@~2.16.2:
     walk-sync "^0.3.0"
     yam "0.0.22"
 
-ember-deep-set@^0.1.2:
+ember-deep-set@poteto/ember-deep-set#dee1243027d7f47ffa4a28709baf4c4874fd5317:
   version "0.1.2"
-  resolved "https://registry.yarnpkg.com/ember-deep-set/-/ember-deep-set-0.1.2.tgz#fde78d46a783d15d86687c5c7acc033f2dba6167"
+  resolved "https://codeload.github.com/poteto/ember-deep-set/tar.gz/dee1243027d7f47ffa4a28709baf4c4874fd5317"
   dependencies:
     ember-cli-babel "^5.1.7"
 
