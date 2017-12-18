@@ -1,13 +1,13 @@
 import pairs, { Node } from 'ember-changeset/utils/pairs';
-import { module, test, only } from 'qunit';
-import { sample, check, gen, property } from 'ember-changeset/testcheck';
+import { module, test } from 'qunit';
+import { check, gen, property } from 'ember-changeset/testcheck';
 import { A as emberArray } from '@ember/array';
 import flat from 'flat';
 import EmberObject, { get } from '@ember/object';
 import { expect } from 'chai';
 import isObject from 'ember-changeset/utils/is-object';
 
-module('Unit | Utility | traverse obj');
+module('Unit | Utility | pairs');
 
 // Test against arbitrary JSON that has EmberObjects somewhere in the
 // object tree.
