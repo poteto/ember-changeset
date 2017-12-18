@@ -4,7 +4,7 @@ import includes from 'ember-changeset/utils/includes';
 
 const { keys } = Object;
 
-class Node {
+export class Node {
   constructor(k, v) {
     this.key   = k;
     this.value = v;
@@ -26,10 +26,10 @@ export default function* traverse(obj = {}) {
     // Visit node.
     if (node.value !== obj) yield node;
 
-    // Mark the node as "seen".
-    if (!isObject(node.value)) {
-      continue;
-    }
+    // If node is not an object, we don't need to add children.
+    if (!isObject(node.value)) continue;
+
+    // Otherwise, mark the node as "seen".
     seen.push(node.value);
 
     // Then, for each of the node's children,

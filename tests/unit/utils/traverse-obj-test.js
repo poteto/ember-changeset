@@ -1,13 +1,20 @@
-import traverseObj from 'ember-changeset/utils/traverse-obj';
-import { module, test } from 'qunit';
-import { check, gen, property } from 'ember-changeset/testcheck';
+import traverseObj, { Node } from 'ember-changeset/utils/traverse-obj';
+import { module, test, only } from 'qunit';
+import { sample, check, gen, property } from 'ember-changeset/testcheck';
 import { A as emberArray } from '@ember/array';
 import flat from 'flat';
-import { get } from '@ember/object';
+import EmberObject, { get } from '@ember/object';
 import { expect } from 'chai';
 import isObject from 'ember-changeset/utils/is-object';
 
 module('Unit | Utility | traverse obj');
+
+// Test against arbitrary JSON that has EmberObjects somewhere in the
+// object tree.
+const genEmberObject = gen.nested(
+  gen.object,
+  gen.JSON.then(j => EmberObject.create(j))
+);
 
 /**
  * Given a Generator, collect the values of the Generator into an array
@@ -53,7 +60,7 @@ function deepEqual(actual, expected) {
 }
 
 test('returned keys are unique', function(a) {
-  const p = property(gen.JSON, json => {
+  const p = property(genEmberObject, json => {
     // json
     // |> traverseObj
     // |> collect
@@ -68,13 +75,13 @@ test('returned keys are unique', function(a) {
     return deepEqual(actual, expectedResult);
   });
 
-  const output = check(p);
+  const output = check(p, { numTests: 30 });
   console.log(output); // eslint-disable-line
   a.ok(output.result);
 });
 
 test('keys are correct', function(a) {
-  const p = property(gen.JSON, json => {
+  const p = property(genEmberObject, json => {
     const pairs = collect(traverseObj(json));
     const keys = pairs.map(p => p.key);
 
@@ -83,7 +90,7 @@ test('keys are correct', function(a) {
     return deepEqual(actual, expectedResult);
   });
 
-  const output = check(p);
+  const output = check(p, { numTests: 30 });
   console.log(output); // eslint-disable-line
   a.ok(output.result);
 });
@@ -102,14 +109,36 @@ test('values are correct', function(a) {
     return values;
   }
 
-  const p = property(gen.JSON, json => (
+  const p = property(genEmberObject, json => (
     deepEqual(actual(json), expected(json))
   ));
 
-  const output = check(p);
+  const output = check(p, { numTests: 30 });
   console.log(output); // eslint-disable-line
   a.ok(output.result);
 });
 
-// TODO: example test for circular dependencies
-// TODO: example test for ember objects
+test('works with circular dependencies', function(a) {
+  const o = {
+    foo: {
+      bar: {
+        baz: null
+      }
+    },
+
+    hello: null
+  };
+
+  o.foo.bar.baz = o;
+  o.hello = o.foo.bar;
+
+  let actual = collect(traverseObj(o))
+  actual = emberArray(actual).sortBy('key').slice();
+
+  const expected = emberArray([
+    new Node('foo', o.foo),
+    new Node('hello', o.hello),
+  ]).sortBy('key').slice();
+
+  a.deepEqual(actual, expected);
+});
