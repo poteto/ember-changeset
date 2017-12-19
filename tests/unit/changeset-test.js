@@ -491,7 +491,7 @@ test('#execute does not remove original nested objects', function(a) {
     let c = new Changeset(m);
 
     setCalls.forEach(([k, v]) => {
-      console.log('pre', JSON.stringify(m))
+      console.log('pre', JSON.stringify(m), k, v)
       c.set(k, v)
       console.log('post', JSON.stringify(m))
     });

@@ -195,9 +195,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
         let content = get(this, CONTENT);
         let changes = get(this, CHANGES);
         let changePairs = pairs(changes).filter(c => c.value instanceof Change);
-        debugger
         changePairs.forEach(({ key, value: c }) => deepSet(content, key, c.value));
-        debugger
       }
 
       return this;
@@ -518,19 +516,31 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
 
     _setChange(key, value) {
       let changes = get(this, CHANGES);
-      let changePairs = pairs(changes);
+      let changePairs = pairs(changes).filter(ch => ch.value instanceof Change);
 
       // Delete changed keys prefixed by `key`.
       changePairs
         .filter(p => p.key.indexOf(key) === 0)
         .forEach(p => this._deleteKey(CHANGES, p.key));
 
-      // Delete any keys in path leading up to `key`.
-      key.split('.').slice(0, -1).forEach((_, i, allKeys) => {
-        let key = allKeys.slice(0, i+1).join('.');
-        debugger
-        this._deleteKey(CHANGES, key);
-      });
+      // Determine if there are other changes at the same level.
+      let parts = key.split('.');
+      let branch = parts.slice(0, -1).join('.');
+      let hasOtherLeaves = changePairs
+        .filter(p => (
+          p.key.indexOf(branch) === 0 &&
+          p.key.split('.').length === parts.length
+        ))
+        .length > 0;
+
+      // If there are no other changes at the same level,
+      if (!hasOtherLeaves) {
+        // Delete any keys in path leading up to `key`.
+        key.split('.').slice(0, -1).forEach((_, i, allKeys) => {
+          let key = allKeys.slice(0, i+1).join('.');
+          this._deleteKey(CHANGES, key);
+        });
+      }
 
       deepSet(changes, key, new Change(value));
     },
@@ -626,20 +636,15 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
         return get(errors, `${key}.value`);
       }
 
-      if (relay.hasOwnProperty(key)) {
-        return relay[key];
+      let original = get(content, key);
+      if (isObject(original) && !plainValue) {
+        return this._relayFor(key, original);
       }
 
       // If `changes` has a nested property at `key` that is a `Change`,
       if (hasOwnNestedProperty(changes, key, Change)) {
         // Return the value of that `Change`.
         return get(changes, `${key}.value`);
-      }
-
-      let original = get(content, key);
-
-      if (isObject(original) && !plainValue) {
-        return this._relayFor(key, original);
       }
 
       return original;
