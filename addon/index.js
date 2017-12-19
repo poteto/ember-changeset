@@ -354,16 +354,22 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      *
      * @public
      * @param {String} key
+     * @param {String|Object} options
      * @param {Any} options.value
      * @param {Any} options.validation Validation message
      * @return {Any}
      */
-    addError(key, options) {
+    addError(key, options = {}) {
       let errors = get(this, ERRORS);
+
       if (!isObject(options)) {
         let value = get(this, key);
         let validation = options;
         options = new Err(value, validation);
+      }
+
+      if (!(options instanceof Err)) {
+        options = new Err(options.value, options.validation);
       }
 
       this._deleteKey(CHANGES, key);
