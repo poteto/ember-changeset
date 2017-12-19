@@ -670,10 +670,10 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      * @return {Array}
      */
     _rollbackKeys() {
-      return [
-        ...keys(get(this, CHANGES)),
-        ...keys(get(this, ERRORS))
-      ];
+      return emberArray([
+        ...leafKeys(get(this, CHANGES)),
+        ...leafKeys(get(this, ERRORS))
+      ]).uniq();
     },
 
     /**

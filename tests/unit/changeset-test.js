@@ -311,14 +311,67 @@ test('#rollback resets valid state', function(assert) {
 });
 
 test('observing #rollback values', function(assert) {
-  let res;
+  set(dummyModel, 'nested', { name: undefined })
   let changeset = new Changeset(dummyModel, dummyValidator);
-  changeset.addObserver('name', function() { res = this.get('name') });
-  assert.equal(undefined, changeset.get('name'), 'initial value');
-  changeset.set('name', 'Jack');
-  assert.equal('Jack', res, 'observer fired when setting value');
+
+  [
+    {
+      desc: 'shallow',
+      path: 'name',
+      value: 'Jack'
+    },
+    {
+      desc: 'nested',
+      path: 'nested.name',
+      value: 'Jack'
+    },
+  ].forEach(function({ desc, path, value }){
+    let res;
+
+    changeset.addObserver(path, function() {
+      res = this.get(path);
+    });
+
+    assert.equal(changeset.get(path), undefined, `Precondition - ${desc} initial value`);
+
+    changeset.set(path, value);
+    assert.equal(value, res, `Confirmation - ${desc} observer fired when setting value`);
+
+    changeset.rollback();
+    assert.equal(res, undefined, `Result - ${desc} observer fired with the value it was rollback to`);
+  })
+});
+
+test('observing #rollback only notifies properties once when errors and changes have the same keys', function(assert) {
+  let changeset = new Changeset(dummyModel, dummyValidator);
+  let count = 0;
+
+  /**
+   * It would be nice not to have to it this way but
+   * it's forcing changes and errors to have the same keys
+   */
+  changeset._changes['name'] = 'J';
+  changeset._errors['name'] = 'too short';
+
+  assert.deepEqual(
+    changeset.get('changes'),
+    [{ key: 'name', value: 'J' }],
+    'Precondition - Name should appear changed'
+  );
+
+  assert.deepEqual(
+    changeset.get('errors'),
+    [{ key: 'name', value: 'too short' }],
+    'Precondition - Name should have an error'
+  );
+
+  // Add observer AFTER setting values
+  changeset.addObserver('name', function() {
+    count++;
+  });
+
   changeset.rollback();
-  assert.equal(undefined, res, 'observer fired with the value name was rollback to');
+  assert.equal(count, 1, 'Name property should be notified once');
 });
 
 test('#error returns the error object', function(assert) {
