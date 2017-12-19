@@ -13,7 +13,6 @@ import take from 'ember-changeset/utils/take';
 import isChangeset, { CHANGESET } from 'ember-changeset/utils/is-changeset';
 import hasOwnNestedProperty from 'ember-changeset/utils/has-own-nested-property';
 import facade from 'ember-changeset/utils/facade';
-import pairs from 'ember-changeset/utils/pairs';
 import Err from 'ember-changeset/-private/err';
 import Change from 'ember-changeset/-private/change';
 import deepSet from 'ember-deep-set';
@@ -181,7 +180,6 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
       let preparedChanges = prepareChangesFn(changes);
       assert('Callback to `changeset.prepare` must return an object', isObject(preparedChanges));
       preparedChanges = facade(preparedChanges, null, ch => new Change(ch));
-      debugger
       set(this, CHANGES, preparedChanges);
       return this;
     },
