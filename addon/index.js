@@ -73,9 +73,9 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      */
     __changeset__: CHANGESET,
 
-    changes: objectToArray(CHANGES, false),
-    errors: objectToArray(ERRORS, true),
-    change: facade(CHANGES, Change, ({ value }) => value),
+    changes: objectToArray(CHANGES, Change, ch => ch.value, false),
+    errors: objectToArray(ERRORS, Err, e => e, true),
+    change: facade(CHANGES, Change, ch => ch.value),
     error: readOnly(ERRORS),
 
     isValid: isEmptyObject(ERRORS),
@@ -376,7 +376,8 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
       let errors = get(this, ERRORS);
       if (!isObject(options)) {
         let value = get(this, key);
-        options = { value, validation: options };
+        let validation = options;
+        options = new Err(value, validation);
       }
 
       this._deleteKey(CHANGES, key);
@@ -572,7 +573,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
         return value;
       }
 
-      return this.addError(key, { value, validation });
+      return this.addError(key, new Err(value, validation));
     },
 
     /**

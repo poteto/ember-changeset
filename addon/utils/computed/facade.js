@@ -10,8 +10,8 @@ import deepSet from 'ember-deep-set';
  */
 export default function facade(dependentKey, type, transform) {
   return computed(dependentKey, function() {
-    let changes = get(this, dependentKey);
-    let result = pairs(changes)
+    let obj = get(this, dependentKey);
+    let result = pairs(obj)
       .filter(p => p.value instanceof type)
       .reduce((obj, { key, value: typeInstance }) => {
         deepSet(obj, key, transform(typeInstance))

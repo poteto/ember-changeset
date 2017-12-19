@@ -21,7 +21,7 @@ export function* traverse(obj = {}) {
   // While stack is not empty,
   while (stack.length) {
     // Pop node off stack.
-    const node = stack.pop();
+    const node = stack.shift();
 
     // Visit node.
     if (node.value !== obj) yield node;
