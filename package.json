@@ -16,7 +16,8 @@
   "scripts": {
     "build": "ember build",
     "start": "ember server",
-    "test": "ember try:each"
+    "test": "ember try:each",
+    "flow": "flow"
   },
   "bugs": "https://github.com/poteto/ember-changeset/issues",
   "homepage": "https://github.com/poteto/ember-changeset",
@@ -49,6 +50,7 @@
     "ember-rollup": "^0.3.8",
     "ember-source": "~2.16.0",
     "flat": "^4.0.0",
+    "flow-bin": "^0.61.0",
     "loader.js": "^4.2.3",
     "testcheck": "^1.0.0-rc.2"
   },
