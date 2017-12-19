@@ -4,5 +4,5 @@ import { module, test } from 'qunit';
 module('Unit | Utility | computed facade');
 
 test("it has no tests", function(assert) {
-  assert.ok(false, 'write tests plz');
+  assert.ok(!facade, 'write tests plz');
 });

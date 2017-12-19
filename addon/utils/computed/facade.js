@@ -10,7 +10,6 @@ import facade from 'ember-changeset/utils/facade';
 export default function computedFacade(dependentKey, type, transform = a => a) {
   return computed(dependentKey, function() {
     let obj = get(this, dependentKey);
-    debugger
     return facade(obj, type, transform);
   }).readOnly();
 }

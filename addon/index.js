@@ -5,11 +5,11 @@ import isEmptyObject from 'ember-changeset/utils/computed/is-empty-object';
 import computedFacade from 'ember-changeset/utils/computed/facade';
 import isPromise from 'ember-changeset/utils/is-promise';
 import isObject from 'ember-changeset/utils/is-object';
-import leafKeys from 'ember-changeset/utils/leaf-keys';
 import pureAssign from 'ember-changeset/utils/assign';
 import objectWithout from 'ember-changeset/utils/object-without';
 import includes from 'ember-changeset/utils/includes';
 import take from 'ember-changeset/utils/take';
+import pairs from 'ember-changeset/utils/pairs';
 import isChangeset, { CHANGESET } from 'ember-changeset/utils/is-changeset';
 import hasOwnNestedProperty from 'ember-changeset/utils/has-own-nested-property';
 import facade from 'ember-changeset/utils/facade';
@@ -32,7 +32,6 @@ const {
   isPresent,
   set,
   typeOf,
-  runInDebug
 } = Ember;
 const { keys } = Object;
 const CONTENT = '_content';
@@ -195,22 +194,10 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
       if (get(this, 'isValid') && get(this, 'isDirty')) {
         let content = get(this, CONTENT);
         let changes = get(this, CHANGES);
-        let keys = leafKeys(changes);
-
-        // `keys` should only contain leaf keys. For example, `foo` and
-        // `foo.bar` should not be in `keys` at the same time.
-        runInDebug(() => {
-          let test = keys
-            .slice()
-            .sort()
-            .reduce((prev, curr) => prev && curr.indexOf(prev) !== 0, true);
-          assert(`List of changes has some non-leaf keys: ${changes}`, test);
-        });
-
-        for (let i = 0; i < keys.length; i++) {
-          let k = keys[i];
-          deepSet(content, k, get(this, `${CHANGES}.${k}`));
-        }
+        let changePairs = pairs(changes).filter(c => c.value instanceof Change);
+        debugger
+        changePairs.forEach(({ key, value: c }) => deepSet(content, key, c.value));
+        debugger
       }
 
       return this;
@@ -529,6 +516,25 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
       return true;
     },
 
+    _setChange(key, value) {
+      let changes = get(this, CHANGES);
+      let changePairs = pairs(changes);
+
+      // Delete changed keys prefixed by `key`.
+      changePairs
+        .filter(p => p.key.indexOf(key) === 0)
+        .forEach(p => this._deleteKey(CHANGES, p.key));
+
+      // Delete any keys in path leading up to `key`.
+      key.split('.').slice(0, -1).forEach((_, i, allKeys) => {
+        let key = allKeys.slice(0, i+1).join('.');
+        debugger
+        this._deleteKey(CHANGES, key);
+      });
+
+      deepSet(changes, key, new Change(value));
+    },
+
     /**
      * Sets property or error on the changeset.
      *
@@ -550,7 +556,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
         this._deleteKey(ERRORS, key);
 
         if (!isEqual(oldValue, value)) {
-          deepSet(changes, key, new Change(value));
+          this._setChange(key, value);
         } else if (hasOwnNestedProperty(changes, key)) {
           this._deleteKey(CHANGES, key);
         }
@@ -612,11 +618,16 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
       let changes = get(this, CHANGES);
       let errors = get(this, ERRORS);
       let content = get(this, CONTENT);
+      let relay = get(this, RELAY_CACHE);
 
       // If `errors` has a nested property at `key` that is an `Err`,
       if (hasOwnNestedProperty(errors, key, Err)) {
         // Return the value of that `Err`.
         return get(errors, `${key}.value`);
+      }
+
+      if (relay.hasOwnProperty(key)) {
+        return relay[key];
       }
 
       // If `changes` has a nested property at `key` that is a `Change`,
