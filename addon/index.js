@@ -470,6 +470,8 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
       let oldValue = get(content, key);
       let validation = this._validate(key, value, oldValue);
 
+      //console.log(key, validation)
+
       if (isPromise(validation)) {
         this._setIsValidating(key, true);
         this.trigger(BEFORE_VALIDATION_EVENT, key);
@@ -504,7 +506,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
           key,
           newValue,
           oldValue,
-          changes: pureAssign(changes),
+          changes: facade(changes, Change, ch => ch.value),
           content,
         });
 
@@ -628,7 +630,6 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
       let changes = get(this, CHANGES);
       let errors = get(this, ERRORS);
       let content = get(this, CONTENT);
-      let relay = get(this, RELAY_CACHE);
 
       // If `errors` has a nested property at `key` that is an `Err`,
       if (hasOwnNestedProperty(errors, key, Err)) {
