@@ -441,7 +441,6 @@ test('#execute does not apply changes to content if invalid', function(assert) {
   assert.equal(get(dummyModel, 'name'), undefined, 'should not apply changes');
 });
 
-<<<<<<< HEAD
 test('#execute does not remove original nested objects', function(a) {
   class DogTag {}
 
