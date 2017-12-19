@@ -3,10 +3,13 @@ import { module, test } from 'qunit';
 
 module('Unit | Utility | has own nested property');
 
+class Dummy {}
+
 let subject = {
   a: {
     b: {
-      c: true
+      c: true,
+      foo: new Dummy
     }
   }
 };
@@ -56,12 +59,19 @@ let testData = [
     desc: 'double dot',
     path: 'a..a',
     expected: false
+  },
+  {
+    desc: 'nested property that is an instance of a class',
+    path: 'a.b.c',
+    type: Dummy,
+    expected: false
   }
 ];
 
-testData.forEach(function({ desc, path, expected }) {
+testData.forEach(function({ desc, path, type, expected }) {
   test(`${path}`, function(assert) {
     let msg = `${desc} ${path} in ${JSON.stringify(subject)}`.trim();
-    assert.equal(hasOwnNestedProperty(subject, path), expected, msg);
+    let actual = hasOwnNestedProperty(subject, path, type);
+    assert.equal(actual, expected, msg);
   });
 });

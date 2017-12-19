@@ -1,4 +1,5 @@
 import Ember from 'ember';
+import pairs from 'ember-changeset/utils/pairs';
 
 const {
   computed,
@@ -8,18 +9,33 @@ const {
 const { keys } = Object;
 const assign = Ember.assign || Ember.merge;
 
-export default function objectToArray(objKey, flattenObjects) {
+function objectToArray(
+  objKey,
+  type,
+  transform = a => a,
+  flattenObjects
+) {
   return computed(objKey, function() {
     let obj = get(this, objKey);
+    console.log('computing', objKey, JSON.stringify(obj))
+    debugger
+    let result = pairs(obj)
+      .filter(p => p.value instanceof type)
+      .map(p => {
+        console.log('map')
+        let key = p.key;
+        let value = transform(p.value);
 
-    return keys(obj).map((key) => {
-      let value = obj[key];
+        if (flattenObjects && typeOf(value) === 'object') {
+          return assign({ key }, value);
+        }
 
-      if (flattenObjects && typeOf(value) === 'object') {
-        return assign({ key }, value);
-      }
+        return { key, value };
+      });
+    console.log('result:', result)
 
-      return { key, value };
-    });
+    return result;
   }).readOnly();
 }
+
+export default objectToArray;

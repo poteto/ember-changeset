@@ -2,6 +2,7 @@ import Ember from 'ember';
 import Relay from 'ember-changeset/-private/relay';
 import objectToArray from 'ember-changeset/utils/computed/object-to-array';
 import isEmptyObject from 'ember-changeset/utils/computed/is-empty-object';
+import computedFacade from 'ember-changeset/utils/computed/facade';
 import isPromise from 'ember-changeset/utils/is-promise';
 import isObject from 'ember-changeset/utils/is-object';
 import leafKeys from 'ember-changeset/utils/leaf-keys';
@@ -11,12 +12,15 @@ import includes from 'ember-changeset/utils/includes';
 import take from 'ember-changeset/utils/take';
 import isChangeset, { CHANGESET } from 'ember-changeset/utils/is-changeset';
 import hasOwnNestedProperty from 'ember-changeset/utils/has-own-nested-property';
+import facade from 'ember-changeset/utils/facade';
+import Err from 'ember-changeset/-private/err';
+import Change from 'ember-changeset/-private/change';
 import deepSet from 'ember-deep-set';
 
 const {
   Object: EmberObject,
   RSVP: { all, resolve },
-  computed: { not, readOnly },
+  computed: { not },
   Evented,
   A: emberArray,
   assert,
@@ -70,10 +74,12 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      */
     __changeset__: CHANGESET,
 
-    changes: objectToArray(CHANGES, false),
-    errors: objectToArray(ERRORS, true),
-    change: readOnly(CHANGES),
-    error: readOnly(ERRORS),
+    changes: objectToArray(CHANGES, Change, ch => ch.value, false),
+    errors: objectToArray(ERRORS, Err, e => e, true),
+    change: computedFacade(CHANGES, Change, ch => ch.value),
+    error: computedFacade(ERRORS, Err, e => {
+      return { value: e.value, validation: e.validation };
+    }),
 
     isValid: isEmptyObject(ERRORS),
     isPristine: isEmptyObject(CHANGES),
@@ -99,7 +105,6 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      * @return {Any}
      */
     unknownProperty(key) {
-      console.log('unknown property', key, this._valueFor(key))
       return this._valueFor(key);
     },
 
@@ -112,8 +117,6 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      * @return {Any}
      */
     setUnknownProperty(key, value) {
-      console.log('set unknown property', key, value)
-
       let changesetOptions = get(this, OPTIONS);
       let skipValidate = get(changesetOptions, 'skipValidate');
 
@@ -173,12 +176,11 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      */
     prepare(prepareChangesFn) {
       let changes = pureAssign(get(this, CHANGES));
+      changes = facade(changes, Change, ch => ch.value);
       let preparedChanges = prepareChangesFn(changes);
-
       assert('Callback to `changeset.prepare` must return an object', isObject(preparedChanges));
-
+      preparedChanges = facade(preparedChanges, null, ch => new Change(ch));
       set(this, CHANGES, preparedChanges);
-
       return this;
     },
 
@@ -375,7 +377,8 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
       let errors = get(this, ERRORS);
       if (!isObject(options)) {
         let value = get(this, key);
-        options = { value, validation: options };
+        let validation = options;
+        options = new Err(value, validation);
       }
 
       this._deleteKey(CHANGES, key);
@@ -504,7 +507,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      * @param {String} key
      * @param {Any} newValue
      * @param {Any} oldValue
-     * @return {Boolean|String}
+     * @return {Boolean|String|Promise}
      */
     _validate(key, newValue, oldValue) {
       let changes = get(this, CHANGES);
@@ -547,14 +550,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
         this._deleteKey(ERRORS, key);
 
         if (!isEqual(oldValue, value)) {
-          // Ensure each key leading up to leaf key is an object.
-          // Example: for `foo.bar.baz`, `foo` and `foo.bar` should be objects.
-          key.split('.').forEach((_, i, parts) => {
-            let key = parts.slice(0, i+1).join('.');
-            if (!isObject(get(changes, key))) deepSet(changes, key, {});
-          });
-
-          deepSet(changes, key, value);
+          deepSet(changes, key, new Change(value));
         } else if (hasOwnNestedProperty(changes, key)) {
           this._deleteKey(CHANGES, key);
         }
@@ -578,7 +574,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
         return value;
       }
 
-      return this.addError(key, { value, validation });
+      return this.addError(key, new Err(value, validation));
     },
 
     /**
@@ -608,36 +604,34 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      * Value for change or the original value.
      *
      * @private
-     * @param  {String} key
+     * @param {String} key
      * @param {Boolean} [plainValue=false]
-     * @return {Any}
+     * @return {Error|Change|Relay|Any}
      */
     _valueFor(key, plainValue = false) {
       let changes = get(this, CHANGES);
       let errors = get(this, ERRORS);
       let content = get(this, CONTENT);
-      let relay = get(this, RELAY_CACHE);
 
-      if (errors.hasOwnProperty(key)) {
-        let v = get(errors, `${key}.value`);
-        if (!isNone(v)) return v;
+      // If `errors` has a nested property at `key` that is an `Err`,
+      if (hasOwnNestedProperty(errors, key, Err)) {
+        // Return the value of that `Err`.
+        return get(errors, `${key}.value`);
       }
 
-      if (relay.hasOwnProperty(key)) {
-        return relay[key];
+      // If `changes` has a nested property at `key` that is a `Change`,
+      if (hasOwnNestedProperty(changes, key, Change)) {
+        // Return the value of that `Change`.
+        return get(changes, `${key}.value`);
       }
 
-      if (hasOwnNestedProperty(changes, key)) {
-        return get(changes, key);
+      let original = get(content, key);
+
+      if (isObject(original) && !plainValue) {
+        return this._relayFor(key, original);
       }
 
-      let oldValue = get(content, key);
-
-      if (isObject(oldValue) && !plainValue) {
-        return this._relayFor(key);
-      }
-
-      return oldValue;
+      return original;
     },
 
     /**
@@ -649,7 +643,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      * @param {Boolean} [shouldInvalidate=false]
      * @return {Any}
      */
-    _relayFor(key, shouldInvalidate = false) {
+    _relayFor(key, value, shouldInvalidate = false) {
       let cache = get(this, RELAY_CACHE);
       let found = cache[key];
 
@@ -662,7 +656,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
         return found;
       }
 
-      let relay = Relay.create({ key, changeset: this });
+      let relay = Relay.create({ key, changeset: this, content: value });
       cache[key] = relay;
       return relay;
     },

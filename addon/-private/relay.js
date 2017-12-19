@@ -5,9 +5,21 @@ const {
   get
 } = Ember;
 
+/**
+ * A Relay is a workaround for Ember's `unknownProperty` and
+ * `setUnknownProperty` behavior. `unknownProperty` breaks a nested key into
+ * its constituent parts, so we need to store those parts in an object that
+ * isn't the changeset.
+ *
+ * Property accesses on a Relay object delegate to the changeset, optionally
+ * prefixed by a key scope.
+ *
+ * TODO: Relay should extend ObjectProxy.
+ */
 export default EmberObject.extend({
   changeset: null,
   key: null,
+  content: null,
 
   init() {
     this._changedKeys = {};
@@ -35,5 +47,6 @@ export default EmberObject.extend({
   destroy() {
     this._super(...arguments);
     this.changeset = null;
+    this.content = null;
   }
 });
