@@ -414,8 +414,10 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      */
     snapshot() {
       return {
-        changes: pureAssign(get(this, CHANGES)),
-        errors: pureAssign(get(this, ERRORS))
+        changes: facade(get(this, CHANGES), Change, ch => ch.value),
+        errors: facade(get(this, ERRORS), Err, e => {
+          return { value: e.value, validation: e.validation }
+        })
       };
     },
 
