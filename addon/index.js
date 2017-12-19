@@ -2,7 +2,7 @@ import Ember from 'ember';
 import Relay from 'ember-changeset/-private/relay';
 import objectToArray from 'ember-changeset/utils/computed/object-to-array';
 import isEmptyObject from 'ember-changeset/utils/computed/is-empty-object';
-import facade from 'ember-changeset/utils/computed/facade';
+import computedFacade from 'ember-changeset/utils/computed/facade';
 import isPromise from 'ember-changeset/utils/is-promise';
 import isObject from 'ember-changeset/utils/is-object';
 import leafKeys from 'ember-changeset/utils/leaf-keys';
@@ -12,6 +12,8 @@ import includes from 'ember-changeset/utils/includes';
 import take from 'ember-changeset/utils/take';
 import isChangeset, { CHANGESET } from 'ember-changeset/utils/is-changeset';
 import hasOwnNestedProperty from 'ember-changeset/utils/has-own-nested-property';
+import facade from 'ember-changeset/utils/facade';
+import pairs from 'ember-changeset/utils/pairs';
 import Err from 'ember-changeset/-private/err';
 import Change from 'ember-changeset/-private/change';
 import deepSet from 'ember-deep-set';
@@ -19,7 +21,7 @@ import deepSet from 'ember-deep-set';
 const {
   Object: EmberObject,
   RSVP: { all, resolve },
-  computed: { not, readOnly },
+  computed: { not },
   Evented,
   A: emberArray,
   assert,
@@ -75,8 +77,10 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
 
     changes: objectToArray(CHANGES, Change, ch => ch.value, false),
     errors: objectToArray(ERRORS, Err, e => e, true),
-    change: facade(CHANGES, Change, ch => ch.value),
-    error: readOnly(ERRORS),
+    change: computedFacade(CHANGES, Change, ch => ch.value),
+    error: computedFacade(ERRORS, Err, e => {
+      return { value: e.value, validation: e.validation };
+    }),
 
     isValid: isEmptyObject(ERRORS),
     isPristine: isEmptyObject(CHANGES),
@@ -173,12 +177,12 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      */
     prepare(prepareChangesFn) {
       let changes = pureAssign(get(this, CHANGES));
+      changes = facade(changes, Change, ch => ch.value);
       let preparedChanges = prepareChangesFn(changes);
-
       assert('Callback to `changeset.prepare` must return an object', isObject(preparedChanges));
-
+      preparedChanges = facade(preparedChanges, null, ch => new Change(ch));
+      debugger
       set(this, CHANGES, preparedChanges);
-
       return this;
     },
 
