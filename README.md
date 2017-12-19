@@ -1,6 +1,11 @@
-# ember-changeset ![Download count all time](https://img.shields.io/npm/dt/ember-changeset.svg) [![TravisCI Build Status](https://img.shields.io/travis/poteto/ember-changeset/master.svg)](https://travis-ci.org/poteto/ember-changeset) [![npm version](https://badge.fury.io/js/ember-changeset.svg)](https://badge.fury.io/js/ember-changeset) [![Ember Observer Score](http://emberobserver.com/badges/ember-changeset.svg)](http://emberobserver.com/addons/ember-changeset)
+<h1 align="center"><br><br><a href="https://github.com/elixir-lang/ecto"><img alt="ember-changeset" src="assets/title.svg" width="350px"></a><br><br><br></h1>
 
-Ember.js flavored changesets, inspired by [Ecto](https://github.com/elixir-lang/ecto). To install:
+<a href="https://badge.fury.io/js/ember-changeset"><img alt="Download count all time" src="https://img.shields.io/npm/dt/ember-changeset.svg"></a>
+<a href="https://travis-ci.org/poteto/ember-changeset"><img alt="TravisCI Build Status" src="https://img.shields.io/travis/poteto/ember-changeset/master.svg"></a>
+<a href="https://badge.fury.io/js/ember-changeset"><img alt="npm version" src="https://badge.fury.io/js/ember-changeset.svg"></a>
+<a href="https://emberobserver.com/addons/ember-changeset"><img alt="Ember Observer Score" src="https://emberobserver.com/badges/ember-changeset.svg"></a>
+
+To install:
 
 ```
 ember install ember-changeset@1.3.0
