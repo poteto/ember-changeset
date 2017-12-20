@@ -18,7 +18,7 @@
     "start": "ember server",
     "test": "ember try:each",
     "flow": "flow",
-    "postinstall": "npm link ./addon"
+    "postinstall": "mv ember-changeset-package.json addon/package.json && npm link ./addon && mv addon/package.json ember-changeset-package.json"
   },
   "bugs": "https://github.com/poteto/ember-changeset/issues",
   "homepage": "https://github.com/poteto/ember-changeset",

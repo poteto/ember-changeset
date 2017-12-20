@@ -1,5 +1,6 @@
 // @flow
 
+/*::
 import type { ValidationResult } from 'ember-changeset/types/validation-result';
 
 export type IValidatorFunc = ({
@@ -9,3 +10,4 @@ export type IValidatorFunc = ({
   changes: { [string]: any },
   content: Object,
 }) => ValidationResult;
+*/
