@@ -1,3 +1,5 @@
+// @flow
+
 import Ember from 'ember';
 
 const { merge } = Ember;
@@ -7,6 +9,6 @@ function _assign(origin, ...sources) {
   return sources.reduce((acc, source) => merge(acc, source), merge({}, origin));
 }
 
-export default function pureAssign() {
-  return assign({}, ...arguments);
+export default function pureAssign(...objects /*: Array<Object> */) {
+  return assign({}, ...objects);
 }

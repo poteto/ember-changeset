@@ -1,5 +1,12 @@
+// @flow
+
 import Ember from 'ember';
 import pairs from 'ember-changeset/utils/pairs';
+
+/*::
+import type Change from 'ember-changeset/-private/change';
+import type Err from 'ember-changeset/-private/err';
+*/
 
 const {
   computed,
@@ -9,10 +16,10 @@ const {
 const assign = Ember.assign || Ember.merge;
 
 function objectToArray(
-  objKey,
-  type,
-  transform = a => a,
-  flattenObjects
+  objKey /*: string */,
+  type /*: Change | Err */,
+  transform /*: (Change | Err) => mixed*/ = a => a,
+  flattenObjects /*: boolean */
 ) {
   return computed(objKey, function() {
     let obj = get(this, objKey);

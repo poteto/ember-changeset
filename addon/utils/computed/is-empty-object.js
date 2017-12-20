@@ -1,3 +1,5 @@
+// @flow
+
 import Ember from 'ember';
 
 const {
@@ -8,7 +10,7 @@ const {
 } = Ember;
 const { keys } = Object;
 
-export default function isEmptyObject(dependentKey) {
+export default function isEmptyObject(dependentKey /*: string */) {
   assert('`dependentKey` must be defined', isPresent(dependentKey));
 
   return computed(dependentKey, function() {

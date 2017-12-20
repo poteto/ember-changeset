@@ -1,3 +1,5 @@
+// @flow
+
 import Ember from 'ember';
 import isObject from './is-object';
 
@@ -9,6 +11,6 @@ function isPromiseLike(obj = {}) {
     typeOf(obj.finally) === 'function';
 }
 
-export default function isPromise(obj) {
+export default function isPromise(obj /*: Object */) {
   return isObject(obj) && isPromiseLike(obj);
 }

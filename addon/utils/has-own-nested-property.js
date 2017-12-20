@@ -1,6 +1,13 @@
+// @flow
+
 import isObject from './is-object';
 import { isPresent, isBlank, typeOf } from '@ember/utils';
 import { assert, runInDebug } from '@ember/debug';
+
+/*::
+import type Change from 'ember-changeset/-private/change';
+import type Err from 'ember-changeset/-private/err';
+*/
 
 /**
  * Checks if a path exists in an object or any of it's children.
@@ -14,7 +21,11 @@ import { assert, runInDebug } from '@ember/debug';
  * @param {Class} type
  * @return {Boolean}
  */
-export default function hasOwnNestedProperty(object, key, type) {
+export default function hasOwnNestedProperty(
+  object /*: Object */,
+  key /*: string */,
+  type /*: Class<Change | Err> */
+) {
   runInDebug(() => {
     let condition =
       isBlank(type) ||

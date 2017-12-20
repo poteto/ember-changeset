@@ -3,9 +3,16 @@ import Changeset from 'ember-changeset';
 import isChangeset from 'ember-changeset/utils/is-changeset';
 import isPromise from 'ember-changeset/utils/is-promise';
 
+/*::
+import type { IValidatorFunc } from 'ember-changeset/types/validator-func';
+*/
+
 const { Helper: { helper } } = Ember;
 
-export function changeset([obj, validations], options = {}) {
+export function changeset(
+  [obj, validations] /*: [Object, IValidatorFunc] */,
+  options /*: { skipValidate?: boolean } */ = {}
+) {
   if (isChangeset(obj)) {
     return obj;
   }

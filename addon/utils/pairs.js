@@ -1,20 +1,16 @@
+// @flow
+
 import { get } from '@ember/object';
 import isObject from 'ember-changeset/utils/is-object';
 import includes from 'ember-changeset/utils/includes';
+import Node from 'ember-changeset/-private/node';
 
 const { keys } = Object;
-
-export class Node {
-  constructor(k, v) {
-    this.key   = k;
-    this.value = v;
-  }
-}
 
 /**
  * Traverse `obj` in depth-first order.
  */
-export function* traverse(obj = {}) {
+export function* traverse(obj /*: Object */ = {}) /*: Generator<Node, void, void> */ {
   const stack = [new Node('', obj)];
   const seen  = [];
 
@@ -52,7 +48,7 @@ export function* traverse(obj = {}) {
  * Given an object, collect all key-value pairs of the object into an
  * array and return the array.
  */
-export default function pairs(obj) {
+export default function pairs(obj /*: Object */) {
   const a = [];
   for (const v of traverse(obj)) a.push(v);
   return a;

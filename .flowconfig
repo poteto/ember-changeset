@@ -6,3 +6,5 @@
 [libs]
 
 [options]
+# Remap 'ember-changeset/<anything>' imports to 'addon/<anything>'.
+module.name_mapper='^ember-changeset/\([a-z-/]+\)$' -> 'ember-changeset-addon-dir/\1'

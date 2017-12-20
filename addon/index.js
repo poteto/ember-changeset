@@ -1,23 +1,20 @@
-// @flow
-
-// $FlowFixMe
-import Ember from 'ember'; // $FlowFixMe
-import Relay from 'ember-changeset/-private/relay'; // $FlowFixMe
-import objectToArray from 'ember-changeset/utils/computed/object-to-array'; // $FlowFixMe
-import isEmptyObject from 'ember-changeset/utils/computed/is-empty-object'; // $FlowFixMe
-import computedFacade from 'ember-changeset/utils/computed/facade'; // $FlowFixMe
-import isPromise from 'ember-changeset/utils/is-promise'; // $FlowFixMe
-import isObject from 'ember-changeset/utils/is-object'; // $FlowFixMe
-import pureAssign from 'ember-changeset/utils/assign'; // $FlowFixMe
-import objectWithout from 'ember-changeset/utils/object-without'; // $FlowFixMe
-import includes from 'ember-changeset/utils/includes'; // $FlowFixMe
-import take from 'ember-changeset/utils/take'; // $FlowFixMe
-import pairs from 'ember-changeset/utils/pairs'; // $FlowFixMe
-import isChangeset, { CHANGESET } from 'ember-changeset/utils/is-changeset'; // $FlowFixMe
-import hasOwnNestedProperty from 'ember-changeset/utils/has-own-nested-property'; // $FlowFixMe
-import facade from 'ember-changeset/utils/facade'; // $FlowFixMe
-import Err from 'ember-changeset/-private/err'; // $FlowFixMe
-import Change from 'ember-changeset/-private/change'; // $FlowFixMe
+import Ember from 'ember';
+import Relay from 'ember-changeset/-private/relay';
+import objectToArray from 'ember-changeset/utils/computed/object-to-array';
+import isEmptyObject from 'ember-changeset/utils/computed/is-empty-object';
+import computedFacade from 'ember-changeset/utils/computed/facade';
+import isPromise from 'ember-changeset/utils/is-promise';
+import isObject from 'ember-changeset/utils/is-object';
+import pureAssign from 'ember-changeset/utils/assign';
+import objectWithout from 'ember-changeset/utils/object-without';
+import includes from 'ember-changeset/utils/includes';
+import take from 'ember-changeset/utils/take';
+import pairs from 'ember-changeset/utils/pairs';
+import isChangeset, { CHANGESET } from 'ember-changeset/utils/is-changeset';
+import hasOwnNestedProperty from 'ember-changeset/utils/has-own-nested-property';
+import facade from 'ember-changeset/utils/facade';
+import Err from 'ember-changeset/-private/err';
+import Change from 'ember-changeset/-private/change';
 import deepSet from 'ember-deep-set';
 
 const {
@@ -53,23 +50,6 @@ function defaultValidatorFn() {
 
 const defaultOptions = { skipValidate: false };
 
-/*::
-type ValidationResult =
-  | boolean
-  | string
-  | Array<string>
-  | Promise<string>
-  | Promise<Array<string>>;
-
-type IValidatorFunc = ({
-  key: string,
-  newValue: any,
-  oldValue: any,
-  changes: any, // TODO
-  content: Object,
-}) => ValidationResult;
-*/
-
 /**
  * Creates new changesets.
  *
@@ -82,9 +62,9 @@ type IValidatorFunc = ({
  */
 export function changeset(
   obj /*: Object */,
-  validateFn /*: ({  }) => void */ = defaultValidatorFn,
-  validationMap = {},
-  options = {}
+  validateFn /*: IValidatorFunc */ = defaultValidatorFn,
+  validationMap /*: { [string]: IValidatorFunc } */ = {},
+  options /*: any */ = {}
 ) {
   assert('Underlying object for changeset is missing', isPresent(obj));
 
@@ -781,7 +761,7 @@ export default class Changeset {
    * @class Changeset
    * @constructor
    */
-  constructor() {
-    return changeset(...arguments).create();
+  constructor(...stuff /*: Array<any> */) {
+    return changeset(...stuff).create();
   }
 }
