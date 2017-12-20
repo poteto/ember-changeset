@@ -1,3 +1,5 @@
+// @flow
+
 import Ember from 'ember';
 import Relay from 'ember-changeset/-private/relay';
 import objectToArray from 'ember-changeset/utils/computed/object-to-array';
@@ -16,6 +18,10 @@ import facade from 'ember-changeset/utils/facade';
 import Err from 'ember-changeset/-private/err';
 import Change from 'ember-changeset/-private/change';
 import deepSet from 'ember-deep-set';
+
+/*::
+import type { IValidatorFunc } from 'ember-changeset/types/validator-func';
+*/
 
 const {
   Object: EmberObject,
@@ -64,7 +70,7 @@ export function changeset(
   obj /*: Object */,
   validateFn /*: IValidatorFunc */ = defaultValidatorFn,
   validationMap /*: { [string]: IValidatorFunc } */ = {},
-  options /*: any */ = {}
+  options /*: { skipValidate?: boolean } */ = {}
 ) {
   assert('Underlying object for changeset is missing', isPresent(obj));
 

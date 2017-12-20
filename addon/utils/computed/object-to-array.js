@@ -17,7 +17,7 @@ const assign = Ember.assign || Ember.merge;
 
 function objectToArray(
   objKey /*: string */,
-  type /*: Change | Err */,
+  type /*: Class<Change | Err> */,
   transform /*: (Change | Err) => mixed*/ = a => a,
   flattenObjects /*: boolean */
 ) {
