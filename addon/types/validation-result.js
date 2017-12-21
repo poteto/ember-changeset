@@ -4,7 +4,8 @@
 export type ValidationResult =
   | boolean
   | string
-  | Array<string>
+  | Array<boolean | string>
+  | Promise<boolean>
   | Promise<string>
   | Promise<Array<string>>;
 */

@@ -1,5 +1,8 @@
 // @flow
 
 /*::
-export type ValidationMsg = string | Array<string>;
+export type ValidationMsg =
+  | boolean
+  | string
+  | Array<boolean | string>;
 */

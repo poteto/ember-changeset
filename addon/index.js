@@ -89,12 +89,12 @@ export type ChangesetDef = {|
   _valueFor: (string, ?boolean) => Err | Change | RelayDef | mixed,
   _relayFor: (string, mixed, ?boolean) => RelayDef,
   toString: () => string,
-  _setProperty: (boolean | ValidationMsg, {
+  _setProperty: (ValidationMsg, {
     key: string,
     value: mixed,
     oldValue?: mixed
   }) => void,
-  addError: (string, ValidationMsg | ErrLike) => void,
+  addError: (string, ValidationMsg | ErrLike) => Err,
   _deleteKey: (
     '_changes' | '_errors' | '_relayCache' | '_runningValidations',
     string
@@ -439,7 +439,9 @@ export function changeset(
       c._deleteKey(CHANGES, key);
       c.notifyPropertyChange(ERRORS);
       c.notifyPropertyChange(key);
-      return set(errors, key, e);
+
+      errors[key] = e;
+      return e;
     },
 
 //     /**
@@ -631,24 +633,24 @@ export function changeset(
      * @return {Any}
      */
     _setProperty(validation, { key, value, oldValue }) {
-//       let changes = get(this, CHANGES);
-//       let isSingleValidationArray =
-//         isArray(validation) &&
-//         validation.length === 1 &&
-//         validation[0] === true;
-//       let [root] = key.split('.');
-//
-//       if (validation === true || isSingleValidationArray) {
-//         this._deleteKey(ERRORS, key);
-//
-//         if (!isEqual(oldValue, value)) {
-//           this._setChange(key, value);
-//         } else if (hasOwnNestedProperty(changes, key)) {
-//           this._deleteKey(CHANGES, key);
-//         }
-//         this.notifyPropertyChange(CHANGES);
-//         this.notifyPropertyChange(root);
-//
+      let changes /*: Changes */ = get(this, CHANGES);
+      let isSingleValidationArray /*: boolean */ =
+        isArray(validation) &&
+        validation.length === 1 &&
+        (validation /*: any */)[0] === true;
+
+      let self /*: ChangesetDef */ = this;
+      if (validation === true || isSingleValidationArray) {
+        self._deleteKey(ERRORS, key);
+
+        if (!isEqual(oldValue, value)) {
+          changes[key] = new Change(value);
+        } else if (key in changes) {
+          self._deleteKey(CHANGES, key);
+        }
+        self.notifyPropertyChange(CHANGES);
+        self.notifyPropertyChange(key);
+
 //         let errors = get(this, ERRORS);
 //         if (errors['__ember_meta__'] && errors['__ember_meta__']['values']) {
 //           let path = key.split('.');
@@ -664,11 +666,11 @@ export function changeset(
 //         }
 //
 //         return value;
-//       }
-//
-//       return this.addError(key, new Err(value, validation));
+      }
+
+      return (this /*: ChangesetDef */).addError(key, { value, validation });
     },
-//
+
 //     /**
 //      * Updates the cache that stores the number of running validations
 //      * for a given key.
