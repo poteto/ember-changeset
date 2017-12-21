@@ -69,6 +69,18 @@ type InternalMap =
   | RelayCache
   | RunningValidations;
 
+type NewProperty<T> = {
+  key: string,
+  value: T,
+  oldValue?: mixed,
+};
+
+type InternalMapKey =
+  | '_changes'
+  | '_errors'
+  | '_relayCache'
+  | '_runningValidations';
+
 export type ChangesetDef = {|
 	_content: Object,
 	_changes: Changes,
@@ -86,19 +98,12 @@ export type ChangesetDef = {|
   _super: () => void,
 	init: () => void,
   unknownProperty: (string) => mixed,
-  _valueFor: (string, ?boolean) => Err | Change | RelayDef | mixed,
+  _valueFor: (string, ?boolean) => RelayDef | mixed,
   _relayFor: (string, mixed, ?boolean) => RelayDef,
   toString: () => string,
-  _setProperty: (ValidationMsg, {
-    key: string,
-    value: mixed,
-    oldValue?: mixed
-  }) => void,
-  addError: (string, ValidationMsg | ErrLike) => Err,
-  _deleteKey: (
-    '_changes' | '_errors' | '_relayCache' | '_runningValidations',
-    string
-  ) => void,
+  _setProperty: <T>(ValidationMsg, NewProperty<T>) => (ErrLike | T),
+  addError: <T: ValidationMsg | ErrLike>(string, T) => T,
+  _deleteKey: (InternalMapKey, string) => void,
   notifyPropertyChange: (string) => void,
 |};
 */
@@ -423,7 +428,7 @@ export function changeset(
      * @param {Any} options.validation Validation message
      * @return {Any}
      */
-    addError(key, options = {}) {
+    addError /*:: <T> */ (key, options /*: T */) /*: T */ {
       let errors /*: Errors */ = get(this, ERRORS);
       let e /*: Err */;
 
@@ -432,6 +437,8 @@ export function changeset(
         e = new Err(get(this, key), opts);
       } else {
         let opts /*: ErrLike */ = (options /*: any */);
+        assert('Error must have value.', isPresent(opts.value));
+        assert('Error must have validation.', isPresent(opts.validation));
         e = new Err(opts.value, opts.validation);
       }
 
@@ -441,7 +448,7 @@ export function changeset(
       c.notifyPropertyChange(key);
 
       errors[key] = e;
-      return e;
+      return options;
     },
 
 //     /**
@@ -546,8 +553,6 @@ export function changeset(
 //       let oldValue = get(content, key);
 //       let validation = this._validate(key, value, oldValue);
 //
-//       //console.log(key, validation)
-//
 //       if (isPromise(validation)) {
 //         this._setIsValidating(key, true);
 //         this.trigger(BEFORE_VALIDATION_EVENT, key);
@@ -632,7 +637,10 @@ export function changeset(
      * @param {Any} options.value
      * @return {Any}
      */
-    _setProperty(validation, { key, value, oldValue }) {
+    _setProperty /*:: <T> */ (
+      validation /*: ValidationMsg */,
+      { key, value, oldValue } /*: NewProperty<T> */
+    ) /*: ErrLike | T */ {
       let changes /*: Changes */ = get(this, CHANGES);
       let isSingleValidationArray /*: boolean */ =
         isArray(validation) &&
@@ -651,24 +659,13 @@ export function changeset(
         self.notifyPropertyChange(CHANGES);
         self.notifyPropertyChange(key);
 
-//         let errors = get(this, ERRORS);
-//         if (errors['__ember_meta__'] && errors['__ember_meta__']['values']) {
-//           let path = key.split('.');
-//           if (path.length === 1) {
-//             delete errors['__ember_meta__']['values'][key];
-//           } else {
-//             let branch = path.slice(0, -1).join('.');
-//             let [leaf] = path.slice(-1);
-//             let obj = get(errors, branch);
-//             if (obj) delete obj['__ember_meta__']['values'][leaf];
-//           }
-//           set(this, ERRORS, errors);
-//         }
-//
-//         return value;
+        return value;
       }
 
-      return (this /*: ChangesetDef */).addError(key, { value, validation });
+      return (this /*: ChangesetDef */).addError(key, {
+        value,
+        validation: (validation /*: ValidationMsg */)
+      });
     },
 
 //     /**
@@ -700,7 +697,7 @@ export function changeset(
      * @private
      * @param {String} key
      * @param {Boolean} [plainValue=false]
-     * @return {Error|Change|Relay|Any}
+     * @return {Relay|mixed}
      */
     _valueFor(key, plainValue = false) {
       let changes /*: Changes */ = get(this, CHANGES);
