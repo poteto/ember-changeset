@@ -2,6 +2,11 @@
 
 /*::
 import type { ValidationMsg } from 'ember-changeset/types/validation-msg';
+
+export type ErrLike = {
+  value: mixed,
+  validation: ValidationMsg,
+};
 */
 
 export default class Err {

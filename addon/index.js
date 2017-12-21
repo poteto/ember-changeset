@@ -23,6 +23,8 @@ import deepSet from 'ember-deep-set';
 import type { ValidatorFunc } from 'ember-changeset/types/validator-func';
 import type { RelayDef } from 'ember-changeset/-private/relay';
 import type { ChangesetOpts } from 'ember-changeset/types/changeset-opts';
+import type { ValidationMsg } from 'ember-changeset/types/validation-msg';
+import type { ErrLike } from 'ember-changeset/-private/err';
 */
 
 const {
@@ -59,6 +61,13 @@ const defaultOptions = { skipValidate: false };
 type Changes = { [string]: Change };
 type Errors = { [string]: Err };
 type RelayCache = { [string]: RelayDef };
+type RunningValidations = { [string]: number };
+
+type InternalMap =
+  | Changes
+  | Errors
+  | RelayCache
+  | RunningValidations;
 
 export type ChangesetDef = {|
 	_content: Object,
@@ -67,7 +76,7 @@ export type ChangesetDef = {|
 	_relayCache: RelayCache,
 	_validator: ValidatorFunc,
 	_options: ChangesetOpts,
-	_runningValidations: { [string]: number },
+	_runningValidations: RunningValidations,
 
   isValid: boolean,
   isPristine: boolean,
@@ -80,6 +89,17 @@ export type ChangesetDef = {|
   _valueFor: (string, ?boolean) => Err | Change | RelayDef | mixed,
   _relayFor: (string, mixed, ?boolean) => RelayDef,
   toString: () => string,
+  _setProperty: (boolean | ValidationMsg, {
+    key: string,
+    value: mixed,
+    oldValue?: mixed
+  }) => void,
+  addError: (string, ValidationMsg | ErrLike) => void,
+  _deleteKey: (
+    '_changes' | '_errors' | '_relayCache' | '_runningValidations',
+    string
+  ) => void,
+  notifyPropertyChange: (string) => void,
 |};
 */
 
@@ -104,6 +124,7 @@ export function changeset(
   return EmberObject.extend(Evented, ({
     /*::
     _super() {},
+    notifyPropertyChange() {},
     _content: {},
     _changes: {},
     _errors: {},
@@ -390,39 +411,37 @@ export function changeset(
 //
 //       return !isEmpty(ks);
 //     },
-//
-//
-//     /**
-//      * Manually add an error to the changeset. If there is an existing error or
-//      * change for `key`, it will be overwritten.
-//      *
-//      * @public
-//      * @param {String} key
-//      * @param {String|Object} options
-//      * @param {Any} options.value
-//      * @param {Any} options.validation Validation message
-//      * @return {Any}
-//      */
-//     addError(key, options = {}) {
-//       let errors = get(this, ERRORS);
-//
-//       if (!isObject(options)) {
-//         let value = get(this, key);
-//         let validation = options;
-//         options = new Err(value, validation);
-//       }
-//
-//       if (!(options instanceof Err)) {
-//         options = new Err(options.value, options.validation);
-//       }
-//
-//       this._deleteKey(CHANGES, key);
-//       this.notifyPropertyChange(ERRORS);
-//       this.notifyPropertyChange(key);
-//
-//       return deepSet(errors, key, options);
-//     },
-//
+
+    /**
+     * Manually add an error to the changeset. If there is an existing error or
+     * change for `key`, it will be overwritten.
+     *
+     * @public
+     * @param {String} key
+     * @param {String|Object} options
+     * @param {Any} options.value
+     * @param {Any} options.validation Validation message
+     * @return {Any}
+     */
+    addError(key, options = {}) {
+      let errors /*: Errors */ = get(this, ERRORS);
+      let e /*: Err */;
+
+      if (!isObject(options)) {
+        let opts /*: ValidationMsg */ = (options /*: any */);
+        e = new Err(get(this, key), opts);
+      } else {
+        let opts /*: ErrLike */ = (options /*: any */);
+        e = new Err(opts.value, opts.validation);
+      }
+
+      let c = (this /*: ChangesetDef */);
+      c._deleteKey(CHANGES, key);
+      c.notifyPropertyChange(ERRORS);
+      c.notifyPropertyChange(key);
+      return set(errors, key, e);
+    },
+
 //     /**
 //      * Manually push multiple errors to the changeset as an array. If there is
 //      * an existing error or change for `key`. it will be overwritten.
@@ -602,16 +621,16 @@ export function changeset(
 //       deepSet(changes, key, new Change(value));
 //     },
 //
-//     /**
-//      * Sets property or error on the changeset.
-//      *
-//      * @private
-//      * @param {Boolean|Array|String} validation
-//      * @param {String} options.key
-//      * @param {Any} options.value
-//      * @return {Any}
-//      */
-//     _setProperty(validation, { key, value, oldValue } = {}) {
+    /**
+     * Sets property or error on the changeset.
+     *
+     * @private
+     * @param {Boolean|Array|String} validation
+     * @param {String} options.key
+     * @param {Any} options.value
+     * @return {Any}
+     */
+    _setProperty(validation, { key, value, oldValue }) {
 //       let changes = get(this, CHANGES);
 //       let isSingleValidationArray =
 //         isArray(validation) &&
@@ -648,7 +667,7 @@ export function changeset(
 //       }
 //
 //       return this.addError(key, new Err(value, validation));
-//     },
+    },
 //
 //     /**
 //      * Updates the cache that stores the number of running validations
@@ -762,37 +781,22 @@ export function changeset(
 //         ...keys(get(this, ERRORS))
 //       ];
 //     },
-//
-//     /**
-//      * Deletes a key off an object and notifies observers.
-//      *
-//      * @private
-//      * @param  {String} objName
-//      * @param  {String} key
-//      * @return {Void}
-//      */
-//     _deleteKey(objName, key = '') {
-//       let obj = get(this, objName);
-//
-//       if (isNone(obj)) {
-//         return;
-//       }
-//
-//       let keyPath = key.split('.');
-//       let isNestedKey = keyPath.length > 1;
-//
-//       if (isNestedKey) {
-//         let path = keyPath.slice(0, -1).join('.');
-//         let [leaf] = keyPath.slice(-1);
-//         let branch = get(obj, path);
-//         branch && delete branch[leaf];
-//       } else if (obj.hasOwnProperty(key)) {
-//         delete obj[key];
-//       }
-//
-//       this.notifyPropertyChange(`${objName}.${key}`);
-//       this.notifyPropertyChange(objName);
-//     }
+
+    /**
+     * Deletes a key off an object and notifies observers.
+     *
+     * @private
+     * @param  {String} objName
+     * @param  {String} key
+     * @return {Void}
+     */
+    _deleteKey(objName, key = '') {
+      let obj /*: InternalMap */ = get(this, objName);
+      if (obj.hasOwnProperty(key)) delete obj[key];
+      let c /*: ChangesetDef */ = this;
+      c.notifyPropertyChange(`${objName}.${key}`);
+      c.notifyPropertyChange(objName);
+    }
   } /*: ChangesetDef */));
 }
 
