@@ -18,14 +18,14 @@ const assign = Ember.assign || Ember.merge;
 function objectToArray(
   objKey /*: string */,
   type /*: Class<Change | Err> */,
-  transform /*: (Change | Err) => mixed*/ = a => a,
+  transform /*: (Change | Err) => mixed */ = a => a,
   flattenObjects /*: boolean */
-) {
+) /*: Array<{ key: string, value: mixed }> */ {
   return computed(objKey, function() {
     let obj = get(this, objKey);
     let result = pairs(obj)
       .filter(p => p.value instanceof type)
-      .map(p => {
+      .map((p) /*: { key: string, value: mixed } */ => {
         let key = p.key;
         let value = transform(p.value);
 

@@ -7,7 +7,6 @@ import { isPresent } from '@ember/utils';
 /*::
 import type Change from 'ember-changeset/-private/change';
 import type Err from 'ember-changeset/-private/err';
-import type { ModificationClass } from 'ember-changeset/types/modification-class';
 */
 
 /**
@@ -18,9 +17,9 @@ import type { ModificationClass } from 'ember-changeset/types/modification-class
  */
 export default function facade(
   obj /*: Object */,
-  type /*: ModificationClass | null */,
+  type /*: Class<Change | Err> | null */,
   transform /*: (Change | Err) => mixed */ = a => a
-) {
+) /*: Object */ {
   return pairs(obj)
     .filter(p => isPresent(type) ? p.value instanceof type : true)
     .reduce((obj, { key, value }) => {

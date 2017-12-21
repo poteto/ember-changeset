@@ -13,7 +13,7 @@ const { keys } = Object;
 export default function objectWithout(
   excludedKeys /*: Array<string> */,
   ...sources /*: Array<Object> */
-) {
+) /*: Object */ {
   return sources.reduce((acc, source) => {
     keys(source)
       .filter((key) => excludedKeys.indexOf(key) === -1 || !source.hasOwnProperty(key))

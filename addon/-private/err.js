@@ -1,7 +1,7 @@
 // @flow
 
 /*::
-import type { ValidationMsg } from 'ember-changeset/types/validation-message';
+import type { ValidationMsg } from 'ember-changeset/types/validation-msg';
 */
 
 export default class Err {

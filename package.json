@@ -17,8 +17,7 @@
     "build": "ember build",
     "start": "ember server",
     "test": "ember try:each",
-    "flow": "flow",
-    "postinstall": "mv ember-changeset-package.json addon/package.json && npm link ./addon && mv addon/package.json ember-changeset-package.json"
+    "flow": "flow"
   },
   "bugs": "https://github.com/poteto/ember-changeset/issues",
   "homepage": "https://github.com/poteto/ember-changeset",
@@ -28,7 +27,6 @@
     "ember-maybe-import-regenerator": "^0.1.6"
   },
   "devDependencies": {
-    "ember-changeset-addon-dir": "file:addon",
     "broccoli-asset-rev": "^2.4.5",
     "ember-ajax": "^3.0.0",
     "ember-cli": "~2.16.2",

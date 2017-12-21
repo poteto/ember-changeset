@@ -3,11 +3,11 @@
 /*::
 import type { ValidationResult } from 'ember-changeset/types/validation-result';
 
-export type IValidatorFunc = ({
+export type ValidatorFunc = ({
   key: string,
-  newValue: any,
-  oldValue: any,
-  changes: { [string]: any },
+  newValue: mixed,
+  oldValue: mixed,
+  changes: { [string]: mixed },
   content: Object,
 }) => ValidationResult;
 */

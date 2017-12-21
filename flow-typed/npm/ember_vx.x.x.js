@@ -28,3 +28,6 @@ declare module '@ember/debug' {
 declare module '@ember/utils' {
   declare module.exports: any;
 }
+declare module '@ember/object/proxy' {
+  declare module.exports: any;
+}

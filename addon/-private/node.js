@@ -12,7 +12,7 @@ export default class Node {
   */
 
   constructor(k /*: string */, v /*: Change | Err */) {
-    this.key   = k;
+    this.key = k;
     this.value = v;
   }
 }

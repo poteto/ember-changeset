@@ -9,6 +9,6 @@ function _assign(origin, ...sources) {
   return sources.reduce((acc, source) => merge(acc, source), merge({}, origin));
 }
 
-export default function pureAssign(...objects /*: Array<Object> */) {
+export default function pureAssign(...objects /*: Array<Object> */) /*: Object */ {
   return assign({}, ...objects);
 }

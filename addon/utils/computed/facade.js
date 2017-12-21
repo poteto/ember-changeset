@@ -6,7 +6,6 @@ import facade from 'ember-changeset/utils/facade';
 /*::
 import type Change from 'ember-changeset/-private/change';
 import type Err from 'ember-changeset/-private/err';
-import type { ModificationClass } from 'ember-changeset/types/modification-class';
 */
 
 /**
@@ -17,9 +16,9 @@ import type { ModificationClass } from 'ember-changeset/types/modification-class
  */
 export default function computedFacade(
   dependentKey /*: string */,
-  type /*: ModificationClass | null */,
+  type /*: Class<Change | Err> | null */,
   transform /*: (Change | Err) => mixed */ = a => a
-) {
+) /*: Object */ {
   return computed(dependentKey, function() {
     let obj = get(this, dependentKey);
     return facade(obj, type, transform);

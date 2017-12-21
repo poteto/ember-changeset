@@ -6,5 +6,9 @@
 [libs]
 
 [options]
-# Remap 'ember-changeset/<anything>' imports to 'addon/<anything>'.
-module.name_mapper='^ember-changeset/\([a-z-/]+\)$' -> 'ember-changeset-addon-dir/\1'
+# Remap 'ember-changeset/<anything>' imports to '<PROJECT_ROOT>/addon/<anything>'.
+module.name_mapper='^ember-changeset$' -> '<PROJECT_ROOT>/addon/index.js'
+module.name_mapper='^ember-changeset/\([a-z-/]+\)$' -> '<PROJECT_ROOT>/addon/\1'
+
+# https://github.com/facebook/flow/issues/2826
+unsafe.enable_getters_and_setters=true

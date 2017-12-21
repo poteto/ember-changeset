@@ -10,7 +10,9 @@ const {
 } = Ember;
 const { keys } = Object;
 
-export default function isEmptyObject(dependentKey /*: string */) {
+export default function isEmptyObject(
+  dependentKey /*: string */
+) /*: boolean */ {
   assert('`dependentKey` must be defined', isPresent(dependentKey));
 
   return computed(dependentKey, function() {
