@@ -1,5 +1,11 @@
+// @flow
+
 export default class Change {
-  constructor(value) {
+  /*::
+  value: mixed;
+  */
+
+  constructor(value /*: mixed */) {
     this.value = value;
   }
 }

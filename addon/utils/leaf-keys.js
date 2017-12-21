@@ -1,3 +1,5 @@
+// @flow
+
 import isObject from 'ember-changeset/utils/is-object';
 import { isArray } from '@ember/array';
 
@@ -26,6 +28,6 @@ const _leafKeys = function(object = {}, scope = '') {
  * @param  {Object} [object={}] Object to inspect.
  * @return {Array} Array of the leaf-most keys
  */
-export default function leafKeys(object = {}) {
+export default function leafKeys(object /*: Object */ = {}) {
   return _leafKeys(object);
 }

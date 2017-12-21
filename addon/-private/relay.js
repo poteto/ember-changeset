@@ -1,52 +1,89 @@
+// @flow
+
 import Ember from 'ember';
+import Changeset from 'ember-changeset';
+import ObjectProxy from '@ember/object/proxy';
+
+/*::
+import type { ChangesetDef } from 'ember-changeset';
+*/
 
 const {
   Object: EmberObject,
   get
 } = Ember;
 
+/*::
+export type RelayDef = {|
+  changeset: ChangesetDef | null,
+  key: string,
+  content: Object | null,
+  _changedKeys: Object,
+
+  _super: () => void,
+  init: () => void,
+  unknownProperty: (string) => mixed,
+  setUnknownProperty: (string, mixed) => mixed,
+  rollback: () => void,
+  destroy: () => void,
+  notifyPropertyChange: (string) => void,
+|};
+*/
+
 /**
- * A Relay is a workaround for Ember's `unknownProperty` and
- * `setUnknownProperty` behavior. `unknownProperty` breaks a nested key into
- * its constituent parts, so we need to store those parts in an object that
- * isn't the changeset.
+ * A Relay delegates property accesses to its changeset. The property
+ * may optionally be prefixed by `key`.
  *
- * Property accesses on a Relay object delegate to the changeset, optionally
- * prefixed by a key scope.
- *
- * TODO: Relay should extend ObjectProxy.
+ * This is done as a workaround for Ember's `unknownProperty` behavior.
+ * Given the key "foo.bar.baz", Ember breaks the key into "foo", "bar",
+ * and "baz", then feeds each string into `unknownProperty`. However, we
+ * need the entire key "foo.bar.baz" in order to look up the change on
+ * the changeset. A Relay will hold the key "foo.bar", and let us look
+ * up "foo.bar.baz" on the changeset when "baz" is requested.
  */
-export default EmberObject.extend({
+export default ObjectProxy.extend(({
+  /*::
+  _super() {},
+  notifyPropertyChange() {},
+  _changedKeys: {},
+  */
+
   changeset: null,
-  key: null,
+  key: '',
   content: null,
 
   init() {
-    this._changedKeys = {};
+    let r /*: RelayDef */ = this;
+    r._super(...arguments);
+    r._changedKeys = {};
   },
 
   unknownProperty(key) {
-    return this.changeset._valueFor(`${get(this, 'key')}.${key}`);
+    let r /*: RelayDef */ = this;
+    if (!r.changeset) throw new Error('Relay has no changeset.');
+    return r.changeset._valueFor(`${r.key}.${key}`);
   },
 
   setUnknownProperty(key, value) {
-    this._changedKeys[key] = null;
-    this.changeset._validateAndSet(`${get(this, 'key')}.${key}`, value);
-    this.notifyPropertyChange(key);
+    let r /*: RelayDef */ = this;
+    r._changedKeys[key] = null;
+    if (!r.changeset) throw new Error('Relay has no changeset.');
+    r.changeset._validateAndSet(`${r.key}.${key}`, value);
+    r.notifyPropertyChange(key);
     return value;
   },
 
   rollback() {
-    for (let key of Object.keys(this._changedKeys)) {
-      this.notifyPropertyChange(key);
-    }
-
-    this._changedKeys = {};
+    let r /*: RelayDef */ = this;
+    r._super(...arguments);
+    for (let k of Object.keys(r._changedKeys)) r.notifyPropertyChange(k);
+    r._changedKeys = {};
   },
 
   destroy() {
-    this._super(...arguments);
-    this.changeset = null;
-    this.content = null;
+    let r /*: RelayDef */ = this;
+    r._super(...arguments);
+    r.changeset = null;
+    r.content = null;
   }
-});
+} /*: RelayDef */));
