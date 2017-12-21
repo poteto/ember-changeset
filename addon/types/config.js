@@ -1,7 +1,7 @@
 // @flow
 
 /*::
-export type ChangesetOpts = {
+export type Config = {
   skipValidate?: boolean
 };
 */

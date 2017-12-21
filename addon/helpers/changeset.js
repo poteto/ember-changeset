@@ -7,14 +7,14 @@ import isPromise from 'ember-changeset/utils/is-promise';
 
 /*::
 import type { ValidatorFunc } from 'ember-changeset/types/validator-func';
-import type { ChangesetOpts } from 'ember-changeset/types/changeset-opts';
+import type { Config } from 'ember-changeset/types/config';
 */
 
 const { Helper: { helper } } = Ember;
 
 export function changeset(
   [obj, validations] /*: [Object, ValidatorFunc] */,
-  options /*: ChangesetOpts */ = {}
+  options /*: Config */ = {}
 ) {
   if (isChangeset(obj)) {
     return obj;

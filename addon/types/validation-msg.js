@@ -4,5 +4,5 @@
 export type ValidationMsg =
   | boolean
   | string
-  | Array<boolean | string>;
+  | Array<false | string>;
 */

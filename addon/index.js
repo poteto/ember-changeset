@@ -21,8 +21,9 @@ import deepSet from 'ember-deep-set';
 
 /*::
 import type { ValidatorFunc } from 'ember-changeset/types/validator-func';
+import type { ValidationResult } from 'ember-changeset/types/validation-result';
 import type { RelayDef } from 'ember-changeset/-private/relay';
-import type { ChangesetOpts } from 'ember-changeset/types/changeset-opts';
+import type { Config } from 'ember-changeset/types/config';
 import type { ValidationMsg } from 'ember-changeset/types/validation-msg';
 import type { ErrLike } from 'ember-changeset/-private/err';
 */
@@ -82,13 +83,13 @@ type InternalMapKey =
   | '_runningValidations';
 
 export type ChangesetDef = {|
-	_content: Object,
-	_changes: Changes,
-	_errors: Errors,
-	_relayCache: RelayCache,
-	_validator: ValidatorFunc,
-	_options: ChangesetOpts,
-	_runningValidations: RunningValidations,
+  _content: Object,
+  _changes: Changes,
+  _errors: Errors,
+  _relayCache: RelayCache,
+  _validator: ValidatorFunc,
+  _options: Config,
+  _runningValidations: RunningValidations,
 
   isValid: boolean,
   isPristine: boolean,
@@ -96,7 +97,7 @@ export type ChangesetDef = {|
   isDirty: boolean,
 
   _super: () => void,
-	init: () => void,
+  init: () => void,
   unknownProperty: (string) => mixed,
   _valueFor: (string, ?boolean) => RelayDef | mixed,
   _relayFor: (string, mixed, ?boolean) => RelayDef,
@@ -122,11 +123,32 @@ export function changeset(
   obj /*: Object */,
   validateFn /*: ValidatorFunc */ = defaultValidatorFn,
   validationMap /*: { [string]: ValidatorFunc } */ = {},
-  options /*: ChangesetOpts */ = {}
+  options /*: Config */ = {}
 ) {
   assert('Underlying object for changeset is missing', isPresent(obj));
 
   return EmberObject.extend(Evented, ({
+    /**
+     * Internal descriptor for changeset identification
+     *
+     * @private
+     * @property __changeset__
+     * @type {String}
+     */
+    __changeset__: CHANGESET,
+
+    /*
+    changes: objectToArray(CHANGES, false),
+    errors: objectToArray(ERRORS, true),
+    change: readOnly(CHANGES),
+    error: readOnly(ERRORS),
+    */
+
+    isValid: isEmptyObject(ERRORS),
+    isPristine: isEmptyObject(CHANGES),
+    isInvalid: not('isValid').readOnly(),
+    isDirty: not('isPristine').readOnly(),
+
     /*::
     _super() {},
     notifyPropertyChange() {},
@@ -151,21 +173,6 @@ export function changeset(
       c[RUNNING_VALIDATIONS] = {};
     },
 
-    isValid: isEmptyObject(ERRORS),
-    isPristine: isEmptyObject(CHANGES),
-    isInvalid: not('isValid').readOnly(),
-    isDirty: not('isPristine').readOnly(),
-
-    /*
-    TODO:
-    changes: objectToArray(CHANGES, Change, ch => ch.value, false),
-    errors: objectToArray(ERRORS, Err, e => e, true),
-    change: computedFacade(CHANGES, Change, ch => ch.value),
-    error: computedFacade(ERRORS, Err, e => {
-      return { value: e.value, validation: e.validation };
-    }),
-    */
-
     /**
      * Proxies `get` to the underlying content or changed value, if present.
      *
@@ -173,28 +180,30 @@ export function changeset(
      * @param  {String} key
      * @return {Any}
      */
-     unknownProperty(key) {
-       return (this /*: ChangesetDef */)._valueFor(key);
-     },
+    unknownProperty(key) {
+      return (this /*: ChangesetDef */)._valueFor(key);
+    },
 
-//     /**
-//      * Stores change on the changeset.
-//      *
-//      * @public
-//      * @param  {String} key
-//      * @param  {Any} value
-//      * @return {Any}
-//      */
-//     setUnknownProperty(key, value) {
-//       let changesetOptions = get(this, OPTIONS);
-//       let skipValidate = get(changesetOptions, 'skipValidate');
-//
-//       if (skipValidate) {
-//         return this._setProperty(true, { key, value });
-//       }
-//
-//       return this._validateAndSet(key, value);
-//     },
+    /**
+     * Stores change on the changeset.
+     *
+     * @public
+     * @param  {String} key
+     * @param  {Any} value
+     * @return {Any}
+     */
+    setUnknownProperty(key, value) {
+      /*
+      let changesetOptions = get(this, OPTIONS);
+      let skipValidate = get(changesetOptions, 'skipValidate');
+
+      if (skipValidate) {
+        return this._setProperty(true, { key, value });
+      }
+
+      return this._validateAndSet(key, value);
+      */
+    },
 
     /**
      * String representation for the changeset.
@@ -207,52 +216,56 @@ export function changeset(
       return `changeset:${normalisedContent.toString()}`;
     },
 
-//     /**
-//      * Teardown relays from cache.
-//      *
-//      * @public
-//      * @return {Void}
-//      */
-//     willDestroy() {
-//       let relayCache = get(this, RELAY_CACHE);
-//       for (let key in relayCache) {
-//         relayCache[key].destroy();
-//       }
-//     },
-//
-//     /**
-//      * Provides a function to run before emitting changes to the model. The
-//      * callback function must return a hash in the same shape:
-//      *
-//      * ```
-//      * changeset
-//      *   .prepare((changes) => {
-//      *     let modified = {};
-//      *
-//      *     for (let key in changes) {
-//      *       modified[underscore(key)] = changes[key];
-//      *     }
-//      *
-//      *    return modified; // { first_name: "Jim", last_name: "Bob" }
-//      *  })
-//      *  .execute(); // execute the changes
-//      * ```
-//      *
-//      * @public
-//      * @chainable
-//      * @param  {Function} prepareChangesFn
-//      * @return {Changeset}
-//      */
-//     prepare(prepareChangesFn) {
-//       let changes = pureAssign(get(this, CHANGES));
-//       changes = facade(changes, Change, ch => ch.value);
-//       let preparedChanges = prepareChangesFn(changes);
-//       assert('Callback to `changeset.prepare` must return an object', isObject(preparedChanges));
-//       preparedChanges = facade(preparedChanges, null, ch => new Change(ch));
-//       set(this, CHANGES, preparedChanges);
-//       return this;
-//     },
-//
+    /**
+     * Teardown relays from cache.
+     *
+     * @public
+     * @return {Void}
+     */
+    willDestroy() {
+      /*
+      let relayCache = get(this, RELAY_CACHE);
+      for (let key in relayCache) {
+        relayCache[key].destroy();
+      }
+      */
+    },
+
+    /**
+     * Provides a function to run before emitting changes to the model. The
+     * callback function must return a hash in the same shape:
+     *
+     * ```
+     * changeset
+     *   .prepare((changes) => {
+     *     let modified = {};
+     *
+     *     for (let key in changes) {
+     *       modified[underscore(key)] = changes[key];
+     *     }
+     *
+     *    return modified; // { first_name: "Jim", last_name: "Bob" }
+     *  })
+     *  .execute(); // execute the changes
+     * ```
+     *
+     * @public
+     * @chainable
+     * @param  {Function} prepareChangesFn
+     * @return {Changeset}
+     */
+    prepare(prepareChangesFn) {
+      /*
+      let changes = pureAssign(get(this, CHANGES));
+      changes = facade(changes, Change, ch => ch.value);
+      let preparedChanges = prepareChangesFn(changes);
+      assert('Callback to `changeset.prepare` must return an object', isObject(preparedChanges));
+      preparedChanges = facade(preparedChanges, null, ch => new Change(ch));
+      set(this, CHANGES, preparedChanges);
+      return this;
+      */
+    },
+
 //     /**
 //      * Executes the changeset if in a valid state.
 //      *
@@ -294,33 +307,7 @@ export function changeset(
 //         return result;
 //       });
 //     },
-//
-//     /**
-//      * Returns the changeset to its pristine state, and discards changes and
-//      * errors.
-//      *
-//      * @public
-//      * @chainable
-//      * @return {Changeset}
-//      */
-//     rollback() {
-//       let relayCache = get(this, RELAY_CACHE);
-//
-//       for (let key in relayCache) {
-//         relayCache[key].rollback();
-//       }
-//
-//       // Get keys before resetting
-//       let keys = this._rollbackKeys();
-//
-//       set(this, RELAY_CACHE, {});
-//       set(this, CHANGES, {});
-//       set(this, ERRORS, {});
-//       this._notifyVirtualProperties(keys)
-//
-//       return this;
-//     },
-//
+
 //     /**
 //      * Merges 2 valid changesets and returns a new changeset. Both changesets
 //      * must point to the same underlying object. The changeset target is the
@@ -372,6 +359,32 @@ export function changeset(
 //
 //       return newChangeset;
 //     },
+
+//     /**
+//      * Returns the changeset to its pristine state, and discards changes and
+//      * errors.
+//      *
+//      * @public
+//      * @chainable
+//      * @return {Changeset}
+//      */
+//     rollback() {
+//       let relayCache = get(this, RELAY_CACHE);
+//
+//       for (let key in relayCache) {
+//         relayCache[key].rollback();
+//       }
+//
+//       // Get keys before resetting
+//       let keys = this._rollbackKeys();
+//
+//       set(this, RELAY_CACHE, {});
+//       set(this, CHANGES, {});
+//       set(this, ERRORS, {});
+//       this._notifyVirtualProperties(keys)
+//
+//       return this;
+//     },
 //
 //     /**
 //      * Validates the changeset immediately against the validationMap passed in.
@@ -399,22 +412,6 @@ export function changeset(
 //       }
 //
 //       return resolve(this._validateAndSet(key, this._valueFor(key)));
-//     },
-//
-//     /**
-//      * Checks to see if async validator for a given key has not resolved.
-//      * If no key is provided it will check to see if any async validator is running.
-//      *
-//      * @public
-//      * @param  {String|Undefined} key
-//      * @return {boolean}
-//      */
-//     isValidating(key) {
-//       let runningValidations = get(this, RUNNING_VALIDATIONS);
-//       let ks = emberArray(keys(runningValidations));
-//       if (key) { return ks.includes(key); }
-//
-//       return !isEmpty(ks);
 //     },
 
     /**
@@ -539,7 +536,23 @@ export function changeset(
 //
 //       return this;
 //     },
+
+       /**
+//      * Checks to see if async validator for a given key has not resolved.
+//      * If no key is provided it will check to see if any async validator is running.
+//      *
+//      * @public
+//      * @param  {String|Undefined} key
+//      * @return {boolean}
+//      */
+//     isValidating(key) {
+//       let runningValidations = get(this, RUNNING_VALIDATIONS);
+//       let ks = emberArray(keys(runningValidations));
+//       if (key) { return ks.includes(key); }
 //
+//       return !isEmpty(ks);
+//     },
+
 //     /**
 //      * For a given key and value, set error or change.
 //      *
@@ -567,22 +580,27 @@ export function changeset(
 //       this.trigger(AFTER_VALIDATION_EVENT, key);
 //       return this._setProperty(validation, { key, value, oldValue });
 //     },
-//
-//     /**
-//      * Validates a given key and value.
-//      *
-//      * @private
-//      * @param {String} key
-//      * @param {Any} newValue
-//      * @param {Any} oldValue
-//      * @return {Boolean|String|Promise}
-//      */
-//     _validate(key, newValue, oldValue) {
-//       let changes = get(this, CHANGES);
-//       let validator = get(this, VALIDATOR);
-//       let content = get(this, CONTENT);
-//
-//       if (typeOf(validator) === 'function') {
+
+    /**
+     * Validates a given key and value.
+     *
+     * @private
+     * @param {String} key
+     * @param {Any} newValue
+     * @param {Any} oldValue
+     * @return {Any}
+     */
+    _validate(key, newValue, oldValue) /*: ValidationResult */ {
+      let changes   /*: Changes */       = get(this, CHANGES);
+      let validator /*: ValidatorFunc */ = get(this, VALIDATOR);
+      let content   /*: Object */        = get(this, CONTENT);
+
+      // Object.keys(changes).sort()
+      // for each key, deepSet the value onto a new object
+
+      if (typeOf(validator) === 'function') {
+        let readon
+
 //         let isValid = validator({
 //           key,
 //           newValue,
@@ -592,11 +610,11 @@ export function changeset(
 //         });
 //
 //         return isPresent(isValid) ? isValid : true;
-//       }
-//
-//       return true;
-//     },
-//
+      }
+
+      return true;
+    },
+
 //     _setChange(key, value) {
 //       let changes = get(this, CHANGES);
 //       let changePairs = pairs(changes).filter(ch => ch.value instanceof Change);
@@ -701,8 +719,8 @@ export function changeset(
      */
     _valueFor(key, plainValue = false) {
       let changes /*: Changes */ = get(this, CHANGES);
-      let errors /*: Errors */ = get(this, ERRORS);
-      let content /*: Object */ = get(this, CONTENT);
+      let errors  /*: Errors */  = get(this, ERRORS);
+      let content /*: Object */  = get(this, CONTENT);
 
       if (errors.hasOwnProperty(key)) {
         let e /*: Err */ = get(errors, key);
@@ -723,36 +741,22 @@ export function changeset(
     },
 
     /**
-     * Setup a small changeset relay for sub objects.
+     * Construct a Relay instance for an object.
      *
      * @private
      * @param {String} key
-     * @param {Any} value
-     * @param {Boolean} [shouldInvalidate=false]
-     * @return {Any}
+     * @param {Object} value
+     * @return {Relay}
      */
-     _relayFor(key, value, shouldInvalidate = false) {
+     _relayFor(key, value) {
        let cache /*: RelayCache */ = get(this, RELAY_CACHE);
-       let found = cache[key];
 
-       if (shouldInvalidate) {
-         found && found.destroy();
-         delete cache[key];
+       if (!(key in cache)) {
+         cache[key] = Relay.create({ key, changeset: this, content: value });
        }
 
-       if (key in cache) {
-         return found;
-       }
-
-       let relay /*: RelayDef */ = Relay.create({
-         key,
-         changeset: this,
-         content: value
-       });
-
-       cache[key] = relay;
-       return relay;
-    },
+       return cache[key];
+     },
 
 //     /**
 //      * Notifies virtual properties set on the changeset of a change.
