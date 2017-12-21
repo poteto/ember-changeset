@@ -5,6 +5,7 @@ import Relay from 'ember-changeset/-private/relay';
 import objectToArray from 'ember-changeset/utils/computed/object-to-array';
 import isEmptyObject from 'ember-changeset/utils/computed/is-empty-object';
 import computedFacade from 'ember-changeset/utils/computed/facade';
+import inflate from 'ember-changeset/utils/computed/inflate';
 import isPromise from 'ember-changeset/utils/is-promise';
 import isObject from 'ember-changeset/utils/is-object';
 import pureAssign from 'ember-changeset/utils/assign';
@@ -148,6 +149,8 @@ export function changeset(
     isPristine: isEmptyObject(CHANGES),
     isInvalid: not('isValid').readOnly(),
     isDirty: not('isPristine').readOnly(),
+
+    _inflatedChanges: inflate(CHANGES, c => c.value),
 
     /*::
     _super() {},
@@ -590,26 +593,25 @@ export function changeset(
      * @param {Any} oldValue
      * @return {Any}
      */
-    _validate(key, newValue, oldValue) /*: ValidationResult */ {
+    _validate(
+      key      /*: string */,
+      newValue /*: mixed  */,
+      oldValue /*: mixed  */
+    ) /*: ValidationResult */ {
       let changes   /*: Changes */       = get(this, CHANGES);
       let validator /*: ValidatorFunc */ = get(this, VALIDATOR);
       let content   /*: Object */        = get(this, CONTENT);
 
-      // Object.keys(changes).sort()
-      // for each key, deepSet the value onto a new object
-
       if (typeOf(validator) === 'function') {
-        let readon
+        let isValid = validator({
+          key,
+          newValue,
+          oldValue,
+          changes: get(this, '_inflatedChanges'),
+          content,
+        });
 
-//         let isValid = validator({
-//           key,
-//           newValue,
-//           oldValue,
-//           changes: facade(changes, Change, ch => ch.value),
-//           content,
-//         });
-//
-//         return isPresent(isValid) ? isValid : true;
+        return isPresent(isValid) ? isValid : true;
       }
 
       return true;
