@@ -122,6 +122,12 @@ export type ChangesetDef = {|
   cast: (Array<string>) => ChangesetDef,
   willDestroy: () => void,
   setUnknownProperty: <T>(string, T) => (T | ErrLike<T> | Promise<T> | Promise<ErrLike<T>>),
+  prepare: (({ [string]: mixed }) => ({ [string]: mixed })) => ChangesetDef,
+  execute: () => ChangesetDef,
+  _notifyVirtualProperties: (Array<string>) => void,
+  _rollbackKeys: () => Array<string>,
+  rollback: () => ChangesetDef,
+  save: (Object) => Promise<ChangesetDef | mixed>,
 |};
 */
 
@@ -244,141 +250,145 @@ export function changeset(
      *  })
      *  .execute(); // execute the changes
      * ```
-     *
-     * @public
-     * @chainable
-     * @param  {Function} prepareChangesFn
-     * @return {Changeset}
      */
-    prepare(prepareChangesFn) {
-      let changes /*: Changes */ = get(this, '_bareChanges');
+    prepare(
+      prepareChangesFn /*: ({ [string]: mixed }) => ({ [string]: mixed }) */
+    ) /*: ChangesetDef */ {
+      let changes /*: { [string]: mixed } */ = get(this, '_bareChanges');
       let preparedChanges = prepareChangesFn(changes);
+
       assert('Callback to `changeset.prepare` must return an object', isObject(preparedChanges));
-      preparedChanges = facade(preparedChanges, null, ch => new Change(ch));
-      set(this, CHANGES, preparedChanges);
+      runInDebug(() => keys(preparedChanges).forEach(key => {
+        key.split('.').forEach((_, i, allParts) => {
+          if (i < allParts.length - 1) {
+            let path = allParts.slice(0, i+1).join('.');
+            let msg = 'Object returned by `prepareChangesFn` may not have changes that override each other.';
+            assert(msg, !(path in preparedChanges));
+          }
+        });
+      }));
+
+      let newChanges /*: Changes */ = keys(preparedChanges).reduce((newObj, key) => {
+        newObj[key] = new Change(obj[key]);
+        return newObj;
+      }, {});
+
+      set(this, CHANGES, newChanges);
       return this;
     },
 
-//     /**
-//      * Executes the changeset if in a valid state.
-//      *
-//      * @public
-//      * @chainable
-//      * @return {Changeset}
-//      */
-//     execute() {
-//       if (get(this, 'isValid') && get(this, 'isDirty')) {
-//         let content = get(this, CONTENT);
-//         let changes = get(this, CHANGES);
-//         let changePairs = pairs(changes).filter(c => c.value instanceof Change);
-//         changePairs.forEach(({ key, value: c }) => deepSet(content, key, c.value));
-//       }
-//
-//       return this;
-//     },
-//
-//     /**
-//      * Executes the changeset and saves the underlying content.
-//      *
-//      * @async
-//      * @public
-//      * @param  {Object} options optional object to pass to content save method
-//      * @return {Promise}
-//      */
-//     save(options) {
-//       let content = get(this, CONTENT);
-//       let savePromise = resolve(this);
-//
-//       this.execute();
-//
-//       if (typeOf(content.save) === 'function') {
-//         savePromise = content.save(options);
-//       }
-//
-//       return resolve(savePromise).then((result) => {
-//         this.rollback();
-//         return result;
-//       });
-//     },
+    /**
+     * Executes the changeset if in a valid state.
+     */
+    execute() /*: ChangesetDef */ {
+      if (get(this, 'isValid') && get(this, 'isDirty')) {
+        let content /*: Object  */ = get(this, CONTENT);
+        let changes /*: Changes */ = get(this, CHANGES);
+        keys(changes).forEach(key => deepSet(content, key, changes[key].value));
+      }
 
-//     /**
-//      * Merges 2 valid changesets and returns a new changeset. Both changesets
-//      * must point to the same underlying object. The changeset target is the
-//      * origin. For example:
-//      *
-//      * ```
-//      * let changesetA = new Changeset(user, validatorFn);
-//      * let changesetB = new Changeset(user, validatorFn);
-//      * changesetA.set('firstName', 'Jim');
-//      * changesetB.set('firstName', 'Jimmy');
-//      * changesetB.set('lastName', 'Fallon');
-//      * let changesetC = changesetA.merge(changesetB);
-//      * changesetC.execute();
-//      * user.get('firstName'); // "Jimmy"
-//      * user.get('lastName'); // "Fallon"
-//      * ```
-//      *
-//      * @public
-//      * @chainable
-//      * @param  {Changeset} changeset
-//      * @return {Changeset}
-//      */
-//     merge(changeset) {
-//       let content = get(this, CONTENT);
-//       assert('Cannot merge with a non-changeset', isChangeset(changeset));
-//       assert('Cannot merge with a changeset of different content', get(changeset, CONTENT) === content);
-//
-//       if (get(this, 'isPristine') && get(changeset, 'isPristine')) {
-//         return this;
-//       }
-//
-//       let changesA = get(this, CHANGES);
-//       let changesB = get(changeset, CHANGES);
-//       let errorsA = get(this, ERRORS);
-//       let errorsB = get(changeset, ERRORS);
-//       let relayA = get(this, RELAY_CACHE);
-//       let relayB = get(changeset, RELAY_CACHE);
-//       let newChangeset = new Changeset(content, get(this, VALIDATOR));
-//       let newErrors = objectWithout(keys(changesB), errorsA);
-//       let newChanges = objectWithout(keys(errorsB), changesA);
-//       let mergedChanges = pureAssign(newChanges, changesB);
-//       let mergedErrors = pureAssign(newErrors, errorsB);
-//       let mergedRelays = pureAssign(relayA, relayB);
-//
-//       newChangeset[CHANGES] = mergedChanges;
-//       newChangeset[ERRORS] = mergedErrors;
-//       newChangeset[RELAY_CACHE] = mergedRelays;
-//       newChangeset._notifyVirtualProperties();
-//
-//       return newChangeset;
-//     },
+      return this;
+    },
 
-//     /**
-//      * Returns the changeset to its pristine state, and discards changes and
-//      * errors.
-//      *
-//      * @public
-//      * @chainable
-//      * @return {Changeset}
-//      */
-//     rollback() {
-//       let relayCache = get(this, RELAY_CACHE);
-//
-//       for (let key in relayCache) {
-//         relayCache[key].rollback();
-//       }
-//
-//       // Get keys before resetting
-//       let keys = this._rollbackKeys();
-//
-//       set(this, RELAY_CACHE, {});
-//       set(this, CHANGES, {});
-//       set(this, ERRORS, {});
-//       this._notifyVirtualProperties(keys)
-//
-//       return this;
-//     },
-//
+    /**
+     * Executes the changeset and saves the underlying content.
+     *
+     * @param {Object} options optional object to pass to content save method
+     */
+    save(
+      options /*: Object */
+    ) /*: Promise<ChangesetDef | mixed> */ {
+      let content     /*: Object */ = get(this, CONTENT);
+      let savePromise /*: mixed | Promise<ChangesetDef | mixed> */ = resolve(this);
+      (this /*: ChangesetDef */).execute();
+
+      if (typeOf(content.save) === 'function') {
+        let result /*: mixed | Promise<mixed> */ = content.save(options);
+        savePromise = result;
+      }
+
+      return resolve(savePromise).then((result) => {
+        (this /*: ChangesetDef */).rollback();
+        return result;
+      });
+    },
+
+    /**
+     * Merges 2 valid changesets and returns a new changeset. Both changesets
+     * must point to the same underlying object. The changeset target is the
+     * origin. For example:
+     *
+     * ```
+     * let changesetA = new Changeset(user, validatorFn);
+     * let changesetB = new Changeset(user, validatorFn);
+     * changesetA.set('firstName', 'Jim');
+     * changesetB.set('firstName', 'Jimmy');
+     * changesetB.set('lastName', 'Fallon');
+     * let changesetC = changesetA.merge(changesetB);
+     * changesetC.execute();
+     * user.get('firstName'); // "Jimmy"
+     * user.get('lastName'); // "Fallon"
+     * ```
+     *
+     * @public
+     * @chainable
+     * @param  {Changeset} changeset
+     * @return {Changeset}
+     */
+    merge(
+      changeset /*: Object */
+    ) /*: ChangesetDef */ {
+      let content /*: Object */ = get(this, CONTENT);
+      assert('Cannot merge with a non-changeset', isChangeset(changeset));
+      assert('Cannot merge with a changeset of different content', get(changeset, CONTENT) === content);
+
+      if (get(this, 'isPristine') && get(changeset, 'isPristine')) {
+        return this;
+      }
+
+      let c1 /*: Changes    */ = get(this, CHANGES);
+      let c2 /*: Changes    */ = get(changeset, CHANGES);
+      let e1 /*: Errors     */ = get(this, ERRORS);
+      let e2 /*: Errors     */ = get(changeset, ERRORS);
+      let r1 /*: RelayCache */ = get(this, RELAY_CACHE);
+      let r2 /*: RelayCache */ = get(changeset, RELAY_CACHE);
+
+      let newChangeset /*: ChangesetDef */ = new Changeset(content, get(this, VALIDATOR));
+      let newErrors /*: Errors */ = objectWithout(keys(c2), e1);
+      let newChanges /*: Changes */ = objectWithout(keys(e2), c1);
+      let mergedErrors /*: Errors */ = pureAssign(newErrors, e2);
+      let mergedChanges /*: Changes */ = pureAssign(newChanges, c2);
+      let mergedRelays /*: RelayCache */ = pureAssign(r1, r2);
+
+      newChangeset[CHANGES] = mergedChanges;
+      newChangeset[ERRORS] = mergedErrors;
+      newChangeset[RELAY_CACHE] = mergedRelays;
+      newChangeset._notifyVirtualProperties((this /*: ChangesetDef */)._rollbackKeys());
+
+      return newChangeset;
+    },
+
+    /**
+     * Returns the changeset to its pristine state, and discards changes and
+     * errors.
+     */
+    rollback() /*: ChangesetDef */ {
+      // Notify keys contained in relays.
+      let relayCache /*: RelayCache */ = get(this, RELAY_CACHE);
+      for (let key in relayCache) relayCache[key].rollback();
+
+      // Get keys before reset.
+      let keys = (this /*: ChangesetDef */)._rollbackKeys();
+
+      // Reset.
+      set(this, RELAY_CACHE, {});
+      set(this, CHANGES, {});
+      set(this, ERRORS, {});
+      (this /*: ChangesetDef */)._notifyVirtualProperties(keys)
+
+      return this;
+    },
+
 //     /**
 //      * Validates the changeset immediately against the validationMap passed in.
 //      * If no key is passed into this method, it will validate all fields on the
@@ -701,32 +711,30 @@ export function changeset(
       return cache[key];
     },
 
-//     /**
-//      * Notifies virtual properties set on the changeset of a change.
-//      * You can specify which keys are notified by passing in an array.
-//      *
-//      * @private
-//      * @param {Array} keys
-//      * @return {Void}
-//      */
-//     _notifyVirtualProperties(keys = this._rollbackKeys()) {
-//       for (let i = 0; i < keys.length; i++) {
-//         this.notifyPropertyChange(keys[i]);
-//       }
-//     },
-//
-//     /**
-//      * Gets the changes and error keys.
-//      *
-//      * @private
-//      * @return {Array}
-//      */
-//     _rollbackKeys() {
-//       return [
-//         ...keys(get(this, CHANGES)),
-//         ...keys(get(this, ERRORS))
-//       ];
-//     },
+    /**
+     * Notifies virtual properties set on the changeset of a change.
+     * You can specify which keys are notified by passing in an array.
+     *
+     * @private
+     * @param {Array} keys
+     * @return {Void}
+     */
+    _notifyVirtualProperties(
+      keys /*: Array<string> */ = this._rollbackKeys()
+    ) /*: void */ {
+      for (let i = 0; i < keys.length; i++) {
+        this.notifyPropertyChange(keys[i]);
+      }
+    },
+
+    /**
+     * Gets the changes and error keys.
+     */
+    _rollbackKeys() /*: Array<string> */ {
+      let changes /*: Changes */ = get(this, CHANGES);
+      let errors  /*: Errors  */ = get(this, ERRORS);
+      return emberArray([...keys(changes), ...keys(errors)]).uniq();
+    },
 
     /**
      * Deletes a key off an object and notifies observers.
