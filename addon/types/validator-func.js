@@ -9,5 +9,5 @@ export type ValidatorFunc = ({
   oldValue: mixed,
   changes: { [string]: mixed },
   content: Object,
-}) => ValidationResult;
+}) => ValidationResult | Promise<ValidationResult>;
 */

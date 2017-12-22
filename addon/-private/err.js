@@ -1,21 +1,21 @@
 // @flow
 
 /*::
-import type { ValidationMsg } from 'ember-changeset/types/validation-msg';
+import type { ValidationErr } from 'ember-changeset/types/validation-result';
 
 export type ErrLike = {
   value: mixed,
-  validation: ValidationMsg,
+  validation: ValidationErr,
 };
 */
 
 export default class Err {
   /*::
   value: mixed;
-  validation: ValidationMsg;
+  validation: ValidationErr;
   */
 
-  constructor(value /*: mixed */, validation /*: ValidationMsg */) {
+  constructor(value /*: mixed */, validation /*: ValidationErr */) {
     this.value = value;
     this.validation = validation;
   }

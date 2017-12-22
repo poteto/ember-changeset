@@ -22,10 +22,12 @@ import deepSet from 'ember-deep-set';
 
 /*::
 import type { ValidatorFunc } from 'ember-changeset/types/validator-func';
-import type { ValidationResult } from 'ember-changeset/types/validation-result';
+import type {
+  ValidationResult,
+  ValidationErr,
+} from 'ember-changeset/types/validation-result';
 import type { RelayDef } from 'ember-changeset/-private/relay';
 import type { Config } from 'ember-changeset/types/config';
-import type { ValidationMsg } from 'ember-changeset/types/validation-msg';
 import type { ErrLike } from 'ember-changeset/-private/err';
 */
 
@@ -72,8 +74,8 @@ type InternalMap =
   | RunningValidations;
 
 type NewProperty<T> = {
-  key: string,
-  value: T,
+  key:       string,
+  value:     T,
   oldValue?: mixed,
 };
 
@@ -103,8 +105,8 @@ export type ChangesetDef = {|
   _valueFor: (string, ?boolean) => RelayDef | mixed,
   _relayFor: (string, mixed, ?boolean) => RelayDef,
   toString: () => string,
-  _setProperty: <T>(ValidationMsg, NewProperty<T>) => (ErrLike | T),
-  addError: <T: ValidationMsg | ErrLike>(string, T) => T,
+  _setProperty: <T>(ValidationResult, NewProperty<T>) => (T | ErrLike),
+  addError: <T: ValidationErr | ErrLike>(string, T) => T,
   _deleteKey: (InternalMapKey, string) => void,
   notifyPropertyChange: (string) => void,
 |};
@@ -556,51 +558,46 @@ export function changeset(
 //       return !isEmpty(ks);
 //     },
 
-//     /**
-//      * For a given key and value, set error or change.
-//      *
-//      * @private
-//      * @param  {String} key
-//      * @param  {Any} value
-//      * @return {Any}
-//      */
-//     _validateAndSet(key, value) {
-//       let content = get(this, CONTENT);
-//       let oldValue = get(content, key);
-//       let validation = this._validate(key, value, oldValue);
-//
-//       if (isPromise(validation)) {
-//         this._setIsValidating(key, true);
-//         this.trigger(BEFORE_VALIDATION_EVENT, key);
-//         return validation.then((resolvedValidation) => {
-//           this._setIsValidating(key, false);
-//           this.trigger(AFTER_VALIDATION_EVENT, key);
-//           return this._setProperty(resolvedValidation, { key, value, oldValue });
-//         });
-//       }
-//
-//       this.trigger(BEFORE_VALIDATION_EVENT, key);
-//       this.trigger(AFTER_VALIDATION_EVENT, key);
-//       return this._setProperty(validation, { key, value, oldValue });
-//     },
+    /**
+     * For a given key and value, set error or change.
+     */
+    _validateAndSet(
+      key   /*: string */,
+      value /*: mixed  */
+    ) /*: number */ {
+      let content    /*: Object           */ = get(this, CONTENT);
+      let oldValue   /*: mixed            */ = get(content, key);
+      let validation /*: ValidationResult | Promise<ValidationResult> */;
+      validation = this._validate(key, value, oldValue);
+
+      // TODO: Address case when Promise is rejected.
+      if (isPromise(validation)) {
+        this._setIsValidating(key, true);
+        this.trigger(BEFORE_VALIDATION_EVENT, key);
+
+        return validation.then(resolvedValidation => {
+          this._setIsValidating(key, false);
+          this.trigger(AFTER_VALIDATION_EVENT, key);
+          return this._setProperty(resolvedValidation, { key, value, oldValue });
+        });
+      }
+
+      this.trigger(BEFORE_VALIDATION_EVENT, key);
+      this.trigger(AFTER_VALIDATION_EVENT, key);
+      return this._setProperty(validation, { key, value, oldValue });
+    },
 
     /**
      * Validates a given key and value.
-     *
-     * @private
-     * @param {String} key
-     * @param {Any} newValue
-     * @param {Any} oldValue
-     * @return {Any}
      */
     _validate(
       key      /*: string */,
       newValue /*: mixed  */,
       oldValue /*: mixed  */
-    ) /*: ValidationResult */ {
-      let changes   /*: Changes */       = get(this, CHANGES);
+    ) /*: ValidationResult | Promise<ValidationResult> */ {
+      let changes   /*: Changes       */ = get(this, CHANGES);
       let validator /*: ValidatorFunc */ = get(this, VALIDATOR);
-      let content   /*: Object */        = get(this, CONTENT);
+      let content   /*: Object        */ = get(this, CONTENT);
 
       if (typeOf(validator) === 'function') {
         let isValid = validator({
@@ -650,79 +647,68 @@ export function changeset(
 //
     /**
      * Sets property or error on the changeset.
-     *
-     * @private
-     * @param {Boolean|Array|String} validation
-     * @param {String} options.key
-     * @param {Any} options.value
-     * @return {Any}
      */
-    _setProperty /*:: <T> */ (
-      validation /*: ValidationMsg */,
-      { key, value, oldValue } /*: NewProperty<T> */
-    ) /*: ErrLike | T */ {
-      let changes /*: Changes */ = get(this, CHANGES);
-      let isSingleValidationArray /*: boolean */ =
-        isArray(validation) &&
-        validation.length === 1 &&
-        (validation /*: any */)[0] === true;
-
-      let self /*: ChangesetDef */ = this;
-      if (validation === true || isSingleValidationArray) {
-        self._deleteKey(ERRORS, key);
-
-        if (!isEqual(oldValue, value)) {
-          changes[key] = new Change(value);
-        } else if (key in changes) {
-          self._deleteKey(CHANGES, key);
-        }
-        self.notifyPropertyChange(CHANGES);
-        self.notifyPropertyChange(key);
-
-        return value;
-      }
-
-      return (this /*: ChangesetDef */).addError(key, {
-        value,
-        validation: (validation /*: ValidationMsg */)
-      });
-    },
-
-//     /**
-//      * Updates the cache that stores the number of running validations
-//      * for a given key.
-//      *
-//      * @private
-//      * @param {String} key
-//      * @param {Boolean} value
-//      */
-//     _setIsValidating(key, value) {
-//       let runningValidations = get(this, RUNNING_VALIDATIONS);
-//       let count = get(runningValidations, key) || 0;
+//     _setProperty /*:: <T> */ (
+//       validation               /*: ValidationResult */,
+//       { key, value, oldValue } /*: NewProperty<T>   */
+//     ) /*: T | ErrLike */ {
+//       let changes /*: Changes */ = get(this, CHANGES);
+//       let isValid /*: boolean */ = validation
+//         || isArray(validation)
+//         && validation.length === 1
+//         && (validation /*: any */)[0] === true;
 //
-//       if (value) {
-//         set(runningValidations, key, count + 1);
-//       } else {
-//         if (count === 1) {
-//           delete runningValidations[key];
-//         } else {
-//           set(runningValidations, key, count - 1);
+//       // TODO
+//       let self /*: ChangesetDef */ = this;
+//       if (isValid) {
+//         self._deleteKey(ERRORS, key);
+//
+//         if (!isEqual(oldValue, value)) {
+//           changes[key] = new Change(value);
+//         } else if (key in changes) {
+//           self._deleteKey(CHANGES, key);
 //         }
+//         self.notifyPropertyChange(CHANGES);
+//         self.notifyPropertyChange(key);
+//
+//         return value;
 //       }
+//
+//       return (this /*: ChangesetDef */).addError(key, {
+//         value,
+//         validation: (validation /*: ValidationMsg */)
+//       });
 //     },
 
     /**
-     * Value for change or the original value.
-     *
-     * @private
-     * @param {String} key
-     * @param {Boolean} [plainValue=false]
-     * @return {Relay|mixed}
+     * Increment or decrement the number of running validations for a
+     * given key.
      */
-    _valueFor(key, plainValue = false) {
+    _setIsValidating(
+      key   /*: string  */,
+      value /*: boolean */
+    ) /*: void */ {
+      let running /*: RunningValidations */ = get(this, RUNNING_VALIDATIONS);
+      let count   /*: number             */ = get(running, key) || 0;
+
+      if (!value && count === 1) {
+        delete running[key];
+        return;
+      }
+
+      set(running, key, value ? count+1 : count-1);
+    },
+
+    /**
+     * Value for change or the original value.
+     */
+    _valueFor(
+      key        /*: string  */,
+      plainValue /*: boolean */ = false
+    ) /*: Relay | mixed */ {
       let changes /*: Changes */ = get(this, CHANGES);
-      let errors  /*: Errors */  = get(this, ERRORS);
-      let content /*: Object */  = get(this, CONTENT);
+      let errors  /*: Errors  */ = get(this, ERRORS);
+      let content /*: Object  */ = get(this, CONTENT);
 
       if (errors.hasOwnProperty(key)) {
         let e /*: Err */ = get(errors, key);
@@ -744,13 +730,11 @@ export function changeset(
 
     /**
      * Construct a Relay instance for an object.
-     *
-     * @private
-     * @param {String} key
-     * @param {Object} value
-     * @return {Relay}
      */
-     _relayFor(key, value) {
+     _relayFor(
+       key   /*: string */,
+       value /*: Object */
+     ) /*: RelayDef */ {
        let cache /*: RelayCache */ = get(this, RELAY_CACHE);
 
        if (!(key in cache)) {
@@ -795,13 +779,13 @@ export function changeset(
      * @param  {String} key
      * @return {Void}
      */
-    _deleteKey(objName, key = '') {
-      let obj /*: InternalMap */ = get(this, objName);
-      if (obj.hasOwnProperty(key)) delete obj[key];
-      let c /*: ChangesetDef */ = this;
-      c.notifyPropertyChange(`${objName}.${key}`);
-      c.notifyPropertyChange(objName);
-    }
+    //_deleteKey(objName, key = '') {
+      //let obj /*: InternalMap */ = get(this, objName);
+      //if (obj.hasOwnProperty(key)) delete obj[key];
+      //let c /*: ChangesetDef */ = this;
+      //c.notifyPropertyChange(`${objName}.${key}`);
+      //c.notifyPropertyChange(objName);
+    //}
   } /*: ChangesetDef */));
 }
 

@@ -1,7 +1,7 @@
 // @flow
 
 /*::
-import type { ValidationMsg } from 'ember-changeset/types/validation-msg';
-
-export type ValidationResult = ValidationMsg | Promise<ValidationMsg>;
+export type ValidationOk = true | [true];
+export type ValidationErr = string | Array<string>;
+export type ValidationResult = ValidationOk | ValidationErr;
 */
