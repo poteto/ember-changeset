@@ -1,4 +1,4 @@
-import validateNestedObj from 'dummy/utils/validate-nested-obj';
+import validateNestedObj from 'ember-changeset/utils/validate-nested-obj';
 import { module, test } from 'qunit';
 
 module('Unit | Utility | validate nested obj');

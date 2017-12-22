@@ -1,4 +1,4 @@
-import mergeNested from 'dummy/utils/merge-nested';
+import mergeNested from 'ember-changeset/utils/merge-nested';
 import { module, test } from 'qunit';
 
 module('Unit | Utility | merge nested');

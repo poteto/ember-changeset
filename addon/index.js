@@ -422,7 +422,7 @@ export function changeset(
       let newError /*: Err */;
       if (isObject(error)) {
         let errorLike /*: ErrLike<*> */ = (error /*: any */);
-        assert('Error must have value.', isPresent(errorLike.value));
+        assert('Error must have value.', !isNone(errorLike.value));
         assert('Error must have validation.', isPresent(errorLike.validation));
         newError = new Err(errorLike.value, errorLike.validation);
       } else {
@@ -682,7 +682,7 @@ export function changeset(
       let content /*: Object  */ = get(this, CONTENT);
 
       if (errors.hasOwnProperty(key)) {
-        let e /*: Err */ = get(errors, key);
+        let e /*: Err */ = errors[key];
         return e.value;
       }
 
@@ -694,7 +694,7 @@ export function changeset(
       }
 
       if (changes.hasOwnProperty(key)) {
-        let c /*: Change */ = get(changes, key);
+        let c /*: Change */ = changes[key];
         return c.value;
       }
 
