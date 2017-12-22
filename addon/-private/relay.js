@@ -1,17 +1,10 @@
 // @flow
 
-import Ember from 'ember';
-import Changeset from 'ember-changeset';
 import ObjectProxy from '@ember/object/proxy';
 
 /*::
 import type { ChangesetDef } from 'ember-changeset';
 */
-
-const {
-  Object: EmberObject,
-  get
-} = Ember;
 
 /*::
 export type RelayDef = {|

@@ -1,7 +1,6 @@
 // @flow
 
 import Ember from 'ember';
-import pairs from 'ember-changeset/utils/pairs';
 
 /*::
 import type Change from 'ember-changeset/-private/change';

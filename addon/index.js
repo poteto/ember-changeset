@@ -4,22 +4,17 @@ import Ember from 'ember';
 import Relay from 'ember-changeset/-private/relay';
 import objectToArray from 'ember-changeset/utils/computed/object-to-array';
 import isEmptyObject from 'ember-changeset/utils/computed/is-empty-object';
-import computedFacade from 'ember-changeset/utils/computed/facade';
 import inflate from 'ember-changeset/utils/computed/inflate';
 import transform from 'ember-changeset/utils/computed/transform';
 import isPromise from 'ember-changeset/utils/is-promise';
 import isObject from 'ember-changeset/utils/is-object';
 import pureAssign from 'ember-changeset/utils/assign';
-import objectWithout from 'ember-changeset/utils/object-without';
 import includes from 'ember-changeset/utils/includes';
 import take from 'ember-changeset/utils/take';
-import pairs from 'ember-changeset/utils/pairs';
 import isChangeset, { CHANGESET } from 'ember-changeset/utils/is-changeset';
-import hasOwnNestedProperty from 'ember-changeset/utils/has-own-nested-property';
 import setNestedProperty from 'ember-changeset/utils/set-nested-property';
 import mergeNested from 'ember-changeset/utils/merge-nested';
 import validateNestedObj from 'ember-changeset/utils/validate-nested-obj';
-import facade from 'ember-changeset/utils/facade';
 import Err from 'ember-changeset/-private/err';
 import Change from 'ember-changeset/-private/change';
 import deepSet from 'ember-deep-set';
@@ -50,7 +45,6 @@ const {
   isPresent,
   set,
   typeOf,
-  runInDebug
 } = Ember;
 const { keys } = Object;
 const CONTENT = '_content';
@@ -350,12 +344,13 @@ export function changeset(
         return this;
       }
 
+      // Note: we do not need to merge the RelayCache because the new
+      // changeset will create its own relays if necessary.
+
       let c1 /*: Changes    */ = get(this, CHANGES);
       let c2 /*: Changes    */ = get(changeset, CHANGES);
       let e1 /*: Errors     */ = get(this, ERRORS);
       let e2 /*: Errors     */ = get(changeset, ERRORS);
-      let r1 /*: RelayCache */ = get(this, RELAY_CACHE);
-      let r2 /*: RelayCache */ = get(changeset, RELAY_CACHE);
 
       let newChangeset /*: ChangesetDef */ = new Changeset(content, get(this, VALIDATOR));
       let newErrors    /*: Errors       */ = mergeNested(e1, e2);
@@ -598,7 +593,6 @@ export function changeset(
       newValue /*: mixed  */,
       oldValue /*: mixed  */
     ) /*: ValidationResult | Promise<ValidationResult> */ {
-      let changes   /*: Changes       */ = get(this, CHANGES);
       let validator /*: ValidatorFunc */ = get(this, VALIDATOR);
       let content   /*: Object        */ = get(this, CONTENT);
 
