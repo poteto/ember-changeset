@@ -94,6 +94,10 @@ type Snapshot = {
   errors:  { [string]: ErrLike<mixed> },
 };
 
+type Inflated<T> = {
+  [string]: Inflated<T> | T,
+};
+
 export type ChangesetDef = {|
   _content:            Object,
   _changes:            Changes,
@@ -103,8 +107,12 @@ export type ChangesetDef = {|
   _options:            Config,
   _runningValidations: RunningValidations,
   __changeset__:       '__CHANGESET__',
-  _inflatedChanges:    { [string]: mixed },
   _bareChanges:        { [string]: mixed },
+
+  changes: Array<{ key: string }>,
+  errors:  Array<{ key: string }>,
+  change:  Inflated<mixed>,
+  error:   Inflated<ErrLike<mixed>>,
 
   isValid:    boolean,
   isPristine: boolean,
@@ -162,19 +170,16 @@ export function changeset(
      */
     __changeset__: CHANGESET,
 
-    /*
-    changes: objectToArray(CHANGES, false),
-    errors: objectToArray(ERRORS, true),
-    change: readOnly(CHANGES),
-    error: readOnly(ERRORS),
-    */
+    changes: objectToArray(CHANGES, (c /*: Change */) => c.value, false),
+    errors:  objectToArray(ERRORS, (e /*: Err */) => ({ value: e.value, validation: e.validation }), true),
+    change:  inflate(CHANGES, c => c.value),
+    error:   inflate(ERRORS, e => ({ value: e.value, validation: e.validation })),
 
-    isValid: isEmptyObject(ERRORS),
+    isValid:    isEmptyObject(ERRORS),
     isPristine: isEmptyObject(CHANGES),
-    isInvalid: not('isValid').readOnly(),
-    isDirty: not('isPristine').readOnly(),
+    isInvalid:  not('isValid').readOnly(),
+    isDirty:    not('isPristine').readOnly(),
 
-    _inflatedChanges: inflate(CHANGES, c => c.value),
     _bareChanges: transform(CHANGES, c => c.value),
 
     /*::
@@ -602,7 +607,7 @@ export function changeset(
           key,
           newValue,
           oldValue,
-          changes: get(this, '_inflatedChanges'),
+          changes: get(this, 'change'),
           content,
         });
 

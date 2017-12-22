@@ -14,30 +14,35 @@ const {
   typeOf
 } = Ember;
 const assign = Ember.assign || Ember.merge;
+const { keys } = Object;
 
-function objectToArray(
-  objKey /*: string */,
-  type /*: Class<Change | Err> */,
-  transform /*: (Change | Err) => mixed */ = a => a,
-  flattenObjects /*: boolean */
-) /*: Array<{ key: string, value: mixed }> */ {
+/**
+ * Compute the array form of an object.
+ *
+ * Each value of the object is transformed by a passed-in `transform`
+ * function.
+ *
+ * Returns a list of objects, where each object has the form
+ * `{ key, value }`. If `flattenObjects` is true and the result of
+ * `transform` is an Object, the resulting object has the form
+ * `{ key, ...transformResult }`.
+ */
+export default function objectToArray /*:: <T> */ (
+  objKey         /*: string             */,
+  transform      /*: (T) => (mixed) */ = a => a,
+  flattenObjects /*: boolean            */ = false
+) /*: Array<{ key: string }> */ {
   return computed(objKey, function() {
     let obj = get(this, objKey);
-    let result = pairs(obj)
-      .filter(p => p.value instanceof type)
-      .map((p) /*: { key: string, value: mixed } */ => {
-        let key = p.key;
-        let value = transform(p.value);
 
-        if (flattenObjects && typeOf(value) === 'object') {
-          return assign({ key }, value);
-        }
+    return keys(obj).map(key => {
+      let value = transform(obj[key]);
 
-        return { key, value };
-      });
+      if (flattenObjects && typeOf(value) === 'object') {
+        return assign({ key }, value);
+      }
 
-    return result;
+      return { key, value };
+    })
   }).readOnly();
 }
-
-export default objectToArray;
