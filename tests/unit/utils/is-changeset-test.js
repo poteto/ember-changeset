@@ -1,9 +1,7 @@
-import Ember from 'ember';
-import isChangeset from 'ember-changeset/utils/is-changeset';
 import Changeset from 'ember-changeset';
+import EmberObject from '@ember/object';
+import isChangeset from 'ember-changeset/utils/is-changeset';
 import { module, test } from 'qunit';
-
-const { Object: EmberObject } = Ember;
 
 module('Unit | Utility | is changeset');
 

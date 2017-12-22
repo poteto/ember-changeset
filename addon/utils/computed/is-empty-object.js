@@ -1,13 +1,9 @@
 // @flow
 
-import Ember from 'ember';
+import { computed, get } from '@ember/object';
+import { isPresent } from '@ember/utils';
+import { assert } from '@ember/debug';
 
-const {
-  assert,
-  computed,
-  get,
-  isPresent
-} = Ember;
 const { keys } = Object;
 
 export default function isEmptyObject(

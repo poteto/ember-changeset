@@ -1,8 +1,6 @@
 // @flow
 
-import Ember from 'ember';
-
-const { get } = Ember;
+import { get } from '@ember/object';
 
 export const CHANGESET = '__CHANGESET__';
 
