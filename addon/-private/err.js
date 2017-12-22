@@ -3,8 +3,8 @@
 /*::
 import type { ValidationErr } from 'ember-changeset/types/validation-result';
 
-export type ErrLike = {
-  value: mixed,
+export type ErrLike<T> = {
+  value: T,
   validation: ValidationErr,
 };
 */

@@ -62,10 +62,10 @@ const defaultValidatorFn = () => true;
 const defaultOptions = { skipValidate: false };
 
 /*::
-type Changes = { [string]: Change };
-type Errors = { [string]: Err };
-type RelayCache = { [string]: RelayDef };
-type RunningValidations = { [string]: number };
+type Changes            = { [string]: Change   };
+type Errors             = { [string]: Err      };
+type RelayCache         = { [string]: RelayDef };
+type RunningValidations = { [string]: number   };
 
 type InternalMap =
   | Changes
@@ -93,6 +93,8 @@ export type ChangesetDef = {|
   _validator: ValidatorFunc,
   _options: Config,
   _runningValidations: RunningValidations,
+  __changeset__: '__CHANGESET__',
+  _inflatedChanges: { [string]: mixed },
 
   isValid: boolean,
   isPristine: boolean,
@@ -103,12 +105,16 @@ export type ChangesetDef = {|
   init: () => void,
   unknownProperty: (string) => mixed,
   _valueFor: (string, ?boolean) => RelayDef | mixed,
-  _relayFor: (string, mixed, ?boolean) => RelayDef,
+  _relayFor: (string, Object) => RelayDef,
   toString: () => string,
-  _setProperty: <T>(ValidationResult, NewProperty<T>) => (T | ErrLike),
-  addError: <T: ValidationErr | ErrLike>(string, T) => T,
   _deleteKey: (InternalMapKey, string) => void,
   notifyPropertyChange: (string) => void,
+  addError: <T: ValidationErr | ErrLike<*>>(string, T) => T,
+  _setProperty: <T>(ValidationResult, NewProperty<T>) => (T | ErrLike<T>),
+  _validateAndSet: <T>(string, T) => (Promise<T> | Promise<ErrLike<T>> | T | ErrLike<T>),
+  _setIsValidating: (string, boolean) => void,
+  _validate: (string, mixed, mixed) => (ValidationResult | Promise<ValidationResult>),
+  trigger: (string, string) => void,
 |};
 */
 
@@ -164,6 +170,7 @@ export function changeset(
     _validator: defaultValidatorFn,
     _options: defaultOptions,
     _runningValidations: {},
+    trigger() {},
     */
 
     init() {
@@ -197,7 +204,7 @@ export function changeset(
      * @param  {Any} value
      * @return {Any}
      */
-    setUnknownProperty(key, value) {
+    //setUnknownProperty(key, value) {
       /*
       let changesetOptions = get(this, OPTIONS);
       let skipValidate = get(changesetOptions, 'skipValidate');
@@ -208,7 +215,7 @@ export function changeset(
 
       return this._validateAndSet(key, value);
       */
-    },
+    //},
 
     /**
      * String representation for the changeset.
@@ -227,14 +234,14 @@ export function changeset(
      * @public
      * @return {Void}
      */
-    willDestroy() {
+    //willDestroy() {
       /*
       let relayCache = get(this, RELAY_CACHE);
       for (let key in relayCache) {
         relayCache[key].destroy();
       }
       */
-    },
+    //},
 
     /**
      * Provides a function to run before emitting changes to the model. The
@@ -259,7 +266,7 @@ export function changeset(
      * @param  {Function} prepareChangesFn
      * @return {Changeset}
      */
-    prepare(prepareChangesFn) {
+    //prepare(prepareChangesFn) {
       /*
       let changes = pureAssign(get(this, CHANGES));
       changes = facade(changes, Change, ch => ch.value);
@@ -269,7 +276,7 @@ export function changeset(
       set(this, CHANGES, preparedChanges);
       return this;
       */
-    },
+    //},
 
 //     /**
 //      * Executes the changeset if in a valid state.
@@ -423,14 +430,14 @@ export function changeset(
      * Manually add an error to the changeset. If there is an existing
      * error or change for `key`, it will be overwritten.
      */
-    addError /*:: <T: ValidationErr | ErrLike> */ (
+    addError /*:: <T: ValidationErr | ErrLike<*>> */ (
       key   /*: string */,
       error /*: T      */
     ) /*: T */ {
       // Construct new `Err` instance.
       let newError /*: Err */;
       if (isObject(error)) {
-        let errorLike /*: ErrLike */ = (error /*: any */);
+        let errorLike /*: ErrLike<*> */ = (error /*: any */);
         assert('Error must have value.', isPresent(errorLike.value));
         assert('Error must have validation.', isPresent(errorLike.validation));
         newError = new Err(errorLike.value, errorLike.validation);
@@ -563,30 +570,33 @@ export function changeset(
     /**
      * For a given key and value, set error or change.
      */
-    _validateAndSet(
+    _validateAndSet /*:: <T> */ (
       key   /*: string */,
-      value /*: mixed  */
-    ) /*: number */ {
+      value /*: T      */
+    ) /*: Promise<T> | Promise<ErrLike<T>> | T | ErrLike<T> */ {
+      let c          /*: ChangesetDef     */ = this;
       let content    /*: Object           */ = get(this, CONTENT);
       let oldValue   /*: mixed            */ = get(content, key);
-      let validation /*: ValidationResult | Promise<ValidationResult> */;
-      validation = this._validate(key, value, oldValue);
+      let validation /*: ValidationResult | Promise<ValidationResult> */ =
+        c._validate(key, value, oldValue);
 
       // TODO: Address case when Promise is rejected.
       if (isPromise(validation)) {
-        this._setIsValidating(key, true);
-        this.trigger(BEFORE_VALIDATION_EVENT, key);
+        c._setIsValidating(key, true);
+        c.trigger(BEFORE_VALIDATION_EVENT, key);
 
-        return validation.then(resolvedValidation => {
-          this._setIsValidating(key, false);
-          this.trigger(AFTER_VALIDATION_EVENT, key);
-          return this._setProperty(resolvedValidation, { key, value, oldValue });
+        let v /*: Promise<ValidationResult> */ = (validation /*: any */);
+        return v.then(resolvedValidation => {
+          c._setIsValidating(key, false);
+          c.trigger(AFTER_VALIDATION_EVENT, key);
+          return c._setProperty(resolvedValidation, { key, value, oldValue });
         });
       }
 
-      this.trigger(BEFORE_VALIDATION_EVENT, key);
-      this.trigger(AFTER_VALIDATION_EVENT, key);
-      return this._setProperty(validation, { key, value, oldValue });
+      c.trigger(BEFORE_VALIDATION_EVENT, key);
+      c.trigger(AFTER_VALIDATION_EVENT, key);
+      let v /*: ValidationResult */ = (validation /*: any */);
+      return c._setProperty(v, { key, value, oldValue });
     },
 
     /**
@@ -650,37 +660,42 @@ export function changeset(
     /**
      * Sets property or error on the changeset.
      */
-//     _setProperty /*:: <T> */ (
-//       validation               /*: ValidationResult */,
-//       { key, value, oldValue } /*: NewProperty<T>   */
-//     ) /*: T | ErrLike */ {
-//       let changes /*: Changes */ = get(this, CHANGES);
-//       let isValid /*: boolean */ = validation
-//         || isArray(validation)
-//         && validation.length === 1
-//         && (validation /*: any */)[0] === true;
-//
-//       // TODO
-//       let self /*: ChangesetDef */ = this;
-//       if (isValid) {
-//         self._deleteKey(ERRORS, key);
-//
-//         if (!isEqual(oldValue, value)) {
-//           changes[key] = new Change(value);
-//         } else if (key in changes) {
-//           self._deleteKey(CHANGES, key);
-//         }
-//         self.notifyPropertyChange(CHANGES);
-//         self.notifyPropertyChange(key);
-//
-//         return value;
-//       }
-//
-//       return (this /*: ChangesetDef */).addError(key, {
-//         value,
-//         validation: (validation /*: ValidationMsg */)
-//       });
-//     },
+    _setProperty /*:: <T> */ (
+      validation               /*: ValidationResult */,
+      { key, value, oldValue } /*: NewProperty<T>   */
+    ) /*: T | ErrLike<T> */ {
+      let changes /*: Changes */ = get(this, CHANGES);
+      let isValid /*: boolean */ = validation === true
+        || isArray(validation)
+        && validation.length === 1
+        && (validation /*: any */)[0] === true;
+
+      // Shorthand for `this`.
+      let c /*: ChangesetDef */ = this;
+
+      // Error case.
+      if (!isValid) {
+        let v /*: ValidationErr */ = (validation /*: any */);
+        return c.addError(key, { value, validation: v });
+      }
+
+      // Happy path: remove `key` from error map.
+      c._deleteKey(ERRORS, key);
+
+      // Happy path: update change map.
+      if (!isEqual(oldValue, value)) {
+        changes[key] = new Change(value);
+      } else if (key in changes) {
+        c._deleteKey(CHANGES, key);
+      }
+
+      // Happy path: notify that `key` was added.
+      c.notifyPropertyChange(CHANGES);
+      c.notifyPropertyChange(key);
+
+      // Return new value.
+      return value;
+    },
 
     /**
      * Increment or decrement the number of running validations for a
@@ -706,8 +721,8 @@ export function changeset(
      */
     _valueFor(
       key        /*: string  */,
-      plainValue /*: boolean */ = false
-    ) /*: Relay | mixed */ {
+      plainValue /*: ?boolean */ = false
+    ) /*: RelayDef | mixed */ {
       let changes /*: Changes */ = get(this, CHANGES);
       let errors  /*: Errors  */ = get(this, ERRORS);
       let content /*: Object  */ = get(this, CONTENT);
@@ -719,7 +734,9 @@ export function changeset(
 
       let original /*: mixed */ = get(content, key);
       if (isObject(original) && !plainValue) {
-        return (this /*: ChangesetDef */)._relayFor(key, original);
+        let c /*: ChangesetDef */ = this;
+        let o /*: Object       */ = (original /*: any */);
+        return c._relayFor(key, o);
       }
 
       if (changes.hasOwnProperty(key)) {
@@ -733,18 +750,18 @@ export function changeset(
     /**
      * Construct a Relay instance for an object.
      */
-     _relayFor(
-       key   /*: string */,
-       value /*: Object */
-     ) /*: RelayDef */ {
-       let cache /*: RelayCache */ = get(this, RELAY_CACHE);
+    _relayFor(
+      key   /*: string */,
+      value /*: Object */
+    ) /*: RelayDef */ {
+      let cache /*: RelayCache */ = get(this, RELAY_CACHE);
 
-       if (!(key in cache)) {
-         cache[key] = Relay.create({ key, changeset: this, content: value });
-       }
+      if (!(key in cache)) {
+        cache[key] = Relay.create({ key, changeset: this, content: value });
+      }
 
-       return cache[key];
-     },
+      return cache[key];
+    },
 
 //     /**
 //      * Notifies virtual properties set on the changeset of a change.

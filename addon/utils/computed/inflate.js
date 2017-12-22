@@ -11,9 +11,9 @@ const { keys } = Object;
 /**
  * Unflatten an object.
  */
-export default function inflate(
-  dependentKey /*: string */,
-  transform /*: (mixed) => mixed */ = a => a
+export default function inflate /*:: <T> */ (
+  dependentKey /*: string   */,
+  transform    /*: (T) => T */ = a => a
 ) /*: Object */ {
   return computed(dependentKey, function() {
     let obj /*: Object */ = get(this, dependentKey);
