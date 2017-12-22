@@ -20,12 +20,27 @@ import Change from 'ember-changeset/-private/change';
 import deepSet from 'ember-deep-set';
 import EmberObject from '@ember/object';
 import Evented from '@ember/object/evented';
-import { A as emberArray, isArray } from '@ember/array';
-import { all, resolve } from 'rsvp';
+import {
+  A as emberArray,
+  isArray,
+} from '@ember/array';
+import {
+  all,
+  resolve,
+} from 'rsvp';
 import { assert } from '@ember/debug';
-import { isEmpty, isEqual, isNone, isPresent, typeOf } from '@ember/utils';
-import { not, readOnly } from '@ember/object/computed';
-import { get, set, setProperties } from '@ember/object';
+import {
+  isEmpty,
+  isEqual,
+  isNone,
+  isPresent,
+  typeOf,
+} from '@ember/utils';
+import { not } from '@ember/object/computed';
+import {
+  get,
+  set,
+} from '@ember/object';
 
 /*::
 import type { ValidatorFunc } from 'ember-changeset/types/validator-func';
