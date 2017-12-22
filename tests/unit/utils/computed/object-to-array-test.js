@@ -32,7 +32,7 @@ test('it maintains shallow objects when flattenObjects is false', function(asser
       }
     },
 
-    values: objectToArray('_object', false)
+    values: objectToArray('_object', a => a, false)
   });
   let result = Dummy.create().get('values');
   let expectedResult = [{ key: 'firstName', value: { value: 'Jim', validation: 'Too short' }}];
@@ -48,7 +48,7 @@ test('it flattens shallow object values when flattenObjects is true', function(a
       }
     },
 
-    values: objectToArray('_object', true)
+    values: objectToArray('_object', a => a, true)
   });
   let result = Dummy.create().get('values');
   let expectedResult = [{ key: 'firstName', value: 'Jim', validation: 'Too short' }];

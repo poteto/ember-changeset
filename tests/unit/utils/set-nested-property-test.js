@@ -26,7 +26,10 @@ module('Unit | Utility | set nested property');
     },
     key: 'foo',
     value: 42,
-    actual: (obj, key, value) => setNestedProperty(obj, key, value),
+    actual: (obj, key, value) => {
+      setNestedProperty(obj, key, value);
+      return obj;
+    },
     expected: {
       'foo': 42,
     },
@@ -41,7 +44,10 @@ module('Unit | Utility | set nested property');
     },
     key: 'foo',
     value: 42,
-    actual: (obj, key, value) => setNestedProperty(obj, key, value),
+    actual: (obj, key, value) => {
+      setNestedProperty(obj, key, value);
+      return obj;
+    },
     expected: {
       'foo': 42,
       'foobar': 'freakin',
@@ -59,7 +65,10 @@ module('Unit | Utility | set nested property');
     },
     key: 'foo.bar.baz',
     value: 'whoop',
-    actual: (obj, key, value) => setNestedProperty(obj, key, value),
+    actual: (obj, key, value) => {
+      setNestedProperty(obj, key, value);
+      return obj;
+    },
     expected: {
       'foo.bar.baz': 'whoop',
       'foo.bar.qux': 'holidays',
@@ -73,7 +82,10 @@ module('Unit | Utility | set nested property');
     },
     key: 'foo.bar.baz',
     value: 'whoop',
-    actual: (obj, key, value) => setNestedProperty(obj, key, value),
+    actual: (obj, key, value) => {
+      setNestedProperty(obj, key, value);
+      return obj;
+    },
     expected: {
       'foo.bar.baz': 'whoop',
     },
