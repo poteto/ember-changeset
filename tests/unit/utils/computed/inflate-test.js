@@ -29,7 +29,7 @@ module('Unit | Utility | computed/inflate');
       inflatedChanges: inflate('changes'),
     },
     actual: obj => () => obj.get('inflatedChanges'),
-    expected: 'Assertion Failed: Path foo.bar leading up to foo.bar.baz must be an Object if specified.',
+    expected: /Assertion Failed: Path foo.bar leading up to foo.bar.baz must be an Object if specified./,
     method: 'throws',
   },
   {

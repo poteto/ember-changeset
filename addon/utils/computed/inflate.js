@@ -9,14 +9,16 @@ import { isBlank } from '@ember/utils';
 const { keys } = Object;
 
 /**
- * Unflatten an object.
+ * Inflate an Object, optionally transforming each key's value by
+ * `transform` function.
  */
 export default function inflate /*:: <T> */ (
-  dependentKey /*: string   */,
-  transform    /*: (T) => T */ = a => a
+  dependentKey /*: string       */,
+  transform    /*: (T) => mixed */ = a => a
 ) /*: Object */ {
   return computed(dependentKey, function() {
     let obj /*: Object */ = get(this, dependentKey);
+
     runInDebug(() => {
       keys(obj).forEach(key => {
         key.split('.').forEach((_part, i, allParts) => {
