@@ -1,6 +1,7 @@
 // @flow
 
 import ObjectProxy from '@ember/object/proxy';
+import { get } from '@ember/object';
 
 /*::
 import type { ChangesetDef } from 'ember-changeset';
@@ -20,6 +21,7 @@ export type RelayDef = {|
   rollback: () => void,
   destroy: () => void,
   notifyPropertyChange: (string) => void,
+  isEqual: (RelayDef) => boolean,
 |};
 */
 
@@ -78,5 +80,11 @@ export default ObjectProxy.extend(({
     r._super(...arguments);
     r.changeset = null;
     r.content = null;
-  }
+  },
+
+  isEqual(other) {
+    let r /*: RelayDef */ = this;
+    let original = get(r, 'content');
+    return r === other || original === other;
+  },
 } /*: RelayDef */));

@@ -869,7 +869,7 @@ test('#validate does not mark changes when nothing has changed', function(assert
     persist: true,
     // test isEqual to ensure we're using Ember.isEqual for comparison
     isEqual(other) {
-      return this.persist === other.persist;
+      return this.persist === get(other, 'persist');
     }
   };
   dummyModel.setProperties({ name: 'Jim Bob', password: true, passwordConfirmation: true, async: true, options});
