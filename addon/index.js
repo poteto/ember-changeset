@@ -272,7 +272,7 @@ export function changeset(
       validateNestedObj('preparedChanges', preparedChanges);
 
       let newChanges /*: Changes */ = keys(preparedChanges).reduce((newObj, key) => {
-        newObj[key] = new Change(obj[key]);
+        newObj[key] = new Change(preparedChanges[key]);
         return newObj;
       }, {});
 
