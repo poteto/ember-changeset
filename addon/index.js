@@ -115,6 +115,8 @@ export type ChangesetDef = {|
   _setIsValidating: (string, boolean) => void,
   _validate: (string, mixed, mixed) => (ValidationResult | Promise<ValidationResult>),
   trigger: (string, string) => void,
+  isValidating: (string | void) => boolean,
+  cast: (Array<string>) => ChangesetDef,
 |};
 */
 
@@ -524,48 +526,38 @@ export function changeset(
 //
 //       return this;
 //     },
-//
-//     /**
-//      * Unlike `Ecto.Changeset.cast`, `cast` will take allowed keys and
-//      * remove unwanted keys off of the changeset. For example, this method
-//      * can be used to only allow specified changes through prior to saving.
-//      *
-//      * @public
-//      * @chainable
-//      * @param  {Array} allowed Array of allowed keys
-//      * @return {Changeset}
-//      */
-//     cast(allowed = []) {
-//       let changes = get(this, CHANGES);
-//
-//       if (isArray(allowed) && allowed.length === 0) {
-//         return changes;
-//       }
-//
-//       let changeKeys = keys(changes);
-//       let validKeys = emberArray(changeKeys).filter((key) => includes(allowed, key));
-//       let casted = take(changes, validKeys);
-//
-//       set(this, CHANGES, casted);
-//
-//       return this;
-//     },
 
-       /**
-//      * Checks to see if async validator for a given key has not resolved.
-//      * If no key is provided it will check to see if any async validator is running.
-//      *
-//      * @public
-//      * @param  {String|Undefined} key
-//      * @return {boolean}
-//      */
-//     isValidating(key) {
-//       let runningValidations = get(this, RUNNING_VALIDATIONS);
-//       let ks = emberArray(keys(runningValidations));
-//       if (key) { return ks.includes(key); }
-//
-//       return !isEmpty(ks);
-//     },
+    /**
+     * Unlike `Ecto.Changeset.cast`, `cast` will take allowed keys and
+     * remove unwanted keys off of the changeset. For example, this method
+     * can be used to only allow specified changes through prior to saving.
+     */
+    cast(allowed /*: Array<string> */ = []) /*: ChangesetDef */ {
+      let changes /*: Changes */ = get(this, CHANGES);
+
+      if (isArray(allowed) && allowed.length === 0) {
+        return this;
+      }
+
+      let changeKeys /*: Array<string> */ = keys(changes);
+      let validKeys = emberArray(changeKeys).filter((key /*: string */) => includes(allowed, key));
+      let casted = take(changes, validKeys);
+
+      set(this, CHANGES, casted);
+
+      return this;
+    },
+
+    /**
+     * Checks to see if async validator for a given key has not resolved.
+     * If no key is provided it will check to see if any async validator is running.
+     */
+    isValidating(key /*: string | void */) /*: boolean */ {
+      let runningValidations /*: RunningValidations */ = get(this, RUNNING_VALIDATIONS);
+      let ks /*: Array<string> */ = emberArray(keys(runningValidations));
+      if (key) return includes(ks, key);
+      return !isEmpty(ks);
+    },
 
     /**
      * For a given key and value, set error or change.
