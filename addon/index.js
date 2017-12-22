@@ -130,6 +130,7 @@ export type ChangesetDef = {|
   rollback: () => ChangesetDef,
   save: (Object) => Promise<ChangesetDef | mixed>,
   merge: (ChangesetDef) => ChangesetDef,
+  validate: (string | void) => (Promise<null> | Promise<mixed | ErrLike<mixed>> | Promise<Array<mixed | ErrLike<mixed>>>),
 |};
 */
 
@@ -381,33 +382,32 @@ export function changeset(
       return this;
     },
 
-//     /**
-//      * Validates the changeset immediately against the validationMap passed in.
-//      * If no key is passed into this method, it will validate all fields on the
-//      * validationMap and set errors accordingly. Will throw an error if no
-//      * validationMap is present.
-//      *
-//      * @async
-//      * @public
-//      * @param  {String|Undefined} key
-//      * @return {Promise}
-//      */
-//     validate(key) {
-//       if (keys(validationMap).length === 0) {
-//         return resolve(null);
-//       }
-//
-//       if (isNone(key)) {
-//         let maybePromise = keys(validationMap)
-//           .map((validationKey) => {
-//             return this._validateAndSet(validationKey, this._valueFor(validationKey, true));
-//           });
-//
-//         return all(maybePromise);
-//       }
-//
-//       return resolve(this._validateAndSet(key, this._valueFor(key)));
-//     },
+    /**
+     * Validates the changeset immediately against the validationMap passed in.
+     * If no key is passed into this method, it will validate all fields on the
+     * validationMap and set errors accordingly. Will throw an error if no
+     * validationMap is present.
+     */
+    validate(
+      key /*: string | void */
+    ) /*: Promise<null> | Promise<mixed | ErrLike<mixed>> | Promise<Array<mixed | ErrLike<mixed>>> */ {
+      if (keys(validationMap).length === 0) {
+        return resolve(null);
+      }
+
+      let c /*: ChangesetDef */ = this;
+
+      if (isNone(key)) {
+        let maybePromise = keys(validationMap).map(validationKey => {
+          return c._validateAndSet(validationKey, c._valueFor(validationKey));
+        });
+
+        return all(maybePromise);
+      }
+
+      let k /*: string */ = (key /*: any */);
+      return resolve(c._validateAndSet(k, c._valueFor(k)));
+    },
 
     /**
      * Manually add an error to the changeset. If there is an existing
