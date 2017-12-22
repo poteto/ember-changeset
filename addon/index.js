@@ -88,6 +88,11 @@ type InternalMapKey =
   | '_relayCache'
   | '_runningValidations';
 
+type Snapshot = {
+  changes: { [string]: mixed          },
+  errors:  { [string]: ErrLike<mixed> },
+};
+
 export type ChangesetDef = {|
   _content:            Object,
   _changes:            Changes,
@@ -132,6 +137,7 @@ export type ChangesetDef = {|
   merge: (ChangesetDef) => ChangesetDef,
   validate: (string | void) => (Promise<null> | Promise<mixed | ErrLike<mixed>> | Promise<Array<mixed | ErrLike<mixed>>>),
   pushErrors: (string, ...string) => ErrLike<mixed>,
+  snapshot: () => Snapshot,
 |};
 */
 
@@ -476,21 +482,30 @@ export function changeset(
       return { value, validation };
     },
 
-//     /**
-//      * Creates a snapshot of the changeset's errors and changes.
-//      *
-//      * @public
-//      * @return {Object} snapshot
-//      */
-//     snapshot() {
-//       return {
-//         changes: facade(get(this, CHANGES), Change, ch => ch.value),
-//         errors: facade(get(this, ERRORS), Err, e => {
-//           return { value: e.value, validation: e.validation }
-//         })
-//       };
-//     },
-//
+    /**
+     * Creates a snapshot of the changeset's errors and changes.
+     *
+     * @public
+     * @return {Object} snapshot
+     */
+    snapshot() /*: Snapshot */ {
+      let changes /*: Changes */ = get(this, CHANGES);
+      let errors  /*: Errors  */ = get(this, ERRORS);
+
+      return {
+        changes: keys(changes).reduce((newObj, key) => {
+          newObj[key] = changes[key].value;
+          return newObj;
+        }, {}),
+
+        errors: keys(errors).reduce((newObj, key) => {
+          let e = errors[key]
+          newObj[key] = { value: e.value, validation: e.validation };
+          return newObj;
+        }, {}),
+      };
+    },
+
 //     /**
 //      * Restores a snapshot of changes and errors. This overrides existing
 //      * changes and errors.
