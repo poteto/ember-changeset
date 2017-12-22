@@ -143,6 +143,7 @@ test('a passed down nested object updates when set without a validator', async f
       type="text"
       value={{childChangeset.firstName}}
       onchange={{action (mut childChangeset.firstName) value="target.value"}}>
+    >
     {{input id="last-name" value=childChangeset.lastName}}
   `);
 
