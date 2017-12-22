@@ -18,6 +18,7 @@ import isChangeset, { CHANGESET } from 'ember-changeset/utils/is-changeset';
 import hasOwnNestedProperty from 'ember-changeset/utils/has-own-nested-property';
 import setNestedProperty from 'ember-changeset/utils/set-nested-property';
 import mergeNested from 'ember-changeset/utils/merge-nested';
+import validateNestedObj from 'ember-changeset/utils/validate-nested-obj';
 import facade from 'ember-changeset/utils/facade';
 import Err from 'ember-changeset/-private/err';
 import Change from 'ember-changeset/-private/change';
@@ -138,6 +139,7 @@ export type ChangesetDef = {|
   validate: (string | void) => (Promise<null> | Promise<mixed | ErrLike<mixed>> | Promise<Array<mixed | ErrLike<mixed>>>),
   pushErrors: (string, ...string) => ErrLike<mixed>,
   snapshot: () => Snapshot,
+  restore: (Snapshot) => ChangesetDef,
 |};
 */
 
@@ -268,15 +270,7 @@ export function changeset(
       let preparedChanges = prepareChangesFn(changes);
 
       assert('Callback to `changeset.prepare` must return an object', isObject(preparedChanges));
-      runInDebug(() => keys(preparedChanges).forEach(key => {
-        key.split('.').forEach((_, i, allParts) => {
-          if (i < allParts.length - 1) {
-            let path = allParts.slice(0, i+1).join('.');
-            let msg = 'Object returned by `prepareChangesFn` may not have changes that override each other.';
-            assert(msg, !(path in preparedChanges));
-          }
-        });
-      }));
+      validateNestedObj('preparedChanges', preparedChanges);
 
       let newChanges /*: Changes */ = keys(preparedChanges).reduce((newObj, key) => {
         newObj[key] = new Change(obj[key]);
@@ -484,9 +478,6 @@ export function changeset(
 
     /**
      * Creates a snapshot of the changeset's errors and changes.
-     *
-     * @public
-     * @return {Object} snapshot
      */
     snapshot() /*: Snapshot */ {
       let changes /*: Changes */ = get(this, CHANGES);
@@ -506,26 +497,31 @@ export function changeset(
       };
     },
 
-//     /**
-//      * Restores a snapshot of changes and errors. This overrides existing
-//      * changes and errors.
-//      *
-//      * @public
-//      * @chainable
-//      * @param  {Object} options.changes
-//      * @param  {Object} options.errors
-//      * @return {Changeset}
-//      */
-//     restore({ changes, errors }) {
-//       let newChanges = keys(changes).forEach(k => new Change(changes[k]));
-//       let newErrors = keys(errors).forEach(k => new Err(errors[k].value, errors[k].validation));
-//
-//       set(this, CHANGES, newChanges);
-//       set(this, ERRORS, newErrors);
-//       this._notifyVirtualProperties();
-//
-//       return this;
-//     },
+    /**
+     * Restores a snapshot of changes and errors. This overrides existing
+     * changes and errors.
+     */
+    restore({ changes, errors } /*: Snapshot */) /*: ChangesetDef */ {
+      validateNestedObj('snapshot.changes', changes);
+      validateNestedObj('snapshot.errors',  errors);
+
+      let newChanges /*: Changes */ = keys(changes).reduce((newObj, key) => {
+        newObj[key] = new Change(changes[key]);
+        return newObj;
+      }, {});
+
+      let newErrors /*: Errors */ = keys(errors).reduce((newObj, key) => {
+        let e /*: ErrLike<*> */ = errors[key];
+        newObj[key] = new Err(e.value, e.validation);
+        return newObj;
+      }, {});
+
+      set(this, CHANGES, newChanges);
+      set(this, ERRORS,  newErrors);
+
+      (this /*: ChangesetDef */)._notifyVirtualProperties();
+      return this;
+    },
 
     /**
      * Unlike `Ecto.Changeset.cast`, `cast` will take allowed keys and
