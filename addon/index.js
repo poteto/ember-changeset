@@ -113,7 +113,7 @@ export type ChangesetDef = {|
   toString: () => string,
   _deleteKey: (InternalMapKey, string) => void,
   notifyPropertyChange: (string) => void,
-  addError: <T: ValidationErr | ErrLike<*>>(string, T) => T,
+  addError: <T: string | ErrLike<*>>(string, T) => T,
   _setProperty: <T>(ValidationResult, NewProperty<T>) => (T | ErrLike<T>),
   _validateAndSet: <T>(string, T) => (Promise<T> | Promise<ErrLike<T>> | T | ErrLike<T>),
   _setIsValidating: (string, boolean) => void,
@@ -125,12 +125,13 @@ export type ChangesetDef = {|
   setUnknownProperty: <T>(string, T) => (T | ErrLike<T> | Promise<T> | Promise<ErrLike<T>>),
   prepare: (({ [string]: mixed }) => ({ [string]: mixed })) => ChangesetDef,
   execute: () => ChangesetDef,
-  _notifyVirtualProperties: (Array<string>) => void,
+  _notifyVirtualProperties: (?Array<string>) => void,
   _rollbackKeys: () => Array<string>,
   rollback: () => ChangesetDef,
   save: (Object) => Promise<ChangesetDef | mixed>,
   merge: (ChangesetDef) => ChangesetDef,
   validate: (string | void) => (Promise<null> | Promise<mixed | ErrLike<mixed>> | Promise<Array<mixed | ErrLike<mixed>>>),
+  pushErrors: (string, ...string) => ErrLike<mixed>,
 |};
 */
 
@@ -357,7 +358,7 @@ export function changeset(
 
       newChangeset[CHANGES] = newChanges;
       newChangeset[ERRORS] = newErrors;
-      newChangeset._notifyVirtualProperties((this /*: ChangesetDef */)._rollbackKeys());
+      newChangeset._notifyVirtualProperties();
       return newChangeset;
     },
 
@@ -413,7 +414,7 @@ export function changeset(
      * Manually add an error to the changeset. If there is an existing
      * error or change for `key`, it will be overwritten.
      */
-    addError /*:: <T: ValidationErr | ErrLike<*>> */ (
+    addError /*:: <T: string | ErrLike<*>> */ (
       key   /*: string */,
       error /*: T      */
     ) /*: T */ {
@@ -445,33 +446,36 @@ export function changeset(
       return error;
     },
 
-//     /**
-//      * Manually push multiple errors to the changeset as an array. If there is
-//      * an existing error or change for `key`. it will be overwritten.
-//      *
-//      * @param  {String} key
-//      * @param  {...[String]} newErrors
-//      * @return {Any}
-//      */
-//     pushErrors(key, ...newErrors) {
-//       let errors = get(this, ERRORS);
-//       let existingError = get(errors, key) || { validation: [] };
-//       let { validation } = existingError;
-//       let value = get(this, key);
-//
-//       if (!isArray(validation) && isPresent(validation)) {
-//         existingError.validation = [existingError.validation];
-//       }
-//
-//       validation = [...existingError.validation, ...newErrors];
-//
-//       this._deleteKey(CHANGES, key);
-//       this.notifyPropertyChange(ERRORS);
-//       this.notifyPropertyChange(key);
-//
-//       return set(errors, key, { value, validation });
-//     },
-//
+    /**
+     * Manually push multiple errors to the changeset as an array. If there is
+     * an existing error or change for `key`. it will be overwritten.
+     */
+    pushErrors(
+      key          /*: string        */,
+      ...newErrors /*: Array<string> */
+    ) /*: ErrLike<mixed> */ {
+      let errors /*: Errors */ = get(this, ERRORS);
+      let existingError /*: Err */ = errors[key] || new Err(null, []);
+      let validation /*: ValidationErr */ = existingError.validation;
+      let value /*: mixed */ = get(this, key);
+
+      if (!isArray(validation) && isPresent(validation)) {
+        let v /*: string */ = (existingError.validation /*: any */);
+        existingError.validation = [v];
+      }
+
+      let v /*: Array<string> */ = (existingError.validation /*: any */);
+      validation = [...v, ...newErrors];
+
+      let c = (this /*: ChangesetDef */)
+      c._deleteKey(CHANGES, key);
+      c.notifyPropertyChange(ERRORS);
+      c.notifyPropertyChange(key);
+
+      errors[key] = new Err(value, validation);
+      return { value, validation };
+    },
+
 //     /**
 //      * Creates a snapshot of the changeset's errors and changes.
 //      *
@@ -712,11 +716,9 @@ export function changeset(
      * @return {Void}
      */
     _notifyVirtualProperties(
-      keys /*: Array<string> */ = this._rollbackKeys()
+      keys /*: ?Array<string> */ = (this /*: ChangesetDef */)._rollbackKeys()
     ) /*: void */ {
-      for (let i = 0; i < keys.length; i++) {
-        this.notifyPropertyChange(keys[i]);
-      }
+      (keys || []).forEach(key => (this /*: ChangesetDef */).notifyPropertyChange(key));
     },
 
     /**
