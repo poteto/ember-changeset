@@ -6,6 +6,7 @@ import objectToArray from 'ember-changeset/utils/computed/object-to-array';
 import isEmptyObject from 'ember-changeset/utils/computed/is-empty-object';
 import computedFacade from 'ember-changeset/utils/computed/facade';
 import inflate from 'ember-changeset/utils/computed/inflate';
+import transform from 'ember-changeset/utils/computed/transform';
 import isPromise from 'ember-changeset/utils/is-promise';
 import isObject from 'ember-changeset/utils/is-object';
 import pureAssign from 'ember-changeset/utils/assign';
@@ -15,6 +16,7 @@ import take from 'ember-changeset/utils/take';
 import pairs from 'ember-changeset/utils/pairs';
 import isChangeset, { CHANGESET } from 'ember-changeset/utils/is-changeset';
 import hasOwnNestedProperty from 'ember-changeset/utils/has-own-nested-property';
+import setNestedProperty from 'ember-changeset/utils/set-nested-property';
 import facade from 'ember-changeset/utils/facade';
 import Err from 'ember-changeset/-private/err';
 import Change from 'ember-changeset/-private/change';
@@ -86,20 +88,21 @@ type InternalMapKey =
   | '_runningValidations';
 
 export type ChangesetDef = {|
-  _content: Object,
-  _changes: Changes,
-  _errors: Errors,
-  _relayCache: RelayCache,
-  _validator: ValidatorFunc,
-  _options: Config,
+  _content:            Object,
+  _changes:            Changes,
+  _errors:             Errors,
+  _relayCache:         RelayCache,
+  _validator:          ValidatorFunc,
+  _options:            Config,
   _runningValidations: RunningValidations,
-  __changeset__: '__CHANGESET__',
-  _inflatedChanges: { [string]: mixed },
+  __changeset__:       '__CHANGESET__',
+  _inflatedChanges:    { [string]: mixed },
+  _bareChanges:        { [string]: mixed },
 
-  isValid: boolean,
+  isValid:    boolean,
   isPristine: boolean,
-  isInvalid: boolean,
-  isDirty: boolean,
+  isInvalid:  boolean,
+  isDirty:    boolean,
 
   _super: () => void,
   init: () => void,
@@ -117,6 +120,8 @@ export type ChangesetDef = {|
   trigger: (string, string) => void,
   isValidating: (string | void) => boolean,
   cast: (Array<string>) => ChangesetDef,
+  willDestroy: () => void,
+  setUnknownProperty: <T>(string, T) => (T | ErrLike<T> | Promise<T> | Promise<ErrLike<T>>),
 |};
 */
 
@@ -124,27 +129,18 @@ export type ChangesetDef = {|
  * Creates new changesets.
  *
  * @uses Ember.Evented
- * @param  {Object} obj
- * @param  {Function} validateFn
- * @param  {Object} validationMap
- * @param  {Object}  options
- * @return {Ember.Object}
  */
 export function changeset(
-  obj /*: Object */,
-  validateFn /*: ValidatorFunc */ = defaultValidatorFn,
+  obj           /*: Object                      */,
+  validateFn    /*: ValidatorFunc               */ = defaultValidatorFn,
   validationMap /*: { [string]: ValidatorFunc } */ = {},
-  options /*: Config */ = {}
-) {
+  options       /*: Config                      */ = {}
+) /*: Class<ChangesetDef> */ {
   assert('Underlying object for changeset is missing', isPresent(obj));
 
   return EmberObject.extend(Evented, ({
     /**
-     * Internal descriptor for changeset identification
-     *
-     * @private
-     * @property __changeset__
-     * @type {String}
+     * Internal descriptor for changeset identification.
      */
     __changeset__: CHANGESET,
 
@@ -161,6 +157,7 @@ export function changeset(
     isDirty: not('isPristine').readOnly(),
 
     _inflatedChanges: inflate(CHANGES, c => c.value),
+    _bareChanges: transform(CHANGES, c => c.value),
 
     /*::
     _super() {},
@@ -189,61 +186,46 @@ export function changeset(
 
     /**
      * Proxies `get` to the underlying content or changed value, if present.
-     *
-     * @public
-     * @param  {String} key
-     * @return {Any}
      */
-    unknownProperty(key) {
+    unknownProperty(
+      key /*: string */
+    ) /*: RelayDef | mixed */ {
       return (this /*: ChangesetDef */)._valueFor(key);
     },
 
     /**
      * Stores change on the changeset.
-     *
-     * @public
-     * @param  {String} key
-     * @param  {Any} value
-     * @return {Any}
      */
-    //setUnknownProperty(key, value) {
-      /*
-      let changesetOptions = get(this, OPTIONS);
-      let skipValidate = get(changesetOptions, 'skipValidate');
+    setUnknownProperty /*:: <T> */ (
+      key   /*: string */,
+      value /*: T      */
+    ) /*: T | ErrLike<T> | Promise<T> | Promise<ErrLike<T>> */ {
+      let config       /*: Config       */ = get(this, OPTIONS);
+      let skipValidate /*: boolean      */ = get(config, 'skipValidate');
+      let c            /*: ChangesetDef */ = this;
 
       if (skipValidate) {
-        return this._setProperty(true, { key, value });
+        return c._setProperty(true, { key, value });
       }
 
-      return this._validateAndSet(key, value);
-      */
-    //},
+      return c._validateAndSet(key, value);
+    },
 
     /**
      * String representation for the changeset.
-     *
-     * @public
-     * @return {String}
      */
-    toString() {
-      let normalisedContent = pureAssign(get(this, CONTENT), {});
+    toString() /*: string */ {
+      let normalisedContent /*: Object */ = pureAssign(get(this, CONTENT), {});
       return `changeset:${normalisedContent.toString()}`;
     },
 
     /**
      * Teardown relays from cache.
-     *
-     * @public
-     * @return {Void}
      */
-    //willDestroy() {
-      /*
-      let relayCache = get(this, RELAY_CACHE);
-      for (let key in relayCache) {
-        relayCache[key].destroy();
-      }
-      */
-    //},
+    willDestroy() /*: void */ {
+      let relayCache /*: RelayCache */ = get(this, RELAY_CACHE);
+      for (let key in relayCache) relayCache[key].destroy();
+    },
 
     /**
      * Provides a function to run before emitting changes to the model. The
@@ -268,17 +250,14 @@ export function changeset(
      * @param  {Function} prepareChangesFn
      * @return {Changeset}
      */
-    //prepare(prepareChangesFn) {
-      /*
-      let changes = pureAssign(get(this, CHANGES));
-      changes = facade(changes, Change, ch => ch.value);
+    prepare(prepareChangesFn) {
+      let changes /*: Changes */ = get(this, '_bareChanges');
       let preparedChanges = prepareChangesFn(changes);
       assert('Callback to `changeset.prepare` must return an object', isObject(preparedChanges));
       preparedChanges = facade(preparedChanges, null, ch => new Change(ch));
       set(this, CHANGES, preparedChanges);
       return this;
-      */
-    //},
+    },
 
 //     /**
 //      * Executes the changeset if in a valid state.
@@ -454,7 +433,7 @@ export function changeset(
 
       // Add `key` to errors map.
       let errors /*: Errors */ = get(this, ERRORS);
-      errors[key] = newError;
+      setNestedProperty(errors, key, newError);
       c.notifyPropertyChange(ERRORS);
 
       // Notify that `key` has changed.
@@ -542,9 +521,7 @@ export function changeset(
       let changeKeys /*: Array<string> */ = keys(changes);
       let validKeys = emberArray(changeKeys).filter((key /*: string */) => includes(allowed, key));
       let casted = take(changes, validKeys);
-
       set(this, CHANGES, casted);
-
       return this;
     },
 
@@ -618,37 +595,6 @@ export function changeset(
       return true;
     },
 
-//     _setChange(key, value) {
-//       let changes = get(this, CHANGES);
-//       let changePairs = pairs(changes).filter(ch => ch.value instanceof Change);
-//
-//       // Delete changed keys prefixed by `key`.
-//       changePairs
-//         .filter(p => p.key.indexOf(key) === 0)
-//         .forEach(p => this._deleteKey(CHANGES, p.key));
-//
-//       // Determine if there are other changes at the same level.
-//       let parts = key.split('.');
-//       let branch = parts.slice(0, -1).join('.');
-//       let hasOtherLeaves = changePairs
-//         .filter(p => (
-//           p.key.indexOf(branch) === 0 &&
-//           p.key.split('.').length === parts.length
-//         ))
-//         .length > 0;
-//
-//       // If there are no other changes at the same level,
-//       if (!hasOtherLeaves) {
-//         // Delete any keys in path leading up to `key`.
-//         key.split('.').slice(0, -1).forEach((_, i, allKeys) => {
-//           let key = allKeys.slice(0, i+1).join('.');
-//           this._deleteKey(CHANGES, key);
-//         });
-//       }
-//
-//       deepSet(changes, key, new Change(value));
-//     },
-//
     /**
      * Sets property or error on the changeset.
      */
@@ -676,7 +622,7 @@ export function changeset(
 
       // Happy path: update change map.
       if (!isEqual(oldValue, value)) {
-        changes[key] = new Change(value);
+        setNestedProperty(changes, key, new Change(value));
       } else if (key in changes) {
         c._deleteKey(CHANGES, key);
       }
