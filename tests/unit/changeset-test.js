@@ -314,6 +314,24 @@ test('#set adds the change without validation if `skipValidate` option is set', 
   assert.deepEqual(changes, expectedChanges, 'should add change');
 });
 
+test('#set should remove nested changes when setting roots', function(assert) {
+  set(dummyModel, 'org', {
+    usa: {
+      ny: 'ny',
+      ca: 'ca',
+    },
+  });
+
+  let c = new Changeset(dummyModel);
+  c.set('org.usa.ny', 'foo');
+  c.set('org.usa.ca', 'bar');
+  c.set('org', 'no usa for you')
+
+  let actual = get(c, 'changes');
+  let expectedResult = [{ key: 'org', value: 'no usa for you' }];
+  assert.deepEqual(actual, expectedResult, 'removes nested changes');
+});
+
 test('it works with setProperties', function(assert) {
   let dummyChangeset = new Changeset(dummyModel);
   let expectedResult = [
@@ -421,6 +439,69 @@ test('#execute does not apply changes to content if invalid', function(assert) {
   assert.ok(get(dummyChangeset, 'isInvalid'), 'should be invalid');
   dummyChangeset.execute();
   assert.equal(get(dummyModel, 'name'), undefined, 'should not apply changes');
+});
+
+test('#execute does not remove original nested objects', function(a) {
+  class DogTag {}
+
+  let dog = {};
+  dog.info = new DogTag;
+  dog.info.name = 'mishka';
+  dog.info.breed = 'husky';
+
+  let c = new Changeset(dog);
+  c.set('info.name', 'laika');
+  c.execute();
+
+  let condition = get(dog, 'info') instanceof DogTag;
+  a.ok(condition, 'should not remove original object');
+});
+
+[
+  {
+    model: () => ({ org: { usa: { ny: '', ca: '' } } }),
+    setCalls: [
+      ['org.usa.ny', 'foo'],
+      ['org.usa.ca', 'bar'],
+      ['org', 'no usa for you'],
+    ],
+    result: () => ({ org: 'no usa for you' }),
+  },
+  {
+    model: () => ({ org: { usa: { ny: '', ca: '' } } }),
+    setCalls: [
+      ['org.usa.ny', 'foo'],
+      ['org', 'no usa for you'],
+      ['org.usa.ca', 'bar'],
+    ],
+    result: () => ({ org: { usa: { ny: '', ca: 'bar' } } }),
+  },
+  {
+    model: () => ({ org: { usa: { ny: '', ca: '' } } }),
+    setCalls: [
+      ['org', 'no usa for you'],
+      ['org.usa.ny', 'foo'],
+      ['org.usa.ca', 'bar'],
+    ],
+    result: () => ({ org: { usa: { ny: 'foo', ca: 'bar' } } }),
+  },
+].forEach(({ model, setCalls, result }, i) => {
+  test(`#execute - table-driven test ${i+1}`, function(assert) {
+    let m = model();
+    let c = new Changeset(m);
+
+    setCalls.forEach(([k, v]) => {
+      //console.log('pre', JSON.stringify(m), k, v)
+      c.set(k, v)
+      //console.log('post', JSON.stringify(m))
+    });
+    c.execute();
+    //console.log(JSON.stringify(m));
+
+    let actual = m;
+    let expectedResult = result();
+    assert.deepEqual(actual, expectedResult, `table driven test ${i+1}`);
+  });
 });
 
 test('it works with nested keys', function(assert) {
@@ -788,7 +869,7 @@ test('#validate does not mark changes when nothing has changed', function(assert
     persist: true,
     // test isEqual to ensure we're using Ember.isEqual for comparison
     isEqual(other) {
-      return this.persist === other.persist;
+      return this.persist === get(other, 'persist');
     }
   };
   dummyModel.setProperties({ name: 'Jim Bob', password: true, passwordConfirmation: true, async: true, options});
