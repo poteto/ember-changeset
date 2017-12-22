@@ -420,37 +420,39 @@ export function changeset(
 //     },
 
     /**
-     * Manually add an error to the changeset. If there is an existing error or
-     * change for `key`, it will be overwritten.
-     *
-     * @public
-     * @param {String} key
-     * @param {String|Object} options
-     * @param {Any} options.value
-     * @param {Any} options.validation Validation message
-     * @return {Any}
+     * Manually add an error to the changeset. If there is an existing
+     * error or change for `key`, it will be overwritten.
      */
-    addError /*:: <T> */ (key, options /*: T */) /*: T */ {
-      let errors /*: Errors */ = get(this, ERRORS);
-      let e /*: Err */;
-
-      if (!isObject(options)) {
-        let opts /*: ValidationMsg */ = (options /*: any */);
-        e = new Err(get(this, key), opts);
+    addError /*:: <T: ValidationErr | ErrLike> */ (
+      key   /*: string */,
+      error /*: T      */
+    ) /*: T */ {
+      // Construct new `Err` instance.
+      let newError /*: Err */;
+      if (isObject(error)) {
+        let errorLike /*: ErrLike */ = (error /*: any */);
+        assert('Error must have value.', isPresent(errorLike.value));
+        assert('Error must have validation.', isPresent(errorLike.validation));
+        newError = new Err(errorLike.value, errorLike.validation);
       } else {
-        let opts /*: ErrLike */ = (options /*: any */);
-        assert('Error must have value.', isPresent(opts.value));
-        assert('Error must have validation.', isPresent(opts.validation));
-        e = new Err(opts.value, opts.validation);
+        let validation /*: ValidationErr */ = (error /*: any */);
+        newError = new Err(get(this, key), validation);
       }
 
+      // Remove `key` from changes map.
       let c = (this /*: ChangesetDef */);
       c._deleteKey(CHANGES, key);
+
+      // Add `key` to errors map.
+      let errors /*: Errors */ = get(this, ERRORS);
+      errors[key] = newError;
       c.notifyPropertyChange(ERRORS);
+
+      // Notify that `key` has changed.
       c.notifyPropertyChange(key);
 
-      errors[key] = e;
-      return options;
+      // Return passed-in `error`.
+      return error;
     },
 
 //     /**
@@ -773,19 +775,17 @@ export function changeset(
 
     /**
      * Deletes a key off an object and notifies observers.
-     *
-     * @private
-     * @param  {String} objName
-     * @param  {String} key
-     * @return {Void}
      */
-    //_deleteKey(objName, key = '') {
-      //let obj /*: InternalMap */ = get(this, objName);
-      //if (obj.hasOwnProperty(key)) delete obj[key];
-      //let c /*: ChangesetDef */ = this;
-      //c.notifyPropertyChange(`${objName}.${key}`);
-      //c.notifyPropertyChange(objName);
-    //}
+    _deleteKey(
+      objName /*: string */,
+      key     /*: string */ = ''
+    ) /*: void */ {
+      let obj /*: InternalMap */ = get(this, objName);
+      if (obj.hasOwnProperty(key)) delete obj[key];
+      let c /*: ChangesetDef */ = this;
+      c.notifyPropertyChange(`${objName}.${key}`);
+      c.notifyPropertyChange(objName);
+    }
   } /*: ChangesetDef */));
 }
 
