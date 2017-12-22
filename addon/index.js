@@ -17,6 +17,7 @@ import pairs from 'ember-changeset/utils/pairs';
 import isChangeset, { CHANGESET } from 'ember-changeset/utils/is-changeset';
 import hasOwnNestedProperty from 'ember-changeset/utils/has-own-nested-property';
 import setNestedProperty from 'ember-changeset/utils/set-nested-property';
+import mergeNested from 'ember-changeset/utils/merge-nested';
 import facade from 'ember-changeset/utils/facade';
 import Err from 'ember-changeset/-private/err';
 import Change from 'ember-changeset/-private/change';
@@ -128,6 +129,7 @@ export type ChangesetDef = {|
   _rollbackKeys: () => Array<string>,
   rollback: () => ChangesetDef,
   save: (Object) => Promise<ChangesetDef | mixed>,
+  merge: (ChangesetDef) => ChangesetDef,
 |};
 */
 
@@ -329,14 +331,9 @@ export function changeset(
      * user.get('firstName'); // "Jimmy"
      * user.get('lastName'); // "Fallon"
      * ```
-     *
-     * @public
-     * @chainable
-     * @param  {Changeset} changeset
-     * @return {Changeset}
      */
     merge(
-      changeset /*: Object */
+      changeset /*: ChangesetDef */
     ) /*: ChangesetDef */ {
       let content /*: Object */ = get(this, CONTENT);
       assert('Cannot merge with a non-changeset', isChangeset(changeset));
@@ -354,17 +351,12 @@ export function changeset(
       let r2 /*: RelayCache */ = get(changeset, RELAY_CACHE);
 
       let newChangeset /*: ChangesetDef */ = new Changeset(content, get(this, VALIDATOR));
-      let newErrors /*: Errors */ = objectWithout(keys(c2), e1);
-      let newChanges /*: Changes */ = objectWithout(keys(e2), c1);
-      let mergedErrors /*: Errors */ = pureAssign(newErrors, e2);
-      let mergedChanges /*: Changes */ = pureAssign(newChanges, c2);
-      let mergedRelays /*: RelayCache */ = pureAssign(r1, r2);
+      let newErrors    /*: Errors       */ = mergeNested(e1, e2);
+      let newChanges   /*: Changes      */ = mergeNested(c1, c2);
 
-      newChangeset[CHANGES] = mergedChanges;
-      newChangeset[ERRORS] = mergedErrors;
-      newChangeset[RELAY_CACHE] = mergedRelays;
+      newChangeset[CHANGES] = newChanges;
+      newChangeset[ERRORS] = newErrors;
       newChangeset._notifyVirtualProperties((this /*: ChangesetDef */)._rollbackKeys());
-
       return newChangeset;
     },
 
