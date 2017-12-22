@@ -15,6 +15,7 @@ import isChangeset, { CHANGESET } from 'ember-changeset/utils/is-changeset';
 import setNestedProperty from 'ember-changeset/utils/set-nested-property';
 import mergeNested from 'ember-changeset/utils/merge-nested';
 import validateNestedObj from 'ember-changeset/utils/validate-nested-obj';
+import objectWithout from 'ember-changeset/utils/object-without';
 import Err from 'ember-changeset/-private/err';
 import Change from 'ember-changeset/-private/change';
 import deepSet from 'ember-deep-set';
@@ -352,12 +353,14 @@ export function changeset(
       let e1 /*: Errors     */ = get(this, ERRORS);
       let e2 /*: Errors     */ = get(changeset, ERRORS);
 
-      let newChangeset /*: ChangesetDef */ = new Changeset(content, get(this, VALIDATOR));
-      let newErrors    /*: Errors       */ = mergeNested(e1, e2);
-      let newChanges   /*: Changes      */ = mergeNested(c1, c2);
+      let newChangeset  /*: ChangesetDef */ = new Changeset(content, get(this, VALIDATOR));
+      let newErrors     /*: Errors  */      = objectWithout(keys(c2), e1);
+      let newChanges    /*: Changes */      = objectWithout(keys(e2), c1);
+      let mergedErrors  /*: Errors  */      = mergeNested(newErrors, e2);
+      let mergedChanges /*: Changes */      = mergeNested(newChanges, c2);
 
-      newChangeset[CHANGES] = newChanges;
-      newChangeset[ERRORS] = newErrors;
+      newChangeset[ERRORS]  = mergedErrors;
+      newChangeset[CHANGES] = mergedChanges;
       newChangeset._notifyVirtualProperties();
       return newChangeset;
     },
@@ -422,8 +425,8 @@ export function changeset(
       let newError /*: Err */;
       if (isObject(error)) {
         let errorLike /*: ErrLike<*> */ = (error /*: any */);
-        assert('Error must have value.', !isNone(errorLike.value));
-        assert('Error must have validation.', isPresent(errorLike.validation));
+        assert('Error must have value.', errorLike.hasOwnProperty('value'));
+        assert('Error must have validation.', errorLike.hasOwnProperty('validation'));
         newError = new Err(errorLike.value, errorLike.validation);
       } else {
         let validation /*: ValidationErr */ = (error /*: any */);
