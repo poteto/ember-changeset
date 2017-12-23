@@ -528,11 +528,6 @@ let validationMap = {
 
   // specify nested keys with dot delimiters
   'address.zipCode': validateLength({ is: 5 }),
-
-  // nested objects will also work
-  address: {
-    zipCode: validateLength({ is: 5 })
-  }
 };
 
 let changeset = new Changeset(user, validatorFn, validationMap);
