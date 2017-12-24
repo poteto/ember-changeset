@@ -11,6 +11,7 @@ import pureAssign from 'ember-changeset/utils/assign';
 import includes from 'ember-changeset/utils/includes';
 import take from 'ember-changeset/utils/take';
 import isChangeset, { CHANGESET } from 'ember-changeset/utils/is-changeset';
+import isRelay from 'ember-changeset/utils/is-relay';
 import setNestedProperty from 'ember-changeset/utils/set-nested-property';
 import mergeNested from 'ember-changeset/utils/merge-nested';
 import validateNestedObj from 'ember-changeset/utils/validate-nested-obj';
@@ -123,6 +124,7 @@ export type ChangesetDef = {|
   _super: () => void,
   init: () => void,
   unknownProperty: (string) => mixed,
+  get: (string) => mixed,
   _valueFor: (string, ?boolean) => RelayDef | mixed,
   _relayFor: (string, Object) => RelayDef,
   toString: () => string,
@@ -761,6 +763,20 @@ export function changeset(
       let c /*: ChangesetDef */ = this;
       c.notifyPropertyChange(`${objName}.${key}`);
       c.notifyPropertyChange(objName);
+    },
+
+    /**
+     * Overrides `Ember.Object.get`.
+     *
+     * If the returned value is a Relay, return the Relay's underlying
+     * content instead.
+     *
+     * Otherwise, this method is equivalent to `Ember.Object.get`.
+     */
+    get(keyName /*: string */) /*: mixed */ {
+      let result = this._super(keyName);
+      if (isRelay(result)) return get(result, 'content');
+      return result;
     }
   } /*: ChangesetDef */));
 }

@@ -389,19 +389,15 @@ You can use and bind this property in the template:
 {{input value=changeset.firstName}}
 ```
 
-Fetching a key that is tied to an Object will return a sub-changeset:
+Note that using `Ember.get` **will not necessarily work if you're expecting an Object**. This is because `ember-changeset` overrides `Ember.Object.get` behind the scenes:
 
 ```js
-let subset = get(changeset, 'address');
-get(subset, 'zipCode'); // "94016"
+changeset.get('momentObj').format('dddd'); // "Friday"
+get(changeset, 'momentObj').format('dddd'); // will complain, format is not a function
+get(changeset, 'momentObj.content').format('dddd'); // "Friday" – works, but more verbose
 ```
 
-Because `ember-changeset` treats Objects as sub-changesets, you should always use `Ember.get` when expecting an Object. A sub-changeset proxies method calls to the original object:
-
-```js
-let momentDate = get(changeset, 'momentDate');
-get(momentDate, 'format')('dddd'); // "Friday"
-```
+Thus, you should always use `changeset.get` when interacting with changesets.
 
 **[⬆️ back to top](#api)**
 

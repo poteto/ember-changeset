@@ -178,7 +178,7 @@ test('#get returns change that is a blank value', function(assert) {
   assert.equal(result, '', 'should proxy to change');
 });
 
-test('nested objects will return changesets', function(assert) {
+test('nested objects will return correct values', function(assert) {
   set(dummyModel, 'org', {
     asia: { sg: '_initial' },  // for the sake of disambiguating nulls
     usa: {
@@ -192,11 +192,6 @@ test('nested objects will return changesets', function(assert) {
   assert.equal(dummyChangeset.get('org.asia.sg'), '_initial', 'returns initial value');
   dummyChangeset.set('org.asia.sg', 'sg');
   assert.equal(dummyChangeset.get('org.asia.sg'), 'sg', 'returns newly set value');
-
-  let childChangeset = dummyChangeset.get('org.asia');
-  assert.equal(childChangeset.get('sg'), 'sg', 'child changeset sees changed value');
-  childChangeset.set('sg', 'sing');
-  assert.equal(dummyChangeset.get('org.asia.sg'), 'sing', 'changes in child should reflect on parent');
 });
 
 test('nested objects can contain arrays', function(assert) {
@@ -222,6 +217,47 @@ test('nested objects can contain arrays', function(assert) {
 
   dummyChangeset.execute();
   assert.deepEqual(dummyModel.get('contact.emails'), [ 'fred@email.com', 'the_fred@email.com' ], 'returns model saved value');
+});
+
+test('#getted Object proxies to underlying method', function(assert) {
+  class Dog {
+    constructor(b) {
+      this.breed = b;
+    }
+
+    bark() {
+      return `woof i'm a ${this.breed}`;
+    }
+  }
+
+  let model = {
+    foo: {
+      bar: {
+        dog: new Dog('shiba inu, wow')
+      }
+    }
+  };
+
+  {
+    let c = new Changeset(model);
+    let actual = c.get('foo.bar.dog').bark();
+    let expectedResult = "woof i'm a shiba inu, wow";
+    assert.equal(actual, expectedResult, 'should proxy to underlying method');
+  }
+
+  {
+    let c = new Changeset(model);
+    let actual = get(c, 'foo.bar.dog');
+    let expectedResult = get(model, 'foo.bar.dog');
+    assert.notEqual(actual, expectedResult, "using Ember.get won't work");
+  }
+
+  {
+    let c = new Changeset(model);
+    let actual = get(c, 'foo.bar.dog.content');
+    let expectedResult = get(model, 'foo.bar.dog');
+    assert.equal(actual, expectedResult, "you have to use .content");
+  }
 });
 
 /**
@@ -1162,34 +1198,6 @@ test('afterValidation event is triggered with the key', function(assert) {
 /**
  * Behavior.
  */
-
-test('nested objects can contain arrays from a child changeset', function(assert) {
-  assert.expect(8);
-  setProperties(dummyModel, {
-    name: 'Bob',
-    contact: {
-      emails: [ 'bob@email.com', 'the_bob@email.com' ]
-    }
-  });
-
-  assert.deepEqual(dummyModel.get('contact.emails'), [ 'bob@email.com', 'the_bob@email.com' ], 'returns initial model value');
-  let dummyChangeset = new Changeset(dummyModel, dummyValidator);
-  assert.equal(dummyChangeset.get('name'), 'Bob', 'returns changeset initial value');
-  assert.deepEqual(dummyChangeset.get('contact.emails'), [ 'bob@email.com', 'the_bob@email.com' ], 'returns changeset initial value');
-
-  let childChangeset = dummyChangeset.get('contact');
-  assert.deepEqual(childChangeset.get('emails'), [ 'bob@email.com', 'the_bob@email.com' ], 'returns child changeset initial value');
-  childChangeset.set('emails', [ 'fred@email.com', 'the_fred@email.com' ]);
-  assert.deepEqual(childChangeset.get('emails'), [ 'fred@email.com', 'the_fred@email.com' ], 'returns child changeset changed value');
-
-  dummyChangeset.rollback();
-  assert.deepEqual(childChangeset.get('emails'), [ 'bob@email.com', 'the_bob@email.com' ], 'returns child changeset rolledback value');
-  childChangeset.set('emails', [ 'fred@email.com', 'the_fred@email.com' ]);
-  assert.deepEqual(childChangeset.get('emails'), [ 'fred@email.com', 'the_fred@email.com' ], 'returns child changeset changed value');
-
-  dummyChangeset.execute();
-  assert.deepEqual(dummyModel.get('contact.emails'), [ 'fred@email.com', 'the_fred@email.com' ], 'returns model saved value');
-});
 
 test('can set nested keys after validate', function(assert) {
   assert.expect(0);
