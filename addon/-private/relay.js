@@ -4,6 +4,7 @@ import ObjectProxy from '@ember/object/proxy';
 import { get } from '@ember/object';
 import { assert } from '@ember/debug';
 import { isPresent } from '@ember/utils';
+import { RELAY } from 'ember-changeset/utils/is-relay';
 
 /*::
 import type { ChangesetDef } from 'ember-changeset';
@@ -15,6 +16,7 @@ export type RelayDef = {|
   key: string,
   content: Object | null,
   _changedKeys: Object,
+  __relay__: typeof RELAY,
 
   _super: () => void,
   init: () => void,
@@ -44,6 +46,11 @@ export default ObjectProxy.extend(({
   notifyPropertyChange() {},
   _changedKeys: {},
   */
+
+  /**
+   * Internal descriptor for relay identification.
+   */
+  __relay__: RELAY,
 
   changeset: null,
   key: '',
