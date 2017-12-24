@@ -1,22 +1,12 @@
-import Ember from 'ember';
 import Changeset from 'ember-changeset';
 import { module, test } from 'qunit';
 
-const {
-  Object: EmberObject,
-  RSVP: { resolve, Promise },
-  String: { dasherize },
-  run,
-  get,
-  isPresent,
-  set,
-  setProperties,
-  typeOf
-} = Ember;
-
-const {
-  next
-} = run;
+import EmberObject, { get, set, setProperties } from '@ember/object';
+import ObjectProxy from '@ember/object/proxy';
+import { Promise, resolve } from 'rsvp';
+import { dasherize } from '@ember/string';
+import { isPresent, typeOf } from '@ember/utils';
+import { run, next } from '@ember/runloop';
 
 let dummyModel;
 let dummyValidations = {
@@ -248,7 +238,7 @@ test('#set adds a change if valid', function(assert) {
 });
 
 test('#set removes a change if set back to original value', function(assert) {
-  let model = Ember.Object.create({ name: 'foo' });
+  let model = EmberObject.create({ name: 'foo' });
   let dummyChangeset = new Changeset(model);
 
   dummyChangeset.set('name', 'bar');
@@ -267,7 +257,7 @@ test('#set removes a change if set back to original value', function(assert) {
 });
 
 test('#set removes a change if set back to original value when obj is ProxyObject', function(assert) {
-  let model = Ember.ObjectProxy.create({ content: { name: 'foo' } });
+  let model = ObjectProxy.create({ content: { name: 'foo' } });
   let dummyChangeset = new Changeset(model);
 
   dummyChangeset.set('name', 'bar');

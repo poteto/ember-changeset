@@ -1,6 +1,5 @@
 // @flow
 
-import Ember from 'ember';
 import Relay from 'ember-changeset/-private/relay';
 import objectToArray from 'ember-changeset/utils/computed/object-to-array';
 import isEmptyObject from 'ember-changeset/utils/computed/is-empty-object';
@@ -19,6 +18,29 @@ import objectWithout from 'ember-changeset/utils/object-without';
 import Err from 'ember-changeset/-private/err';
 import Change from 'ember-changeset/-private/change';
 import deepSet from 'ember-deep-set';
+import EmberObject from '@ember/object';
+import Evented from '@ember/object/evented';
+import {
+  A as emberArray,
+  isArray,
+} from '@ember/array';
+import {
+  all,
+  resolve,
+} from 'rsvp';
+import { assert } from '@ember/debug';
+import {
+  isEmpty,
+  isEqual,
+  isNone,
+  isPresent,
+  typeOf,
+} from '@ember/utils';
+import { not } from '@ember/object/computed';
+import {
+  get,
+  set,
+} from '@ember/object';
 
 /*::
 import type { ValidatorFunc } from 'ember-changeset/types/validator-func';
@@ -31,22 +53,6 @@ import type { Config } from 'ember-changeset/types/config';
 import type { ErrLike } from 'ember-changeset/-private/err';
 */
 
-const {
-  Object: EmberObject,
-  RSVP: { all, resolve },
-  computed: { not },
-  Evented,
-  A: emberArray,
-  assert,
-  get,
-  isArray,
-  isEmpty,
-  isEqual,
-  isNone,
-  isPresent,
-  set,
-  typeOf,
-} = Ember;
 const { keys } = Object;
 const CONTENT = '_content';
 const CHANGES = '_changes';

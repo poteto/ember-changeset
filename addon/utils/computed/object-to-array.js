@@ -1,19 +1,16 @@
 // @flow
 
 import Ember from 'ember';
+import { computed, get } from '@ember/object';
+import { typeOf } from '@ember/utils';
 
 /*::
 import type Change from 'ember-changeset/-private/change';
 import type Err from 'ember-changeset/-private/err';
 */
 
-const {
-  computed,
-  get,
-  typeOf
-} = Ember;
-const assign = Ember.assign || Ember.merge;
 const { keys } = Object;
+const assign = Ember.assign || Ember.merge;
 
 /**
  * Compute the array form of an object.

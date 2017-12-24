@@ -1,9 +1,7 @@
 // @flow
 
-import Ember from 'ember';
+import { typeOf } from '@ember/utils';
 import isObject from './is-object';
-
-const { typeOf } = Ember;
 
 function isPromiseLike(obj /*: mixed */) /*: boolean */ {
   return !!obj

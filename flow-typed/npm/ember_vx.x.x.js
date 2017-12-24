@@ -31,3 +31,18 @@ declare module '@ember/utils' {
 declare module '@ember/object/proxy' {
   declare module.exports: any;
 }
+declare module '@ember/component/helper' {
+  declare module.exports: any;
+}
+declare module '@ember/object/evented' {
+  declare module.exports: any;
+}
+declare module 'rsvp' {
+  declare module.exports: any;
+}
+declare module '@ember/object/computed' {
+  declare module.exports: any;
+}
+declare module '@ember/polyfills' {
+  declare module.exports: any;
+}
