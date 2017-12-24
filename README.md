@@ -303,7 +303,7 @@ You can use this property to render a list of changes:
 Returns a Boolean value of the changeset's validity.
 
 ```js
-get(changeset, 'isValid'); // true
+changeset.get('isValid'); // true
 ```
 
 You can use this property in the template:
@@ -321,7 +321,7 @@ You can use this property in the template:
 Returns a Boolean value of the changeset's (in)validity.
 
 ```js
-get(changeset, 'isInvalid'); // true
+changeset.get('isInvalid'); // true
 ```
 
 You can use this property in the template:
@@ -339,7 +339,7 @@ You can use this property in the template:
 Returns a Boolean value of the changeset's state. A pristine changeset is one with no changes.
 
 ```js
-get(changeset, 'isPristine'); // true
+changeset.get('isPristine'); // true
 ```
 
 If changes present on the changeset are equal to the content's, this will return `true`. However, note that key/value pairs in the list of changes must all be present and equal on the content, but not necessarily vice versa:
@@ -364,7 +364,7 @@ changeset.get('isPristine'); // false
 Returns a Boolean value of the changeset's state. A dirty changeset is one with changes.
 
 ```js
-get(changeset, 'isDirty'); // true
+changeset.get('isDirty'); // true
 ```
 
 **[⬆️ back to top](#api)**
@@ -374,13 +374,13 @@ get(changeset, 'isDirty'); // true
 Exactly the same semantics as `Ember.get`. This proxies first to the error value, the changed value, and finally to the underlying Object.
 
 ```js
-get(changeset, 'firstName'); // "Jim"
-set(changeset, 'firstName', 'Billy'); // "Billy"
-get(changeset, 'firstName'); // "Billy"
+changeset.get('firstName'); // "Jim"
+changeset.set('firstName', 'Billy'); // "Billy"
+changeset.get('firstName'); // "Billy"
 
-get(changeset, 'address.zipCode'); // "10001"
-set(changeset, 'address.zipCode', '94016'); // "94016"
-get(changeset, 'address.zipCode'); // "94016"
+changeset.get('address.zipCode'); // "10001"
+changeset.set('address.zipCode', '94016'); // "94016"
+changeset.get('address.zipCode'); // "94016"
 ```
 
 You can use and bind this property in the template:
