@@ -389,15 +389,20 @@ You can use and bind this property in the template:
 {{input value=changeset.firstName}}
 ```
 
-Note that using `Ember.get` **will not necessarily work if you're expecting an Object**. This is because `ember-changeset` overrides `Ember.Object.get` behind the scenes:
+Note that using `Ember.get` **will not necessarily work if you're expecting an Object**. On the other hand, using `changeset.get` will work just fine:
 
 ```js
-changeset.get('momentObj').format('dddd'); // "Friday"
-get(changeset, 'momentObj').format('dddd'); // will complain, format is not a function
-get(changeset, 'momentObj.content').format('dddd'); // "Friday" – works, but more verbose
+get(changeset, 'momentObj').format('dddd'); // will error, format is undefined
+changeset.get('momentObj').format('dddd');  // => "Friday"
 ```
 
-Thus, you should always use `changeset.get` when interacting with changesets.
+This is because `Changeset` wraps an Object with `Ember.ObjectProxy` internally, and overrides `Ember.Object.get` to hide this implementation detail.
+
+Because an Object is wrapped with `Ember.ObjectProxy`, the following (although more verbose) will also work:
+
+```js
+get(changeset, 'momentObj.content').format('dddd'); // => "Friday"
+```
 
 **[⬆️ back to top](#api)**
 
