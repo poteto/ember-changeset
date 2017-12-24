@@ -148,14 +148,14 @@ Be sure to call `validate()` on the `changeset` before saving or committing chan
   + [`isPristine`](#ispristine)
   + [`isDirty`](#isdirty)
 * Methods
-  + [`get`](#get)
-  + [`set`](#set)
+  + [`get(changeset: Changeset, key: string): Relay | mixed`](#get)
+  + [`set(changeset: Changeset, key: string, value: mixed): Promise<mixed>`](#set)
   + [`prepare`](#prepare)
   + [`execute`](#execute)
   + [`save`](#save)
   + [`merge`](#merge)
   + [`rollback`](#rollback)
-  + [`validate`](#validate)
+  + [`validate(string | void) => (Promise<null> | Promise<mixed | ErrLike<mixed>> | Promise<Array<mixed | ErrLike<mixed>>>)`](#validate)
   + [`addError`](#adderror)
   + [`pushErrors`](#pusherrors)
   + [`snapshot`](#snapshot)
@@ -167,6 +167,23 @@ Be sure to call `validate()` on the `changeset` before saving or committing chan
   + [`afterValidation`](#aftervalidation)
 
 #### `error`
+
+<details>
+<summary><em>Expand for <code>type</code> details</em></summary>
+
+```ts
+type Inflated<T> = {
+  [string]: Inflated<T> | T,
+};
+
+type Err = {
+  value:      mixed,
+  validation: string | Array<string>,
+};
+
+(get(changeset, 'error'): Inflated<Err>);
+```
+</details>
 
 Returns the error object.
 
@@ -208,6 +225,20 @@ You can use this property to locate a single error:
 
 #### `change`
 
+<details>
+<summary><em>Expand for <code>type</code> details</em></summary>
+
+```ts
+type Inflated<T> = {
+  [string]: Inflated<T> | T,
+};
+
+type Change = mixed;
+
+(get(changeset, 'change'): Inflated<Change>);
+```
+</details>
+
 Returns the change object.
 
 ```js
@@ -236,6 +267,20 @@ You can use this property to locate a single change:
 **[⬆️ back to top](#api)**
 
 #### `errors`
+
+<details>
+<summary><em>Expand for <code>type</code> details</em></summary>
+
+```ts
+type Errors = Array<{
+  key:        string,
+  value:      mixed,
+  validation: string | Array<string>,
+}>;
+
+(get(changeset, 'errors'): Errors);
+```
+</details>
 
 Returns an array of errors. If your `validate` function returns a non-boolean value, it is added here as the `validation` property.
 
@@ -271,6 +316,19 @@ You can use this property to render a list of errors:
 
 #### `changes`
 
+<details>
+<summary><em>Expand for <code>type</code> details</em></summary>
+
+```ts
+type Changes = Array<{
+  key:   string,
+  value: mixed,
+}>;
+
+(get(changeset, 'changes'): Changes);
+```
+</details>
+
 Returns an array of changes to be executed. Only valid changes will be stored on this property.
 
 ```js
@@ -300,6 +358,14 @@ You can use this property to render a list of changes:
 
 #### `isValid`
 
+<details>
+<summary><em>Expand for <code>type</code> details</em></summary>
+
+```ts
+(get(changeset, 'isValid'): boolean);
+```
+</details>
+
 Returns a Boolean value of the changeset's validity.
 
 ```js
@@ -318,6 +384,14 @@ You can use this property in the template:
 
 #### `isInvalid`
 
+<details>
+<summary><em>Expand for <code>type</code> details</em></summary>
+
+```ts
+(get(changeset, 'isInvalid'): boolean);
+```
+</details>
+
 Returns a Boolean value of the changeset's (in)validity.
 
 ```js
@@ -335,6 +409,14 @@ You can use this property in the template:
 **[⬆️ back to top](#api)**
 
 #### `isPristine`
+
+<details>
+<summary><em>Expand for <code>type</code> details</em></summary>
+
+```ts
+(get(changeset, 'isPristine'): boolean);
+```
+</details>
 
 Returns a Boolean value of the changeset's state. A pristine changeset is one with no changes.
 
@@ -361,6 +443,14 @@ changeset.get('isPristine'); // false
 
 #### `isDirty`
 
+<details>
+<summary><em>Expand for <code>type</code> details</em></summary>
+
+```ts
+(get(changeset, 'isDirty'): boolean);
+```
+</details>
+
 Returns a Boolean value of the changeset's state. A dirty changeset is one with changes.
 
 ```js
@@ -370,6 +460,10 @@ get(changeset, 'isDirty'); // true
 **[⬆️ back to top](#api)**
 
 #### `get`
+
+```ts
+function get(changeset: Changeset, key: string): Relay | mixed;
+```
 
 Exactly the same semantics as `Ember.get`. This proxies first to the error value, the changed value, and finally to the underlying Object.
 
@@ -406,6 +500,10 @@ get(momentDate, 'format')('dddd'); // "Friday"
 **[⬆️ back to top](#api)**
 
 #### `set`
+
+```ts
+function set<T>(changeset: Changeset, key: string, value: T): ;
+```
 
 Exactly the same semantics as `Ember.set`. This stores the change on the changeset.
 
