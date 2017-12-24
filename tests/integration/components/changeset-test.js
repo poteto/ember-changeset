@@ -135,16 +135,16 @@ test('it updates when set with a validator', async function(assert) {
 test('a passed down nested object updates when set without a validator', async function(assert) {
   let data = { person: { firstName: 'Jim', lastName: 'Bob' } };
   let changeset = new Changeset(data);
-  this.set('childChangeset', changeset.get('person'));
+  this.set('changeset', changeset);
   this.render(hbs`
-    <h1>{{childChangeset.firstName}} {{childChangeset.lastName}}</h1>
+    <h1>{{changeset.person.firstName}} {{changeset.person.lastName}}</h1>
     <input
       id="first-name"
       type="text"
-      value={{childChangeset.firstName}}
-      onchange={{action (mut childChangeset.firstName) value="target.value"}}>
+      value={{changeset.person.firstName}}
+      onchange={{action (mut changeset.person.firstName) value="target.value"}}>
     >
-    {{input id="last-name" value=childChangeset.lastName}}
+    {{input id="last-name" value=changeset.person.lastName}}
   `);
 
   assert.equal(find('h1').textContent.trim(), 'Jim Bob', 'precondition');
@@ -245,16 +245,16 @@ test('deeply nested key error clears after entering valid input', async function
 test('a rollback propagates binding to deeply nested changesets', async function(assert) {
   let data = { person: { firstName: 'Jim', lastName: 'Bob' } };
   let changeset = new Changeset(data);
-  this.set('childChangeset', changeset.get('person'));
+  this.set('changeset', changeset);
   this.on('reset', () => changeset.rollback());
   this.render(hbs`
-    <h1>{{childChangeset.firstName}} {{childChangeset.lastName}}</h1>
+    <h1>{{changeset.person.firstName}} {{changeset.person.lastName}}</h1>
     <input
       id="first-name"
       type="text"
-      value={{childChangeset.firstName}}
-      onchange={{action (mut childChangeset.firstName) value="target.value"}}>
-    {{input id="last-name" value=childChangeset.lastName}}
+      value={{changeset.person.firstName}}
+      onchange={{action (mut changeset.person.firstName) value="target.value"}}>
+    {{input id="last-name" value=changeset.person.lastName}}
     <button id="reset-btn" {{action "reset"}}>Reset</button>
   `);
 
