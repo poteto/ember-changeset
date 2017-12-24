@@ -10,8 +10,6 @@ module.exports = function(defaults) {
     options.vendorFiles = { 'jquery.js': null };
   }
   let app = new EmberAddon(defaults, options);
-  app.import('vendor/flat.js');
-  app.import('vendor/shims/flat.js');
 
   /*
     This build file specifies the options for the dummy test app of this
