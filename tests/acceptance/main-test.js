@@ -1,4 +1,4 @@
-import { test } from 'qunit';
+import { test, skip } from 'qunit';
 import moduleForAcceptance from '../../tests/helpers/module-for-acceptance';
 import Model from 'ember-data/model';
 import attr from 'ember-data/attr';
@@ -22,16 +22,19 @@ moduleForAcceptance('Acceptance | main', {
 
     this.application.register('model:dog', Model.extend({
       breed: attr('string', { defaultValue: 'rough collie' }),
+      user: belongsTo('user'),
     }));
 
     run(() => {
-      let dogs = [];
-      for (let i = 0; i < 2; i++) dogs.push(store.createRecord('dog'));
+      let profile = store.createRecord('profile');
+      let user = store.createRecord('user', { profile });
+      this.dummyUser = user;
 
-      let p = store.createRecord('profile');
-      let u = store.createRecord('user', { profile: p, dogs });
-
-      this.dummyUser = u;
+      return user.get('dogs').then(() => {
+        for (let i = 0; i < 2; i++) {
+          user.get('dogs').addObject(store.createRecord('dog'))
+        }
+      });
     });
   },
 });
@@ -58,15 +61,30 @@ test('it works for belongsTo', function(assert) {
   })
 });
 
-test('it works for firstObject', function(assert) {
-  let user = this.dummyUser;
-  let changeset = new Changeset(user);
+skip("it (doesn't) work for hasMany / firstObject", function(a) {
+  a.expect(2 + 4);
 
   run(() => {
-    assert.equal(changeset.get('dogs'), user.get('dogs'));
-    assert.equal(changeset.get('dogs.firstObject'), user.get('dogs.firstObject'));
-    assert.equal(changeset.get('dogs.firstObject'), user.get('dogs.firstObject'));
+    let user = this.dummyUser;
+
+    // TODO: Add special handling if content is DS.ManyArray?
+    // `dogs.firstObject` is readonly.
+    return user.get('dogs').then(dogs => {
+      const FirstName = 'firstObject.user.profile.firstName';
+      const LastName  = 'firstObject.user.profile.lastName';
+
+      let cs = new Changeset(dogs);
+
+      cs.set(FirstName, 'Grace');
+      cs.set(LastName,  'Hopper');
+      a.equal(cs.get(FirstName), 'Grace');
+      a.equal(cs.get(LastName),  'Hopper');
+
+      cs.execute();
+      a.equal(user.get(FirstName), 'Grace');
+      a.equal(user.get(LastName),  'Hopper');
+      a.equal(user.get('profile.firstName'), 'Grace');
+      a.equal(user.get('profile.lastName'),  'Hopper');
+    });
   });
 });
-
-// test('it works for lastObject');
