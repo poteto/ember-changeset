@@ -408,6 +408,17 @@ test('#set should delete nested changes when equal', function(assert) {
   assert.equal(actual, expectedResult, 'should clear nested key');
 });
 
+test('#set works when replacing an Object with an primitive', function(assert) {
+  let model = { foo: { bar: { baz: 42 } } };
+
+  let c = new Changeset(model);
+  assert.deepEqual(c.get('foo'), get(model, 'foo'));
+
+  c.set('foo', 'not an object anymore');
+  c.execute();
+  assert.equal(c.get('foo'), get(model, 'foo'));
+});
+
 /**
  * #prepare
  */
