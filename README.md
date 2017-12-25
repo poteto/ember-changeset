@@ -8,7 +8,7 @@
 To install:
 
 ```
-ember install ember-changeset@1.3.0
+ember install ember-changeset
 ```
 
 [Watch a free video intro presented by EmberScreencasts](https://www.emberscreencasts.com/posts/168-introduction-to-ember-changeset)
