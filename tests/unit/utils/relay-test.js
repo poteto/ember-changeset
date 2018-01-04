@@ -7,7 +7,7 @@ module('Unit | Utility | Relay');
 
 test("it shouldn't leak memory", function(assert) {
   let c = new Changeset({});
-  let r = Relay.create({ changeset: c });
+  let r = Relay.create({ changeset: c, content: {}, key: 'welp' });
 
   let n = 100;
   while (n--) set(r, 'invalidKey', 'test');

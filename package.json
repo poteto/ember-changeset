@@ -16,13 +16,14 @@
   "scripts": {
     "build": "ember build",
     "start": "ember server",
-    "test": "ember try:each"
+    "test": "ember try:each",
+    "flow": "flow"
   },
   "bugs": "https://github.com/poteto/ember-changeset/issues",
   "homepage": "https://github.com/poteto/ember-changeset",
   "dependencies": {
     "ember-cli-babel": "^6.8.2",
-    "ember-deep-set": "^0.1.2"
+    "ember-deep-set": "poteto/ember-deep-set#dee1243027d7f47ffa4a28709baf4c4874fd5317"
   },
   "devDependencies": {
     "broccoli-asset-rev": "^2.4.5",
@@ -38,6 +39,7 @@
     "ember-cli-shims": "^1.1.0",
     "ember-cli-sri": "^2.1.0",
     "ember-cli-uglify": "^2.0.0",
+    "ember-data": "^2.17.0",
     "ember-disable-prototype-extensions": "^1.1.2",
     "ember-export-application-global": "^2.0.0",
     "ember-load-initializers": "^1.0.0",
@@ -46,6 +48,8 @@
     "ember-native-dom-helpers": "^0.4.1",
     "ember-resolver": "^4.0.0",
     "ember-source": "~2.16.0",
+    "flow-bin": "^0.61.0",
+    "flow-typed": "^2.2.3",
     "loader.js": "^4.2.3"
   },
   "engines": {
