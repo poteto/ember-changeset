@@ -38,23 +38,6 @@ get accepted:
  - Did you confirm this fix/feature is something that is needed?
  - Did you write tests, preferably in a test driven style?
  - Did you add documentation for the changes you made?
- - Did you follow our [styleguide](https://github.com/dockyard/styleguides)?
 
 If your pull-request addresses an issue then please add the corresponding
 issue's number to the description of your pull-request.
-
-# How to work with this project locally
-
-## Installation
-
-First clone this repository:
-
-```sh
-git clone https://github.com/DockYard/ember-changeset.git
-```
-
-<!-- Add further details on how to install the project here -->
-
-## Running tests
-
-<!-- Tell the user how to run the tests of your project -->
