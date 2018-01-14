@@ -1,17 +1,9 @@
 <!--
 Thank you for contributing!
 
-Have a usage question?
-======================
-Questions will be closed without comment. Here are some resources to get help:
-
-- Read the README: https://github.com/dockyard/styleguides
-!! ADD MORE HELP RESOURCES HERE !!
-
 Think you found a bug?
 ======================
 The best bug report is a failing test in the repository as a pull request. Otherwise, please use the "BUG REPORT" template below.
-
 
 Have a feature request?
 =======================
