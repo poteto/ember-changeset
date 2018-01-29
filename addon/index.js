@@ -698,13 +698,14 @@ export function changeset(
       }
 
       let original /*: mixed */ = get(content, key);
-      if (isObject(original) && !plainValue) {
+      let hasChanged /*: boolean */ = changes.hasOwnProperty(key);
+      if (isObject(original) && !plainValue && !hasChanged) {
         let c /*: ChangesetDef */ = this;
         let o /*: Object       */ = (original /*: any */);
         return c._relayFor(key, o);
       }
 
-      if (changes.hasOwnProperty(key)) {
+      if (hasChanged) {
         let c /*: Change */ = changes[key];
         return c.value;
       }
