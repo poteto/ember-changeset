@@ -411,14 +411,16 @@ export function changeset(
 
       if (isNone(key)) {
         let maybePromise = keys(validationMap).map(validationKey => {
-          return c._validateAndSet(validationKey, c._valueFor(validationKey));
+          const isPlain = true;
+          return c._validateAndSet(validationKey, c._valueFor(validationKey, isPlain));
         });
 
         return all(maybePromise);
       }
 
       let k /*: string */ = (key /*: any */);
-      return resolve(c._validateAndSet(k, c._valueFor(k)));
+      const isPlain = true;
+      return resolve(c._validateAndSet(k, c._valueFor(k, isPlain)));
     },
 
     /**
@@ -629,6 +631,8 @@ export function changeset(
       validation               /*: ValidationResult */,
       { key, value, oldValue } /*: NewProperty<T>   */
     ) /*: T | ErrLike<T> */ {
+      assert('Value must not be a Relay. If you see this error, please open an issue on https://github.com/poteto/ember-changeset/issues.', !isRelay(value));
+
       let changes /*: Changes */ = get(this, CHANGES);
       let isValid /*: boolean */ = validation === true
         || isArray(validation)

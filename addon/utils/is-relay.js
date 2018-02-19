@@ -5,7 +5,7 @@ import { isPresent } from '@ember/utils';
 
 export const RELAY = '__RELAY__';
 
-export default function isRelay(relay /*: Object */) /*: boolean */ {
+export default function isRelay(relay /*: mixed */) /*: boolean */ {
   if (!isPresent(relay)) return false;
   return get(relay, '__relay__') === RELAY;
 }
