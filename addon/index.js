@@ -37,7 +37,10 @@ import {
   isPresent,
   typeOf,
 } from '@ember/utils';
-import { not } from '@ember/object/computed';
+import {
+  not,
+  readOnly,
+} from '@ember/object/computed';
 import {
   get,
   set,
@@ -115,6 +118,7 @@ export type ChangesetDef = {|
   errors:  Array<{ key: string }>,
   change:  Inflated<mixed>,
   error:   Inflated<ErrLike<mixed>>,
+  data:    Object,
 
   isValid:    boolean,
   isPristine: boolean,
@@ -177,6 +181,7 @@ export function changeset(
     errors:  objectToArray(ERRORS, (e /*: Err */) => ({ value: e.value, validation: e.validation }), true),
     change:  inflate(CHANGES, c => c.value),
     error:   inflate(ERRORS, e => ({ value: e.value, validation: e.validation })),
+    data:    readOnly(CONTENT),
 
     isValid:    isEmptyObject(ERRORS),
     isPristine: isEmptyObject(CHANGES),

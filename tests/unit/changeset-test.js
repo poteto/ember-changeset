@@ -99,6 +99,26 @@ test('#change returns the changes object', function(assert) {
  */
 
 /**
+ * #data
+ */
+
+test("data reads the changeset CONTENT", function(assert) {
+  let dummyChangeset = new Changeset(dummyModel);
+
+  assert.equal(get(dummyChangeset, 'data'), dummyModel, 'should return data');
+});
+
+test("data is readonly", function(assert) {
+  let dummyChangeset = new Changeset(dummyModel);
+
+  assert.throws(
+    () => set(dummyChangeset, 'data', { foo: 'bar' }),
+    ({message}) => message === "Cannot set read-only property 'data' on object: changeset:[object Object]",
+    'should throw error'
+  );
+});
+
+/**
  * #isValid
  */
 
