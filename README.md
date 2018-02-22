@@ -143,6 +143,7 @@ Be sure to call `validate()` on the `changeset` before saving or committing chan
   + [`change`](#change)
   + [`errors`](#errors)
   + [`changes`](#changes)
+  + [`data`](#data)
   + [`isValid`](#isvalid)
   + [`isInvalid`](#isinvalid)
   + [`isPristine`](#ispristine)
@@ -294,6 +295,19 @@ You can use this property to render a list of changes:
     <li>{{change.key}}: {{change.value}}</li>
   {{/each}}
 </ul>
+```
+
+**[⬆️ back to top](#api)**
+
+#### `data`
+
+Returns the Object that was wrapped in the changeset.
+
+```js
+let user = { name: 'Bobby', age: 21, address: { zipCode: '10001' } };
+let changeset = new Changeset(user);
+
+changeset.get('data'); // user
 ```
 
 **[⬆️ back to top](#api)**
