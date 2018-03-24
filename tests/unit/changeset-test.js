@@ -1244,6 +1244,30 @@ test('afterValidation event is triggered with the key', function(assert) {
 });
 
 /**
+ * afterRollback
+ */
+
+test('afterRollback event is fired after rollback', function(assert) {
+  let dummyChangeset;
+  let _validator = () => resolve(true);
+  let _validations = {
+    reservations() {
+      return _validator();
+    }
+  };
+  let hasFired = false;
+
+  set(dummyModel, 'reservations', 'ABC12345');
+  dummyChangeset = new Changeset(dummyModel, _validator, _validations);
+  dummyChangeset.on('afterRollback', () => { hasFired = true; });
+
+  run(() => {
+    dummyChangeset.rollback();
+    assert.ok(hasFired, 'afterRollback should be triggered');
+  });
+});
+
+/**
  * Behavior.
  */
 
