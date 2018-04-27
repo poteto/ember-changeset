@@ -2,11 +2,11 @@ import Ember from 'ember';
 import Changeset from 'ember-changeset';
 import { moduleForComponent, test } from 'ember-qunit';
 import hbs from 'htmlbars-inline-precompile';
+import { find, fillIn, click, blur, triggerEvent } from 'ember-native-dom-helpers';
 
 const {
   RSVP: { resolve },
   isPresent,
-  run,
   typeOf
 } = Ember;
 
@@ -14,7 +14,7 @@ moduleForComponent('changeset', 'Integration | Helper | changeset', {
   integration: true
 });
 
-test('it validates changes', function(assert) {
+test('it validates changes', async function(assert) {
   let validations = {
     firstName(value) {
       return isPresent(value) && value.length > 3 || 'too short';
@@ -36,62 +36,62 @@ test('it validates changes', function(assert) {
   this.render(hbs`
     {{#with (changeset dummyModel (action "validate")) as |changeset|}}
       {{#if changeset.isInvalid}}
-        <p>There were one or more errors in your form.</p>
+        <p id="errors-paragraph">There were one or more errors in your form.</p>
       {{/if}}
       {{input id="first-name" value=changeset.firstName}}
       {{input id="last-name" value=changeset.lastName}}
-      <button {{action "submit" changeset}}>Submit</button>
-      <button {{action "reset" changeset}}>Reset</button>
+      <button id="submit-btn" {{action "submit" changeset}}>Submit</button>
+      <button id="reset-btn" {{action "reset" changeset}}>Reset</button>
     {{/with}}
   `);
 
-  this.$('#first-name').val('A').trigger('change');
-  run(() => this.$('button:contains("Submit")').click());
-  assert.ok(this.$('p:contains("There were one or more errors in your form.")').length, 'should be invalid');
+  await fillIn('#first-name', 'A');
+  await click('#submit-btn');
+  assert.ok(find('#errors-paragraph'), 'should be invalid');
 
-  this.$('#first-name').val('Billy').trigger('change');
-  run(() => this.$('button:contains("Submit")').click());
-  assert.notOk(this.$('p:contains("There were one or more errors in your form.")').length, 'should be valid');
+  await fillIn('#first-name', 'Billy');
+  await click('#submit-btn');
+  assert.notOk(find('#errors-paragraph'), 'should be valid');
 });
 
-test('it rollsback changes', function(assert) {
+test('it rollsback changes', async function(assert) {
   this.set('dummyModel', { firstName: 'Jim' });
   this.on('reset', (changeset) => changeset.rollback());
   this.render(hbs`
     {{#with (changeset dummyModel) as |changeset|}}
       {{input id="first-name" value=changeset.firstName}}
-      <button {{action "reset" changeset}}>Reset</button>
+      <button id="reset-btn" {{action "reset" changeset}}>Reset</button>
     {{/with}}
   `);
 
-  assert.equal(this.$('#first-name').val(), 'Jim', 'precondition');
-  this.$('#first-name').val('foo').trigger('change');
-  assert.equal(this.$('#first-name').val(), 'foo', 'should update input');
-  run(() => this.$('button:contains("Reset")').click());
-  assert.equal(this.$('#first-name').val(), 'Jim', 'should rollback');
+  assert.equal(find('#first-name').value, 'Jim', 'precondition');
+  await fillIn('#first-name', 'foo');
+  assert.equal(find('#first-name').value, 'foo', 'should update input');
+  await click('#reset-btn');
+  assert.equal(find('#first-name').value, 'Jim', 'should rollback');
 });
 
-test('it can be used with 1 argument', function(assert) {
+test('it can be used with 1 argument', async function(assert) {
   this.set('dummyModel', { firstName: 'Jim', lastName: 'Bob' });
   this.on('submit', (changeset) => changeset.validate());
   this.on('reset', (changeset) => changeset.rollback());
   this.render(hbs`
     {{#with (changeset dummyModel) as |changeset|}}
       {{#if changeset.isInvalid}}
-        <p>There were one or more errors in your form.</p>
+        <p id="errors-paragraph">There were one or more errors in your form.</p>
       {{/if}}
       {{input value=changeset.firstName}}
       {{input value=changeset.lastName}}
-      <button {{action "submit" changeset}}>Submit</button>
-      <button {{action "reset" changeset}}>Reset</button>
+      <button id="submit-btn" {{action "submit" changeset}}>Submit</button>
+      <button id="reset-btn" {{action "reset" changeset}}>Reset</button>
     {{/with}}
   `);
 
-  run(() => this.$('button:contains("Submit")').click());
-  assert.notOk(this.$('p:contains("There were one or more errors in your form.")').length, 'does not turn invalid');
+  await click('#submit-btn');
+  assert.notOk(find('#errors-paragraph'), 'should be valid');
 });
 
-test('it updates when set without a validator', function(assert) {
+test('it updates when set without a validator', async function(assert) {
   this.set('dummyModel', { firstName: 'Jim', lastName: 'Bob' });
   this.render(hbs`
     {{#with (changeset dummyModel) as |changeset|}}
@@ -105,13 +105,13 @@ test('it updates when set without a validator', function(assert) {
     {{/with}}
   `);
 
-  assert.ok(this.$('h1:contains("Jim Bob")'), 'precondition');
-  run(() => this.$('#first-name').val('foo').trigger('change'));
-  run(() => this.$('#last-name').val('foo').trigger('change'));
-  assert.ok(this.$('h1:contains("foo bar")'), 'should update observable value');
+  assert.equal(find('h1').textContent.trim(), 'Jim Bob', 'precondition');
+  await fillIn('#first-name', 'foo');
+  await fillIn('#last-name', 'bar');
+  assert.equal(find('h1').textContent.trim(), 'foo bar', 'should update observable value');
 });
 
-test('it updates when set with a validator', function(assert) {
+test('it updates when set with a validator', async function(assert) {
   this.set('dummyModel', { firstName: 'Jim', lastName: 'Bob' });
   this.on('validate', () => true);
   this.render(hbs`
@@ -126,13 +126,147 @@ test('it updates when set with a validator', function(assert) {
     {{/with}}
   `);
 
-  assert.ok(this.$('h1:contains("Jim Bob")'), 'precondition');
-  run(() => this.$('#first-name').val('foo').trigger('change'));
-  run(() => this.$('#last-name').val('foo').trigger('change'));
-  assert.ok(this.$('h1:contains("foo bar")'), 'should update observable value');
+  assert.equal(find('h1').textContent.trim(), 'Jim Bob', 'precondition');
+  await fillIn('#first-name', 'foo');
+  await fillIn('#last-name', 'bar');
+  assert.equal(find('h1').textContent.trim(), 'foo bar', 'should update observable value');
 });
 
-test('it does not rollback when validating', function(assert) {
+test('a passed down nested object updates when set without a validator', async function(assert) {
+  let data = { person: { firstName: 'Jim', lastName: 'Bob' } };
+  let changeset = new Changeset(data);
+  this.set('changeset', changeset);
+  this.render(hbs`
+    <h1>{{changeset.person.firstName}} {{changeset.person.lastName}}</h1>
+    <input
+      id="first-name"
+      type="text"
+      value={{changeset.person.firstName}}
+      onchange={{action (mut changeset.person.firstName) value="target.value"}}>
+    >
+    {{input id="last-name" value=changeset.person.lastName}}
+  `);
+
+  assert.equal(find('h1').textContent.trim(), 'Jim Bob', 'precondition');
+  await fillIn('#first-name', 'foo');
+  await fillIn('#last-name', 'bar');
+  assert.equal(find('h1').textContent.trim(), 'foo bar', 'should update observable value');
+});
+
+test('nested object updates when set without a validator', async function(assert) {
+  let data = { person: { firstName: 'Jim', lastName: 'Bob' } };
+  let changeset = new Changeset(data);
+  this.set('changeset', changeset);
+  this.render(hbs`
+    <h1>{{changeset.person.firstName}} {{changeset.person.lastName}}</h1>
+    <input
+      id="first-name"
+      type="text"
+      value={{changeset.person.firstName}}
+      onchange={{action (mut changeset.person.firstName) value="target.value"}}>
+    {{input id="last-name" value=changeset.person.lastName}}
+  `);
+
+  assert.equal(find('h1').textContent.trim(), 'Jim Bob', 'precondition');
+  await fillIn('#first-name', 'foo');
+  await fillIn('#last-name', 'bar');
+  assert.equal(find('h1').textContent.trim(), 'foo bar', 'should update observable value');
+});
+
+test('nested key error clears after entering valid input', async function(assert) {
+  let data = { person: { firstName: 'Jim' } };
+  let validator = ({ newValue }) => isPresent(newValue) || 'need a first name';
+  let c = new Changeset(data, validator);
+  this.set('c', c);
+
+  this.render(hbs`
+    <h1>{{c.person.firstName}}</h1>
+    <input
+      id="first-name"
+      type="text"
+      value={{c.person.firstName}}
+      onchange={{action (mut c.person.firstName) value="target.value"}}>
+    <small id="first-name-error">{{c.error.person.firstName.validation}}</small>
+  `);
+
+  assert.equal(find('h1').textContent.trim(), 'Jim', 'precondition');
+  await fillIn('#first-name', 'foo');
+  await fillIn('#first-name', '');
+
+  {
+    let actual = find('#first-name-error').textContent.trim();
+    let expectedResult = 'need a first name';
+    assert.equal(actual, expectedResult, 'shows error message');
+  }
+
+  await fillIn('#first-name', 'foo');
+
+  {
+    let actual = find('#first-name-error').textContent.trim();
+    let expectedResult = '';
+    assert.equal(actual, expectedResult, 'hides error message');
+  }
+});
+
+test('deeply nested key error clears after entering valid input', async function(assert) {
+  let data = { person: { name: { parts: { first: 'Jim' } } } };
+  let validator = ({ newValue }) => isPresent(newValue) || 'need a first name';
+  let c = new Changeset(data, validator);
+  this.set('c', c);
+
+  this.render(hbs`
+    <h1>{{c.person.name.parts.first}}</h1>
+    <input
+      id="first-name"
+      type="text"
+      value={{c.person.name.parts.first}}
+      onchange={{action (mut c.person.name.parts.first) value="target.value"}}>
+    <small id="first-name-error">{{c.error.person.name.parts.first.validation}}</small>
+  `);
+
+  assert.equal(find('h1').textContent.trim(), 'Jim', 'precondition');
+  await fillIn('#first-name', '');
+
+  {
+    let actual = find('#first-name-error').textContent.trim();
+    let expectedResult = 'need a first name';
+    assert.equal(actual, expectedResult, 'shows error message');
+  }
+
+  await fillIn('#first-name', 'foo');
+
+  {
+    let actual = find('#first-name-error').textContent.trim();
+    let expectedResult = '';
+    assert.equal(actual, expectedResult, 'hides error message');
+  }
+});
+
+test('a rollback propagates binding to deeply nested changesets', async function(assert) {
+  let data = { person: { firstName: 'Jim', lastName: 'Bob' } };
+  let changeset = new Changeset(data);
+  this.set('changeset', changeset);
+  this.on('reset', () => changeset.rollback());
+  this.render(hbs`
+    <h1>{{changeset.person.firstName}} {{changeset.person.lastName}}</h1>
+    <input
+      id="first-name"
+      type="text"
+      value={{changeset.person.firstName}}
+      onchange={{action (mut changeset.person.firstName) value="target.value"}}>
+    {{input id="last-name" value=changeset.person.lastName}}
+    <button id="reset-btn" {{action "reset"}}>Reset</button>
+  `);
+
+  assert.equal(find('h1').textContent.trim(), 'Jim Bob', 'precondition');
+  await fillIn('#first-name', 'foo');
+  await fillIn('#last-name', 'bar');
+  assert.equal(find('h1').textContent.trim(), 'foo bar', 'should update observable value');
+  await click('#reset-btn');
+  assert.equal(find('h1').textContent.trim(), 'Jim Bob', 'should rollback values');
+});
+
+test('it does not rollback when validating', async function(assert) {
   let dummyValidations = {
     even(value) { return value % 2 === 0 || 'must be even'; },
     odd(value) { return value % 2 !== 0 || 'must be odd'; }
@@ -148,7 +282,7 @@ test('it does not rollback when validating', function(assert) {
       <label for="even">Even Number</label>
       <input
         id="even"
-        type="even"
+        type="text"
         value={{changeset.even}}
         oninput={{action (mut changeset.even) value="target.value"}}
         onblur={{action "validateProperty" changeset "even"}}>
@@ -162,7 +296,7 @@ test('it does not rollback when validating', function(assert) {
       <label for="odd">Odd Number</label>
       <input
         id="odd"
-        type="odd"
+        type="text"
         value={{changeset.odd}}
         oninput={{action (mut changeset.odd) value="target.value"}}
         onblur={{action "validateProperty" changeset "odd"}}>
@@ -173,28 +307,25 @@ test('it does not rollback when validating', function(assert) {
     </fieldset>
   `);
 
-  run(() => this.$('#even').val(9).trigger('input'));
-  run(() => this.$('#odd').trigger('blur'));
-  run(() => {
-    assert.equal(this.$('small.even').text().trim(), 'must be even', 'should display error message');
-    assert.equal(this.$('small.odd').text().trim(), 'must be odd', 'should display error message');
-    assert.equal(this.$('#even').val(), '9', 'should not rollback');
-    assert.equal(this.$('code.even').text().trim(), '9', 'should not rollback');
-    assert.equal(this.$('#odd').val(), '4', 'should not rollback');
-  });
-  run(() => this.$('#even').trigger('blur'));
+  await fillIn('#even', '9');
+  await triggerEvent('#odd', 'blur');
+  assert.equal(find('small.even').textContent.trim(), 'must be even', 'should display error message');
+  assert.equal(find('small.odd').textContent.trim(), 'must be odd', 'should display error message');
+  assert.equal(find('#even').value, '9', 'should not rollback');
+  assert.equal(find('code.even').textContent.trim(), '9', 'should not rollback');
+  assert.equal(find('#odd').value, '4', 'should not rollback');
+  await blur('#even');
   // there is a scenario where going from valid to invalid would cause values to
   // go out of sync
-  run(() => this.$('#odd').val(10).trigger('input').trigger('blur'));
-  run(() => {
-    assert.equal(this.$('small.even').text().trim(), 'must be even', 'should display error message');
-    assert.equal(this.$('small.odd').text().trim(), 'must be odd', 'should display error message');
-    assert.equal(this.$('#odd').val(), '10', 'should not rollback');
-    assert.equal(this.$('code.odd').text().trim(), '10', 'should not rollback');
-  });
+  await fillIn('#odd', '10');
+  await blur('#odd');
+  assert.equal(find('small.even').textContent.trim(), 'must be even', 'should display error message');
+  assert.equal(find('small.odd').textContent.trim(), 'must be odd', 'should display error message');
+  assert.equal(find('#odd').value, '10', 'should not rollback');
+  assert.equal(find('code.odd').textContent.trim(), '10', 'should not rollback');
 });
 
-test('it handles models that are promises', function(assert) {
+test('it handles models that are promises', async function(assert) {
   this.set('dummyModel', resolve({ firstName: 'Jim', lastName: 'Bob' }));
   this.render(hbs`
     {{#with (changeset dummyModel) as |changeset|}}
@@ -208,13 +339,14 @@ test('it handles models that are promises', function(assert) {
     {{/with}}
   `);
 
-  assert.ok(this.$('h1:contains("Jim Bob")'), 'precondition');
-  run(() => this.$('#first-name').val('foo').trigger('change'));
-  run(() => this.$('#last-name').val('foo').trigger('change'));
-  assert.ok(this.$('h1:contains("foo bar")'), 'should update observable value');
+  await fillIn('#first-name', 'foo');
+  await blur('#first-name');
+  await fillIn('#last-name', 'bar');
+  await blur('#last-name');
+  assert.equal(find('h1').textContent.trim(), 'foo bar', 'should update observable value');
 });
 
-test('it skips validation when skipValidate is passed as an option', function(assert) {
+test('it skips validation when skipValidate is passed as an option', async function(assert) {
   this.set('dummyModel', { firstName: 'Jim', lastName: 'Bob' });
   this.on('validate', () => false);
   this.render(hbs`
@@ -223,14 +355,16 @@ test('it skips validation when skipValidate is passed as an option', function(as
       {{input id="first-name" value=changeset.firstName}}
       {{input id="last-name" value=changeset.lastName}}
       {{#if changeset.isInvalid}}
-        <p>There were one or more errors in your form.</p>
+        <p id="error-paragraph">There were one or more errors in your form.</p>
       {{/if}}
     {{/with}}
   `);
-  
-  assert.ok(this.$('h1:contains("Jim Bob")'), 'precondition');
-  run(() => this.$('#first-name').val('J').trigger('change'));
-  run(() => this.$('#last-name').val('B').trigger('change'));
-  assert.ok(this.$('h1:contains("J B")'), 'should update observable value');
-  assert.notOk(this.$('p:contains("There were one or more errors in your form.")').length, 'should skip validation');
+
+  assert.equal(find('h1').textContent.trim(), 'Jim Bob', 'precondition');
+  await fillIn('#first-name', 'J');
+  await blur('#first-name')
+  await fillIn('#last-name', 'B');
+  await blur('#last-name')
+  assert.equal(find('h1').textContent.trim(), 'J B', 'should update observable value');
+  assert.notOk(find('#error-paragraph'), 'should skip validation');
 });

@@ -1,7 +1,7 @@
-import Ember from 'ember';
+// @flow
 
-const { typeOf } = Ember;
+import { typeOf } from '@ember/utils';
 
-export default function isObject(val) {
+export default function isObject(val /*: mixed */) {
   return typeOf(val) === 'object' || typeOf(val) === 'instance';
 }

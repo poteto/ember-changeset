@@ -1,5 +1,6 @@
 /* eslint-env node */
 module.exports = {
+  useYarn: true,
   scenarios: [
     {
       name: 'ember-1.13',
@@ -13,7 +14,8 @@ module.exports = {
       },
       npm: {
         devDependencies: {
-          'ember-source': null
+          'ember-source': null,
+          'ember-native-dom-event-dispatcher': null
         }
       }
     },
@@ -29,7 +31,8 @@ module.exports = {
       },
       npm: {
         devDependencies: {
-          'ember-source': null
+          'ember-source': null,
+          'ember-native-dom-event-dispatcher': null
         }
       }
     },
@@ -45,7 +48,16 @@ module.exports = {
       },
       npm: {
         devDependencies: {
-          'ember-source': null
+          'ember-source': null,
+          'ember-native-dom-event-dispatcher': null
+        }
+      }
+    },
+    {
+      name: 'ember-lts-2.12',
+      npm: {
+        devDependencies: {
+          'ember-source': '~2.12.0'
         }
       }
     },
@@ -89,23 +101,6 @@ module.exports = {
         },
         resolutions: {
           'ember': 'canary'
-        }
-      },
-      npm: {
-        devDependencies: {
-          'ember-source': null
-        }
-      }
-    },
-    {
-      name: 'ember-alpha',
-      allowedToFail: true,
-      bower: {
-        dependencies: {
-          "ember": "components/ember#alpha"
-        },
-        resolutions: {
-          "ember": "alpha"
         }
       },
       npm: {

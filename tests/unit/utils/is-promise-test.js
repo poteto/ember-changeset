@@ -1,11 +1,6 @@
-import Ember from 'ember';
 import isPromise from 'ember-changeset/utils/is-promise';
+import { Promise, resolve } from 'rsvp';
 import { module, test } from 'qunit';
-
-const {
-  RSVP: { Promise, resolve },
-  K
-} = Ember;
 
 module('Unit | Utility | is promise');
 
@@ -19,11 +14,11 @@ let testData = [
     expected: true
   },
   {
-    value: { then: K, catch: K, finally: K },
+    value: { then() {}, catch() {}, finally() {} },
     expected: true
   },
   {
-    value: { then: K },
+    value: { then() {} },
     expected: false
   },
   {

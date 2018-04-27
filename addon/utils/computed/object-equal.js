@@ -1,6 +1,7 @@
-import Ember from 'ember';
+// @flow
 
-const { computed, get } = Ember;
+import { computed, get } from '@ember/object';
+
 const { keys } = Object;
 
 /**
@@ -14,7 +15,10 @@ const { keys } = Object;
  * @param  {String} compareKey dependent key for second object
  * @return {Boolean}
  */
-export default function objectEqual(sourceKey, compareKey) {
+export default function objectEqual(
+  sourceKey /*: string */,
+  compareKey /*: string */
+) /*: boolean */ {
   return computed(sourceKey, compareKey, function() {
     let source = get(this, sourceKey);
     let compare = get(this, compareKey);

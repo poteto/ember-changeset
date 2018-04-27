@@ -1,11 +1,19 @@
-import Ember from 'ember';
+// @flow
+
 import Changeset from 'ember-changeset';
 import isChangeset from 'ember-changeset/utils/is-changeset';
 import isPromise from 'ember-changeset/utils/is-promise';
+import { helper } from '@ember/component/helper';
 
-const { Helper: { helper } } = Ember;
+/*::
+import type { ValidatorFunc } from 'ember-changeset/types/validator-func';
+import type { Config } from 'ember-changeset/types/config';
+*/
 
-export function changeset([obj, validations], options = {}) {
+export function changeset(
+  [obj, validations] /*: [Object, ValidatorFunc] */,
+  options /*: Config */ = {}
+) {
   if (isChangeset(obj)) {
     return obj;
   }

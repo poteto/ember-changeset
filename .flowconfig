@@ -1,0 +1,13 @@
+[ignore]
+<PROJECT_ROOT>/node_modules
+<PROJECT_ROOT>/tmp
+<PROJECT_ROOT>/dist
+
+[include]
+
+[libs]
+
+[options]
+# Remap 'ember-changeset/<anything>' imports to '<PROJECT_ROOT>/addon/<anything>'.
+module.name_mapper='^ember-changeset$' -> '<PROJECT_ROOT>/addon/index.js'
+module.name_mapper='^ember-changeset/\([a-z-/]+\)$' -> '<PROJECT_ROOT>/addon/\1'
