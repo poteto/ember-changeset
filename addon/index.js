@@ -331,50 +331,6 @@ export function changeset(
     },
 
     /**
-     * Returns the changeset to its pristine state, and discards changes and
-     * errors.
-     *
-     * @public
-     * @chainable
-     * @return {Changeset}
-     */
-    rollback() {
-      this._notifyVirtualProperties();
-      set(this, CHANGES, {});
-      set(this, ERRORS, {});
-
-      return this;
-    },
-
-    /**
-     * Discards any errors, keeping only valid changes.
-     *
-     * @public
-     * @chainable
-     * @return {Changeset}
-     */
-    rollbackInvalid() {
-      this._notifyVirtualProperties();
-      set(this, ERRORS, {});
-
-      return this;
-    },
-
-    /**
-     * Discards changes/errors for the specified properly only.
-     *
-     * @public
-     * @chainable
-     * @return {Changeset}
-     */
-    rollbackProperty(key) {
-      this._deleteKey(CHANGES, key);
-      this._deleteKey(ERRORS, key);
-
-      return this;
-    },
-
-    /**
      * Merges 2 valid changesets and returns a new changeset. Both changesets
      * must point to the same underlying object. The changeset target is the
      * origin. For example:
@@ -439,6 +395,34 @@ export function changeset(
       set(this, CHANGES, {});
       set(this, ERRORS, {});
       (this /*: ChangesetDef */)._notifyVirtualProperties(keys)
+
+      return this;
+    },
+
+    /**
+     * Discards any errors, keeping only valid changes.
+     *
+     * @public
+     * @chainable
+     * @return {Changeset}
+     */
+    rollbackInvalid() {
+      this._notifyVirtualProperties();
+      set(this, ERRORS, {});
+
+      return this;
+    },
+
+    /**
+     * Discards changes/errors for the specified properly only.
+     *
+     * @public
+     * @chainable
+     * @return {Changeset}
+     */
+    rollbackProperty(key) {
+      this._deleteKey(CHANGES, key);
+      this._deleteKey(ERRORS, key);
 
       return this;
     },
