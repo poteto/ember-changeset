@@ -1,14 +1,15 @@
-import Ember from 'ember';
+import { resolve } from 'rsvp';
+import { typeOf, isPresent } from '@ember/utils';
 import Changeset from 'ember-changeset';
 import { moduleForComponent, test } from 'ember-qunit';
 import hbs from 'htmlbars-inline-precompile';
-import { find, fillIn, click, blur, triggerEvent } from 'ember-native-dom-helpers';
-
-const {
-  RSVP: { resolve },
-  isPresent,
-  typeOf
-} = Ember;
+import {
+  find,
+  fillIn,
+  click,
+  blur,
+  triggerEvent
+} from 'ember-native-dom-helpers';
 
 moduleForComponent('changeset', 'Integration | Helper | changeset', {
   integration: true

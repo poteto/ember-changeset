@@ -10,6 +10,7 @@ import type Err from 'ember-changeset/-private/err';
 */
 
 const { keys } = Object;
+// eslint-disable-next-line ember/new-module-imports
 const assign = Ember.assign || Ember.merge;
 
 /**

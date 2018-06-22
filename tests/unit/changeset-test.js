@@ -1,7 +1,11 @@
 import Changeset from 'ember-changeset';
 import { module, test } from 'qunit';
 
-import EmberObject, { get, set, setProperties } from '@ember/object';
+import EmberObject, {
+  get,
+  set,
+  setProperties
+} from '@ember/object';
 import ObjectProxy from '@ember/object/proxy';
 import { Promise, resolve } from 'rsvp';
 import { dasherize } from '@ember/string';
