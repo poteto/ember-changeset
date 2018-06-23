@@ -659,6 +659,11 @@ export function changeset(
       // Happy path: update change map.
       if (!isEqual(oldValue, value)) {
         setNestedProperty(changes, key, new Change(value));
+        // ensure cache key is updated with new relay
+        if (value) {
+          let cache /*: RelayCache */ = get(this, RELAY_CACHE);
+          cache[key] = Relay.create({ key, changeset: this, content: value });
+        }
       } else if (key in changes) {
         c._deleteKey(CHANGES, key);
       }

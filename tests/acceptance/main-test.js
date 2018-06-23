@@ -66,6 +66,7 @@ module('Acceptance | main', function(hooks) {
       let profile = this.store.createRecord('profile', { firstName: 'Terry', lastName: 'Bubblewinkles' });
       changeset.set('profile', profile);
 
+      assert.equal(changeset.get('profile').get('firstName'), 'Terry');
       assert.equal(changeset.get('profile.firstName'), 'Terry');
       assert.equal(changeset.get('profile.lastName'), 'Bubblewinkles');
 
