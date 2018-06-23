@@ -727,7 +727,8 @@ export function changeset(
       if (key.indexOf('.') !== -1) {
         let [baseKey, ...keyParts] = key.split('.');
         if (changes.hasOwnProperty(baseKey)) {
-          let result = changes[baseKey].value.get(keyParts.join('.'));
+          let { value } = changes[baseKey];
+          let result = get(value, keyParts.join('.'));
           if (result) {
             return result;
           }
