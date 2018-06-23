@@ -67,11 +67,15 @@ module('Acceptance | main', function(hooks) {
       changeset.get('dogs').pushObjects([newDog]);
     });
 
-    assert.equal(changeset.get('dogs.firstObject.breed'), 'rough collie');
-    assert.equal(changeset.get('dogs.lastObject.breed'), 'Münsterländer');
+    let dogs = changeset.get('dogs').toArray();
+    assert.equal(dogs[0].get('breed'), 'rough collie');
+    assert.equal(dogs[1].get('breed'), 'rough collie');
+    assert.equal(dogs[2].get('breed'), 'Münsterländer');
 
     changeset.execute();
-    assert.equal(user.get('dogs.firstObject.breed'), 'rough collie');
-    assert.equal(user.get('dogs.lastObject.breed'), 'Münsterländer');
+    dogs = user.get('dogs').toArray();
+    assert.equal(dogs[0].get('breed'), 'rough collie');
+    assert.equal(dogs[1].get('breed'), 'rough collie');
+    assert.equal(dogs[2].get('breed'), 'Münsterländer');
   });
 });
