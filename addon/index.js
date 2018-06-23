@@ -727,7 +727,7 @@ export function changeset(
       if (key.indexOf('.') !== -1) {
         let [baseKey, ...keyParts] = key.split('.');
         if (changes.hasOwnProperty(baseKey)) {
-          let result = this._checkKeyAgainstChanges(changes, baseKey, keyParts.join('.'));
+          let result = changes[baseKey].value.get(keyParts.join('.'));
           if (result) {
             return result;
           }
@@ -735,10 +735,6 @@ export function changeset(
       }
 
       return original;
-    },
-
-    _checkKeyAgainstChanges(changes, baseKey, keyParts) {
-      return changes[baseKey].value.get(keyParts);
     },
 
     /**
