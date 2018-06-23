@@ -13,7 +13,7 @@ module('Acceptance | main', function(hooks) {
     // for backwards compatibility with pre 3.0 versions of ember
     let container = this.owner || this.application.__container__;
     let application = this.owner.application || this.application;
-    let store = container.lookup('service:store');
+    this.store = container.lookup('service:store');
 
     application.register('model:profile', Model.extend({
       firstName: attr('string', { defaultValue: 'Bob' }),
@@ -31,13 +31,13 @@ module('Acceptance | main', function(hooks) {
     }));
 
     run(() => {
-      let profile = store.createRecord('profile');
-      let user = store.createRecord('user', { profile });
+      let profile = this.store.createRecord('profile');
+      let user = this.store.createRecord('user', { profile });
       this.dummyUser = user;
 
       return user.get('dogs').then(() => {
         for (let i = 0; i < 2; i++) {
-          user.get('dogs').addObject(store.createRecord('dog'))
+          user.get('dogs').addObject(this.store.createRecord('dog'))
         }
       });
     });
@@ -62,6 +62,17 @@ module('Acceptance | main', function(hooks) {
 
       assert.equal(user.get('profile.firstName'), 'Grace');
       assert.equal(user.get('profile.lastName'), 'Hopper');
+
+      let profile = this.store.createRecord('profile', { firstName: 'Terry', lastName: 'Bubblewinkles' });
+      changeset.set('profile', profile);
+
+      assert.equal(changeset.get('profile.firstName'), 'Terry');
+      assert.equal(changeset.get('profile.lastName'), 'Bubblewinkles');
+
+      changeset.execute();
+
+      assert.equal(user.get('profile.firstName'), 'Terry');
+      assert.equal(user.get('profile.lastName'), 'Bubblewinkles');
     })
   });
 

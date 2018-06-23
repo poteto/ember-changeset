@@ -718,7 +718,22 @@ export function changeset(
         return c.value;
       }
 
+      // nested thus circulate through `value` and see if match
+      if (key.indexOf('.') !== -1) {
+        let [baseKey, ...keyParts] = key.split('.');
+        if (changes.hasOwnProperty(baseKey)) {
+          let result = this._checkKeyAgainstChanges(changes, baseKey, keyParts.join('.'));
+          if (result) {
+            return result;
+          }
+        }
+      }
+
       return original;
+    },
+
+    _checkKeyAgainstChanges(changes, baseKey, keyParts) {
+      return changes[baseKey].value.get(keyParts);
     },
 
     /**
