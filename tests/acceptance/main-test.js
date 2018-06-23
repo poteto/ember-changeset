@@ -70,9 +70,6 @@ module('Acceptance | main', function(hooks) {
     assert.equal(changeset.get('dogs.firstObject.breed'), 'rough collie');
     assert.equal(changeset.get('dogs.lastObject.breed'), 'Münsterländer');
 
-    assert.equal(changeset.get('dogs').get('firstObject.breed'), 'rough collie');
-    assert.equal(changeset.get('dogs.lastObject').get('breed'), 'Münsterländer');
-
     changeset.execute();
     assert.equal(user.get('dogs.firstObject.breed'), 'rough collie');
     assert.equal(user.get('dogs.lastObject.breed'), 'Münsterländer');
