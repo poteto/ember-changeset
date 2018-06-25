@@ -805,7 +805,7 @@ export function changeset(
       if (isRelay(result)) return get(result, 'content');
       return result;
     }
-  }));
+  } /*: ChangesetDef */));
 }
 
 export default class Changeset {
