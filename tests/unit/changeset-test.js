@@ -115,11 +115,14 @@ test("data reads the changeset CONTENT", function(assert) {
 test("data is readonly", function(assert) {
   let dummyChangeset = new Changeset(dummyModel);
 
-  assert.throws(
-    () => set(dummyChangeset, 'data', { foo: 'bar' }),
-    ({message}) => message === "Cannot set read-only property 'data' on object: changeset:[object Object]",
-    'should throw error'
-  );
+  try {
+    set(dummyChangeset, 'data', { foo: 'bar' });
+  } catch({ message }) {
+    assert.throws(
+      ({message}) => message === "Cannot set read-only property 'data' on object: changeset:[object Object]",
+      'should throw error'
+    );
+  }
 });
 
 /**
@@ -473,9 +476,14 @@ test('#prepare throws if callback does not return object', function(assert) {
   let dummyChangeset = new Changeset(dummyModel);
   dummyChangeset.set('first_name', 'foo');
 
-  assert.throws(() => dummyChangeset.prepare(() => { return 'foo'; }), ({ message }) => {
-    return message === 'Assertion Failed: Callback to `changeset.prepare` must return an object';
-  }, 'should throw error');
+  try {
+    dummyChangeset.prepare(() => { return 'foo'; });
+  } catch({ message }) {
+    assert.throws(
+      ({message}) => message === "Assertion Failed: Callback to `changeset.prepare` must return an object",
+      'should throw error'
+    );
+  }
 });
 
 /**
@@ -715,18 +723,28 @@ test('#merge does not merge a changeset with a non-changeset', function(assert) 
   let dummyChangesetB = { _changes: { name: 'b' } };
   dummyChangesetA.set('name', 'a');
 
-  assert.throws(() => dummyChangesetA.merge(dummyChangesetB), ({ message }) => {
-    return message === 'Assertion Failed: Cannot merge with a non-changeset';
-  }, 'should throw error');
+  try {
+    dummyChangesetA.merge(dummyChangesetB);
+  } catch({ message }) {
+    assert.throws(
+      ({message}) => message === "Assertion Failed: Cannot merge with a non-changeset",
+      'should throw error'
+    );
+  }
 });
 
 test('#merge does not merge a changeset with different content', function(assert) {
   let dummyChangesetA = new Changeset(dummyModel, dummyValidator);
   let dummyChangesetB = new Changeset(EmberObject.create(), dummyValidator);
 
-  assert.throws(() => dummyChangesetA.merge(dummyChangesetB), ({ message }) => {
-    return message === 'Assertion Failed: Cannot merge with a changeset of different content';
-  }, 'should throw error');
+  try {
+    dummyChangesetA.merge(dummyChangesetB);
+  } catch({ message }) {
+    assert.throws(
+      ({message}) => message === "Assertion Failed: Cannot merge with a changeset of different content",
+      'should throw error'
+    );
+  }
 });
 
 test('#merge preserves content and validator of origin changeset', function(assert) {

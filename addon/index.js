@@ -659,6 +659,12 @@ export function changeset(
       // Happy path: update change map.
       if (!isEqual(oldValue, value)) {
         setNestedProperty(changes, key, new Change(value));
+
+        // ensure cache key is updated with new relay if value is object
+        if (isObject(value)) {
+          let cache /*: RelayCache */ = get(this, RELAY_CACHE);
+          cache[key] = Relay.create({ key, changeset: this, content: value });
+        }
       } else if (key in changes) {
         c._deleteKey(CHANGES, key);
       }
@@ -716,6 +722,18 @@ export function changeset(
       if (changes.hasOwnProperty(key)) {
         let c /*: Change */ = changes[key];
         return c.value;
+      }
+
+      // nested thus circulate through `value` and see if match
+      if (key.indexOf('.') !== -1) {
+        let [baseKey, ...keyParts] = key.split('.');
+        if (changes.hasOwnProperty(baseKey)) {
+          let { value } = changes[baseKey];
+          let result = get(value, keyParts.join('.'));
+          if (result) {
+            return result;
+          }
+        }
       }
 
       return original;

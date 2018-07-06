@@ -1,8 +1,5 @@
 import { module, test, skip } from 'qunit';
 import { setupApplicationTest } from 'ember-qunit';
-import Model from 'ember-data/model';
-import attr from 'ember-data/attr';
-import { belongsTo, hasMany } from 'ember-data/relationships';
 import { run } from '@ember/runloop';
 import Changeset from 'ember-changeset';
 
@@ -12,32 +9,16 @@ module('Acceptance | main', function(hooks) {
   hooks.beforeEach(function() {
     // for backwards compatibility with pre 3.0 versions of ember
     let container = this.owner || this.application.__container__;
-    let application = this.owner.application || this.application;
-    let store = container.lookup('service:store');
-
-    application.register('model:profile', Model.extend({
-      firstName: attr('string', { defaultValue: 'Bob' }),
-      lastName: attr('string', { defaultValue: 'Ross' }),
-    }));
-
-    application.register('model:user', Model.extend({
-      profile: belongsTo('profile'),
-      dogs: hasMany('dog'),
-    }));
-
-    application.register('model:dog', Model.extend({
-      breed: attr('string', { defaultValue: 'rough collie' }),
-      user: belongsTo('user'),
-    }));
+    this.store = container.lookup('service:store');
 
     run(() => {
-      let profile = store.createRecord('profile');
-      let user = store.createRecord('user', { profile });
+      let profile = this.store.createRecord('profile');
+      let user = this.store.createRecord('user', { profile });
       this.dummyUser = user;
 
       return user.get('dogs').then(() => {
         for (let i = 0; i < 2; i++) {
-          user.get('dogs').addObject(store.createRecord('dog'))
+          user.get('dogs').addObject(this.store.createRecord('dog'))
         }
       });
     });
@@ -62,34 +43,40 @@ module('Acceptance | main', function(hooks) {
 
       assert.equal(user.get('profile.firstName'), 'Grace');
       assert.equal(user.get('profile.lastName'), 'Hopper');
+
+      let profile = this.store.createRecord('profile', { firstName: 'Terry', lastName: 'Bubblewinkles' });
+      changeset.set('profile', profile);
+
+      assert.equal(changeset.get('profile').get('firstName'), 'Terry');
+      assert.equal(changeset.get('profile.firstName'), 'Terry');
+      assert.equal(changeset.get('profile.lastName'), 'Bubblewinkles');
+
+      changeset.execute();
+
+      assert.equal(user.get('profile.firstName'), 'Terry');
+      assert.equal(user.get('profile.lastName'), 'Bubblewinkles');
     })
   });
 
-  skip("it (doesn't) work for hasMany / firstObject", function(a) {
-    a.expect(2 + 4);
+  // skipping test for now
+  skip('it works for hasMany / firstObject', function(assert) {
+    let user = this.dummyUser;
 
+    let changeset = new Changeset(user);
     run(() => {
-      let user = this.dummyUser;
-
-      // TODO: Add special handling if content is DS.ManyArray?
-      // `dogs.firstObject` is readonly.
-      return user.get('dogs').then(dogs => {
-        const FirstName = 'firstObject.user.profile.firstName';
-        const LastName  = 'firstObject.user.profile.lastName';
-
-        let cs = new Changeset(dogs);
-
-        cs.set(FirstName, 'Grace');
-        cs.set(LastName,  'Hopper');
-        a.equal(cs.get(FirstName), 'Grace');
-        a.equal(cs.get(LastName),  'Hopper');
-
-        cs.execute();
-        a.equal(user.get(FirstName), 'Grace');
-        a.equal(user.get(LastName),  'Hopper');
-        a.equal(user.get('profile.firstName'), 'Grace');
-        a.equal(user.get('profile.lastName'),  'Hopper');
-      });
+      let newDog = this.store.createRecord('dog', { breed: 'Münsterländer' });
+      changeset.get('dogs').pushObjects([newDog]);
     });
+
+    let dogs = changeset.get('dogs').toArray();
+    assert.equal(dogs[0].get('breed'), 'rough collie');
+    assert.equal(dogs[1].get('breed'), 'rough collie');
+    assert.equal(dogs[2].get('breed'), 'Münsterländer');
+
+    changeset.execute();
+    dogs = user.get('dogs').toArray();
+    assert.equal(dogs[0].get('breed'), 'rough collie');
+    assert.equal(dogs[1].get('breed'), 'rough collie');
+    assert.equal(dogs[2].get('breed'), 'Münsterländer');
   });
 });
