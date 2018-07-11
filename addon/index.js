@@ -492,7 +492,6 @@ export function changeset(
 
       // Remove `key` from changes map.
       let c = (this /*: ChangesetDef */);
-      c._deleteKey(CHANGES, key);
 
       // Add `key` to errors map.
       let errors /*: Errors */ = get(this, ERRORS);
@@ -689,12 +688,6 @@ export function changeset(
       // Shorthand for `this`.
       let c /*: ChangesetDef */ = this;
 
-      // Error case.
-      if (!isValid) {
-        let v /*: ValidationErr */ = (validation /*: any */);
-        return c.addError(key, { value, validation: v });
-      }
-
       // Happy path: remove `key` from error map.
       c._deleteKey(ERRORS, key);
 
@@ -714,6 +707,12 @@ export function changeset(
       // Happy path: notify that `key` was added.
       c.notifyPropertyChange(CHANGES);
       c.notifyPropertyChange(key);
+
+      // Error case.
+      if (!isValid) {
+        let v /*: ValidationErr */ = (validation /*: any */);
+        return c.addError(key, { value, validation: v });
+      }
 
       // Return new value.
       return value;

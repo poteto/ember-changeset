@@ -74,12 +74,13 @@ test('content can be an empty hash', function(assert) {
  * #error
  */
 
-test('#error returns the error object', function(assert) {
+test('#error returns the error object and keeps changes', function(assert) {
   let dummyChangeset = new Changeset(dummyModel, dummyValidator);
   let expectedResult = { name: { validation: 'too short', value: 'a' } };
   dummyChangeset.set('name', 'a');
 
   assert.deepEqual(get(dummyChangeset, 'error'), expectedResult, 'should return error object');
+  assert.deepEqual(get(dummyChangeset, 'change'), { name: 'a' }, 'should return error object');
 });
 
 /**
@@ -400,7 +401,7 @@ test('#set removes a change if set back to original value when obj is ProxyObjec
   );
 });
 
-test('#set does not add a change if invalid', function(assert) {
+test('#set does add a change if invalid', function(assert) {
   let expectedErrors = [
     { key: 'name', validation: 'too short', value: 'a' },
     { key: 'password', validation: ['foo', 'bar'], value: false }
@@ -413,7 +414,8 @@ test('#set does not add a change if invalid', function(assert) {
   let isValid = get(dummyChangeset, 'isValid');
   let isInvalid = get(dummyChangeset, 'isInvalid');
 
-  assert.deepEqual(changes, [], 'should not add change');
+  let expectedChanges = [{ "key": "name", "value": "a" }, { "key": "password", "value": false }];
+  assert.deepEqual(changes, expectedChanges, 'should add change');
   assert.deepEqual(errors, expectedErrors, 'should have errors');
   assert.notOk(isValid, 'should not be valid');
   assert.ok(isInvalid, 'should be invalid');
@@ -769,7 +771,7 @@ test('#merge merges invalid changesets', function(assert) {
   let dummyChangesetD = dummyChangesetA.merge(dummyChangesetB);
   dummyChangesetD = dummyChangesetD.merge(dummyChangesetC);
 
-  let expectedChanges = [{ key: 'age', value: 21 }];
+  let expectedChanges = [{ key: 'age', value: 21 }, { key: 'name', value: 'b'}];
   let expectedErrors = [{ key: 'name', 'validation': 'too short', value: 'b' }];
 
   assert.deepEqual(get(dummyChangesetA, 'isInvalid'), true, 'changesetA is not valid becuase of name');
@@ -834,7 +836,8 @@ test('#rollback restores old values', function(assert) {
   let dummyChangeset = new Changeset(dummyModel, dummyValidator);
   let expectedChanges = [
     { key: 'firstName', value: 'foo' },
-    { key: 'lastName', value: 'bar' }
+    { key: 'lastName', value: 'bar' },
+    { key: 'name', value: '' }
   ];
   let expectedErrors = [{ key: 'name', validation: 'too short', value: '' }];
   dummyChangeset.set('firstName', 'foo');
@@ -1086,7 +1089,7 @@ test('#validate marks actual valid changes', function(assert) {
 
   run(() => {
     dummyChangeset.validate().then(() => {
-      assert.deepEqual(get(dummyChangeset, 'changes'), [{ key: 'name', value: 'foo bar' }]);
+      assert.deepEqual(get(dummyChangeset, 'changes'), [{ key: 'name', value: 'foo bar' }, { key: 'password', value: false }]);
       done();
     });
   });
@@ -1204,7 +1207,7 @@ test('#snapshot creates a snapshot of the changeset', function(assert) {
   dummyChangeset.set('password', false);
   let snapshot = dummyChangeset.snapshot();
   let expectedResult = {
-    changes: { name: 'Pokemon Go' },
+    changes: { name: 'Pokemon Go', password: false },
     errors: { password: { validation: ['foo', 'bar'], value: false } }
   };
 
