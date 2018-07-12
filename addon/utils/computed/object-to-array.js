@@ -3,6 +3,9 @@
 import { computed, get } from '@ember/object';
 import { typeOf } from '@ember/utils';
 import { assign } from '@ember/polyfills';
+import { merge } from '@ember/polyfills'
+
+const assign = assign || merge;
 
 /*::
 import type Change from 'ember-changeset/-private/change';
