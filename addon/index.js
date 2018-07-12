@@ -626,6 +626,8 @@ export function changeset(
         c._validate(key, value, oldValue);
 
       let v /*: ValidationResult */ = (validation /*: any */);
+
+      c.trigger(BEFORE_VALIDATION_EVENT, key);
       let result = c._setProperty(v, { key, value, oldValue });
 
       // TODO: Address case when Promise is rejected.
@@ -640,7 +642,6 @@ export function changeset(
         });
       }
 
-      c.trigger(BEFORE_VALIDATION_EVENT, key);
       c.trigger(AFTER_VALIDATION_EVENT, key);
 
       return result;

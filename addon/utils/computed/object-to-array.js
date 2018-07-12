@@ -1,8 +1,8 @@
 // @flow
 
-import Ember from 'ember';
 import { computed, get } from '@ember/object';
 import { typeOf } from '@ember/utils';
+import pureAssign from 'ember-changeset/utils/assign';
 
 /*::
 import type Change from 'ember-changeset/-private/change';
@@ -10,8 +10,6 @@ import type Err from 'ember-changeset/-private/err';
 */
 
 const { keys } = Object;
-// eslint-disable-next-line ember/new-module-imports
-const assign = Ember.assign || Ember.merge;
 
 /**
  * Compute the array form of an object.
@@ -36,7 +34,7 @@ export default function objectToArray /*:: <T> */ (
       let value = transform(obj[key]);
 
       if (flattenObjects && typeOf(value) === 'object') {
-        return assign({ key }, value);
+        return pureAssign({ key }, value);
       }
 
       return { key, value };
