@@ -1274,7 +1274,7 @@ test('#cast noops if no keys are passed', function(assert) {
  * #isValidating
  */
 
-test('scott isValidating returns true when validations have not resolved', function(assert) {
+test('isValidating returns true when validations have not resolved', function(assert) {
   let dummyChangeset;
   let _validator = () => new Promise(() => {});
   let _validations = {
