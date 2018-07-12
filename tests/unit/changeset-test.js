@@ -681,6 +681,7 @@ test('#save proxies to content', function(assert) {
   assert.equal(result, undefined, 'precondition');
   let promise = dummyChangeset.save('test options');
   assert.equal(result, 'ok', 'should save');
+  assert.deepEqual(get(dummyChangeset, 'change'), { name: 'foo' }, 'should save');
   assert.equal(options, 'test options', 'should proxy options when saving');
   assert.ok(!!promise && typeof promise.then === 'function', 'save returns a promise');
   promise.then((saveResult) => {
@@ -1273,7 +1274,7 @@ test('#cast noops if no keys are passed', function(assert) {
  * #isValidating
  */
 
-test('isValidating returns true when validations have not resolved', function(assert) {
+test('scott isValidating returns true when validations have not resolved', function(assert) {
   let dummyChangeset;
   let _validator = () => new Promise(() => {});
   let _validations = {
@@ -1284,8 +1285,11 @@ test('isValidating returns true when validations have not resolved', function(as
 
   set(dummyModel, 'reservations', 'ABC12345');
   dummyChangeset = new Changeset(dummyModel, _validator, _validations);
+  set(dummyChangeset, 'reservations', 'DCE12345');
 
   dummyChangeset.validate();
+  assert.deepEqual(get(dummyChangeset, 'change'), { reservations: 'DCE12345' });
+
   assert.ok(dummyChangeset.isValidating(),
     'isValidating should be true when no key is passed in and something is validating');
   assert.ok(dummyChangeset.isValidating('reservations'),
