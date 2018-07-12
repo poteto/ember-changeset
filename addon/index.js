@@ -634,6 +634,7 @@ export function changeset(
       if (isPromise(validation)) {
         c._setIsValidating(key, true);
 
+        let v /*: Promise<ValidationResult> */ = (validation /*: any */);
         return v.then(resolvedValidation => {
           c._setIsValidating(key, false);
           c.trigger(AFTER_VALIDATION_EVENT, key);

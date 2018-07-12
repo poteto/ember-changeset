@@ -2,7 +2,7 @@
 
 import { computed, get } from '@ember/object';
 import { typeOf } from '@ember/utils';
-import pureAssign from 'ember-changeset/utils/assign';
+import { assign } from '@ember/polyfills';
 
 /*::
 import type Change from 'ember-changeset/-private/change';
@@ -34,7 +34,7 @@ export default function objectToArray /*:: <T> */ (
       let value = transform(obj[key]);
 
       if (flattenObjects && typeOf(value) === 'object') {
-        return pureAssign({ key }, value);
+        return assign({ key }, value);
       }
 
       return { key, value };
