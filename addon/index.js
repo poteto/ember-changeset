@@ -625,12 +625,14 @@ export function changeset(
       let validation /*: ValidationResult | Promise<ValidationResult> */ =
         c._validate(key, value, oldValue);
 
+      let v /*: ValidationResult */ = (validation /*: any */);
+      let result = c._setProperty(v, { key, value, oldValue });
+
       // TODO: Address case when Promise is rejected.
       if (isPromise(validation)) {
         c._setIsValidating(key, true);
         c.trigger(BEFORE_VALIDATION_EVENT, key);
 
-        let v /*: Promise<ValidationResult> */ = (validation /*: any */);
         return v.then(resolvedValidation => {
           c._setIsValidating(key, false);
           c.trigger(AFTER_VALIDATION_EVENT, key);
@@ -640,8 +642,8 @@ export function changeset(
 
       c.trigger(BEFORE_VALIDATION_EVENT, key);
       c.trigger(AFTER_VALIDATION_EVENT, key);
-      let v /*: ValidationResult */ = (validation /*: any */);
-      return c._setProperty(v, { key, value, oldValue });
+
+      return result;
     },
 
     /**
