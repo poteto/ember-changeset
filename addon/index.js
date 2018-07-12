@@ -633,7 +633,6 @@ export function changeset(
       // TODO: Address case when Promise is rejected.
       if (isPromise(validation)) {
         c._setIsValidating(key, true);
-        c.trigger(BEFORE_VALIDATION_EVENT, key);
 
         return v.then(resolvedValidation => {
           c._setIsValidating(key, false);
