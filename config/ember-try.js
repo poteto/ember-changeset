@@ -11,7 +11,24 @@ module.exports = function() {
     return {
       useYarn: true,
       scenarios: [
-        {
+      {
+          name: 'ember-lts-2.8',
+          bower: {
+            dependencies: {
+              'ember': 'components/ember#lts-2-8'
+            },
+            resolutions: {
+              'ember': 'lts-2-8'
+            }
+          },
+          npm: {
+            devDependencies: {
+              'ember-source': null,
+              'ember-native-dom-event-dispatcher': null
+            }
+          }
+      },
+      {
           name: 'ember-lts-2.12',
           npm: {
             devDependencies: {
