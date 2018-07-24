@@ -67,6 +67,7 @@ const OPTIONS = '_options';
 const RUNNING_VALIDATIONS = '_runningValidations';
 const BEFORE_VALIDATION_EVENT = 'beforeValidation';
 const AFTER_VALIDATION_EVENT = 'afterValidation';
+const AFTER_ROLLBACK_EVENT = 'afterRollback';
 const defaultValidatorFn = () => true;
 const defaultOptions = { skipValidate: false };
 
@@ -139,7 +140,7 @@ export type ChangesetDef = {|
   _validateAndSet: <T>(string, T) => (Promise<T> | Promise<ErrLike<T>> | T | ErrLike<T>),
   _setIsValidating: (string, boolean) => void,
   _validate: (string, mixed, mixed) => (ValidationResult | Promise<ValidationResult>),
-  trigger: (string, string) => void,
+  trigger: (string, string | void) => void,
   isValidating: (string | void) => boolean,
   cast: (Array<string>) => ChangesetDef,
   willDestroy: () => void,
@@ -388,14 +389,16 @@ export function changeset(
       for (let key in relayCache) relayCache[key].rollback();
 
       // Get keys before reset.
-      let keys = (this /*: ChangesetDef */)._rollbackKeys();
+      let c /*: ChangesetDef     */ = this;
+      let keys = c._rollbackKeys();
 
       // Reset.
       set(this, RELAY_CACHE, {});
       set(this, CHANGES, {});
       set(this, ERRORS, {});
-      (this /*: ChangesetDef */)._notifyVirtualProperties(keys)
+      c._notifyVirtualProperties(keys)
 
+      c.trigger(AFTER_ROLLBACK_EVENT);
       return this;
     },
 

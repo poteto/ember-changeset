@@ -166,6 +166,7 @@ Be sure to call `validate()` on the `changeset` before saving or committing chan
 * Events
   + [`beforeValidation`](#beforevalidation)
   + [`afterValidation`](#aftervalidation)
+  + [`afterRollback`](#afterrollback)
 
 #### `error`
 
@@ -739,6 +740,22 @@ changeset.validate().then(() => {
   // console output: lastName has completed validating
   // console output: address.city has completed validating
 });
+```
+
+**[⬆️ back to top](#api)**
+
+#### `afterRollback`
+
+This event is triggered after a rollback of the changeset.
+This can be used for [some advanced use cases](https://github.com/offirgolan/ember-changeset-cp-validations/issues/25#issuecomment-375855834)
+where it is necessary to separately track all changes that are made to the changeset.
+
+```js
+changeset.on('afterRollback', () => {
+  console.log("changeset has rolled back");
+});
+changeset.rollback();
+// console output: changeset has rolled back
 ```
 
 **[⬆️ back to top](#api)**
