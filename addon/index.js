@@ -237,7 +237,9 @@ export function changeset(
       let c            /*: ChangesetDef */ = this;
 
       if (skipValidate) {
-        return c._setProperty(true, { key, value });
+        let content = get(this, CONTENT);
+        let oldValue = get(content, key);
+        return c._setProperty(true, { key, value, oldValue });
       }
 
       return c._validateAndSet(key, value);
