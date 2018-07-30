@@ -150,6 +150,8 @@ export type ChangesetDef = {|
   _notifyVirtualProperties: (?Array<string>) => void,
   _rollbackKeys: () => Array<string>,
   rollback: () => ChangesetDef,
+  rollbackInvalid: () => ChangesetDef,
+  rollbackProperty: () => ChangesetDef,
   save: (Object) => Promise<ChangesetDef | mixed>,
   merge: (ChangesetDef) => ChangesetDef,
   validate: (string | void) => (Promise<null> | Promise<mixed | ErrLike<mixed>> | Promise<Array<mixed | ErrLike<mixed>>>),
@@ -401,6 +403,34 @@ export function changeset(
       c._notifyVirtualProperties(keys)
 
       c.trigger(AFTER_ROLLBACK_EVENT);
+      return this;
+    },
+
+    /**
+     * Discards any errors, keeping only valid changes.
+     *
+     * @public
+     * @chainable
+     * @return {Changeset}
+     */
+    rollbackInvalid() {
+      this._notifyVirtualProperties();
+      set(this, ERRORS, {});
+
+      return this;
+    },
+
+    /**
+     * Discards changes/errors for the specified properly only.
+     *
+     * @public
+     * @chainable
+     * @return {Changeset}
+     */
+    rollbackProperty(key) {
+      this._deleteKey(CHANGES, key);
+      this._deleteKey(ERRORS, key);
+
       return this;
     },
 
