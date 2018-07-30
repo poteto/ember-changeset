@@ -1,7 +1,11 @@
 import Changeset from 'ember-changeset';
 import { module, test } from 'qunit';
 
-import EmberObject, { get, set, setProperties } from '@ember/object';
+import EmberObject, {
+  get,
+  set,
+  setProperties
+} from '@ember/object';
 import ObjectProxy from '@ember/object/proxy';
 import { Promise, resolve } from 'rsvp';
 import { dasherize } from '@ember/string';
@@ -90,6 +94,18 @@ test('#change returns the changes object', function(assert) {
   assert.deepEqual(get(dummyChangeset, 'change'), expectedResult, 'should return changes object');
 });
 
+test('#change supports `undefined`', function(assert) {
+  let model = { name: 'a' };
+  let dummyChangeset = new Changeset(model);
+  let expectedResult = { name: undefined };
+  dummyChangeset.set('name', undefined);
+
+  assert.deepEqual(
+    get(dummyChangeset, 'change'), expectedResult,
+    'property changed to `undefined` should be included in change object'
+  );
+});
+
 /**
  * #errors
  */
@@ -111,11 +127,14 @@ test("data reads the changeset CONTENT", function(assert) {
 test("data is readonly", function(assert) {
   let dummyChangeset = new Changeset(dummyModel);
 
-  assert.throws(
-    () => set(dummyChangeset, 'data', { foo: 'bar' }),
-    ({message}) => message === "Cannot set read-only property 'data' on object: changeset:[object Object]",
-    'should throw error'
-  );
+  try {
+    set(dummyChangeset, 'data', { foo: 'bar' });
+  } catch({ message }) {
+    assert.throws(
+      ({message}) => message === "Cannot set read-only property 'data' on object: changeset:[object Object]",
+      'should throw error'
+    );
+  }
 });
 
 /**
@@ -196,6 +215,15 @@ test('#get returns change that is a blank value', function(assert) {
   let result = get(dummyChangeset, 'name');
 
   assert.equal(result, '', 'should proxy to change');
+});
+
+test('#get returns change that is has undefined as value', function(assert) {
+  set(dummyModel, 'name', 'Jim Bob');
+  let dummyChangeset = new Changeset(dummyModel);
+  set(dummyChangeset, 'name', undefined);
+  let result = get(dummyChangeset, 'name');
+
+  assert.equal(result, undefined, 'should proxy to change');
 });
 
 test('nested objects will return correct values', function(assert) {
@@ -291,6 +319,47 @@ test('#set adds a change if valid', function(assert) {
   let changes = get(dummyChangeset, 'changes');
 
   assert.deepEqual(changes, expectedChanges, 'should add change');
+});
+
+test('#set supports `undefined`', function(assert) {
+  let model = EmberObject.create({ name: 'foo' });
+  let dummyChangeset = new Changeset(model);
+
+  dummyChangeset.set('name', undefined);
+  assert.equal(
+    get(dummyChangeset, 'name'),
+    undefined,
+    'should return changed value'
+  );
+  assert.deepEqual(
+    get(dummyChangeset, 'changes'),
+    [{ key: 'name', value: undefined }],
+    'should add change'
+  );
+});
+
+test('#set does not add a change if new value equals old value', function(assert) {
+  let model = EmberObject.create({ name: 'foo' });
+  let dummyChangeset = new Changeset(model);
+
+  dummyChangeset.set('name', 'foo');
+  assert.deepEqual(
+    get(dummyChangeset, 'changes'),
+    [],
+    'change is not added if new value equals old value'
+  );
+});
+
+test('#set does not add a change if new value equals old value and `skipValidate` is true', function(assert) {
+  let model = EmberObject.create({ name: 'foo' });
+  let dummyChangeset = new Changeset(model, {}, null, {skipValidate: true});
+
+  dummyChangeset.set('name', 'foo');
+  assert.deepEqual(
+    get(dummyChangeset, 'changes'),
+    [],
+    'change is not added if new value equals old value'
+  );
 });
 
 test('#set removes a change if set back to original value', function(assert) {
@@ -469,9 +538,14 @@ test('#prepare throws if callback does not return object', function(assert) {
   let dummyChangeset = new Changeset(dummyModel);
   dummyChangeset.set('first_name', 'foo');
 
-  assert.throws(() => dummyChangeset.prepare(() => { return 'foo'; }), ({ message }) => {
-    return message === 'Assertion Failed: Callback to `changeset.prepare` must return an object';
-  }, 'should throw error');
+  try {
+    dummyChangeset.prepare(() => { return 'foo'; });
+  } catch({ message }) {
+    assert.throws(
+      ({message}) => message === "Assertion Failed: Callback to `changeset.prepare` must return an object",
+      'should throw error'
+    );
+  }
 });
 
 /**
@@ -711,18 +785,28 @@ test('#merge does not merge a changeset with a non-changeset', function(assert) 
   let dummyChangesetB = { _changes: { name: 'b' } };
   dummyChangesetA.set('name', 'a');
 
-  assert.throws(() => dummyChangesetA.merge(dummyChangesetB), ({ message }) => {
-    return message === 'Assertion Failed: Cannot merge with a non-changeset';
-  }, 'should throw error');
+  try {
+    dummyChangesetA.merge(dummyChangesetB);
+  } catch({ message }) {
+    assert.throws(
+      ({message}) => message === "Assertion Failed: Cannot merge with a non-changeset",
+      'should throw error'
+    );
+  }
 });
 
 test('#merge does not merge a changeset with different content', function(assert) {
   let dummyChangesetA = new Changeset(dummyModel, dummyValidator);
   let dummyChangesetB = new Changeset(EmberObject.create(), dummyValidator);
 
-  assert.throws(() => dummyChangesetA.merge(dummyChangesetB), ({ message }) => {
-    return message === 'Assertion Failed: Cannot merge with a changeset of different content';
-  }, 'should throw error');
+  try {
+    dummyChangesetA.merge(dummyChangesetB);
+  } catch({ message }) {
+    assert.throws(
+      ({message}) => message === "Assertion Failed: Cannot merge with a changeset of different content",
+      'should throw error'
+    );
+  }
 });
 
 test('#merge preserves content and validator of origin changeset', function(assert) {
@@ -1286,6 +1370,30 @@ test('afterValidation event is triggered with the key', function(assert) {
     dummyChangeset.validate().then(() => {
       assert.ok(hasFired, 'afterValidation should be triggered with the key');
     });
+  });
+});
+
+/**
+ * afterRollback
+ */
+
+test('afterRollback event is fired after rollback', function(assert) {
+  let dummyChangeset;
+  let _validator = () => resolve(true);
+  let _validations = {
+    reservations() {
+      return _validator();
+    }
+  };
+  let hasFired = false;
+
+  set(dummyModel, 'reservations', 'ABC12345');
+  dummyChangeset = new Changeset(dummyModel, _validator, _validations);
+  dummyChangeset.on('afterRollback', () => { hasFired = true; });
+
+  run(() => {
+    dummyChangeset.rollback();
+    assert.ok(hasFired, 'afterRollback should be triggered');
   });
 });
 

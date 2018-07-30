@@ -4,7 +4,11 @@ import { module, test } from 'qunit';
 module('Unit | Utility | includes');
 
 test('it throws an error if not an array', function(assert) {
-  assert.throws(() => includes('foo', 'bar'), 'should throw error');
+  try {
+    includes('foo');
+  } catch(e) {
+    assert.ok(true, 'should throw error');
+  }
 });
 
 test('it returns true if item is in array', function(assert) {

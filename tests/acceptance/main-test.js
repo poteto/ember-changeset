@@ -1,90 +1,82 @@
-import { test, skip } from 'qunit';
-import moduleForAcceptance from '../../tests/helpers/module-for-acceptance';
-import Model from 'ember-data/model';
-import attr from 'ember-data/attr';
-import { belongsTo, hasMany } from 'ember-data/relationships';
+import { module, test, skip } from 'qunit';
+import { setupApplicationTest } from 'ember-qunit';
 import { run } from '@ember/runloop';
 import Changeset from 'ember-changeset';
 
-moduleForAcceptance('Acceptance | main', {
-  beforeEach: function() {
-    let store = this.application.__container__.lookup('service:store');
+module('Acceptance | main', function(hooks) {
+  setupApplicationTest(hooks);
 
-    this.application.register('model:profile', Model.extend({
-      firstName: attr('string', { defaultValue: 'Bob' }),
-      lastName: attr('string', { defaultValue: 'Ross' }),
-    }));
-
-    this.application.register('model:user', Model.extend({
-      profile: belongsTo('profile'),
-      dogs: hasMany('dog'),
-    }));
-
-    this.application.register('model:dog', Model.extend({
-      breed: attr('string', { defaultValue: 'rough collie' }),
-      user: belongsTo('user'),
-    }));
+  hooks.beforeEach(function() {
+    // for backwards compatibility with pre 3.0 versions of ember
+    let container = this.owner || this.application.__container__;
+    this.store = container.lookup('service:store');
 
     run(() => {
-      let profile = store.createRecord('profile');
-      let user = store.createRecord('user', { profile });
+      let profile = this.store.createRecord('profile');
+      let user = this.store.createRecord('user', { profile });
       this.dummyUser = user;
 
       return user.get('dogs').then(() => {
         for (let i = 0; i < 2; i++) {
-          user.get('dogs').addObject(store.createRecord('dog'))
+          user.get('dogs').addObject(this.store.createRecord('dog'))
         }
       });
     });
-  },
-});
+  });
 
-test('it works for belongsTo', function(assert) {
-  let user = this.dummyUser;
-  let changeset = new Changeset(user);
+  test('it works for belongsTo', function(assert) {
+    let user = this.dummyUser;
+    let changeset = new Changeset(user);
 
-  run(() => {
-    assert.equal(changeset.get('profile'), user.get('profile'));
-    assert.equal(changeset.get('profile.firstName'), user.get('profile.firstName'));
-    assert.equal(changeset.get('profile.lastName'), user.get('profile.lastName'));
+    run(() => {
+      assert.equal(changeset.get('profile'), user.get('profile'));
+      assert.equal(changeset.get('profile.firstName'), user.get('profile.firstName'));
+      assert.equal(changeset.get('profile.lastName'), user.get('profile.lastName'));
 
-    changeset.set('profile.firstName', 'Grace');
-    changeset.set('profile.lastName', 'Hopper');
+      changeset.set('profile.firstName', 'Grace');
+      changeset.set('profile.lastName', 'Hopper');
 
-    assert.equal(changeset.get('profile.firstName'), 'Grace');
-    assert.equal(changeset.get('profile.lastName'), 'Hopper');
+      assert.equal(changeset.get('profile.firstName'), 'Grace');
+      assert.equal(changeset.get('profile.lastName'), 'Hopper');
 
-    changeset.execute();
+      changeset.execute();
 
-    assert.equal(user.get('profile.firstName'), 'Grace');
-    assert.equal(user.get('profile.lastName'), 'Hopper');
-  })
-});
+      assert.equal(user.get('profile.firstName'), 'Grace');
+      assert.equal(user.get('profile.lastName'), 'Hopper');
 
-skip("it (doesn't) work for hasMany / firstObject", function(a) {
-  a.expect(2 + 4);
+      let profile = this.store.createRecord('profile', { firstName: 'Terry', lastName: 'Bubblewinkles' });
+      changeset.set('profile', profile);
 
-  run(() => {
+      assert.equal(changeset.get('profile').get('firstName'), 'Terry');
+      assert.equal(changeset.get('profile.firstName'), 'Terry');
+      assert.equal(changeset.get('profile.lastName'), 'Bubblewinkles');
+
+      changeset.execute();
+
+      assert.equal(user.get('profile.firstName'), 'Terry');
+      assert.equal(user.get('profile.lastName'), 'Bubblewinkles');
+    })
+  });
+
+  // skipping test for now
+  skip('it works for hasMany / firstObject', function(assert) {
     let user = this.dummyUser;
 
-    // TODO: Add special handling if content is DS.ManyArray?
-    // `dogs.firstObject` is readonly.
-    return user.get('dogs').then(dogs => {
-      const FirstName = 'firstObject.user.profile.firstName';
-      const LastName  = 'firstObject.user.profile.lastName';
-
-      let cs = new Changeset(dogs);
-
-      cs.set(FirstName, 'Grace');
-      cs.set(LastName,  'Hopper');
-      a.equal(cs.get(FirstName), 'Grace');
-      a.equal(cs.get(LastName),  'Hopper');
-
-      cs.execute();
-      a.equal(user.get(FirstName), 'Grace');
-      a.equal(user.get(LastName),  'Hopper');
-      a.equal(user.get('profile.firstName'), 'Grace');
-      a.equal(user.get('profile.lastName'),  'Hopper');
+    let changeset = new Changeset(user);
+    run(() => {
+      let newDog = this.store.createRecord('dog', { breed: 'Münsterländer' });
+      changeset.get('dogs').pushObjects([newDog]);
     });
+
+    let dogs = changeset.get('dogs').toArray();
+    assert.equal(dogs[0].get('breed'), 'rough collie');
+    assert.equal(dogs[1].get('breed'), 'rough collie');
+    assert.equal(dogs[2].get('breed'), 'Münsterländer');
+
+    changeset.execute();
+    dogs = user.get('dogs').toArray();
+    assert.equal(dogs[0].get('breed'), 'rough collie');
+    assert.equal(dogs[1].get('breed'), 'rough collie');
+    assert.equal(dogs[2].get('breed'), 'Münsterländer');
   });
 });
