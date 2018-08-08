@@ -434,7 +434,7 @@ export function changeset(
      * @param {String} key key to delete off of changes and errors
      * @return {Changeset}
      */
-    rollbackProperty(key) {
+    rollbackProperty(key) /*: ChangesetDef */ {
       this._deleteKey(CHANGES, key);
       this._deleteKey(ERRORS, key);
 
