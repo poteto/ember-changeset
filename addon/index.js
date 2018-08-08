@@ -150,7 +150,7 @@ export type ChangesetDef = {|
   _notifyVirtualProperties: (?Array<string>) => void,
   _rollbackKeys: () => Array<string>,
   rollback: () => ChangesetDef,
-  rollbackInvalid: () => ChangesetDef,
+  rollbackInvalid: (string | void) => ChangesetDef,
   rollbackProperty: () => ChangesetDef,
   save: (Object) => Promise<ChangesetDef | mixed>,
   merge: (ChangesetDef) => ChangesetDef,
@@ -411,11 +411,17 @@ export function changeset(
      *
      * @public
      * @chainable
+     * @param {String} key optional key to rollback invalid
      * @return {Changeset}
      */
-    rollbackInvalid() {
-      this._notifyVirtualProperties();
-      set(this, ERRORS, {});
+    rollbackInvalid(key /*: string | void */) /*: ChangesetDef */ {
+      if (key) {
+        this._notifyVirtualProperties([key]);
+        this._deleteKey(ERRORS, key);
+      } else {
+        this._notifyVirtualProperties();
+        set(this, ERRORS, {});
+      }
 
       return this;
     },
@@ -425,9 +431,10 @@ export function changeset(
      *
      * @public
      * @chainable
+     * @param {String} key key to delete off of changes and errors
      * @return {Changeset}
      */
-    rollbackProperty(key) {
+    rollbackProperty(key) /*: ChangesetDef */ {
       this._deleteKey(CHANGES, key);
       this._deleteKey(ERRORS, key);
 
@@ -501,7 +508,7 @@ export function changeset(
 
     /**
      * Manually push multiple errors to the changeset as an array. If there is
-     * an existing error or change for `key`. it will be overwritten.
+     * an existing error or change for `key`, it will be overwritten.
      */
     pushErrors(
       key          /*: string        */,
