@@ -150,7 +150,7 @@ export type ChangesetDef = {|
   _notifyVirtualProperties: (?Array<string>) => void,
   _rollbackKeys: () => Array<string>,
   rollback: () => ChangesetDef,
-  rollbackInvalid: () => ChangesetDef,
+  rollbackInvalid: (string | void) => ChangesetDef,
   rollbackProperty: () => ChangesetDef,
   save: (Object) => Promise<ChangesetDef | mixed>,
   merge: (ChangesetDef) => ChangesetDef,
@@ -414,7 +414,7 @@ export function changeset(
      * @param {String} key optional key to rollback invalid
      * @return {Changeset}
      */
-    rollbackInvalid(key) {
+    rollbackInvalid(key /*: string | void */) /*: ChangesetDef */ {
       if (key) {
         this._notifyVirtualProperties([key]);
         this._deleteKey(ERRORS, key);
