@@ -902,7 +902,9 @@ export default Component.extend({
     }
   }
 });
+```
 
+```hbs
 <input
   type={{type}}
   value={{get model valuePath}}
