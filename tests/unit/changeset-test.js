@@ -865,7 +865,8 @@ test('#rollbackInvalid clears errors and keeps valid values', function(assert) {
   let dummyChangeset = new Changeset(dummyModel, dummyValidator);
   let expectedChanges = [
     { key: 'firstName', value: 'foo' },
-    { key: 'lastName', value: 'bar' }
+    { key: 'lastName', value: 'bar' },
+    { key: 'name', value: '' }
   ];
   let expectedErrors = [{ key: 'name', validation: 'too short', value: '' }];
   dummyChangeset.set('firstName', 'foo');
@@ -883,7 +884,9 @@ test('#rollbackInvalid a specific key clears key error and keeps valid values', 
   let dummyChangeset = new Changeset(dummyModel, dummyValidator);
   let expectedChanges = [
     { key: 'firstName', value: 'foo' },
-    { key: 'lastName', value: 'bar' }
+    { key: 'lastName', value: 'bar' },
+    { key: 'password', value: false },
+    { key: 'name', value: '' }
   ];
   let expectedErrors = [
     { key: 'password', validation: ['foo', 'bar'], value: false },
@@ -931,7 +934,8 @@ test('#rollbackProperty clears errors for specified property', function(assert) 
   let dummyChangeset = new Changeset(dummyModel, dummyValidator);
   let expectedChanges = [
     { key: 'firstName', value: 'foo' },
-    { key: 'lastName', value: 'bar' }
+    { key: 'lastName', value: 'bar' },
+    { key: 'name', value: '' }
   ];
   let expectedErrors = [{ key: 'name', validation: 'too short', value: '' }];
   dummyChangeset.set('firstName', 'foo');
@@ -941,6 +945,10 @@ test('#rollbackProperty clears errors for specified property', function(assert) 
   assert.deepEqual(get(dummyChangeset, 'changes'), expectedChanges, 'precondition');
   assert.deepEqual(get(dummyChangeset, 'errors'), expectedErrors, 'precondition');
   dummyChangeset.rollbackProperty('name');
+  expectedChanges = [
+    { key: 'firstName', value: 'foo' },
+    { key: 'lastName', value: 'bar' }
+  ];
   assert.deepEqual(get(dummyChangeset, 'changes'), expectedChanges, 'should not rollback');
   assert.deepEqual(get(dummyChangeset, 'errors'), [], 'should rollback');
 });
@@ -1161,7 +1169,7 @@ test('#addError adds an error to the changeset using the shortcut', function (as
   assert.ok(get(dummyChangeset, 'isInvalid'), 'should be invalid');
   assert.equal(get(dummyChangeset, 'error.email.validation'), 'Email already taken', 'should add the error');
   assert.equal(get(dummyChangeset, 'error.email.value'), 'jim@bob.com', 'addError uses already present value');
-  assert.deepEqual(get(dummyChangeset, 'changes'), [], 'pushErrors clears the changes on the changeset');
+  assert.deepEqual(get(dummyChangeset, 'changes'), [{ key: 'email', value: 'jim@bob.com'}], 'errors set as changes on changeset');
   dummyChangeset.set('email', 'unique@email.com');
   assert.ok(get(dummyChangeset, 'isValid'), 'should be valid');
   assert.deepEqual(get(dummyChangeset, 'changes')[0], { key: 'email', value: 'unique@email.com' }, 'has correct changes');
