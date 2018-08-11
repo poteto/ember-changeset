@@ -850,6 +850,68 @@ if (isChangeset(model)) {
 - [`ember-changeset-hofs`](https://github.com/nucleartide/ember-changeset-hofs) - Higher-order validation functions
 - [`ember-bootstrap-changeset-validations`](https://github.com/kaliber5/ember-bootstrap-changeset-validations) - Adds support for changeset validations to `ember-bootstrap`
 
+## Tips and Tricks
+
+- General Input Helper with ember-concurrency
+
+```js
+export default Component.extend({
+  classNameBindings: ['hasError:validated-input--error'],
+
+  _checkValidity: task(function* (changeset, valuePath, value) {
+    yield timeout(150);
+
+    let snapshot = changeset.snapshot();
+
+    // valuePath is the property on the changeset, e.g. firstName
+    set(changeset, valuePath, value);
+
+    if (!changeset.get(`error.${valuePath}`)) {
+      set(this, 'hasError', false);
+    } else {
+      // if error, restore changeset so don't show error in template immediately'
+      // i.e. wait for onblur action to validate and show error in template
+      changeset.restore(snapshot);
+    }
+  }).restartable(),
+
+  actions: {
+      /**
+     * @method validateProperty
+     * @param {Object} changeset
+     * @param {String} valuePath
+     * @param {Object} e
+     */
+    validateProperty(changeset, valuePath, e) {
+      set(changeset, valuePath, e.target.value);
+
+      if (changeset.get(`error.${valuePath}`)) {
+        set(this, 'hasError', true);
+      } else {
+        set(this, 'hasError', false);
+      }
+    },
+
+    /**
+     * @method checkValidity
+     * @param {Object} changeset
+     * @param {String|Integer} value
+     */
+    checkValidity(changeset, value) {
+      get(this, '_checkValidity').perform(changeset, this.valuePath, value);
+    }
+  }
+});
+
+<input
+  type={{type}}
+  value={{get model valuePath}}
+  oninput={{action (action "checkValidity" changeset) value="target.value"}}
+  onblur={{action "validateProperty" changeset valuePath}}
+  disabled={{disabled}}
+  placeholder={{placeholder}}>
+```
+
 ## Installation
 
 * `git clone` this repository
