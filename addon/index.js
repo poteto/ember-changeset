@@ -415,16 +415,16 @@ export function changeset(
      * @return {Changeset}
      */
     rollbackInvalid(key /*: string | void */) /*: ChangesetDef */ {
+      let errorKeys = keys(get(this, ERRORS));
+
       if (key) {
         this._notifyVirtualProperties([key]);
-        let errorKeys = keys(get(this, ERRORS));
         this._deleteKey(ERRORS, key);
         if (errorKeys.indexOf(key) > -1) {
           this._deleteKey(CHANGES, key);
         }
       } else {
         this._notifyVirtualProperties();
-        let errorKeys = keys(get(this, ERRORS));
         set(this, ERRORS, {});
 
         // if on CHANGES hash, rollback those as well
