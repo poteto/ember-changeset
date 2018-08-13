@@ -411,16 +411,23 @@ export function changeset(
      *
      * @public
      * @chainable
-     * @param {String} key optional key to rollback invalid
+     * @param {String} key optional key to rollback invalid values
      * @return {Changeset}
      */
     rollbackInvalid(key /*: string | void */) /*: ChangesetDef */ {
       if (key) {
         this._notifyVirtualProperties([key]);
         this._deleteKey(ERRORS, key);
+        this._deleteKey(CHANGES, key);
       } else {
         this._notifyVirtualProperties();
+        let errorKeys = keys(get(this, ERRORS));
         set(this, ERRORS, {});
+
+        // if on CHANGES hash, rollback those as well
+        errorKeys.forEach((errKey) => {
+          this._deleteKey(CHANGES, errKey);
+        })
       }
 
       return this;
@@ -830,7 +837,9 @@ export function changeset(
       key     /*: string */ = ''
     ) /*: void */ {
       let obj /*: InternalMap */ = get(this, objName);
-      if (obj.hasOwnProperty(key)) delete obj[key];
+      if (obj.hasOwnProperty(key)) {
+        delete obj[key];
+      }
       let c /*: ChangesetDef */ = this;
       c.notifyPropertyChange(`${objName}.${key}`);
       c.notifyPropertyChange(objName);

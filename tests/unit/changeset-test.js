@@ -876,6 +876,10 @@ test('#rollbackInvalid clears errors and keeps valid values', function(assert) {
   assert.deepEqual(get(dummyChangeset, 'changes'), expectedChanges, 'precondition');
   assert.deepEqual(get(dummyChangeset, 'errors'), expectedErrors, 'precondition');
   dummyChangeset.rollbackInvalid();
+  expectedChanges = [
+    { key: 'firstName', value: 'foo' },
+    { key: 'lastName', value: 'bar' }
+  ];
   assert.deepEqual(get(dummyChangeset, 'changes'), expectedChanges, 'should not rollback');
   assert.deepEqual(get(dummyChangeset, 'errors'), [], 'should rollback');
 });
@@ -900,6 +904,11 @@ test('#rollbackInvalid a specific key clears key error and keeps valid values', 
   assert.deepEqual(get(dummyChangeset, 'changes'), expectedChanges, 'precondition');
   assert.deepEqual(get(dummyChangeset, 'errors'), expectedErrors, 'precondition');
   dummyChangeset.rollbackInvalid('name');
+  expectedChanges = [
+    { key: 'firstName', value: 'foo' },
+    { key: 'lastName', value: 'bar' },
+    { key: 'password', value: false }
+  ];
   assert.deepEqual(get(dummyChangeset, 'changes'), expectedChanges, 'should not rollback');
   expectedErrors = [
     { key: 'password', validation: ['foo', 'bar'], value: false }
@@ -914,6 +923,25 @@ test('#rollbackInvalid resets valid state', function(assert) {
   assert.ok(get(dummyChangeset, 'isInvalid'), 'should be invalid');
   dummyChangeset.rollbackInvalid();
   assert.ok(get(dummyChangeset, 'isValid'), 'should be valid');
+});
+
+test('#rollbackInvalid works for keys not on changeset', function(assert) {
+  let dummyChangeset = new Changeset(dummyModel, dummyValidator);
+  let expectedChanges = [
+    { key: 'firstName', value: 'foo' },
+    { key: 'lastName', value: 'bar' },
+    { key: 'name', value: '' }
+  ];
+  let expectedErrors = [{ key: 'name', validation: 'too short', value: '' }];
+  dummyChangeset.set('firstName', 'foo');
+  dummyChangeset.set('lastName', 'bar');
+  dummyChangeset.set('name', '');
+
+  assert.deepEqual(get(dummyChangeset, 'changes'), expectedChanges, 'precondition');
+  assert.deepEqual(get(dummyChangeset, 'errors'), expectedErrors, 'precondition');
+  dummyChangeset.rollbackInvalid('dowat?');
+  assert.deepEqual(get(dummyChangeset, 'changes'), expectedChanges, 'should not rollback');
+  assert.deepEqual(get(dummyChangeset, 'errors'), expectedErrors, 'precondition');
 });
 
 test('#rollbackProperty restores old value for specified property only', function(assert) {
