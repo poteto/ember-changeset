@@ -925,6 +925,21 @@ test('#rollbackInvalid resets valid state', function(assert) {
   assert.ok(get(dummyChangeset, 'isValid'), 'should be valid');
 });
 
+test('#rollbackInvalid will not remove changes that are valid', function(assert) {
+  let dummyChangeset = new Changeset(dummyModel, dummyValidator);
+  dummyChangeset.set('name', 'abcd');
+
+  let expectedChanges = [
+    { key: 'name', value: 'abcd' },
+  ];
+  assert.deepEqual(get(dummyChangeset, 'changes'), expectedChanges, 'has correct changes');
+  assert.ok(get(dummyChangeset, 'isValid'), 'should be valid');
+  dummyChangeset.rollbackInvalid('name');
+  assert.deepEqual(get(dummyChangeset, 'changes'), expectedChanges, 'should not remove valid changes');
+  assert.ok(get(dummyChangeset, 'isValid'), 'should still be valid');
+});
+
+
 test('#rollbackInvalid works for keys not on changeset', function(assert) {
   let dummyChangeset = new Changeset(dummyModel, dummyValidator);
   let expectedChanges = [

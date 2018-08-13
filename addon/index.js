@@ -417,8 +417,11 @@ export function changeset(
     rollbackInvalid(key /*: string | void */) /*: ChangesetDef */ {
       if (key) {
         this._notifyVirtualProperties([key]);
+        let errorKeys = keys(get(this, ERRORS));
         this._deleteKey(ERRORS, key);
-        this._deleteKey(CHANGES, key);
+        if (errorKeys.indexOf(key) > -1) {
+          this._deleteKey(CHANGES, key);
+        }
       } else {
         this._notifyVirtualProperties();
         let errorKeys = keys(get(this, ERRORS));
