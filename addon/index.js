@@ -411,16 +411,26 @@ export function changeset(
      *
      * @public
      * @chainable
-     * @param {String} key optional key to rollback invalid
+     * @param {String} key optional key to rollback invalid values
      * @return {Changeset}
      */
     rollbackInvalid(key /*: string | void */) /*: ChangesetDef */ {
+      let errorKeys = keys(get(this, ERRORS));
+
       if (key) {
         this._notifyVirtualProperties([key]);
         this._deleteKey(ERRORS, key);
+        if (errorKeys.indexOf(key) > -1) {
+          this._deleteKey(CHANGES, key);
+        }
       } else {
         this._notifyVirtualProperties();
         set(this, ERRORS, {});
+
+        // if on CHANGES hash, rollback those as well
+        errorKeys.forEach((errKey) => {
+          this._deleteKey(CHANGES, errKey);
+        })
       }
 
       return this;
@@ -492,7 +502,6 @@ export function changeset(
 
       // Remove `key` from changes map.
       let c = (this /*: ChangesetDef */);
-      c._deleteKey(CHANGES, key);
 
       // Add `key` to errors map.
       let errors /*: Errors */ = get(this, ERRORS);
@@ -626,10 +635,14 @@ export function changeset(
       let validation /*: ValidationResult | Promise<ValidationResult> */ =
         c._validate(key, value, oldValue);
 
+      let v /*: ValidationResult */ = (validation /*: any */);
+
+      c.trigger(BEFORE_VALIDATION_EVENT, key);
+      let result = c._setProperty(v, { key, value, oldValue });
+
       // TODO: Address case when Promise is rejected.
       if (isPromise(validation)) {
         c._setIsValidating(key, true);
-        c.trigger(BEFORE_VALIDATION_EVENT, key);
 
         let v /*: Promise<ValidationResult> */ = (validation /*: any */);
         return v.then(resolvedValidation => {
@@ -639,10 +652,9 @@ export function changeset(
         });
       }
 
-      c.trigger(BEFORE_VALIDATION_EVENT, key);
       c.trigger(AFTER_VALIDATION_EVENT, key);
-      let v /*: ValidationResult */ = (validation /*: any */);
-      return c._setProperty(v, { key, value, oldValue });
+
+      return result;
     },
 
     /**
@@ -689,12 +701,6 @@ export function changeset(
       // Shorthand for `this`.
       let c /*: ChangesetDef */ = this;
 
-      // Error case.
-      if (!isValid) {
-        let v /*: ValidationErr */ = (validation /*: any */);
-        return c.addError(key, { value, validation: v });
-      }
-
       // Happy path: remove `key` from error map.
       c._deleteKey(ERRORS, key);
 
@@ -714,6 +720,12 @@ export function changeset(
       // Happy path: notify that `key` was added.
       c.notifyPropertyChange(CHANGES);
       c.notifyPropertyChange(key);
+
+      // Error case.
+      if (!isValid) {
+        let v /*: ValidationErr */ = (validation /*: any */);
+        return c.addError(key, { value, validation: v });
+      }
 
       // Return new value.
       return value;
@@ -828,7 +840,9 @@ export function changeset(
       key     /*: string */ = ''
     ) /*: void */ {
       let obj /*: InternalMap */ = get(this, objName);
-      if (obj.hasOwnProperty(key)) delete obj[key];
+      if (obj.hasOwnProperty(key)) {
+        delete obj[key];
+      }
       let c /*: ChangesetDef */ = this;
       c.notifyPropertyChange(`${objName}.${key}`);
       c.notifyPropertyChange(objName);

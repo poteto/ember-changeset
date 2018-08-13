@@ -1,8 +1,11 @@
 // @flow
 
-import Ember from 'ember';
 import { computed, get } from '@ember/object';
 import { typeOf } from '@ember/utils';
+import { assign as EmberAssign } from '@ember/polyfills';
+import { merge } from '@ember/polyfills'
+
+const assign = EmberAssign || merge;
 
 /*::
 import type Change from 'ember-changeset/-private/change';
@@ -10,8 +13,6 @@ import type Err from 'ember-changeset/-private/err';
 */
 
 const { keys } = Object;
-// eslint-disable-next-line ember/new-module-imports
-const assign = Ember.assign || Ember.merge;
 
 /**
  * Compute the array form of an object.
