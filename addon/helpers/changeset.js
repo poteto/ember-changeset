@@ -3,7 +3,9 @@
 import Changeset from 'ember-changeset';
 import isChangeset from 'ember-changeset/utils/is-changeset';
 import isPromise from 'ember-changeset/utils/is-promise';
+import isRelay from 'ember-changeset/utils/is-relay';
 import { helper } from '@ember/component/helper';
+import { get } from '@ember/object';
 
 /*::
 import type { ValidatorFunc } from 'ember-changeset/types/validator-func';
@@ -22,7 +24,11 @@ export function changeset(
     return obj.then((resolved) => new Changeset(resolved, validations, {}, options));
   }
 
-  return new Changeset(obj, validations, {}, options);
+  let result = new Changeset(obj, validations, {}, options);
+  if (isRelay(result)) {
+    return get(result, 'content');
+  }
+  return result;
 }
 
 export default helper(changeset);

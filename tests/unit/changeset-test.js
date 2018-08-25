@@ -46,15 +46,15 @@ function dummyValidator({ key, newValue, oldValue, changes, content }) {
   }
 }
 
-module('Unit | Utility | changeset', {
-  beforeEach() {
+module('Unit | Utility | changeset', function(hooks) {
+  hooks.beforeEach(function() {
     let Dummy = EmberObject.extend({
       save() {
         return resolve(this);
       }
     });
     dummyModel = Dummy.create();
-  }
+  });
 });
 
 /**
@@ -200,6 +200,25 @@ test('#get proxies to content', function(assert) {
   assert.equal(result, 'Jim Bob', 'should proxy to content');
 });
 
+test('#get returns the content when the proxied content is a class', function(assert) {
+  class Moment {
+    constructor(date) {
+      this.date = date;
+    }
+  }
+
+  let d = new Date('2015');
+  let momentInstance = new Moment(d);
+  let c = new Changeset({
+    startDate: momentInstance
+  });
+
+  let newValue = c.get('startDate');
+  assert.deepEqual(newValue, momentInstance, 'correct getter');
+  assert.ok(newValue instanceof Moment, 'correct instance');
+  assert.equal(newValue.date, d, 'correct date on moment object');
+});
+
 test('#get returns change if present', function(assert) {
   set(dummyModel, 'name', 'Jim Bob');
   let dummyChangeset = new Changeset(dummyModel);
@@ -320,6 +339,49 @@ test('#set adds a change if valid', function(assert) {
   let changes = get(dummyChangeset, 'changes');
 
   assert.deepEqual(changes, expectedChanges, 'should add change');
+});
+
+test('#set adds a change if the key is an object', function(assert) {
+  set(dummyModel, 'org', {
+    usa: {
+      ny: 'ny',
+    }
+  });
+
+  let c = new Changeset(dummyModel);
+  c.set('org.usa.ny', 'foo');
+
+  let expectedChanges = [{ key: 'org.usa.ny', value: 'foo' }];
+  let changes = get(c, 'changes');
+
+  assert.deepEqual(changes, expectedChanges, 'should add change');
+});
+
+test('#set adds a change if value is an object', function(assert) {
+  class Moment {
+    constructor(date) {
+      this.date = date;
+    }
+  }
+  let c = new Changeset(dummyModel);
+  let d = new Date();
+  let momentInstance = new Moment(d);
+  c.set('startDate', momentInstance);
+
+  let expectedChanges = [{ key: 'startDate', value: momentInstance }];
+  let changes = get(c, 'changes');
+
+  assert.deepEqual(changes, expectedChanges, 'should add change');
+
+  let newValue = c.get('startDate');
+  assert.deepEqual(newValue, momentInstance, 'correct getter');
+  assert.ok(newValue instanceof Moment, 'correct instance');
+  assert.equal(newValue.date, d, 'correct date on moment object');
+
+  newValue = get(c, 'startDate');
+  assert.deepEqual(newValue, momentInstance, 'correct getter');
+  assert.ok(newValue instanceof Moment, 'correct instance');
+  assert.equal(newValue.date, d, 'correct date on moment object');
 });
 
 test('#set supports `undefined`', function(assert) {
@@ -725,8 +787,8 @@ test('#save handles rejected proxy content', function(assert) {
 
   run(() => {
     dummyChangeset.save().catch((error) => {
-        assert.equal(error.message, 'some ember data error');
-      })
+      assert.equal(error.message, 'some ember data error');
+    })
       .finally(() => done());
   });
 });
@@ -1501,3 +1563,4 @@ test('can set nested keys after validate', function(assert) {
     .then(() => c.set('org.usa.ny', 'should not fail'))
     .finally(done);
 });
+
