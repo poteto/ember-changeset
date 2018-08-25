@@ -767,7 +767,7 @@ export function changeset(
       }
 
       let original /*: mixed */ = get(content, key);
-      if (isObject(original) && !plainValue) {
+      if (original && isObject(original) && !plainValue) {
         let c /*: ChangesetDef */ = this;
         let o /*: Object       */ = (original /*: any */);
         return c._relayFor(key, o);
@@ -858,7 +858,9 @@ export function changeset(
      */
     get(keyName /*: string */) /*: mixed */ {
       let result = this._super(keyName);
-      if (isRelay(result)) return get(result, 'content');
+      if (isRelay(result)) {
+        return get(result, 'content');
+      }
       return result;
     }
   } /*: ChangesetDef */));

@@ -326,6 +326,36 @@ test('it does not rollback when validating', async function(assert) {
   assert.equal(find('code.odd').textContent.trim(), '10', 'should not rollback');
 });
 
+test('it handles when changeset is already set', async function(assert) {
+  class Moment {
+    constructor(date) {
+      this.date = date;
+    }
+  }
+  let d = new Date('2015');
+  let momentInstance = new Moment(d);
+  this.set('dummyModel', { startDate: momentInstance });
+  this.render(hbs`
+    {{#with (changeset dummyModel) as |changeset|}}
+      <h1>{{changeset.startDate.date}}</h1>
+    {{/with}}
+  `);
+
+  assert.equal(find('h1').textContent.trim(), d, 'should update observable value');
+});
+
+test('it handles when is plain object passed to helper', async function(assert) {
+  let d = new Date('2015');
+  this.set('d', d);
+  this.render(hbs`
+    {{#with (changeset (hash date=d)) as |changeset|}}
+      <h1>{{changeset.date}}</h1>
+    {{/with}}
+  `);
+
+  assert.equal(find('h1').textContent.trim(), d, 'should update observable value');
+});
+
 test('it handles models that are promises', async function(assert) {
   this.set('dummyModel', resolve({ firstName: 'Jim', lastName: 'Bob' }));
   this.render(hbs`
