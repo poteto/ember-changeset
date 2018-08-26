@@ -1292,7 +1292,7 @@ module('Unit | Utility | changeset', function(hooks) {
     assert.ok(get(dummyChangeset, 'isInvalid'), 'should be invalid');
     assert.deepEqual(get(dummyChangeset, 'error.email.validation'), ['Email already taken', 'Invalid email format'], 'should push the error');
     assert.equal(get(dummyChangeset, 'error.email.value'), 'jim@bob.com', 'pushErrors uses already present value');
-    assert.deepEqual(get(dummyChangeset, 'changes'), [], 'pushErrors clears the changes on the changeset');
+    assert.deepEqual(get(dummyChangeset, 'changes'), [{ key: 'email', value: 'jim@bob.com' }], 'pushErrors does not clear the changes on the changeset');
     dummyChangeset.set('email', 'unique@email.com');
     assert.ok(get(dummyChangeset, 'isValid'), 'should be valid');
     assert.deepEqual(get(dummyChangeset, 'changes')[0], { key: 'email', value: 'unique@email.com' }, 'has correct changes');

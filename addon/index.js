@@ -537,7 +537,6 @@ export function changeset(
       validation = [...v, ...newErrors];
 
       let c = (this /*: ChangesetDef */)
-      c._deleteKey(CHANGES, key);
       c.notifyPropertyChange(ERRORS);
       c.notifyPropertyChange(key);
 
