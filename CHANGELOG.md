@@ -1,6 +1,6 @@
 # Change Log
 
-## [1.5.0]() (2018-08-28)
+## [1.5.0](https://github.com/poteto/ember-changeset/tree/v1.5.0) (2018-08-28)
 [Full Changelog](https://github.com/poteto/ember-changeset/compare/v1.4.2-beta.0...v1.5.0)
 
 **Important Merged pull requests:**
@@ -16,7 +16,7 @@
 
 **Closed issues:**
 
-## [1.4.1]() (2018-01-03)
+## [1.4.1](https://github.com/poteto/ember-changeset/tree/v1.4.1) (2018-01-03)
 [Full Changelog](https://github.com/poteto/ember-changeset/compare/v1.4.0...v1.4.2-beta.0)
 
 **Important Merged pull requests:**
