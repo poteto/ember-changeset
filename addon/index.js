@@ -516,8 +516,7 @@ export function changeset(
     },
 
     /**
-     * Manually push multiple errors to the changeset as an array. If there is
-     * an existing error or change for `key`, it will be overwritten.
+     * Manually push multiple errors to the changeset as an array.
      */
     pushErrors(
       key          /*: string        */,
