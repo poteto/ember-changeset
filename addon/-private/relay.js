@@ -3,7 +3,6 @@
 import ObjectProxy from '@ember/object/proxy';
 import { get } from '@ember/object';
 import { assert } from '@ember/debug';
-import { isPresent } from '@ember/utils';
 import { RELAY } from 'ember-changeset/utils/is-relay';
 
 /*::
@@ -60,9 +59,9 @@ export default ObjectProxy.extend(({
     let r /*: RelayDef */ = this;
     r._super(...arguments);
     r._changedKeys = {};
-    assert('changeset must be present.', isPresent(get(this, 'changeset')));
-    assert('content must be present.', isPresent(get(this, 'content')));
-    assert('key must be present.', isPresent(get(this, 'key')));
+    assert('changeset must be present.', !!get(this, 'changeset'));
+    assert('content must be present.', !!get(this, 'content'));
+    assert('key must be present.', !!get(this, 'key'));
   },
 
   unknownProperty(key) {

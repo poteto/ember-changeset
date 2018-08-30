@@ -1,4 +1,4 @@
-import { module, test, skip } from 'qunit';
+import { module, test } from 'qunit';
 import { setupApplicationTest } from 'ember-qunit';
 import { run } from '@ember/runloop';
 import Changeset from 'ember-changeset';
@@ -58,14 +58,14 @@ module('Acceptance | main', function(hooks) {
     })
   });
 
-  // skipping test for now
-  skip('it works for hasMany / firstObject', function(assert) {
+  test('it works for hasMany / firstObject', function(assert) {
     let user = this.dummyUser;
 
     let changeset = new Changeset(user);
     run(() => {
       let newDog = this.store.createRecord('dog', { breed: 'Münsterländer' });
-      changeset.get('dogs').pushObjects([newDog]);
+      let dogs = changeset.get('dogs');
+      dogs.pushObjects([newDog]);
     });
 
     let dogs = changeset.get('dogs').toArray();
