@@ -35,7 +35,6 @@ import {
   isEqual,
   isNone,
   isPresent,
-  typeOf,
 } from '@ember/utils';
 import {
   not,
@@ -324,7 +323,7 @@ export function changeset(
       let savePromise /*: mixed | Promise<ChangesetDef | mixed> */ = resolve(this);
       (this /*: ChangesetDef */).execute();
 
-      if (typeOf(content.save) === 'function') {
+      if (typeof content.save === 'function') {
         let result /*: mixed | Promise<mixed> */ = content.save(options);
         savePromise = result;
       }
@@ -666,7 +665,7 @@ export function changeset(
       let validator /*: ValidatorFunc */ = get(this, VALIDATOR);
       let content   /*: Object        */ = get(this, CONTENT);
 
-      if (typeOf(validator) === 'function') {
+      if (typeof validator === 'function') {
         let isValid = validator({
           key,
           newValue,
