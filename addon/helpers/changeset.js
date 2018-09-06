@@ -24,11 +24,7 @@ export function changeset(
     return obj.then((resolved) => new Changeset(resolved, validations, {}, options));
   }
 
-  let result = new Changeset(obj, validations, {}, options);
-  if (isRelay(result)) {
-    return get(result, 'content');
-  }
-  return result;
+  return new Changeset(obj, validations, {}, options);
 }
 
 export default helper(changeset);
