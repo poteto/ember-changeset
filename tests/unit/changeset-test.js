@@ -922,6 +922,49 @@ module('Unit | Utility | changeset', function(hooks) {
     assert.ok(get(dummyChangeset, 'isValid'), 'should be valid');
   });
 
+  test('#rollback twice works', function(assert) {
+    let dummyChangeset = new Changeset(dummyModel);
+    dummyChangeset.set('name', 'abcde');
+
+    let expectedChanges = [
+      { key: 'name', value: 'abcde' }
+    ];
+    assert.deepEqual(get(dummyChangeset, 'changes'), expectedChanges, 'name is set');
+    dummyChangeset.rollback();
+    assert.deepEqual(get(dummyChangeset, 'changes'), [], 'rolls back');
+
+    dummyChangeset.set('name', 'mnop');
+    expectedChanges = [
+      { key: 'name', value: 'mnop' }
+    ];
+    assert.deepEqual(get(dummyChangeset, 'changes'), expectedChanges, 'name is set');
+    dummyChangeset.rollback();
+    assert.deepEqual(get(dummyChangeset, 'changes'), [], 'rolls back');
+  });
+
+  test('#rollback twice with nested keys works', function(assert) {
+    set(dummyModel, 'org', {
+      asia: { sg: null },
+    });
+    let dummyChangeset = new Changeset(dummyModel);
+    dummyChangeset.set('org.asia.sg', 'sg');
+
+    let expectedChanges = [
+      { key: 'org.asia.sg', value: 'sg' }
+    ];
+    assert.deepEqual(get(dummyChangeset, 'changes'), expectedChanges, 'org is set');
+    dummyChangeset.rollback();
+    assert.deepEqual(get(dummyChangeset, 'changes'), [], 'rolls back');
+
+    dummyChangeset.set('org.asia.sg', 'Singapore');
+    expectedChanges = [
+      { key: 'org.asia.sg', value: 'Singapore' }
+    ];
+    assert.deepEqual(get(dummyChangeset, 'changes'), expectedChanges, 'org is set');
+    dummyChangeset.rollback();
+    assert.deepEqual(get(dummyChangeset, 'changes'), [], 'rolls back');
+  });
+
   test('#rollbackInvalid clears errors and keeps valid values', function(assert) {
     let dummyChangeset = new Changeset(dummyModel, dummyValidator);
     let expectedChanges = [
