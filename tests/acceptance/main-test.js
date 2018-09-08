@@ -55,6 +55,14 @@ module('Acceptance | main', function(hooks) {
 
       assert.equal(user.get('profile.firstName'), 'Terry');
       assert.equal(user.get('profile.lastName'), 'Bubblewinkles');
+
+      changeset.set('profile', null);
+
+      assert.equal(changeset.get('profile.content'), null);
+
+      changeset.execute();
+
+      assert.equal(user.get('profile'), null);
     })
   });
 
