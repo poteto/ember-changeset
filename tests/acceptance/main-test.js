@@ -58,7 +58,7 @@ module('Acceptance | main', function(hooks) {
 
       changeset.set('profile', null);
 
-      assert.equal(changeset.get('profile.content'), null);
+      assert.equal(changeset.get('profile'), null);
 
       changeset.execute();
 
