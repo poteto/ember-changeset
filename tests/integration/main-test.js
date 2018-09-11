@@ -1,10 +1,10 @@
 import { module, test } from 'qunit';
-import { setupApplicationTest } from 'ember-qunit';
+import { setupTest } from 'ember-qunit';
 import { run } from '@ember/runloop';
 import Changeset from 'ember-changeset';
 
-module('Acceptance | main', function(hooks) {
-  setupApplicationTest(hooks);
+module('Integration | main', function(hooks) {
+  setupTest(hooks);
 
   hooks.beforeEach(function() {
     // for backwards compatibility with pre 3.0 versions of ember
