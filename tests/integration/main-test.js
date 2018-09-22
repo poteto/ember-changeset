@@ -1,10 +1,10 @@
 import { module, test } from 'qunit';
-import { setupApplicationTest } from 'ember-qunit';
+import { setupTest } from 'ember-qunit';
 import { run } from '@ember/runloop';
 import Changeset from 'ember-changeset';
 
-module('Acceptance | main', function(hooks) {
-  setupApplicationTest(hooks);
+module('Integration | main', function(hooks) {
+  setupTest(hooks);
 
   hooks.beforeEach(function() {
     // for backwards compatibility with pre 3.0 versions of ember
@@ -28,34 +28,36 @@ module('Acceptance | main', function(hooks) {
     let user = this.dummyUser;
     let changeset = new Changeset(user);
 
+    assert.equal(changeset.get('profile'), user.get('profile'));
+    assert.equal(changeset.get('profile.firstName'), user.get('profile.firstName'));
+    assert.equal(changeset.get('profile.lastName'), user.get('profile.lastName'));
+
+    changeset.set('profile.firstName', 'Grace');
+    changeset.set('profile.lastName', 'Hopper');
+
+    assert.equal(changeset.get('profile.firstName'), 'Grace');
+    assert.equal(changeset.get('profile.lastName'), 'Hopper');
+
+    changeset.execute();
+
+    assert.equal(user.get('profile.firstName'), 'Grace');
+    assert.equal(user.get('profile.lastName'), 'Hopper');
+
+    let profile;
     run(() => {
-      assert.equal(changeset.get('profile'), user.get('profile'));
-      assert.equal(changeset.get('profile.firstName'), user.get('profile.firstName'));
-      assert.equal(changeset.get('profile.lastName'), user.get('profile.lastName'));
+      profile = this.store.createRecord('profile', { firstName: 'Terry', lastName: 'Bubblewinkles' });
+    });
 
-      changeset.set('profile.firstName', 'Grace');
-      changeset.set('profile.lastName', 'Hopper');
+    changeset.set('profile', profile);
 
-      assert.equal(changeset.get('profile.firstName'), 'Grace');
-      assert.equal(changeset.get('profile.lastName'), 'Hopper');
+    assert.equal(changeset.get('profile').get('firstName'), 'Terry');
+    assert.equal(changeset.get('profile.firstName'), 'Terry');
+    assert.equal(changeset.get('profile.lastName'), 'Bubblewinkles');
 
-      changeset.execute();
+    changeset.execute();
 
-      assert.equal(user.get('profile.firstName'), 'Grace');
-      assert.equal(user.get('profile.lastName'), 'Hopper');
-
-      let profile = this.store.createRecord('profile', { firstName: 'Terry', lastName: 'Bubblewinkles' });
-      changeset.set('profile', profile);
-
-      assert.equal(changeset.get('profile').get('firstName'), 'Terry');
-      assert.equal(changeset.get('profile.firstName'), 'Terry');
-      assert.equal(changeset.get('profile.lastName'), 'Bubblewinkles');
-
-      changeset.execute();
-
-      assert.equal(user.get('profile.firstName'), 'Terry');
-      assert.equal(user.get('profile.lastName'), 'Bubblewinkles');
-    })
+    assert.equal(user.get('profile.firstName'), 'Terry');
+    assert.equal(user.get('profile.lastName'), 'Bubblewinkles');
   });
 
   test('it works for hasMany / firstObject', function(assert) {
