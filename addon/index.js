@@ -780,6 +780,8 @@ export function changeset(
         let [baseKey, ...keyParts] = key.split('.');
         if (changes.hasOwnProperty(baseKey)) {
           let { value } = changes[baseKey];
+          // make sure to return value if not object
+          if(!value) { return value; }
           let result = get(value, keyParts.join('.'));
           if (result) {
             return result;
