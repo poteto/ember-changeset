@@ -1,6 +1,5 @@
 // @flow
 
-import Relay from 'ember-changeset/-private/relay';
 import objectToArray from 'ember-changeset/utils/computed/object-to-array';
 import isEmptyObject from 'ember-changeset/utils/computed/is-empty-object';
 import inflate from 'ember-changeset/utils/computed/inflate';
@@ -11,7 +10,6 @@ import pureAssign from 'ember-changeset/utils/assign';
 import includes from 'ember-changeset/utils/includes';
 import take from 'ember-changeset/utils/take';
 import isChangeset, { CHANGESET } from 'ember-changeset/utils/is-changeset';
-import isRelay from 'ember-changeset/utils/is-relay';
 import setNestedProperty from 'ember-changeset/utils/set-nested-property';
 import mergeNested from 'ember-changeset/utils/merge-nested';
 import validateNestedObj from 'ember-changeset/utils/validate-nested-obj';
@@ -255,14 +253,6 @@ export function changeset(
     },
 
     /**
-     * Teardown relays from cache.
-     */
-    willDestroy() /*: void */ {
-      let relayCache /*: RelayCache */ = get(this, RELAY_CACHE);
-      for (let key in relayCache) relayCache[key].destroy();
-    },
-
-    /**
      * Provides a function to run before emitting changes to the model. The
      * callback function must return a hash in the same shape:
      *
@@ -387,10 +377,6 @@ export function changeset(
      * errors.
      */
     rollback() /*: ChangesetDef */ {
-      // Notify keys contained in relays.
-      let relayCache /*: RelayCache */ = get(this, RELAY_CACHE);
-      for (let key in relayCache) relayCache[key].rollback();
-
       // Get keys before reset.
       let c /*: ChangesetDef     */ = this;
       let keys = c._rollbackKeys();
@@ -687,8 +673,6 @@ export function changeset(
       validation               /*: ValidationResult */,
       { key, value, oldValue } /*: NewProperty<T>   */
     ) /*: T | ErrLike<T> */ {
-      assert('Value must not be a Relay. If you see this error, please open an issue on https://github.com/poteto/ember-changeset/issues.', !isRelay(value));
-
       let changes /*: Changes */ = get(this, CHANGES);
       let isValid /*: boolean */ = validation === true
         || isArray(validation)
@@ -704,12 +688,6 @@ export function changeset(
       // Happy path: update change map.
       if (!isEqual(oldValue, value)) {
         setNestedProperty(changes, key, new Change(value));
-
-        // ensure cache key is updated with new relay if value is object
-        if (isObject(value)) {
-          let cache /*: RelayCache */ = get(this, RELAY_CACHE);
-          cache[key] = Relay.create({ key, changeset: this, content: value });
-        }
       } else if (key in changes) {
         c._deleteKey(CHANGES, key);
       }
@@ -751,8 +729,7 @@ export function changeset(
      * Value for change or the original value.
      */
     _valueFor(
-      key        /*: string  */,
-      plainValue /*: ?boolean */ = false
+      key /*: string  */
     ) /*: RelayDef | mixed */ {
       let changes /*: Changes */ = get(this, CHANGES);
       let errors  /*: Errors  */ = get(this, ERRORS);
@@ -764,11 +741,6 @@ export function changeset(
       }
 
       let original /*: mixed */ = get(content, key);
-      if (original && isObject(original) && !plainValue) {
-        let c /*: ChangesetDef */ = this;
-        let o /*: Object       */ = (original /*: any */);
-        return c._relayFor(key, o);
-      }
 
       if (changes.hasOwnProperty(key)) {
         let c /*: Change */ = changes[key];
@@ -790,22 +762,6 @@ export function changeset(
       }
 
       return original;
-    },
-
-    /**
-     * Construct a Relay instance for an object.
-     */
-    _relayFor(
-      key   /*: string */,
-      value /*: Object */
-    ) /*: RelayDef */ {
-      let cache /*: RelayCache */ = get(this, RELAY_CACHE);
-
-      if (!(key in cache)) {
-        cache[key] = Relay.create({ key, changeset: this, content: value });
-      }
-
-      return cache[key];
     },
 
     /**
@@ -845,22 +801,6 @@ export function changeset(
       let c /*: ChangesetDef */ = this;
       c.notifyPropertyChange(`${objName}.${key}`);
       c.notifyPropertyChange(objName);
-    },
-
-    /**
-     * Overrides `Ember.Object.get`.
-     *
-     * If the returned value is a Relay, return the Relay's underlying
-     * content instead.
-     *
-     * Otherwise, this method is equivalent to `Ember.Object.get`.
-     */
-    get(keyName /*: string */) /*: mixed */ {
-      let result = this._super(keyName);
-      if (isRelay(result)) {
-        return get(result, 'content');
-      }
-      return result;
     }
   } /*: ChangesetDef */));
 }
