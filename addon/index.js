@@ -49,7 +49,6 @@ import type {
   ValidationResult,
   ValidationErr,
 } from 'ember-changeset/types/validation-result';
-import type { RelayDef } from 'ember-changeset/-private/relay';
 import type { Config } from 'ember-changeset/types/config';
 import type { ErrLike } from 'ember-changeset/-private/err';
 */
@@ -58,7 +57,6 @@ const { keys } = Object;
 const CONTENT = '_content';
 const CHANGES = '_changes';
 const ERRORS = '_errors';
-const RELAY_CACHE = '_relayCache';
 const VALIDATOR = '_validator';
 const OPTIONS = '_options';
 const RUNNING_VALIDATIONS = '_runningValidations';
@@ -71,13 +69,11 @@ const defaultOptions = { skipValidate: false };
 /*::
 type Changes            = { [string]: Change   };
 type Errors             = { [string]: Err      };
-type RelayCache         = { [string]: RelayDef };
 type RunningValidations = { [string]: number   };
 
 type InternalMap =
   | Changes
   | Errors
-  | RelayCache
   | RunningValidations;
 
 type NewProperty<T> = {
@@ -89,7 +85,6 @@ type NewProperty<T> = {
 type InternalMapKey =
   | '_changes'
   | '_errors'
-  | '_relayCache'
   | '_runningValidations';
 
 type Snapshot = {
@@ -105,7 +100,6 @@ export type ChangesetDef = {|
   _content:            Object,
   _changes:            Changes,
   _errors:             Errors,
-  _relayCache:         RelayCache,
   _validator:          ValidatorFunc,
   _options:            Config,
   _runningValidations: RunningValidations,
@@ -127,8 +121,7 @@ export type ChangesetDef = {|
   init: () => void,
   unknownProperty: (string) => mixed,
   get: (string) => mixed,
-  _valueFor: (string, ?boolean) => RelayDef | mixed,
-  _relayFor: (string, Object) => RelayDef,
+  _valueFor: (string, ?boolean) => mixed,
   toString: () => string,
   _deleteKey: (InternalMapKey, string) => void,
   notifyPropertyChange: (string) => void,
@@ -196,7 +189,6 @@ export function changeset(
     _content: {},
     _changes: {},
     _errors: {},
-    _relayCache: {},
     _validator: defaultValidatorFn,
     _options: defaultOptions,
     _runningValidations: {},
@@ -209,7 +201,6 @@ export function changeset(
       c[CONTENT] = obj;
       c[CHANGES] = {};
       c[ERRORS] = {};
-      c[RELAY_CACHE] = {};
       c[VALIDATOR] = validateFn;
       c[OPTIONS] = pureAssign(defaultOptions, options);
       c[RUNNING_VALIDATIONS] = {};
@@ -220,7 +211,7 @@ export function changeset(
      */
     unknownProperty(
       key /*: string */
-    ) /*: RelayDef | mixed */ {
+    ) /*: mixed */ {
       return (this /*: ChangesetDef */)._valueFor(key);
     },
 
@@ -352,9 +343,6 @@ export function changeset(
         return this;
       }
 
-      // Note: we do not need to merge the RelayCache because the new
-      // changeset will create its own relays if necessary.
-
       let c1 /*: Changes    */ = get(this, CHANGES);
       let c2 /*: Changes    */ = get(changeset, CHANGES);
       let e1 /*: Errors     */ = get(this, ERRORS);
@@ -382,7 +370,6 @@ export function changeset(
       let keys = c._rollbackKeys();
 
       // Reset.
-      set(this, RELAY_CACHE, {});
       set(this, CHANGES, {});
       set(this, ERRORS, {});
       c._notifyVirtualProperties(keys)
@@ -730,7 +717,7 @@ export function changeset(
      */
     _valueFor(
       key /*: string  */
-    ) /*: RelayDef | mixed */ {
+    ) /*: mixed */ {
       let changes /*: Changes */ = get(this, CHANGES);
       let errors  /*: Errors  */ = get(this, ERRORS);
       let content /*: Object  */ = get(this, CONTENT);
