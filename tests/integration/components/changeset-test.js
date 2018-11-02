@@ -1,4 +1,4 @@
-import { module, test } from 'qunit';
+import { module, test, skip } from 'qunit';
 import { setupRenderingTest } from 'ember-qunit';
 import { resolve } from 'rsvp';
 import { typeOf, isPresent } from '@ember/utils';
@@ -155,7 +155,7 @@ module('Integration | Helper | changeset', function(hooks) {
     assert.equal(find('h1').textContent.trim(), 'foo bar', 'should update observable value');
   });
 
-  test('nested object updates when set without a validator', async function(assert) {
+  skip('nested object updates when set without a validator', async function(assert) {
     let data = { person: { firstName: 'Jim', lastName: 'Bob' } };
     let changeset = new Changeset(data);
     this.set('changeset', changeset);
@@ -175,7 +175,7 @@ module('Integration | Helper | changeset', function(hooks) {
     assert.equal(find('h1').textContent.trim(), 'foo bar', 'should update observable value');
   });
 
-  test('nested key error clears after entering valid input', async function(assert) {
+  skip('nested key error clears after entering valid input', async function(assert) {
     let data = { person: { firstName: 'Jim' } };
     let validator = ({ newValue }) => isPresent(newValue) || 'need a first name';
     let c = new Changeset(data, validator);
@@ -210,7 +210,7 @@ module('Integration | Helper | changeset', function(hooks) {
     }
   });
 
-  test('deeply nested key error clears after entering valid input', async function(assert) {
+  skip('deeply nested key error clears after entering valid input', async function(assert) {
     let data = { person: { name: { parts: { first: 'Jim' } } } };
     let validator = ({ newValue }) => isPresent(newValue) || 'need a first name';
     let c = new Changeset(data, validator);
@@ -244,7 +244,7 @@ module('Integration | Helper | changeset', function(hooks) {
     }
   });
 
-  test('a rollback propagates binding to deeply nested changesets', async function(assert) {
+  skip('a rollback propagates binding to deeply nested changesets', async function(assert) {
     let data = { person: { firstName: 'Jim', lastName: 'Bob' } };
     let changeset = new Changeset(data);
     this.set('changeset', changeset);
