@@ -1,5 +1,5 @@
 import Changeset from 'ember-changeset';
-import { module, test } from 'qunit';
+import { module, test, skip } from 'qunit';
 
 import EmberObject, {
   get,
@@ -261,7 +261,7 @@ module('Unit | Utility | changeset', function(hooks) {
     assert.equal(dummyChangeset.get('org.asia.sg'), 'sg', 'returns newly set value');
   });
 
-  test('nested objects can contain arrays', function(assert) {
+  skip('nested objects can contain arrays', function(assert) {
     assert.expect(7);
     setProperties(dummyModel, {
       name: 'Bob',
@@ -286,7 +286,7 @@ module('Unit | Utility | changeset', function(hooks) {
     assert.deepEqual(dummyModel.get('contact.emails'), [ 'fred@email.com', 'the_fred@email.com' ], 'returns model saved value');
   });
 
-  test('#getted Object proxies to underlying method', function(assert) {
+  skip('#getted Object proxies to underlying method', function(assert) {
     class Dog {
       constructor(b) {
         this.breed = b;
@@ -340,7 +340,7 @@ module('Unit | Utility | changeset', function(hooks) {
     assert.deepEqual(changes, expectedChanges, 'should add change');
   });
 
-  test('#set adds a change if the key is an object', function(assert) {
+  skip('#set adds a change if the key is an object', function(assert) {
     set(dummyModel, 'org', {
       usa: {
         ny: 'ny',
@@ -680,7 +680,7 @@ module('Unit | Utility | changeset', function(hooks) {
       result: () => ({ org: { usa: { ny: 'foo', ca: 'bar' } } }),
     },
   ].forEach(({ model, setCalls, result }, i) => {
-    test(`#execute - table-driven test ${i+1}`, function(assert) {
+    skip(`#execute - table-driven test ${i+1}`, function(assert) {
       let m = model();
       let c = new Changeset(m);
 
@@ -693,7 +693,7 @@ module('Unit | Utility | changeset', function(hooks) {
     });
   });
 
-  test('it works with nested keys', function(assert) {
+  skip('it works with nested keys', function(assert) {
     let expectedResult = {
       org: {
         asia: { sg: 'sg' },
@@ -942,7 +942,7 @@ module('Unit | Utility | changeset', function(hooks) {
     assert.deepEqual(get(dummyChangeset, 'changes'), [], 'rolls back');
   });
 
-  test('#rollback twice with nested keys works', function(assert) {
+  skip('#rollback twice with nested keys works', function(assert) {
     set(dummyModel, 'org', {
       asia: { sg: null },
     });
