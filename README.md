@@ -55,9 +55,9 @@ First, create a new `Changeset` using the `changeset` helper or through JavaScri
 
 ```hbs
 {{! application/template.hbs}}
-{{#with (changeset model (action "validate")) as |changeset|}}
+{{#with (changeset model (action "validate")) as |changesetObj|}}
   {{dummy-form
-      changeset=changeset
+      changeset=changesetObj
       submit=(action "submit")
       rollback=(action "rollback")
   }}
@@ -129,7 +129,7 @@ let changeset = new Changeset(model, validatorFn, validationMap, { skipValidate:
 ```
 
 ```hbs
-{{#with (changeset model (action "validate") skipValidate=true) as |changeset|}}
+{{#with (changeset model (action "validate") skipValidate=true) as |changesetObj|}}
   ...
 {{/with}}
 ```
