@@ -1,5 +1,3 @@
-// @flow
-
 import { computed, get } from '@ember/object';
 import deepSet from 'ember-deep-set';
 import { assert, runInDebug } from '@ember/debug';
@@ -12,12 +10,12 @@ const { keys } = Object;
  * Inflate an Object, optionally transforming each key's value by
  * `transform` function.
  */
-export default function inflate /*:: <T> */ (
-  dependentKey /*: string       */,
-  transform    /*: (T) => mixed */ = a => a
-) /*: Object */ {
+export default function inflate<T>(
+  dependentKey: string,
+  transform: (arg: T) => any = a => a
+): { [key: string]: any } {
   return computed(dependentKey, function() {
-    let obj /*: Object */ = get(this, dependentKey);
+    let obj: { [key: string]: any } = get(this, dependentKey);
 
     runInDebug(() => {
       keys(obj).forEach(key => {

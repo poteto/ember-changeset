@@ -1,5 +1,3 @@
-// @flow
-
 import setNestedProperty from 'ember-changeset/utils/set-nested-property';
 
 const { keys } = Object;
@@ -10,9 +8,9 @@ const { keys } = Object;
  *
  * This function merges using `setNestedProperty`.
  */
-export default function mergeNested /*:: <T> */ (
-  ...objects /*: Array<{ [string]: T }> */
-) /*: { [string]: T } */ {
+export default function mergeNested<T>(
+  ...objects: Array<{ [key: string]: T }>
+): { [key: string]: T } {
   let finalObj = {};
 
   objects.forEach(obj =>
