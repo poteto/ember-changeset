@@ -1,6 +1,6 @@
-import { ValidationErr } from 'ember-changeset/types/validation-result';
+import { IErr, ValidationErr } from 'ember-changeset/types';
 
-export default class Err {
+export default class Err implements IErr {
   value: any;
   validation: ValidationErr;
 

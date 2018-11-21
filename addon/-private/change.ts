@@ -1,4 +1,6 @@
-export default class Change {
+import { IChange } from 'ember-changeset/types';
+
+export default class Change implements IChange {
   value: number;
 
   constructor(value: number) {
