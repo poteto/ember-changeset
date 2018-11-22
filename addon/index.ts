@@ -42,14 +42,16 @@ import {
 } from '@ember/object';
 
 import {
+  Changes,
   Config,
+  Errors,
   IErr,
   ChangesetDef,
   ValidatorFunc,
   ValidationResult,
   ValidationErr,
+  PrepareChangesFn,
 } from 'ember-changeset/types';
-import EmberObjectNs from '@ember/object';
 
 const { keys } = Object;
 const CONTENT = '_content';
@@ -74,11 +76,23 @@ export function changeset(
   validateFn: ValidatorFunc = defaultValidatorFn,
   validationMap: { [s: string]: ValidatorFunc } = {},
   options: Config = {}
-): EmberObjectNs {
+) {
   assert('Underlying object for changeset is missing', isPresent(obj));
 
-  return EmberObject.extend(Evented, ({
+  let changeset: ChangesetDef = {
+
+    // _super: <T>(...args: Array<T>) => void,
+    // notifyPropertyChange: (s: string) => void,
+    // trigger: (k: string, v: string | void) => void,
     __changeset__: CHANGESET,
+
+    _content: {},
+    _changes: {},
+    _errors: {},
+    _validator: defaultValidatorFn,
+    _options: defaultOptions,
+    _runningValidations: {},
+    _bareChanges: transform(CHANGES, c => c.value),
 
     changes: objectToArray(CHANGES, (c: Change) => c.value, false),
     errors:  objectToArray(ERRORS, (e: Err) => ({ value: e.value, validation: e.validation }), true),
@@ -90,20 +104,6 @@ export function changeset(
     isPristine: isEmptyObject(CHANGES),
     isInvalid:  not('isValid').readOnly(),
     isDirty:    not('isPristine').readOnly(),
-
-    _bareChanges: transform(CHANGES, c => c.value),
-
-    /*::
-    _super() {},
-    notifyPropertyChange() {},
-    _content: {},
-    _changes: {},
-    _errors: {},
-    _validator: defaultValidatorFn,
-    _options: defaultOptions,
-    _runningValidations: {},
-    trigger() {},
-    */
 
     init() {
       let c: ChangesetDef = this;
@@ -131,9 +131,9 @@ export function changeset(
     setUnknownProperty<T> (
       key: string,
       value: T
-    ): T | IErr<T> | Promise<T> | Promise<IErr<T>> {
+    ): T | IErr | Promise<T> | Promise<IErr> {
       let config: Config = get(this, OPTIONS);
-      let skipValidate: boolean = get(config, 'skipValidate');
+      let skipValidate: boolean | undefined = get(config, 'skipValidate');
       let c: ChangesetDef = this;
 
       if (skipValidate) {
@@ -172,7 +172,7 @@ export function changeset(
      * ```
      */
     prepare(
-      prepareChangesFn: ({ [s: string]: any }) => ({ [s: string]: any })
+      prepareChangesFn: PrepareChangesFn
     ): ChangesetDef {
       let changes: { [s: string]: any } = get(this, '_bareChanges');
       let preparedChanges = prepareChangesFn(changes);
@@ -192,7 +192,7 @@ export function changeset(
     /**
      * Executes the changeset if in a valid state.
      */
-    execute() /*: ChangesetDef */ {
+    execute(): ChangesetDef {
       if (get(this, 'isValid') && get(this, 'isDirty')) {
         let content /*: object  */ = get(this, CONTENT);
         let changes /*: Changes */ = get(this, CHANGES);
@@ -209,7 +209,7 @@ export function changeset(
      */
     save(
       options: object
-    ): Promise<ChangesetDef || any> {
+    ): Promise<ChangesetDef | any> {
       let content: object = get(this, CONTENT);
       let savePromise: any | Promise<ChangesetDef | any> = resolve(this);
       (this: ChangesetDef).execute();
@@ -220,7 +220,7 @@ export function changeset(
       }
 
       return resolve(savePromise).then((result) => {
-        (this /*: ChangesetDef */).rollback();
+        this.rollback();
         return result;
       });
     },
@@ -243,9 +243,9 @@ export function changeset(
      * ```
      */
     merge(
-      changeset /*: ChangesetDef */
-    ) /*: ChangesetDef */ {
-      let content /*: object */ = get(this, CONTENT);
+      changeset: ChangesetDef
+    ): ChangesetDef {
+      let content: object = get(this, CONTENT);
       assert('Cannot merge with a non-changeset', isChangeset(changeset));
       assert('Cannot merge with a changeset of different content', get(changeset, CONTENT) === content);
 
@@ -253,16 +253,16 @@ export function changeset(
         return this;
       }
 
-      let c1 /*: Changes    */ = get(this, CHANGES);
-      let c2 /*: Changes    */ = get(changeset, CHANGES);
-      let e1 /*: Errors     */ = get(this, ERRORS);
-      let e2 /*: Errors     */ = get(changeset, ERRORS);
+      let c1: Changes = get(this, CHANGES);
+      let c2: Changes = get(changeset, CHANGES);
+      let e1: Errors = get(this, ERRORS);
+      let e2: Errors = get(changeset, ERRORS);
 
-      let newChangeset  /*: ChangesetDef */ = new Changeset(content, get(this, VALIDATOR));
-      let newErrors     /*: Errors  */      = objectWithout(keys(c2), e1);
-      let newChanges    /*: Changes */      = objectWithout(keys(e2), c1);
-      let mergedErrors  /*: Errors  */      = mergeNested(newErrors, e2);
-      let mergedChanges /*: Changes */      = mergeNested(newChanges, c2);
+      let newChangeset: ChangesetDef = new Changeset(content, get(this, VALIDATOR));
+      let newErrors: Errors = objectWithout(keys(c2), e1);
+      let newChanges: Changes = objectWithout(keys(e2), c1);
+      let mergedErrors: Errors = mergeNested(newErrors, e2);
+      let mergedChanges: Changes = mergeNested(newChanges, c2);
 
       newChangeset[ERRORS]  = mergedErrors;
       newChangeset[CHANGES] = mergedChanges;
@@ -274,9 +274,9 @@ export function changeset(
      * Returns the changeset to its pristine state, and discards changes and
      * errors.
      */
-    rollback() /*: ChangesetDef */ {
+    rollback(): ChangesetDef {
       // Get keys before reset.
-      let c /*: ChangesetDef     */ = this;
+      let c: ChangesetDef = this;
       let keys = c._rollbackKeys();
 
       // Reset.
@@ -296,7 +296,7 @@ export function changeset(
      * @param {String} key optional key to rollback invalid values
      * @return {Changeset}
      */
-    rollbackInvalid(key /*: string | void */) /*: ChangesetDef */ {
+    rollbackInvalid(key: string | void): ChangesetDef {
       let errorKeys = keys(get(this, ERRORS));
 
       if (key) {
@@ -340,36 +340,34 @@ export function changeset(
      * validationMap is present.
      */
     validate(
-      key /*: string | void */
-    ) /*: Promise<null> | Promise<any | IErr<any>> | Promise<Array<any | IErr<any>>> */ {
+      key: string | undefined
+    ): Promise<null> | Promise<any | IErr<any>> | Promise<Array<any | IErr>> {
       if (keys(validationMap).length === 0) {
         return resolve(null);
       }
 
-      let c /*: ChangesetDef */ = this;
+      let c: ChangesetDef = this;
 
       if (isNone(key)) {
         let maybePromise = keys(validationMap).map(validationKey => {
-          const isPlain = true;
-          return c._validateAndSet(validationKey, c._valueFor(validationKey, isPlain));
+          return c._validateAndSet(validationKey, c._valueFor(validationKey));
         });
 
         return all(maybePromise);
       }
 
       let k /*: string */ = (key /*: any */);
-      const isPlain = true;
-      return resolve(c._validateAndSet(k, c._valueFor(k, isPlain)));
+      return resolve(c._validateAndSet(k, c._valueFor(k)));
     },
 
     /**
      * Manually add an error to the changeset. If there is an existing
      * error or change for `key`, it will be overwritten.
      */
-    addError /*:: <T: string | IErr<*>> */ (
-      key   /*: string */,
-      error /*: T      */
-    ) /*: T */ {
+    addError: <T=(string | IErr)> (
+      key: string,
+      error: T
+    ): T {
       // Construct new `Err` instance.
       let newError /*: Err */;
       if (isObject(error)) {
@@ -378,12 +376,12 @@ export function changeset(
         assert('Error must have validation.', errorLike.hasOwnProperty('validation'));
         newError = new Err(errorLike.value, errorLike.validation);
       } else {
-        let validation /*: ValidationErr */ = (error /*: any */);
+        let validation: ValidationErr = error;
         newError = new Err(get(this, key), validation);
       }
 
       // Remove `key` from changes map.
-      let c = (this /*: ChangesetDef */);
+      let c: ChangesetDef = this;
 
       // Add `key` to errors map.
       let errors /*: Errors */ = get(this, ERRORS);
@@ -401,20 +399,20 @@ export function changeset(
      * Manually push multiple errors to the changeset as an array.
      */
     pushErrors(
-      key: string,
-      ...newError: string[]
-    ): IErr<any> {
-      let errors /*: Errors */ = get(this, ERRORS);
-      let existingError /*: Err */ = errors[key] || new Err(null, []);
-      let validation /*: ValidationErr */ = existingError.validation;
-      let value /*: any */ = get(this, key);
+      key,
+      ...newError
+    ) {
+      let errors: Errors = get(this, ERRORS);
+      let existingError: Err = errors[key] || new Err(null, []);
+      let validation: ValidationErr = existingError.validation;
+      let value: any = get(this, key);
 
       if (!isArray(validation) && isPresent(validation)) {
         let v /*: string */ = (existingError.validation /*: any */);
         existingError.validation = [v];
       }
 
-      let v /*: Array<string> */ = (existingError.validation /*: any */);
+      let v: string[] = existingError.validation;
       validation = [...v, ...newErrors];
 
       let c = (this /*: ChangesetDef */)
@@ -460,7 +458,7 @@ export function changeset(
       }, {});
 
       let newErrors: Errors = keys(errors).reduce((newObj, key) => {
-        let e: IErr<T> = errors[key];
+        let e: IErr = errors[key];
         newObj[key] = new Err(e.value, e.validation);
         return newObj;
       }, {});
@@ -510,7 +508,7 @@ export function changeset(
     _validateAndSet<T> (
       key: string,
       value: T
-    ): Promise<T> | Promise<IErr<T>> | T | IErr<T> {
+    ): Promise<T> | Promise<IErr> | T | IErr {
       let c          /*: ChangesetDef     */ = this;
       let content    /*: object           */ = get(this, CONTENT);
       let oldValue   /*: any            */ = get(content, key);
@@ -571,15 +569,15 @@ export function changeset(
     _setProperty<T> (
       validation: ValidationResult,
       { key, value, oldValue }: NewProperty<T>
-    ): T | IErr<T> {
-      let changes /*: Changes */ = get(this, CHANGES);
-      let isValid /*: boolean */ = validation === true
+    ): T | IErr {
+      let changes: Changes = get(this, CHANGES);
+      let isValid: boolean = validation === true
         || isArray(validation)
         && validation.length === 1
         && (validation /*: any */)[0] === true;
 
       // Shorthand for `this`.
-      let c /*: ChangesetDef */ = this;
+      let c: ChangesetDef = this;
 
       // Happy path: remove `key` from error map.
       c._deleteKey(ERRORS, key);
@@ -672,17 +670,21 @@ export function changeset(
      * @return {Void}
      */
     _notifyVirtualProperties(
-      keys: string[] = (this: ChangesetDef)._rollbackKeys()
+      keys: string[]
     ): void {
+      // TODO: investigate
+      if (!keys) {
+        keys = this._rollbackKeys()
+      }
       (keys || []).forEach(key => (this /*: ChangesetDef */).notifyPropertyChange(key));
     },
 
     /**
      * Gets the changes and error keys.
      */
-    _rollbackKeys() /*: Array<string> */ {
-      let changes /*: Changes */ = get(this, CHANGES);
-      let errors  /*: Errors  */ = get(this, ERRORS);
+    _rollbackKeys(): string[] {
+      let changes: Changes = get(this, CHANGES);
+      let errors: Errors = get(this, ERRORS);
       return emberArray([...keys(changes), ...keys(errors)]).uniq();
     },
 
@@ -697,11 +699,13 @@ export function changeset(
       if (obj.hasOwnProperty(key)) {
         delete obj[key];
       }
-      let c /*: ChangesetDef */ = this;
+      let c: ChangesetDef = this;
       c.notifyPropertyChange(`${objName}.${key}`);
       c.notifyPropertyChange(objName);
     }
-  }: ChangesetDef));
+  }
+
+  return EmberObject.extend(Evented, obj);
 }
 
 export default class Changeset {
@@ -711,7 +715,7 @@ export default class Changeset {
    * @class Changeset
    * @constructor
    */
-  constructor(...args /*: Array<any> */) {
+  constructor(...args: Array<any>) {
     return changeset(...args).create();
   }
 }
