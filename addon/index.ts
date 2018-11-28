@@ -43,10 +43,13 @@ import {
 
 import {
   Changes,
+  Content,
   Config,
   Errors,
   IErr,
+  InternalMap,
   ChangesetDef,
+  RunningValidations,
   ValidatorFunc,
   ValidationResult,
   ValidationErr,
@@ -81,7 +84,6 @@ export function changeset(
 
   let changeset: ChangesetDef = {
 
-    // _super: <T>(...args: Array<T>) => void,
     // notifyPropertyChange: (s: string) => void,
     // trigger: (k: string, v: string | void) => void,
     __changeset__: CHANGESET,
@@ -92,13 +94,13 @@ export function changeset(
     _validator: defaultValidatorFn,
     _options: defaultOptions,
     _runningValidations: {},
-    _bareChanges: transform(CHANGES, c => c.value),
+    _bareChanges: transform(CHANGES, (c: Change) => c.value),
 
     changes: objectToArray(CHANGES, (c: Change) => c.value, false),
-    errors:  objectToArray(ERRORS, (e: Err) => ({ value: e.value, validation: e.validation }), true),
-    change:  inflate(CHANGES, c => c.value),
-    error:   inflate(ERRORS, e => ({ value: e.value, validation: e.validation })),
-    data:    readOnly(CONTENT),
+    errors: objectToArray(ERRORS, (e: Err) => ({ value: e.value, validation: e.validation }), true),
+    change: inflate(CHANGES, (c: Change) => c.value),
+    error: inflate(ERRORS, (e: IErr) => ({ value: e.value, validation: e.validation })),
+    data: readOnly(CONTENT),
 
     isValid:    isEmptyObject(ERRORS),
     isPristine: isEmptyObject(CHANGES),
@@ -137,7 +139,7 @@ export function changeset(
       let c: ChangesetDef = this;
 
       if (skipValidate) {
-        let content = get(this, CONTENT);
+        let content: Content = get(this, CONTENT);
         let oldValue = get(content, key);
         return c._setProperty(true, { key, value, oldValue });
       }
@@ -180,7 +182,7 @@ export function changeset(
       assert('Callback to `changeset.prepare` must return an object', isObject(preparedChanges));
       validateNestedObj('preparedChanges', preparedChanges);
 
-      let newChanges: Changes = keys(preparedChanges).reduce((newObj, key) => {
+      let newChanges: Changes = keys(preparedChanges).reduce((newObj, key: keyof Changes) => {
         newObj[key] = new Change(preparedChanges[key]);
         return newObj;
       }, {});
@@ -194,8 +196,8 @@ export function changeset(
      */
     execute(): ChangesetDef {
       if (get(this, 'isValid') && get(this, 'isDirty')) {
-        let content /*: object  */ = get(this, CONTENT);
-        let changes /*: Changes */ = get(this, CHANGES);
+        let content: Content = get(this, CONTENT);
+        let changes: Changes = get(this, CHANGES);
         keys(changes).forEach(key => deepSet(content, key, changes[key].value));
       }
 
@@ -210,12 +212,12 @@ export function changeset(
     save(
       options: object
     ): Promise<ChangesetDef | any> {
-      let content: object = get(this, CONTENT);
+      let content: Content = get(this, CONTENT);
       let savePromise: any | Promise<ChangesetDef | any> = resolve(this);
-      (this: ChangesetDef).execute();
+      this.execute();
 
       if (typeof content.save === 'function') {
-        let result /*: any | Promise<any> */ = content.save(options);
+        let result: any | Promise<any> = content.save(options);
         savePromise = result;
       }
 
@@ -245,7 +247,7 @@ export function changeset(
     merge(
       changeset: ChangesetDef
     ): ChangesetDef {
-      let content: object = get(this, CONTENT);
+      let content: Content = get(this, CONTENT);
       assert('Cannot merge with a non-changeset', isChangeset(changeset));
       assert('Cannot merge with a changeset of different content', get(changeset, CONTENT) === content);
 
@@ -509,13 +511,13 @@ export function changeset(
       key: string,
       value: T
     ): Promise<T> | Promise<IErr> | T | IErr {
-      let c          /*: ChangesetDef     */ = this;
-      let content    /*: object           */ = get(this, CONTENT);
-      let oldValue   /*: any            */ = get(content, key);
-      let validation /*: ValidationResult | Promise<ValidationResult> */ =
+      let c: ChangesetDef = this;
+      let content: Content = get(this, CONTENT);
+      let oldValue: any = get(content, key);
+      let validation: ValidationResult | Promise<ValidationResult> =
         c._validate(key, value, oldValue);
 
-      let v /*: ValidationResult */ = (validation /*: any */);
+      let v: ValidationResult = validation;
 
       c.trigger(BEFORE_VALIDATION_EVENT, key);
       let result = c._setProperty(v, { key, value, oldValue });
@@ -546,7 +548,7 @@ export function changeset(
       oldValue: any
     ): ValidationResult | Promise<ValidationResult> {
       let validator: ValidatorFunc = get(this, VALIDATOR);
-      let content: object = get(this, CONTENT);
+      let content: Content = get(this, CONTENT);
 
       if (typeof validator === 'function') {
         let isValid = validator({
@@ -628,9 +630,9 @@ export function changeset(
     _valueFor(
       key: string
     ): any {
-      let changes /*: Changes */ = get(this, CHANGES);
-      let errors  /*: Errors  */ = get(this, ERRORS);
-      let content /*: object  */ = get(this, CONTENT);
+      let changes: Changes = get(this, CHANGES);
+      let errors: Errors = get(this, ERRORS);
+      let content: Content = get(this, CONTENT);
 
       if (errors.hasOwnProperty(key)) {
         let e: Err = errors[key];
@@ -670,7 +672,7 @@ export function changeset(
      * @return {Void}
      */
     _notifyVirtualProperties(
-      keys: string[]
+      keys?: string[]
     ): void {
       // TODO: investigate
       if (!keys) {

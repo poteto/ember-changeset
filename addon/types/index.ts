@@ -13,11 +13,16 @@ export { Config };
 import ComputedProperty from '@ember/object/computed';
 
 export interface IChange {
-  value: number
+  value: any
 }
-export type Changes = {
+export interface Changes {
   [s: string]: IChange
 };
+
+export interface Content {
+  save?: Function | undefined,
+  [key: string]: any
+}
 
 export interface IErr {
   value: any,
@@ -79,9 +84,9 @@ export interface ChangesetDef {
   isInvalid: ComputedProperty<boolean, boolean>,
   isDirty: ComputedProperty<boolean, boolean>,
 
-  // _super: <T>(...args: Array<T>) => void,
-  // notifyPropertyChange: (s: string) => void,
-  // trigger: (k: string, v: string | void) => void,
+  _super: <T>(...args: Array<T>) => void,
+  notifyPropertyChange: (s: string) => void,
+  trigger: (k: string, v?: string | void) => void,
   init: () => void,
   unknownProperty: (s: string) => any,
   setUnknownProperty: <T>(key: string, value: T) => (T | IErr | Promise<T> | Promise<IErr>),
@@ -105,7 +110,7 @@ export interface ChangesetDef {
   _setProperty: <T>(validation: ValidationResult, obj: NewProperty<T>) => (T | IErr),
   _setIsValidating: (key: string, value: boolean) => void,
   _valueFor: (s: string) => any,
-  _notifyVirtualProperties: (keys: string[]) => void,
+  _notifyVirtualProperties: (keys?: string[]) => void,
   _rollbackKeys: () => Array<string>,
   _deleteKey: (objName: InternalMapKey, key: string) => void
 };
