@@ -8,10 +8,10 @@ const { keys } = Object;
  *
  * @return {object}
  */
-export default function objectWithout(
+export default function objectWithout<T>(
   excludedKeys: string[],
-  ...sources: object[]
-): object {
+  ...sources: T[]
+): T {
   return sources.reduce((acc: any, source: any): object => {
     keys(source)
       .filter((key) => excludedKeys.indexOf(key) === -1 || !source.hasOwnProperty(key))

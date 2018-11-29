@@ -49,7 +49,9 @@ import {
   IErr,
   InternalMap,
   ChangesetDef,
+  NewProperty,
   RunningValidations,
+  Snapshot,
   ValidatorFunc,
   ValidationResult,
   ValidationErr,
@@ -182,10 +184,11 @@ export function changeset(
       assert('Callback to `changeset.prepare` must return an object', isObject(preparedChanges));
       validateNestedObj('preparedChanges', preparedChanges);
 
-      let newChanges: Changes = keys(preparedChanges).reduce((newObj, key: keyof Changes) => {
+      let newObj: Changes = {};
+      let newChanges: Changes = keys(preparedChanges).reduce((newObj: Changes, key: keyof Changes) => {
         newObj[key] = new Change(preparedChanges[key]);
         return newObj;
-      }, {});
+      }, newObj);
 
       set(this, CHANGES, newChanges);
       return this;
@@ -343,23 +346,20 @@ export function changeset(
      */
     validate(
       key: string | undefined
-    ): Promise<null> | Promise<any | IErr<any>> | Promise<Array<any | IErr>> {
+    ): Promise<null> | Promise<any | IErr> | Promise<Array<any | IErr>> {
       if (keys(validationMap).length === 0) {
         return resolve(null);
       }
 
-      let c: ChangesetDef = this;
-
       if (isNone(key)) {
         let maybePromise = keys(validationMap).map(validationKey => {
-          return c._validateAndSet(validationKey, c._valueFor(validationKey));
+          return this._validateAndSet(validationKey, this._valueFor(validationKey));
         });
 
         return all(maybePromise);
       }
 
-      let k /*: string */ = (key /*: any */);
-      return resolve(c._validateAndSet(k, c._valueFor(k)));
+      return resolve(this._validateAndSet(key, this._valueFor(key)));
     },
 
     /**
@@ -401,8 +401,8 @@ export function changeset(
      * Manually push multiple errors to the changeset as an array.
      */
     pushErrors(
-      key,
-      ...newError
+      key: keyof ChangesetDef,
+      ...newErrors
     ) {
       let errors: Errors = get(this, ERRORS);
       let existingError: Err = errors[key] || new Err(null, []);
@@ -511,30 +511,29 @@ export function changeset(
       key: string,
       value: T
     ): Promise<T> | Promise<IErr> | T | IErr {
-      let c: ChangesetDef = this;
       let content: Content = get(this, CONTENT);
       let oldValue: any = get(content, key);
       let validation: ValidationResult | Promise<ValidationResult> =
-        c._validate(key, value, oldValue);
+        this._validate(key, value, oldValue);
 
       let v: ValidationResult = validation;
 
-      c.trigger(BEFORE_VALIDATION_EVENT, key);
-      let result = c._setProperty(v, { key, value, oldValue });
+      this.trigger(BEFORE_VALIDATION_EVENT, key);
+      let result = this._setProperty(v, { key, value, oldValue });
 
       // TODO: Address case when Promise is rejected.
       if (isPromise(validation)) {
-        c._setIsValidating(key, true);
+        this._setIsValidating(key, true);
 
         let v /*: Promise<ValidationResult> */ = (validation /*: any */);
         return v.then(resolvedValidation => {
-          c._setIsValidating(key, false);
-          c.trigger(AFTER_VALIDATION_EVENT, key);
-          return c._setProperty(resolvedValidation, { key, value, oldValue });
+          this._setIsValidating(key, false);
+          this.trigger(AFTER_VALIDATION_EVENT, key);
+          return this._setProperty(resolvedValidation, { key, value, oldValue });
         });
       }
 
-      c.trigger(AFTER_VALIDATION_EVENT, key);
+      this.trigger(AFTER_VALIDATION_EVENT, key);
 
       return result;
     },
@@ -576,29 +575,25 @@ export function changeset(
       let isValid: boolean = validation === true
         || isArray(validation)
         && validation.length === 1
-        && (validation /*: any */)[0] === true;
-
-      // Shorthand for `this`.
-      let c: ChangesetDef = this;
+        && validation[0] === true;
 
       // Happy path: remove `key` from error map.
-      c._deleteKey(ERRORS, key);
+      this._deleteKey(ERRORS, key);
 
       // Happy path: update change map.
       if (!isEqual(oldValue, value)) {
         setNestedProperty(changes, key, new Change(value));
       } else if (key in changes) {
-        c._deleteKey(CHANGES, key);
+        this._deleteKey(CHANGES, key);
       }
 
       // Happy path: notify that `key` was added.
-      c.notifyPropertyChange(CHANGES);
-      c.notifyPropertyChange(key);
+      this.notifyPropertyChange(CHANGES);
+      this.notifyPropertyChange(key);
 
       // Error case.
       if (!isValid) {
-        let v /*: ValidationErr */ = (validation /*: any */);
-        return c.addError(key, { value, validation: v });
+        return this.addError(key, { value, validation });
       }
 
       // Return new value.
@@ -652,7 +647,9 @@ export function changeset(
         if (changes.hasOwnProperty(baseKey)) {
           let { value } = changes[baseKey];
           // make sure to return value if not object
-          if(!value) { return value; }
+          if(!value) {
+            return value;
+          }
           let result = get(value, keyParts.join('.'));
           if (result) {
             return result;
@@ -678,7 +675,7 @@ export function changeset(
       if (!keys) {
         keys = this._rollbackKeys()
       }
-      (keys || []).forEach(key => (this /*: ChangesetDef */).notifyPropertyChange(key));
+      (keys || []).forEach(key => this.notifyPropertyChange(key));
     },
 
     /**
@@ -717,7 +714,12 @@ export default class Changeset {
    * @class Changeset
    * @constructor
    */
-  constructor(...args: Array<any>) {
-    return changeset(...args).create();
+  constructor(
+    obj: object,
+    validateFn: ValidatorFunc = defaultValidatorFn,
+    validationMap: { [s: string]: ValidatorFunc } = {},
+    options: Config = {}
+  ) {
+    return changeset(obj, validateFn, validationMap, options).create();
   }
 }

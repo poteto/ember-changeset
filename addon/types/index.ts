@@ -97,7 +97,7 @@ export interface ChangesetDef {
   merge: (changeset: ChangesetDef) => ChangesetDef,
   rollback: () => ChangesetDef,
   rollbackInvalid: (key: string | void) => ChangesetDef,
-  rollbackProperty: () => ChangesetDef,
+  rollbackProperty: (key: string) => ChangesetDef,
   validate: (key: string | void) => (Promise<null> | Promise<any | IErr> | Promise<Array<any | IErr>>),
   addError: <T=(string | IErr)>(key: string, error: T) => T,
   pushErrors: (key: string, newErrors: string[]) => IErr,
