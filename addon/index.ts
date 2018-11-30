@@ -366,10 +366,10 @@ export function changeset(
      * Manually add an error to the changeset. If there is an existing
      * error or change for `key`, it will be overwritten.
      */
-    addError<T=(IErr | ValidationErr)> (
+    addError(
       key: string,
-      error: T
-    ): T {
+      error: any
+    ): any {
       // Construct new `Err` instance.
       let newError;
       let c: ChangesetDef = this;
@@ -377,7 +377,8 @@ export function changeset(
       if (isObject(error)) {
         assert('Error must have value.', error.hasOwnProperty('value'));
         assert('Error must have validation.', error.hasOwnProperty('validation'));
-        newError = new Err(error.value, error.validation);
+        let e: IErr = error;
+        newError = new Err(e.value, e.validation);
       } else {
         let validation: ValidationErr = error;
         newError = new Err(get(c, key), validation);
@@ -431,7 +432,7 @@ export function changeset(
       let errors: Errors = get(this, ERRORS);
 
       return {
-        changes: keys(changes).reduce((newObj, key) => {
+        changes: keys(changes).reduce((newObj: Changes, key: keyof Changes) => {
           newObj[key] = changes[key].value;
           return newObj;
         }, {}),
@@ -702,7 +703,7 @@ export function changeset(
     }
   }
 
-  return EmberObject.extend(Evented, obj);
+  return EmberObject.extend(Evented, changeset);
 }
 
 export default class Changeset {

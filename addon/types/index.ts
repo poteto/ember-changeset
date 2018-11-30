@@ -64,7 +64,11 @@ export type Inflated<T> = {
 
 export type PrepareChangesFn = (obj: ({ [s: string]: any })) => ({ [s: string]: any })
 
-export interface ChangesetDef {
+interface Any {
+  [s: string]: any
+}
+
+export interface ChangesetDef extends Any {
   __changeset__: '__CHANGESET__',
 
   _content: object,
