@@ -368,8 +368,8 @@ export function changeset(
      */
     addError(
       key: string,
-      error: any
-    ): any {
+      error: IErr | ValidationErr
+    ): IErr | ValidationErr {
       // Construct new `Err` instance.
       let newError;
       let c: ChangesetDef = this;
@@ -377,11 +377,9 @@ export function changeset(
       if (isObject(error)) {
         assert('Error must have value.', error.hasOwnProperty('value'));
         assert('Error must have validation.', error.hasOwnProperty('validation'));
-        let e: IErr = error;
-        newError = new Err(e.value, e.validation);
+        newError = new Err((<IErr>error).value, (<IErr>error).validation);
       } else {
-        let validation: ValidationErr = error;
-        newError = new Err(get(c, key), validation);
+        newError = new Err(get(c, key), (<ValidationErr>error));
       }
 
       // Add `key` to errors map.
