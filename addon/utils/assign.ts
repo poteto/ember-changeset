@@ -1,6 +1,6 @@
-import { merge } from '@ember/polyfills';
+import { merge, assign as EmberAssign } from '@ember/polyfills';
 
-const assign = /* TODO EmberAssign || */Object.assign || _assign;
+const assign = EmberAssign || Object.assign || _assign;
 
 function _assign(origin: object, ...sources: object[]): object {
   return sources.reduce((acc: object, source: object) => merge(acc, source), merge({}, origin));

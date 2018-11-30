@@ -741,6 +741,11 @@
   resolved "https://registry.yarnpkg.com/@types/ember__polyfills/-/ember__polyfills-3.0.2.tgz#ccd9f510a4895abf92435c968f9e582e86a81b25"
   integrity sha1-zNn1EKSJWr+SQ1yWj55YLoaoGyU=
 
+"@types/ember__polyfills@^3.0.3":
+  version "3.0.3"
+  resolved "https://registry.yarnpkg.com/@types/ember__polyfills/-/ember__polyfills-3.0.3.tgz#3435974347f52b962283a1ab8d699fef6b7334d0"
+  integrity sha512-i1p3rn4qb09U3xkj6ziiOlcnH15zCdhsusW8y/jg39P/bcmOOBvL7M7D0hXcPoS3ynohPMuhLiO25nfl1bM7UA==
+
 "@types/ember__routing@*":
   version "3.0.5"
   resolved "https://registry.yarnpkg.com/@types/ember__routing/-/ember__routing-3.0.5.tgz#9b193178a1cc29560992c57b04fd7d83a70f831d"
