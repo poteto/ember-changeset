@@ -366,27 +366,25 @@ export function changeset(
      * Manually add an error to the changeset. If there is an existing
      * error or change for `key`, it will be overwritten.
      */
-    addError: <T=(string | IErr)> (
+    addError<T=(IErr | ValidationErr)> (
       key: string,
       error: T
     ): T {
       // Construct new `Err` instance.
-      let newError /*: Err */;
-      if (isObject(error)) {
-        let errorLike /*: IErr<*> */ = (error /*: any */);
-        assert('Error must have value.', errorLike.hasOwnProperty('value'));
-        assert('Error must have validation.', errorLike.hasOwnProperty('validation'));
-        newError = new Err(errorLike.value, errorLike.validation);
-      } else {
-        let validation: ValidationErr = error;
-        newError = new Err(get(this, key), validation);
-      }
-
-      // Remove `key` from changes map.
+      let newError;
       let c: ChangesetDef = this;
 
+      if (isObject(error)) {
+        assert('Error must have value.', error.hasOwnProperty('value'));
+        assert('Error must have validation.', error.hasOwnProperty('validation'));
+        newError = new Err(error.value, error.validation);
+      } else {
+        let validation: ValidationErr = error;
+        newError = new Err(get(c, key), validation);
+      }
+
       // Add `key` to errors map.
-      let errors /*: Errors */ = get(this, ERRORS);
+      let errors: Errors = get(c, ERRORS);
       setNestedProperty(errors, key, newError);
       c.notifyPropertyChange(ERRORS);
 
@@ -405,7 +403,7 @@ export function changeset(
       ...newErrors
     ) {
       let errors: Errors = get(this, ERRORS);
-      let existingError: Err = errors[key] || new Err(null, []);
+      let existingError: IErr | Err = errors[key] || new Err(null, []);
       let validation: ValidationErr = existingError.validation;
       let value: any = get(this, key);
 
@@ -414,7 +412,7 @@ export function changeset(
         existingError.validation = [v];
       }
 
-      let v: string[] = existingError.validation;
+      let v = existingError.validation;
       validation = [...v, ...newErrors];
 
       let c = (this /*: ChangesetDef */)
@@ -438,7 +436,7 @@ export function changeset(
           return newObj;
         }, {}),
 
-        errors: keys(errors).reduce((newObj, key) => {
+        errors: keys(errors).reduce((newObj: Changes, key: keyof Changes) => {
           let e = errors[key]
           newObj[key] = { value: e.value, validation: e.validation };
           return newObj;
@@ -454,12 +452,12 @@ export function changeset(
       validateNestedObj('snapshot.changes', changes);
       validateNestedObj('snapshot.errors',  errors);
 
-      let newChanges: Changes = keys(changes).reduce((newObj, key) => {
+      let newChanges: Changes = keys(changes).reduce((newObj: Changes, key: keyof Changes) => {
         newObj[key] = new Change(changes[key]);
         return newObj;
       }, {});
 
-      let newErrors: Errors = keys(errors).reduce((newObj, key) => {
+      let newErrors: Errors = keys(errors).reduce((newObj: Changes, key: keyof Changes) => {
         let e: IErr = errors[key];
         newObj[key] = new Err(e.value, e.validation);
         return newObj;
@@ -485,7 +483,7 @@ export function changeset(
       }
 
       let changeKeys: string[] = keys(changes);
-      let validKeys = emberArray(changeKeys).filter((key /*: string */) => includes(allowed, key));
+      let validKeys = emberArray(changeKeys).filter((key: string) => includes(allowed, key));
       let casted = take(changes, validKeys);
       set(this, CHANGES, casted);
       return this;
@@ -526,7 +524,7 @@ export function changeset(
         this._setIsValidating(key, true);
 
         let v /*: Promise<ValidationResult> */ = (validation /*: any */);
-        return v.then(resolvedValidation => {
+        return v.then((resolvedValidation: ValidationResult) => {
           this._setIsValidating(key, false);
           this.trigger(AFTER_VALIDATION_EVENT, key);
           return this._setProperty(resolvedValidation, { key, value, oldValue });

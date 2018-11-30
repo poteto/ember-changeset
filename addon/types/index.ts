@@ -28,9 +28,11 @@ export interface IErr {
   value: any,
   validation: ValidationErr
 }
+
 export type Errors = {
   [s: string]: IErr
 };
+
 export type RunningValidations = {
   [s: string]: number
 };
@@ -99,7 +101,7 @@ export interface ChangesetDef {
   rollbackInvalid: (key: string | void) => ChangesetDef,
   rollbackProperty: (key: string) => ChangesetDef,
   validate: (key: string | void) => (Promise<null> | Promise<any | IErr> | Promise<Array<any | IErr>>),
-  addError: <T=(string | IErr)>(key: string, error: T) => T,
+  addError: <T=(string | IErr | ValidationErr)>(key: string, error: T) => T,
   pushErrors: (key: string, newErrors: string[]) => IErr,
   snapshot: () => Snapshot,
   restore: (obj: Snapshot) => ChangesetDef,
