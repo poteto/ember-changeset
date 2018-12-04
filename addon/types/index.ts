@@ -24,13 +24,13 @@ export interface Content {
   [key: string]: any
 }
 
-export interface IErr {
-  value: any,
+export interface IErr<T> {
+  value: T,
   validation: ValidationErr
 }
 
-export type Errors = {
-  [s: string]: IErr
+export type Errors<T> = {
+  [s: string]: IErr<T>
 };
 
 export type RunningValidations = {
@@ -39,7 +39,7 @@ export type RunningValidations = {
 
 export type InternalMap =
   | Changes
-  | Errors
+  | Errors<any>
   | RunningValidations;
 
 export interface NewProperty<T> {
@@ -55,7 +55,7 @@ export type InternalMapKey =
 
 export type Snapshot = {
   changes: { [s: string]: any },
-  errors:  { [s: string]: IErr },
+  errors:  { [s: string]: IErr<any> },
 };
 
 export type Inflated<T> = {
@@ -73,7 +73,7 @@ export interface ChangesetDef extends Any {
 
   _content: object,
   _changes: Changes,
-  _errors: Errors,
+  _errors: Errors<any>,
   _validator: ValidatorFunc,
   _options: Config,
   _runningValidations: RunningValidations,
@@ -82,7 +82,7 @@ export interface ChangesetDef extends Any {
   changes: ComputedProperty<object[], object[]>,
   errors: ComputedProperty<object[], object[]>,
   change: Inflated<any>,
-  error: Inflated<IErr>,
+  error: Inflated<IErr<any>>,
   data: object,
 
   isValid: ComputedProperty<boolean, boolean>,
@@ -95,7 +95,7 @@ export interface ChangesetDef extends Any {
   trigger: (k: string, v?: string | void) => void,
   init: () => void,
   unknownProperty: (s: string) => any,
-  setUnknownProperty: <T>(key: string, value: T) => (T | IErr | Promise<T> | Promise<IErr>),
+  setUnknownProperty: <T>(key: string, value: T) => (T | IErr<T> | Promise<T> | Promise<IErr<T>>),
   toString: () => string,
   prepare: PrepareChangesFn,
   execute: () => ChangesetDef,
@@ -104,16 +104,16 @@ export interface ChangesetDef extends Any {
   rollback: () => ChangesetDef,
   rollbackInvalid: (key: string | void) => ChangesetDef,
   rollbackProperty: (key: string) => ChangesetDef,
-  validate: (key: string | void) => (Promise<null> | Promise<any | IErr> | Promise<Array<any | IErr>>),
-  addError: (key: string, error: IErr | ValidationErr) => IErr | ValidationErr,
-  pushErrors: (key: string, newErrors: string[]) => IErr,
+  validate: (key: string | void) => (Promise<null> | Promise<any | IErr<any>> | Promise<Array<any | IErr<any>>>),
+  addError: (key: string, error: IErr<any> | ValidationErr) => IErr<any> | ValidationErr,
+  pushErrors: (key: string, newErrors: string[]) => IErr<any>,
   snapshot: () => Snapshot,
   restore: (obj: Snapshot) => ChangesetDef,
   cast: (allowed: Array<string>) => ChangesetDef,
   isValidating: (key: string | void) => boolean,
-  _validateAndSet: <T>(key: string, value: T) => (Promise<T> | Promise<IErr> | T | IErr),
+  _validateAndSet: <T>(key: string, value: T) => (Promise<T> | Promise<IErr<T>> | T | IErr<T>),
   _validate: (key: string, newValue: any, oldValue: any) => (ValidationResult | Promise<ValidationResult>),
-  _setProperty: <T>(validation: ValidationResult, obj: NewProperty<T>) => (T | IErr),
+  _setProperty: <T>(validation: ValidationResult, obj: NewProperty<T>) => (T | IErr<T>),
   _setIsValidating: (key: string, value: boolean) => void,
   _valueFor: (s: string) => any,
   _notifyVirtualProperties: (keys?: string[]) => void,

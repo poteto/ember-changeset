@@ -101,7 +101,7 @@ export function changeset(
     changes: objectToArray(CHANGES, (c: Change) => c.value, false),
     errors: objectToArray(ERRORS, (e: Err) => ({ value: e.value, validation: e.validation }), true),
     change: inflate(CHANGES, (c: Change) => c.value),
-    error: inflate(ERRORS, (e: IErr) => ({ value: e.value, validation: e.validation })),
+    error: inflate(ERRORS, (e: IErr<any>) => ({ value: e.value, validation: e.validation })),
     data: readOnly(CONTENT),
 
     isValid:    isEmptyObject(ERRORS),
@@ -135,7 +135,7 @@ export function changeset(
     setUnknownProperty<T> (
       key: string,
       value: T
-    ): T | IErr | Promise<T> | Promise<IErr> {
+    ): T | IErr<T> | Promise<T> | Promise<IErr<T>> {
       let config: Config = get(this, OPTIONS);
       let skipValidate: boolean | undefined = get(config, 'skipValidate');
       let c: ChangesetDef = this;
@@ -260,13 +260,13 @@ export function changeset(
 
       let c1: Changes = get(this, CHANGES);
       let c2: Changes = get(changeset, CHANGES);
-      let e1: Errors = get(this, ERRORS);
-      let e2: Errors = get(changeset, ERRORS);
+      let e1: Errors<any> = get(this, ERRORS);
+      let e2: Errors<any> = get(changeset, ERRORS);
 
       let newChangeset: ChangesetDef = new Changeset(content, get(this, VALIDATOR));
-      let newErrors: Errors = objectWithout(keys(c2), e1);
+      let newErrors: Errors<any> = objectWithout(keys(c2), e1);
       let newChanges: Changes = objectWithout(keys(e2), c1);
-      let mergedErrors: Errors = mergeNested(newErrors, e2);
+      let mergedErrors: Errors<any> = mergeNested(newErrors, e2);
       let mergedChanges: Changes = mergeNested(newChanges, c2);
 
       newChangeset[ERRORS]  = mergedErrors;
@@ -346,7 +346,7 @@ export function changeset(
      */
     validate(
       key: string | undefined
-    ): Promise<null> | Promise<any | IErr> | Promise<Array<any | IErr>> {
+    ): Promise<null> | Promise<any | IErr<any>> | Promise<Array<any | IErr<any>>> {
       if (keys(validationMap).length === 0) {
         return resolve(null);
       }
@@ -366,10 +366,10 @@ export function changeset(
      * Manually add an error to the changeset. If there is an existing
      * error or change for `key`, it will be overwritten.
      */
-    addError(
+    addError<T> (
       key: string,
-      error: IErr | ValidationErr
-    ): IErr | ValidationErr {
+      error: IErr<T> | ValidationErr
+    ): IErr<T> | ValidationErr {
       // Construct new `Err` instance.
       let newError;
       let c: ChangesetDef = this;
@@ -377,13 +377,13 @@ export function changeset(
       if (isObject(error)) {
         assert('Error must have value.', error.hasOwnProperty('value'));
         assert('Error must have validation.', error.hasOwnProperty('validation'));
-        newError = new Err((<IErr>error).value, (<IErr>error).validation);
+        newError = new Err((<IErr<T>>error).value, (<IErr<T>>error).validation);
       } else {
         newError = new Err(get(c, key), (<ValidationErr>error));
       }
 
       // Add `key` to errors map.
-      let errors: Errors = get(c, ERRORS);
+      let errors: Errors<any> = get(c, ERRORS);
       setNestedProperty(errors, key, newError);
       c.notifyPropertyChange(ERRORS);
 
@@ -401,8 +401,8 @@ export function changeset(
       key: keyof ChangesetDef,
       ...newErrors
     ) {
-      let errors: Errors = get(this, ERRORS);
-      let existingError: IErr | Err = errors[key] || new Err(null, []);
+      let errors: Errors<any> = get(this, ERRORS);
+      let existingError: IErr<any> | Err = errors[key] || new Err(null, []);
       let validation: ValidationErr = existingError.validation;
       let value: any = get(this, key);
 
@@ -427,7 +427,7 @@ export function changeset(
      */
     snapshot(): Snapshot {
       let changes: Changes = get(this, CHANGES);
-      let errors: Errors = get(this, ERRORS);
+      let errors: Errors<any> = get(this, ERRORS);
 
       return {
         changes: keys(changes).reduce((newObj: Changes, key: keyof Changes) => {
@@ -456,8 +456,8 @@ export function changeset(
         return newObj;
       }, {});
 
-      let newErrors: Errors = keys(errors).reduce((newObj: Changes, key: keyof Changes) => {
-        let e: IErr = errors[key];
+      let newErrors: Errors<any> = keys(errors).reduce((newObj: Changes, key: keyof Changes) => {
+        let e: IErr<any> = errors[key];
         newObj[key] = new Err(e.value, e.validation);
         return newObj;
       }, {});
@@ -507,7 +507,7 @@ export function changeset(
     _validateAndSet<T> (
       key: string,
       value: T
-    ): Promise<T> | Promise<IErr> | T | IErr {
+    ): Promise<T> | Promise<IErr<T>> | T | IErr<T> {
       let content: Content = get(this, CONTENT);
       let oldValue: any = get(content, key);
       let validation: ValidationResult | Promise<ValidationResult> =
@@ -567,7 +567,7 @@ export function changeset(
     _setProperty<T> (
       validation: ValidationResult,
       { key, value, oldValue }: NewProperty<T>
-    ): T | IErr {
+    ): T | IErr<T> {
       let changes: Changes = get(this, CHANGES);
       let isValid: boolean = validation === true
         || isArray(validation)
@@ -623,7 +623,7 @@ export function changeset(
       key: string
     ): any {
       let changes: Changes = get(this, CHANGES);
-      let errors: Errors = get(this, ERRORS);
+      let errors: Errors<any> = get(this, ERRORS);
       let content: Content = get(this, CONTENT);
 
       if (errors.hasOwnProperty(key)) {
@@ -680,7 +680,7 @@ export function changeset(
      */
     _rollbackKeys(): string[] {
       let changes: Changes = get(this, CHANGES);
-      let errors: Errors = get(this, ERRORS);
+      let errors: Errors<any> = get(this, ERRORS);
       return emberArray([...keys(changes), ...keys(errors)]).uniq();
     },
 
