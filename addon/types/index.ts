@@ -105,7 +105,7 @@ export interface ChangesetDef extends Any {
   rollbackInvalid: (key: string | void) => ChangesetDef,
   rollbackProperty: (key: string) => ChangesetDef,
   validate: (key: string | void) => (Promise<null> | Promise<any | IErr<any>> | Promise<Array<any | IErr<any>>>),
-  addError: (key: string, error: IErr<any> | ValidationErr) => IErr<any> | ValidationErr,
+  addError: <T>(key: string, error: IErr<T> | ValidationErr) => IErr<T> | ValidationErr,
   pushErrors: (key: string, newErrors: string[]) => IErr<any>,
   snapshot: () => Snapshot,
   restore: (obj: Snapshot) => ChangesetDef,
