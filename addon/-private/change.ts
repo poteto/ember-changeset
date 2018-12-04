@@ -1,9 +1,9 @@
 import { IChange } from 'ember-changeset/types';
 
 export default class Change implements IChange {
-  value: number;
+  value: any;
 
-  constructor(value: number) {
+  constructor(value: any) {
     this.value = value;
   }
 }
