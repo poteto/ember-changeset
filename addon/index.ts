@@ -567,7 +567,7 @@ export function changeset(
     _setProperty<T> (
       validation: ValidationResult,
       { key, value, oldValue }: NewProperty<T>
-    ): T | IErr<T> {
+    ): T | IErr<T> | ValidationErr {
       let changes: Changes = get(this, CHANGES);
       let isValid: boolean = validation === true
         || isArray(validation)
@@ -590,7 +590,7 @@ export function changeset(
 
       // Error case.
       if (!isValid) {
-        return this.addError(key, { value, validation });
+        return this.addError(key, { value, validation } as IErr<T>);
       }
 
       // Return new value.
