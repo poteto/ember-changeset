@@ -135,18 +135,17 @@ export function changeset(
     setUnknownProperty<T> (
       key: string,
       value: T
-    ): T | IErr<T> | Promise<T> | Promise<IErr<T>> {
+    ): Promise<ValidationResult | T | IErr<T>> | T | IErr<T> | ValidationResult {
       let config: Config = get(this, OPTIONS);
       let skipValidate: boolean | undefined = get(config, 'skipValidate');
-      let c: ChangesetDef = this;
 
       if (skipValidate) {
         let content: Content = get(this, CONTENT);
         let oldValue = get(content, key);
-        return c._setProperty(true, { key, value, oldValue });
+        return this._setProperty((<ValidationResult>true), { key, value, oldValue });
       }
 
-      return c._validateAndSet(key, value);
+      return this._validateAndSet(key, value);
     },
 
     /**
@@ -372,23 +371,21 @@ export function changeset(
     ): IErr<T> | ValidationErr {
       // Construct new `Err` instance.
       let newError;
-      let c: ChangesetDef = this;
-
       if (isObject(error)) {
         assert('Error must have value.', error.hasOwnProperty('value'));
         assert('Error must have validation.', error.hasOwnProperty('validation'));
         newError = new Err((<IErr<T>>error).value, (<IErr<T>>error).validation);
       } else {
-        newError = new Err(get(c, key), (<ValidationErr>error));
+        newError = new Err(get(this, key), (<ValidationErr>error));
       }
 
       // Add `key` to errors map.
-      let errors: Errors<any> = get(c, ERRORS);
+      let errors: Errors<any> = get(this, ERRORS);
       setNestedProperty(errors, key, newError);
-      c.notifyPropertyChange(ERRORS);
+      this.notifyPropertyChange(ERRORS);
 
       // Notify that `key` has changed.
-      c.notifyPropertyChange(key);
+      this.notifyPropertyChange(key);
 
       // Return passed-in `error`.
       return error;
@@ -507,28 +504,25 @@ export function changeset(
     _validateAndSet<T> (
       key: string,
       value: T
-    ): Promise<T> | Promise<IErr<T>> | T | IErr<T> {
+    ): Promise<ValidationResult | T | IErr<T>> | T | IErr<T> | ValidationResult {
       let content: Content = get(this, CONTENT);
       let oldValue: any = get(content, key);
       let validation: ValidationResult | Promise<ValidationResult> =
         this._validate(key, value, oldValue);
 
-      let v: ValidationResult = validation;
-
       this.trigger(BEFORE_VALIDATION_EVENT, key);
-      let result = this._setProperty(v, { key, value, oldValue });
-
       // TODO: Address case when Promise is rejected.
       if (isPromise(validation)) {
         this._setIsValidating(key, true);
 
-        let v /*: Promise<ValidationResult> */ = (validation /*: any */);
-        return v.then((resolvedValidation: ValidationResult) => {
+        return (<Promise<ValidationResult>>validation).then((resolvedValidation: ValidationResult) => {
           this._setIsValidating(key, false);
           this.trigger(AFTER_VALIDATION_EVENT, key);
           return this._setProperty(resolvedValidation, { key, value, oldValue });
         });
       }
+
+      let result = this._setProperty((<ValidationResult>validation), { key, value, oldValue });
 
       this.trigger(AFTER_VALIDATION_EVENT, key);
 
