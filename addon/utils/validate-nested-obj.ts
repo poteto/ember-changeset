@@ -1,13 +1,8 @@
-// @flow
-
 import { assert } from '@ember/debug';
 
 const { keys } = Object;
 
-export default function validateNestedObj(
-  label /*: string */,
-  obj   /*: Object */
-) /*: void */ {
+export default function validateNestedObj(label: string, obj: object): void {
   keys(obj).forEach(key => {
     key.split('.').forEach((_, i, allParts) => {
       if (i < allParts.length - 1) {
