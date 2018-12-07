@@ -26,7 +26,7 @@ export interface Content {
 
 export interface IErr<T> {
   value: T,
-  validation: ValidationErr
+  validation: ValidationErr | ValidationErr[]
 }
 
 export type Errors<T> = {

@@ -400,20 +400,18 @@ export function changeset(
     ) {
       let errors: Errors<any> = get(this, ERRORS);
       let existingError: IErr<any> | Err = errors[key] || new Err(null, []);
-      let validation: ValidationErr = existingError.validation;
+      let validation: ValidationErr | ValidationErr[] = existingError.validation;
       let value: any = get(this, key);
 
       if (!isArray(validation) && isPresent(validation)) {
-        let v /*: string */ = (existingError.validation /*: any */);
-        existingError.validation = [v];
+        existingError.validation = [validation];
       }
 
       let v = existingError.validation;
       validation = [...v, ...newErrors];
 
-      let c = (this /*: ChangesetDef */)
-      c.notifyPropertyChange(ERRORS);
-      c.notifyPropertyChange(key);
+      this.notifyPropertyChange(ERRORS);
+      this.notifyPropertyChange((<string>key));
 
       errors[key] = new Err(value, validation);
       return { value, validation };
@@ -432,7 +430,7 @@ export function changeset(
           return newObj;
         }, {}),
 
-        errors: keys(errors).reduce((newObj: Changes, key: keyof Changes) => {
+        errors: keys(errors).reduce((newObj: Errors<any>, key: keyof Errors<any>) => {
           let e = errors[key]
           newObj[key] = { value: e.value, validation: e.validation };
           return newObj;
@@ -662,7 +660,6 @@ export function changeset(
     _notifyVirtualProperties(
       keys?: string[]
     ): void {
-      // TODO: investigate
       if (!keys) {
         keys = this._rollbackKeys()
       }
