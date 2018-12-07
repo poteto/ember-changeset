@@ -1,6 +1,5 @@
-// @flow
-
 import { computed, get } from '@ember/object';
+import ComputedProperty from '@ember/object/computed';
 
 const { keys } = Object;
 
@@ -11,14 +10,14 @@ const { keys } = Object;
  * not vice versa.
  *
  * @public
- * @param  {String} sourceKey dependent key for first object
- * @param  {String} compareKey dependent key for second object
- * @return {Boolean}
+ * @param  {string} sourceKey dependent key for first object
+ * @param  {string} compareKey dependent key for second object
+ * @return {boolean}
  */
 export default function objectEqual(
-  sourceKey /*: string */,
-  compareKey /*: string */
-) /*: boolean */ {
+  sourceKey: string,
+  compareKey: string
+): ComputedProperty<boolean, boolean> {
   return computed(sourceKey, compareKey, function() {
     let source = get(this, sourceKey);
     let compare = get(this, compareKey);

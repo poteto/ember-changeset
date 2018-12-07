@@ -1,17 +1,10 @@
-// @flow
-
 import { computed, get } from '@ember/object';
-import { typeOf } from '@ember/utils';
+import ComputedProperty from '@ember/object/computed';
 import { assign as EmberAssign } from '@ember/polyfills';
 import { merge } from '@ember/polyfills'
+import isObject from 'ember-changeset/utils/is-object';
 
 const assign = EmberAssign || merge;
-
-/*::
-import type Change from 'ember-changeset/-private/change';
-import type Err from 'ember-changeset/-private/err';
-*/
-
 const { keys } = Object;
 
 /**
@@ -25,18 +18,18 @@ const { keys } = Object;
  * `transform` is an Object, the resulting object has the form
  * `{ key, ...transformResult }`.
  */
-export default function objectToArray /*:: <T> */ (
-  objKey         /*: string             */,
-  transform      /*: (T) => (mixed) */ = a => a,
-  flattenObjects /*: boolean            */ = false
-) /*: Array<{ key: string }> */ {
+export default function objectToArray<T>(
+  objKey: string,
+  transform: (arg: T) => any = a => a,
+  flattenObjects: boolean = false
+): ComputedProperty<object[], object[]> {
   return computed(objKey, function() {
     let obj = get(this, objKey);
 
     return keys(obj).map(key => {
       let value = transform(obj[key]);
 
-      if (flattenObjects && typeOf(value) === 'object') {
+      if (flattenObjects && isObject(value)) {
         return assign({ key }, value);
       }
 

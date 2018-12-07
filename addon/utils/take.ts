@@ -1,10 +1,8 @@
-// @flow
-
 export default function take(
-  originalObj /*: Object */ = {},
-  keysToTake /*: Array<string> */ = []
-) {
-  let newObj = {};
+  originalObj: { [key: string]: any } = {},
+  keysToTake: string[] = []
+): { [key: string]: any } {
+  let newObj: { [key: string]: any } = {};
 
   for (let key in originalObj) {
     if (keysToTake.indexOf(key) !== -1) {

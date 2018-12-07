@@ -1,5 +1,3 @@
-// @flow
-
 import { assert, runInDebug } from '@ember/debug';
 
 const { keys } = Object;
@@ -10,11 +8,11 @@ const { keys } = Object;
  * This function deletes every key prefixed by `key` in `obj`, as well
  * as every key in the path leading up to `key`.
  */
-export default function setNestedProperty /*:: <T> */ (
-  obj   /*: { [string]: T } */,
-  key   /*: string          */,
-  value /*: T               */
-) /*: T */ {
+export default function setNestedProperty<T>(
+  obj: { [key: string]: T },
+  key: string,
+  value: T
+): T {
   let objKeys = keys(obj);
 
   // Ensure object keys are in correct format.

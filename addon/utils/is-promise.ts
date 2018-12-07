@@ -1,9 +1,7 @@
-// @flow
-
 import { typeOf } from '@ember/utils';
 import isObject from './is-object';
 
-function isPromiseLike(obj /*: mixed */) /*: boolean */ {
+function isPromiseLike(obj:any): boolean {
   return !!obj
     && !!obj.then
     && !!obj.catch
@@ -13,6 +11,6 @@ function isPromiseLike(obj /*: mixed */) /*: boolean */ {
     && typeOf(obj.finally) === 'function';
 }
 
-export default function isPromise(obj /*: mixed */) /*: boolean */ {
+export default function isPromise(obj: any): boolean {
   return isObject(obj) && isPromiseLike(obj);
 }
