@@ -1,10 +1,8 @@
 import { computed, get } from '@ember/object';
 import ComputedProperty from '@ember/object/computed';
-import { assign as EmberAssign } from '@ember/polyfills';
-import { merge } from '@ember/polyfills'
+import { assign } from '@ember/polyfills';
 import isObject from 'ember-changeset/utils/is-object';
 
-const assign = EmberAssign || merge;
 const { keys } = Object;
 
 /**
