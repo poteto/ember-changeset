@@ -210,6 +210,25 @@ module('Integration | Helper | changeset', function(hooks) {
     }
   });
 
+  test('nested object updates when set with async validator', async function(assert) {
+    let data = { person: { firstName: 'Jim' } };
+    let validator = () => resolve(true);
+    let c = new Changeset(data, validator);
+    this.set('c', c);
+     await render(hbs`
+      <h1>{{c.person.firstName}}</h1>
+      <input
+        id="first-name"
+        type="text"
+        value={{c.person.firstName}}
+        onchange={{action (mut c.person.firstName) value="target.value"}}>
+      <small id="first-name-error">{{c.error.person.firstName.validation}}</small>
+    `);
+     assert.equal(find('h1').textContent.trim(), 'Jim', 'precondition');
+    await fillIn('#first-name', 'John');
+     assert.equal(find('h1').textContent.trim(), 'John', 'should update observable value');
+  });
+
   skip('deeply nested key error clears after entering valid input', async function(assert) {
     let data = { person: { name: { parts: { first: 'Jim' } } } };
     let validator = ({ newValue }) => isPresent(newValue) || 'need a first name';

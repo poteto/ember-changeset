@@ -605,7 +605,7 @@ export function changeset(
         return;
       }
 
-      set(running, key, value ? count+1 : count-1);
+      deepSet(running, key, value ? count+1 : count-1);
     },
 
     /**
