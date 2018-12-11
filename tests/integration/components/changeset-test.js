@@ -4,14 +4,14 @@ import { resolve } from 'rsvp';
 import { typeOf, isPresent } from '@ember/utils';
 import Changeset from 'ember-changeset';
 import hbs from 'htmlbars-inline-precompile';
-import { render } from '@ember/test-helpers';
 import {
+  render,
   find,
   fillIn,
   click,
   blur,
   triggerEvent
-} from 'ember-native-dom-helpers';
+} from '@ember/test-helpers';
 
 module('Integration | Helper | changeset', function(hooks) {
   setupRenderingTest(hooks);
@@ -401,4 +401,3 @@ module('Integration | Helper | changeset', function(hooks) {
     assert.notOk(find('#error-paragraph'), 'should skip validation');
   });
 });
-
