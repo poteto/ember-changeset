@@ -66,6 +66,8 @@ module('scott Integration | main', function(hooks) {
 
     assert.equal(changeset.get('profile'), null);
     assert.equal(user.get('profile').firstName, null);
+    // failing test
+    // assert.equal(user.get('profile'), null);
   });
 
   test('it works for hasMany / firstObject', function(assert) {
