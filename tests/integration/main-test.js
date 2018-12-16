@@ -3,7 +3,7 @@ import { setupTest } from 'ember-qunit';
 import { run } from '@ember/runloop';
 import Changeset from 'ember-changeset';
 
-module('Integration | main', function(hooks) {
+module('scott Integration | main', function(hooks) {
   setupTest(hooks);
 
   hooks.beforeEach(function() {
@@ -84,9 +84,17 @@ module('Integration | main', function(hooks) {
     assert.equal(dogs[2].get('breed'), 'Münsterländer');
 
     changeset.execute();
+
     dogs = user.get('dogs').toArray();
     assert.equal(dogs[0].get('breed'), 'rough collie');
     assert.equal(dogs[1].get('breed'), 'rough collie');
     assert.equal(dogs[2].get('breed'), 'Münsterländer');
+
+    changeset.set('dogs', []);
+
+    changeset.execute();
+
+    dogs = user.get('dogs').toArray();
+    assert.equal(dogs.length, 0, 'dogs removed');
   });
 });
