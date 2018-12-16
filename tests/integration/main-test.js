@@ -58,6 +58,14 @@ module('Integration | main', function(hooks) {
 
     assert.equal(user.get('profile.firstName'), 'Terry');
     assert.equal(user.get('profile.lastName'), 'Bubblewinkles');
+
+    changeset.set('profile', null);
+    assert.equal(changeset.get('profile'), null);
+
+    changeset.execute();
+
+    assert.equal(changeset.get('profile'), null);
+    assert.equal(user.get('profile').firstName, null);
   });
 
   test('it works for hasMany / firstObject', function(assert) {
