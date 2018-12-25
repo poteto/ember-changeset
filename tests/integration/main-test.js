@@ -60,14 +60,13 @@ module('Integration | main', function(hooks) {
     assert.equal(user.get('profile.lastName'), 'Bubblewinkles');
 
     changeset.set('profile', null);
-    assert.equal(changeset.get('profile'), null);
+    assert.equal(changeset.get('profile'), null, 'changeset profile is null');
 
     changeset.execute();
 
-    assert.equal(changeset.get('profile'), null, 'changeset profile relationship is null');
-    assert.equal(user.get('profile').get('firstName'), null, 'underlying user profile is null');
-    assert.ok(user.get('profile'), 'user has yet to call save so still present');
-    assert.notEqual(changeset.get('profile'), user.get('profile'), 'user has yet to call save so still present');
+    assert.equal(changeset.get('profile'), null, 'changeset profile relationship is still null');
+    assert.equal(user.get('profile').get('firstName'), null, 'underlying user profile firstName is null');
+    assert.ok(user.get('profile'), 'user has yet to call save so still present as proxy');
   });
 
   test('can save user', function(assert) {
