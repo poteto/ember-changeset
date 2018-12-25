@@ -226,7 +226,7 @@ export function changeset(
         // another way would be content(belongsTo).content.save
         let result: Function | undefined = get(content, 'save');
         if (result) {
-          savePromise = result();
+          savePromise = result(options);
         }
       }
 
