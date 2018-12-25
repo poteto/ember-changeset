@@ -15,7 +15,11 @@
   "repository": "https://github.com/poteto/ember-changeset",
   "scripts": {
     "build": "ember build",
-    "lint:js": "eslint .",
+    "lint:eslint": "eslint .",
+    "lint": "yarn lint:tsc && yarn lint:tslint && yarn lint:eslint",
+    "lint:fix": "yarn lint:eslint --fix && yarn lint:tslint --fix",
+    "lint:tsc": "tsc --noEmit",
+    "lint:tslint": "tslint -p tsconfig.json",
     "start": "ember serve",
     "test": "ember try:each",
     "prepublishOnly": "ember ts:precompile",
@@ -62,6 +66,7 @@
     "eslint-plugin-ember": "^5.0.0",
     "eslint-plugin-node": "^6.0.1",
     "loader.js": "^4.2.3",
+    "tslint": "^5.12.0",
     "typescript": "^3.2.0"
   },
   "engines": {

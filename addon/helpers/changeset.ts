@@ -1,9 +1,9 @@
+import { helper } from '@ember/component/helper';
 import Changeset from 'ember-changeset';
+import { Config } from 'ember-changeset/types/config';
+import { ValidatorFunc } from 'ember-changeset/types/validator-func';
 import isChangeset from 'ember-changeset/utils/is-changeset';
 import isPromise from 'ember-changeset/utils/is-promise';
-import { helper } from '@ember/component/helper';
-import { ValidatorFunc } from 'ember-changeset/types/validator-func';
-import { Config } from 'ember-changeset/types/config';
 
 export function changeset(
   [obj, validations]: [object | Promise<any>, ValidatorFunc],
