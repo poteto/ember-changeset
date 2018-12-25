@@ -220,6 +220,14 @@ export function changeset(
       if (typeof content.save === 'function') {
         let result: any | Promise<any> = content.save(options);
         savePromise = result;
+      } else if (typeof get(content, 'save') === 'function') {
+        // we might be getting this off a proxy object.  For example, when a
+        // belongsTo relationship (a proxy on the parent model)
+        // another way would be content(belongsTo).content.save
+        let result: Function | undefined = get(content, 'save');
+        if (result) {
+          savePromise = result();
+        }
       }
 
       return resolve(savePromise).then((result) => {

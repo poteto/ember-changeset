@@ -3,7 +3,7 @@ import { setupTest } from 'ember-qunit';
 import { run } from '@ember/runloop';
 import Changeset from 'ember-changeset';
 
-module('scott Integration | main', function(hooks) {
+module('Integration | main', function(hooks) {
   setupTest(hooks);
 
   hooks.beforeEach(function() {
@@ -64,10 +64,52 @@ module('scott Integration | main', function(hooks) {
 
     changeset.execute();
 
-    assert.equal(changeset.get('profile'), null);
-    assert.equal(user.get('profile').firstName, null);
-    // failing test
-    // assert.equal(user.get('profile'), null);
+    assert.equal(changeset.get('profile'), null, 'changeset profile relationship is null');
+    assert.equal(user.get('profile').get('firstName'), null, 'underlying user profile is null');
+    assert.ok(user.get('profile'), 'user has yet to call save so still present');
+    assert.notEqual(changeset.get('profile'), user.get('profile'), 'user has yet to call save so still present');
+  });
+
+  test('can save user', function(assert) {
+    assert.expect(1);
+
+    run(() => {
+      let profile = this.store.createRecord('profile');
+      let save = () => {
+        assert.ok(true, 'user save was called')
+      }
+      this.dummyUser = this.store.createRecord('user', { profile, save });
+    });
+
+    let user = this.dummyUser;
+    let changeset = new Changeset(user);
+
+    changeset.set('profile.firstName', 'Grace');
+    changeset.execute();
+    changeset.save();
+  });
+
+  test('can save belongsTo via changeset', function(assert) {
+    assert.expect(2);
+
+    run(() => {
+      let save = () => {
+        assert.ok(true, 'user save was called')
+      }
+      let profile = this.store.createRecord('profile', { save });
+      this.dummyUser = this.store.createRecord('user', { profile });
+    });
+
+    let user = this.dummyUser;
+    let changeset = new Changeset(user);
+
+    changeset.set('profile.firstName', 'Grace');
+    let profile = changeset.get('profile');
+    let profileChangeset = new Changeset(profile);
+
+    assert.equal(profileChangeset.get('firstName'), 'Grace', 'changeset profile firstName is set');
+    profileChangeset.execute();
+    profileChangeset.save();
   });
 
   test('it works for hasMany / firstObject', function(assert) {
