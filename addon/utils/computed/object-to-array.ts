@@ -19,7 +19,7 @@ const { keys } = Object;
 export default function objectToArray<T>(
   objKey: string,
   transform: (arg: T) => any = a => a,
-  flattenObjects: boolean = false
+  flattenObjects = false
 ): ComputedProperty<object[], object[]> {
   return computed(objKey, function() {
     let obj = get(this, objKey);
