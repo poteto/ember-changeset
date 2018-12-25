@@ -16,7 +16,7 @@
   "scripts": {
     "build": "ember build",
     "lint:eslint": "eslint .",
-    "lint": "yarn lint:tsc && yarn lint:tslint && yarn lint:eslint",
+    "lint": "yarn lint:tslint && yarn lint:eslint",
     "lint:fix": "yarn lint:eslint --fix && yarn lint:tslint --fix",
     "lint:tsc": "tsc --noEmit",
     "lint:tslint": "tslint -p tsconfig.json",

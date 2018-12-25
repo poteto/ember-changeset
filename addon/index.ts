@@ -3,8 +3,7 @@ import {
   isArray,
 } from '@ember/array';
 import { assert } from '@ember/debug';
-import EmberObject from '@ember/object';
-import {
+import EmberObject, {
   get,
   set,
 } from '@ember/object';
