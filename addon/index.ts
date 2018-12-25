@@ -1,61 +1,60 @@
-import objectToArray from 'ember-changeset/utils/computed/object-to-array';
-import isEmptyObject from 'ember-changeset/utils/computed/is-empty-object';
-import inflate from 'ember-changeset/utils/computed/inflate';
-import transform from 'ember-changeset/utils/computed/transform';
-import isPromise from 'ember-changeset/utils/is-promise';
-import isObject from 'ember-changeset/utils/is-object';
-import pureAssign from 'ember-changeset/utils/assign';
-import includes from 'ember-changeset/utils/includes';
-import take from 'ember-changeset/utils/take';
-import isChangeset, { CHANGESET } from 'ember-changeset/utils/is-changeset';
-import setNestedProperty from 'ember-changeset/utils/set-nested-property';
-import mergeNested from 'ember-changeset/utils/merge-nested';
-import validateNestedObj from 'ember-changeset/utils/validate-nested-obj';
-import objectWithout from 'ember-changeset/utils/object-without';
-import Err from 'ember-changeset/-private/err';
-import Change from 'ember-changeset/-private/change';
-import deepSet from 'ember-deep-set';
-import EmberObject from '@ember/object';
-import Evented from '@ember/object/evented';
 import {
   A as emberArray,
   isArray,
 } from '@ember/array';
-import {
-  all,
-  resolve,
-} from 'rsvp';
 import { assert } from '@ember/debug';
+import EmberObject, {
+  get,
+  set,
+} from '@ember/object';
+import {
+  not,
+  readOnly,
+} from '@ember/object/computed';
+import Evented from '@ember/object/evented';
 import {
   isEmpty,
   isEqual,
   isNone,
   isPresent,
 } from '@ember/utils';
+import Change from 'ember-changeset/-private/change';
+import Err from 'ember-changeset/-private/err';
+import pureAssign from 'ember-changeset/utils/assign';
+import inflate from 'ember-changeset/utils/computed/inflate';
+import isEmptyObject from 'ember-changeset/utils/computed/is-empty-object';
+import objectToArray from 'ember-changeset/utils/computed/object-to-array';
+import transform from 'ember-changeset/utils/computed/transform';
+import includes from 'ember-changeset/utils/includes';
+import isChangeset, { CHANGESET } from 'ember-changeset/utils/is-changeset';
+import isObject from 'ember-changeset/utils/is-object';
+import isPromise from 'ember-changeset/utils/is-promise';
+import mergeNested from 'ember-changeset/utils/merge-nested';
+import objectWithout from 'ember-changeset/utils/object-without';
+import setNestedProperty from 'ember-changeset/utils/set-nested-property';
+import take from 'ember-changeset/utils/take';
+import validateNestedObj from 'ember-changeset/utils/validate-nested-obj';
+import deepSet from 'ember-deep-set';
 import {
-  not,
-  readOnly,
-} from '@ember/object/computed';
-import {
-  get,
-  set,
-} from '@ember/object';
+  all,
+  resolve,
+} from 'rsvp';
 
 import {
   Changes,
-  Content,
+  ChangesetDef,
   Config,
+  Content,
   Errors,
   IErr,
   InternalMap,
-  ChangesetDef,
   NewProperty,
+  PrepareChangesFn,
   RunningValidations,
   Snapshot,
-  ValidatorFunc,
-  ValidationResult,
   ValidationErr,
-  PrepareChangesFn,
+  ValidationResult,
+  ValidatorFunc,
 } from 'ember-changeset/types';
 
 const { keys } = Object;
@@ -680,7 +679,7 @@ export function changeset(
      */
     _deleteKey(
       objName: string,
-      key: string = ''
+      key = ''
     ): void {
       let obj: InternalMap = get(this, objName);
       if (obj.hasOwnProperty(key)) {

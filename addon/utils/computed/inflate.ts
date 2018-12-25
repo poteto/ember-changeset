@@ -1,8 +1,8 @@
-import { computed, get } from '@ember/object';
-import deepSet from 'ember-deep-set';
 import { assert, runInDebug } from '@ember/debug';
-import isObject from 'ember-changeset/utils/is-object';
+import { computed, get } from '@ember/object';
 import { isBlank } from '@ember/utils';
+import isObject from 'ember-changeset/utils/is-object';
+import deepSet from 'ember-deep-set';
 
 const { keys } = Object;
 
