@@ -1,6 +1,5 @@
 {
   "rules": {
-    "curly": false,
     "no-var-keyword": true,
     "indent": [true, "spaces"],
     "label-position": true,
