@@ -15,6 +15,10 @@ ember install ember-changeset
 >
 > <img alt="" src="https://user-images.githubusercontent.com/914228/34072730-9d2d0bcc-e25a-11e7-9ab5-405ddce05303.gif" width="25"> <img alt="" src="https://user-images.githubusercontent.com/914228/34072749-07a8ab50-e25b-11e7-80ba-d0f6250aad11.png" width="20.5">
 
+## Updates
+
+We are working on a 2.0 release.  This includes previous solutions for deeply nested sets which caused many problems for users.  In the meantime, we recommend sticking to `1.3.0`.  See [2.0-beta](https://github.com/poteto/ember-changeset/tree/2.0-beta)
+
 ## Philosophy
 
 The idea behind a changeset is simple: it represents a set of valid changes to be applied onto any Object (`Ember.Object`, `DS.Model`, POJOs, etc). Each change is tested against an optional validation, and if valid, the change is stored and applied when executed.
