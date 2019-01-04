@@ -359,13 +359,13 @@ export function changeset(
 
       if (isNone(key)) {
         let maybePromise = keys(validationMap).map(validationKey => {
-          return this._validateAndSet(validationKey, this._valueFor(validationKey));
+          return this._validateOnly(validationKey, this._valueFor(validationKey));
         });
 
         return all(maybePromise);
       }
 
-      return resolve(this._validateAndSet(key, this._valueFor(key)));
+      return resolve(this._validateOnly(key, this._valueFor(key)));
     },
 
     /**
@@ -534,6 +534,58 @@ export function changeset(
       return result;
     },
 
+    _validateOnly<T> (
+      key: string,
+      value: T
+    ): Promise<ValidationResult> | ValidationResult {
+      let content: Content = get(this, CONTENT);
+      let oldValue: any = get(content, key);
+      let validation: ValidationResult | Promise<ValidationResult> =
+        this._validate(key, value, oldValue);
+
+      this.trigger(BEFORE_VALIDATION_EVENT, key);
+
+      // TODO: Address case when Promise is rejected.
+      if (isPromise(validation)) {
+        this._setIsValidating(key, true);
+
+        return (<Promise<ValidationResult>>validation).then((resolvedValidation: ValidationResult) => {
+          this._setIsValidating(key, false);
+          this.trigger(AFTER_VALIDATION_EVENT, key);
+
+          this._handleValidation(resolvedValidation, { key, value });
+          return resolvedValidation;
+        });
+      }
+
+      this._handleValidation(validation, { key, value });
+
+      this.trigger(AFTER_VALIDATION_EVENT, key);
+
+      return validation;
+    },
+
+    _handleValidation<T> (
+      validation: ValidationResult,
+      { key, value }: NewProperty<T>
+    ): T | IErr<T> | ValidationErr {
+
+      let isValid: boolean = validation === true
+        || isArray(validation)
+        && validation.length === 1
+        && validation[0] === true;
+
+      // Happy path: remove `key` from error map.
+      this._deleteKey(ERRORS, key);
+
+      // Error case.
+      if (!isValid) {
+        return this.addError(key, { value, validation } as IErr<T>);
+      }
+
+      return value;
+    },
+
     /**
      * Validates a given key and value.
      */
@@ -562,19 +614,13 @@ export function changeset(
 
     /**
      * Sets property or error on the changeset.
+     * Returns value or error
      */
     _setProperty<T> (
       validation: ValidationResult,
       { key, value, oldValue }: NewProperty<T>
     ): T | IErr<T> | ValidationErr {
       let changes: Changes = get(this, CHANGES);
-      let isValid: boolean = validation === true
-        || isArray(validation)
-        && validation.length === 1
-        && validation[0] === true;
-
-      // Happy path: remove `key` from error map.
-      this._deleteKey(ERRORS, key);
 
       // Happy path: update change map.
       if (!isEqual(oldValue, value)) {
@@ -587,13 +633,8 @@ export function changeset(
       this.notifyPropertyChange(CHANGES);
       this.notifyPropertyChange(key);
 
-      // Error case.
-      if (!isValid) {
-        return this.addError(key, { value, validation } as IErr<T>);
-      }
-
       // Return new value.
-      return value;
+      return this._handleValidation(validation, { key, value });
     },
 
     /**
