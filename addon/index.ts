@@ -141,7 +141,8 @@ export function changeset(
       if (skipValidate) {
         let content: Content = get(this, CONTENT);
         let oldValue = get(content, key);
-        return this._setProperty((<ValidationResult>true), { key, value, oldValue });
+        this._setProperty({ key, value, oldValue });
+        return this._handleValidation(true, { key, value });
       }
 
       return this._validateAndSet(key, value);
@@ -359,13 +360,13 @@ export function changeset(
 
       if (isNone(key)) {
         let maybePromise = keys(validationMap).map(validationKey => {
-          return this._validateOnly(validationKey, this._valueFor(validationKey));
+          return this._validateKey(validationKey, this._valueFor(validationKey));
         });
 
         return all(maybePromise);
       }
 
-      return resolve(this._validateOnly(key, this._valueFor(key)));
+      return resolve(this._validateKey(key, this._valueFor(key)));
     },
 
     /**
@@ -523,18 +524,20 @@ export function changeset(
         return (<Promise<ValidationResult>>validation).then((resolvedValidation: ValidationResult) => {
           this._setIsValidating(key, false);
           this.trigger(AFTER_VALIDATION_EVENT, key);
-          return this._setProperty(resolvedValidation, { key, value, oldValue });
+          this._setProperty({ key, value, oldValue });
+          return this._handleValidation(resolvedValidation, { key, value });
         });
       }
 
-      let result = this._setProperty((<ValidationResult>validation), { key, value, oldValue });
+      this._setProperty({ key, value, oldValue });
+      let result = this._handleValidation(validation, { key, value });
 
       this.trigger(AFTER_VALIDATION_EVENT, key);
 
       return result;
     },
 
-    _validateOnly<T> (
+    _validateKey<T> (
       key: string,
       value: T
     ): Promise<ValidationResult> | ValidationResult {
@@ -617,9 +620,8 @@ export function changeset(
      * Returns value or error
      */
     _setProperty<T> (
-      validation: ValidationResult,
       { key, value, oldValue }: NewProperty<T>
-    ): T | IErr<T> | ValidationErr {
+    ): void {
       let changes: Changes = get(this, CHANGES);
 
       // Happy path: update change map.
@@ -632,9 +634,6 @@ export function changeset(
       // Happy path: notify that `key` was added.
       this.notifyPropertyChange(CHANGES);
       this.notifyPropertyChange(key);
-
-      // Return new value.
-      return this._handleValidation(validation, { key, value });
     },
 
     /**
