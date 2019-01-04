@@ -111,7 +111,6 @@ export interface ChangesetDef extends Any {
   restore: (obj: Snapshot) => ChangesetDef,
   cast: (allowed: Array<string>) => ChangesetDef,
   isValidating: (key: string | void) => boolean,
-  _validateAndSet: <T>(key: string, value: T) => (Promise<ValidationResult | T | IErr<T>> | T | IErr<T> | ValidationResult),
   _validate: (key: string, newValue: any, oldValue: any) => (ValidationResult | Promise<ValidationResult>),
   _setProperty: <T>(obj: NewProperty<T>) => void,
   _setIsValidating: (key: string, value: boolean) => void,

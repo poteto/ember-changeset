@@ -145,7 +145,10 @@ export function changeset(
         return this._handleValidation(true, { key, value });
       }
 
-      return this._validateAndSet(key, value);
+      let content: Content = get(this, CONTENT);
+      let oldValue: any = get(content, key);
+      this._setProperty({ key, value, oldValue });
+      return this._validateKey(key, value);
     },
 
     /**
@@ -504,10 +507,7 @@ export function changeset(
       return !isEmpty(ks);
     },
 
-    /**
-     * For a given key and value, set error or change.
-     */
-    _validateAndSet<T> (
+    _validateKey<T> (
       key: string,
       value: T
     ): Promise<ValidationResult | T | IErr<T>> | T | IErr<T> | ValidationResult {
@@ -517,6 +517,7 @@ export function changeset(
         this._validate(key, value, oldValue);
 
       this.trigger(BEFORE_VALIDATION_EVENT, key);
+
       // TODO: Address case when Promise is rejected.
       if (isPromise(validation)) {
         this._setIsValidating(key, true);
@@ -524,48 +525,16 @@ export function changeset(
         return (<Promise<ValidationResult>>validation).then((resolvedValidation: ValidationResult) => {
           this._setIsValidating(key, false);
           this.trigger(AFTER_VALIDATION_EVENT, key);
-          this._setProperty({ key, value, oldValue });
+
           return this._handleValidation(resolvedValidation, { key, value });
         });
       }
 
-      this._setProperty({ key, value, oldValue });
       let result = this._handleValidation(validation, { key, value });
 
       this.trigger(AFTER_VALIDATION_EVENT, key);
 
       return result;
-    },
-
-    _validateKey<T> (
-      key: string,
-      value: T
-    ): Promise<ValidationResult> | ValidationResult {
-      let content: Content = get(this, CONTENT);
-      let oldValue: any = get(content, key);
-      let validation: ValidationResult | Promise<ValidationResult> =
-        this._validate(key, value, oldValue);
-
-      this.trigger(BEFORE_VALIDATION_EVENT, key);
-
-      // TODO: Address case when Promise is rejected.
-      if (isPromise(validation)) {
-        this._setIsValidating(key, true);
-
-        return (<Promise<ValidationResult>>validation).then((resolvedValidation: ValidationResult) => {
-          this._setIsValidating(key, false);
-          this.trigger(AFTER_VALIDATION_EVENT, key);
-
-          this._handleValidation(resolvedValidation, { key, value });
-          return resolvedValidation;
-        });
-      }
-
-      this._handleValidation(validation, { key, value });
-
-      this.trigger(AFTER_VALIDATION_EVENT, key);
-
-      return validation;
     },
 
     _handleValidation<T> (
