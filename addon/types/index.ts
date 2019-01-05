@@ -96,6 +96,8 @@ export interface ChangesetDef extends Any {
   init: () => void,
   unknownProperty: (s: string) => any,
   setUnknownProperty: <T>(key: string, value: T) => (T | IErr<T> | Promise<T> | Promise<ValidationResult | T | IErr<T>> | ValidationResult),
+  get: (key: string) => any,
+  set: <T>(key: string, value: T) => (void | T | IErr<T> | Promise<T> | Promise<ValidationResult | T | IErr<T>> | ValidationResult),
   toString: () => string,
   prepare: PrepareChangesFn,
   execute: () => ChangesetDef,

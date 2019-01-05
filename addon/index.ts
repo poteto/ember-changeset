@@ -722,20 +722,26 @@ export function changeset(
       c.notifyPropertyChange(objName);
     },
 
-    set<T> (key: string, value: T) {
+    get(key: string): any {
+      if (key.indexOf('.') > -1) {
+        // pull off changes hash with full key instead of
+        // breaking up key
+        return this.unknownProperty(key);
+      } else {
+        return this._super(...arguments);
+      }
+    },
+
+    set<T> (
+      key: string,
+      value: T
+    ): void | Promise<ValidationResult | T | IErr<T>> | T | IErr<T> | ValidationResult {
       if (key.indexOf('.') > -1) {
         // Adds new CHANGE
-        this.setUnknownProperty(key, value);
-        // use a plain setter so ember internals do not break up key and
-        // pull off reference to content to set.  We don't want to also change
-        // the underlying model as well.
-        // This is not necessarily right yet.
-        // Setting on the changeset obj itself isn't ideal as we don't want to put the change
-        // on the underlying model. Will have to find another way
-        this[key] = value;
+        // TODO: issue with overriding is that `set(changeset, )` doesnt work
+        return this.setUnknownProperty(key, value);
       } else {
-        let result = this._super(...arguments);
-        return result;
+        return this._super(...arguments);
       }
     }
   }
