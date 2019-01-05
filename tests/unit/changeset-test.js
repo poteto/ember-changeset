@@ -343,7 +343,7 @@ module('Unit | Utility | changeset', function(hooks) {
     assert.deepEqual(changes, expectedChanges, 'should add change');
   });
 
-  test('scott #set adds a change if the key is an object', function(assert) {
+  test('#set adds a change if the key is an object', function(assert) {
     set(dummyModel, 'org', {
       usa: {
         ny: 'ny',

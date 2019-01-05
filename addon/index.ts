@@ -729,6 +729,9 @@ export function changeset(
         // use a plain setter so ember internals do not break up key and
         // pull off reference to content to set.  We don't want to also change
         // the underlying model as well.
+        // This is not necessarily right yet.
+        // Setting on the changeset obj itself isn't ideal as we don't want to put the change
+        // on the underlying model. Will have to find another way
         this[key] = value;
       } else {
         let result = this._super(...arguments);
