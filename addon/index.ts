@@ -507,6 +507,12 @@ export function changeset(
       return !isEmpty(ks);
     },
 
+    /**
+     * Validates a specific key
+     *
+     * @method _validateKey
+     * @private
+     */
     _validateKey<T> (
       key: string,
       value: T
@@ -537,6 +543,12 @@ export function changeset(
       return result;
     },
 
+    /**
+     * Takes resolved validation and adds an error or simply returns the value
+     *
+     * @method _handleValidation
+     * @private
+     */
     _handleValidation<T> (
       validation: ValidationResult,
       { key, value }: NewProperty<T>
@@ -559,7 +571,10 @@ export function changeset(
     },
 
     /**
-     * Validates a given key and value.
+     * runs the validator with the key and value
+     *
+     * @method _validate
+     * @private
      */
     _validate(
       key: string,
@@ -705,6 +720,20 @@ export function changeset(
       let c: ChangesetDef = this;
       c.notifyPropertyChange(`${objName}.${key}`);
       c.notifyPropertyChange(objName);
+    },
+
+    set<T> (key: string, value: T) {
+      if (key.indexOf('.') > -1) {
+        // Adds new CHANGE
+        this.setUnknownProperty(key, value);
+        // use a plain setter so ember internals do not break up key and
+        // pull off reference to content to set.  We don't want to also change
+        // the underlying model as well.
+        this[key] = value;
+      } else {
+        let result = this._super(...arguments);
+        return result;
+      }
     }
   }
 

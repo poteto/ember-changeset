@@ -32,7 +32,7 @@ module('Integration | main', function(hooks) {
     assert.equal(changeset.get('profile.firstName'), user.get('profile.firstName'));
     assert.equal(changeset.get('profile.lastName'), user.get('profile.lastName'));
 
-    changeset.set('profile.firstName', 'Grace');
+    changeset.get('profile').set('firstName', 'Grace');
     changeset.set('profile.lastName', 'Hopper');
 
     assert.equal(changeset.get('profile.firstName'), 'Grace');
@@ -51,8 +51,9 @@ module('Integration | main', function(hooks) {
     changeset.set('profile', profile);
 
     assert.equal(changeset.get('profile').get('firstName'), 'Terry');
-    assert.equal(changeset.get('profile.firstName'), 'Terry');
-    assert.equal(changeset.get('profile.lastName'), 'Bubblewinkles');
+    assert.equal(changeset.get('profile').get('lastName'), 'Bubblewinkles');
+    // assert.equal(changeset.get('profile.firstName'), 'Terry');
+    // assert.equal(changeset.get('profile.lastName'), 'Bubblewinkles');
 
     changeset.execute();
 
