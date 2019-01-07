@@ -1,5 +1,23 @@
 # Change Log
 
+## [2.0.0](https://github.com/poteto/ember-changeset/tree/v2.0.0) (2019-01-07)
+[Full Changelog](https://github.com/poteto/ember-changeset/compare/v1.3.0...v2.0.0)
+
+- Nested setters and getters improvement [#335](https://github.com/poteto/ember-changeset/pull/335)
+- Belongs-To set to null or undefined [#333](https://github.com/poteto/ember-changeset/pull/333)
+- Convert addon to typescript [#327](https://github.com/poteto/ember-changeset/pull/327)
+- Remove Relay Implementation [#326](https://github.com/poteto/ember-changeset/pull/326)
+
+## [1.6.0](https://github.com/poteto/ember-changeset/tree/v1.6.0) (2018-12-12)
+[Full Changelog](https://github.com/poteto/ember-changeset/compare/v1.5.0...v1.6.0)
+
+**Important Merged pull requests:**
+
+- Use deepSet when updating RUNNING_VALIDATIONS for nested key [#328](https://github.com/poteto/ember-changeset/pull/328)
+- update ember-deep-set dependency [#320](https://github.com/poteto/ember-changeset/pull/320)
+- fix when value is relation, but set as null [#318](https://github.com/poteto/ember-changeset/pull/318)
+- Change to use native typeof instead [#313](https://github.com/poteto/ember-changeset/pull/313)
+
 ## [1.5.0](https://github.com/poteto/ember-changeset/tree/v1.5.0) (2018-08-28)
 [Full Changelog](https://github.com/poteto/ember-changeset/compare/v1.4.2-beta.0...v1.5.0)
 

@@ -141,10 +141,14 @@ export function changeset(
       if (skipValidate) {
         let content: Content = get(this, CONTENT);
         let oldValue = get(content, key);
-        return this._setProperty((<ValidationResult>true), { key, value, oldValue });
+        this._setProperty({ key, value, oldValue });
+        return this._handleValidation(true, { key, value });
       }
 
-      return this._validateAndSet(key, value);
+      let content: Content = get(this, CONTENT);
+      let oldValue: any = get(content, key);
+      this._setProperty({ key, value, oldValue });
+      return this._validateKey(key, value);
     },
 
     /**
@@ -359,13 +363,13 @@ export function changeset(
 
       if (isNone(key)) {
         let maybePromise = keys(validationMap).map(validationKey => {
-          return this._validateAndSet(validationKey, this._valueFor(validationKey));
+          return this._validateKey(validationKey, this._valueFor(validationKey));
         });
 
         return all(maybePromise);
       }
 
-      return resolve(this._validateAndSet(key, this._valueFor(key)));
+      return resolve(this._validateKey(key, this._valueFor(key)));
     },
 
     /**
@@ -504,9 +508,12 @@ export function changeset(
     },
 
     /**
-     * For a given key and value, set error or change.
+     * Validates a specific key
+     *
+     * @method _validateKey
+     * @private
      */
-    _validateAndSet<T> (
+    _validateKey<T> (
       key: string,
       value: T
     ): Promise<ValidationResult | T | IErr<T>> | T | IErr<T> | ValidationResult {
@@ -516,6 +523,7 @@ export function changeset(
         this._validate(key, value, oldValue);
 
       this.trigger(BEFORE_VALIDATION_EVENT, key);
+
       // TODO: Address case when Promise is rejected.
       if (isPromise(validation)) {
         this._setIsValidating(key, true);
@@ -523,11 +531,12 @@ export function changeset(
         return (<Promise<ValidationResult>>validation).then((resolvedValidation: ValidationResult) => {
           this._setIsValidating(key, false);
           this.trigger(AFTER_VALIDATION_EVENT, key);
-          return this._setProperty(resolvedValidation, { key, value, oldValue });
+
+          return this._handleValidation(resolvedValidation, { key, value });
         });
       }
 
-      let result = this._setProperty((<ValidationResult>validation), { key, value, oldValue });
+      let result = this._handleValidation(validation, { key, value });
 
       this.trigger(AFTER_VALIDATION_EVENT, key);
 
@@ -535,7 +544,37 @@ export function changeset(
     },
 
     /**
-     * Validates a given key and value.
+     * Takes resolved validation and adds an error or simply returns the value
+     *
+     * @method _handleValidation
+     * @private
+     */
+    _handleValidation<T> (
+      validation: ValidationResult,
+      { key, value }: NewProperty<T>
+    ): T | IErr<T> | ValidationErr {
+
+      let isValid: boolean = validation === true
+        || isArray(validation)
+        && validation.length === 1
+        && validation[0] === true;
+
+      // Happy path: remove `key` from error map.
+      this._deleteKey(ERRORS, key);
+
+      // Error case.
+      if (!isValid) {
+        return this.addError(key, { value, validation } as IErr<T>);
+      }
+
+      return value;
+    },
+
+    /**
+     * runs the validator with the key and value
+     *
+     * @method _validate
+     * @private
      */
     _validate(
       key: string,
@@ -562,19 +601,12 @@ export function changeset(
 
     /**
      * Sets property or error on the changeset.
+     * Returns value or error
      */
     _setProperty<T> (
-      validation: ValidationResult,
       { key, value, oldValue }: NewProperty<T>
-    ): T | IErr<T> | ValidationErr {
+    ): void {
       let changes: Changes = get(this, CHANGES);
-      let isValid: boolean = validation === true
-        || isArray(validation)
-        && validation.length === 1
-        && validation[0] === true;
-
-      // Happy path: remove `key` from error map.
-      this._deleteKey(ERRORS, key);
 
       // Happy path: update change map.
       if (!isEqual(oldValue, value)) {
@@ -586,14 +618,6 @@ export function changeset(
       // Happy path: notify that `key` was added.
       this.notifyPropertyChange(CHANGES);
       this.notifyPropertyChange(key);
-
-      // Error case.
-      if (!isValid) {
-        return this.addError(key, { value, validation } as IErr<T>);
-      }
-
-      // Return new value.
-      return value;
     },
 
     /**
@@ -696,6 +720,29 @@ export function changeset(
       let c: ChangesetDef = this;
       c.notifyPropertyChange(`${objName}.${key}`);
       c.notifyPropertyChange(objName);
+    },
+
+    get(key: string): any {
+      if (key.indexOf('.') > -1) {
+        // pull off changes hash with full key instead of
+        // breaking up key
+        return this.unknownProperty(key);
+      } else {
+        return this._super(...arguments);
+      }
+    },
+
+    set<T> (
+      key: string,
+      value: T
+    ): void | Promise<ValidationResult | T | IErr<T>> | T | IErr<T> | ValidationResult {
+      if (key.indexOf('.') > -1) {
+        // Adds new CHANGE and avoids ember intenals setting directly on model
+        // TODO: overriding `set(changeset, )` doesnt work
+        return this.setUnknownProperty(key, value);
+      } else {
+        return this._super(...arguments);
+      }
     }
   }
 

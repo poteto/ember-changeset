@@ -286,7 +286,7 @@ module('Unit | Utility | changeset', function(hooks) {
     assert.deepEqual(dummyModel.get('contact.emails'), [ 'fred@email.com', 'the_fred@email.com' ], 'returns model saved value');
   });
 
-  skip('#getted Object proxies to underlying method', function(assert) {
+  test('#getted Object proxies to underlying method', function(assert) {
     class Dog {
       constructor(b) {
         this.breed = b;
@@ -316,14 +316,14 @@ module('Unit | Utility | changeset', function(hooks) {
       let c = new Changeset(model);
       let actual = get(c, 'foo.bar.dog');
       let expectedResult = get(model, 'foo.bar.dog');
-      assert.notEqual(actual, expectedResult, "using Ember.get won't work");
+      assert.equal(actual, expectedResult, "using Ember.get will work");
     }
 
     {
       let c = new Changeset(model);
-      let actual = get(c, 'foo.bar.dog.content');
+      let actual = get(c, 'foo.bar.dog');
       let expectedResult = get(model, 'foo.bar.dog');
-      assert.equal(actual, expectedResult, "you have to use .content");
+      assert.equal(actual, expectedResult, "you dont have to use .content");
     }
   });
 
@@ -337,10 +337,13 @@ module('Unit | Utility | changeset', function(hooks) {
     dummyChangeset.set('name', 'foo');
     let changes = get(dummyChangeset, 'changes');
 
+    assert.equal(dummyModel.name, undefined, 'should keep change');
+    assert.equal(dummyChangeset.get('name'), 'foo', 'should have new change');
+
     assert.deepEqual(changes, expectedChanges, 'should add change');
   });
 
-  skip('#set adds a change if the key is an object', function(assert) {
+  test('#set adds a change if the key is an object', function(assert) {
     set(dummyModel, 'org', {
       usa: {
         ny: 'ny',
@@ -349,6 +352,9 @@ module('Unit | Utility | changeset', function(hooks) {
 
     let c = new Changeset(dummyModel);
     c.set('org.usa.ny', 'foo');
+
+    assert.equal(dummyModel.org.usa.ny, 'ny', 'should keep change');
+    assert.equal(c.get('org.usa.ny'), 'foo', 'should have new change');
 
     let expectedChanges = [{ key: 'org.usa.ny', value: 'foo' }];
     let changes = get(c, 'changes');
@@ -680,7 +686,7 @@ module('Unit | Utility | changeset', function(hooks) {
       result: () => ({ org: { usa: { ny: 'foo', ca: 'bar' } } }),
     },
   ].forEach(({ model, setCalls, result }, i) => {
-    skip(`#execute - table-driven test ${i+1}`, function(assert) {
+    test(`#execute - table-driven test ${i+1}`, function(assert) {
       let m = model();
       let c = new Changeset(m);
 
@@ -693,7 +699,7 @@ module('Unit | Utility | changeset', function(hooks) {
     });
   });
 
-  skip('it works with nested keys', function(assert) {
+  test('it works with nested keys', function(assert) {
     let expectedResult = {
       org: {
         asia: { sg: 'sg' },
@@ -942,7 +948,7 @@ module('Unit | Utility | changeset', function(hooks) {
     assert.deepEqual(get(dummyChangeset, 'changes'), [], 'rolls back');
   });
 
-  skip('#rollback twice with nested keys works', function(assert) {
+  test('#rollback twice with nested keys works', function(assert) {
     set(dummyModel, 'org', {
       asia: { sg: null },
     });
