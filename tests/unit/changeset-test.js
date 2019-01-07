@@ -1,5 +1,5 @@
 import Changeset from 'ember-changeset';
-import { module, test, skip } from 'qunit';
+import { module, test } from 'qunit';
 
 import EmberObject, {
   get,
@@ -261,7 +261,7 @@ module('Unit | Utility | changeset', function(hooks) {
     assert.equal(dummyChangeset.get('org.asia.sg'), 'sg', 'returns newly set value');
   });
 
-  skip('nested objects can contain arrays', function(assert) {
+  test('nested objects can contain arrays', function(assert) {
     assert.expect(7);
     setProperties(dummyModel, {
       name: 'Bob',
