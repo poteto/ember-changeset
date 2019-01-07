@@ -1,4 +1,4 @@
-import { module, test } from 'qunit';
+import { module, test, skip } from 'qunit';
 import { setupTest } from 'ember-qunit';
 import { run } from '@ember/runloop';
 import { set } from '@ember/object';
@@ -94,7 +94,7 @@ module('Integration | main', function(hooks) {
     changeset.save();
   });
 
-  test('can save belongsTo via changeset', function(assert) {
+  skip('can save belongsTo via changeset', function(assert) {
     assert.expect(2);
 
     run(() => {
