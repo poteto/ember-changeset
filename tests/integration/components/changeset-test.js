@@ -123,7 +123,7 @@ module('Integration | Helper | changeset', function(hooks) {
           id="first-name"
           type="text"
           value={{changesetObj.firstName}}
-          onchange={{action (changeset-set changesetObj "firstName") value="target.value"}}>
+          onchange={{action (mut changesetObj.firstName) value="target.value"}}>
         {{input id="last-name" value=changesetObj.lastName}}
       {{/with}}
     `);
@@ -134,11 +134,7 @@ module('Integration | Helper | changeset', function(hooks) {
     assert.equal(find('h1').textContent.trim(), 'foo bar', 'should update observable value');
   });
 
-  skip('a passed down nested object updates when set without a validator', async function(assert) {
-    // TODO: changeset-set will only apply to changeset and not underlying model
-    // so mut will actually modify underlying object
-    // I don't think we have the right observers here to trigger an update on the input
-    // for a ntested object
+  test('a passed down nested object updates when set without a validator', async function(assert) {
     let data = { person: { firstName: 'Jim', lastName: 'Bob' } };
     let changeset = new Changeset(data);
     this.set('changeset', changeset);
@@ -156,7 +152,13 @@ module('Integration | Helper | changeset', function(hooks) {
     assert.equal(find('h1').textContent.trim(), 'Jim Bob', 'precondition');
     await fillIn('#first-name', 'foo');
     await fillIn('#last-name', 'bar');
-    assert.equal(find('h1').textContent.trim(), 'foo bar', 'should update observable value');
+    assert.equal(changeset.get('person.firstName'), 'foo', 'should update observable value');
+    assert.equal(changeset.get('_content').person.firstName, 'Jim', 'keeps value on model as execute hasn\'t been called');
+    // TODO: changeset-set will only apply to changeset and not underlying model
+    // so mut will actually modify underlying object
+    // I don't think we have the right observers here to trigger an update on the input
+    // for a nested object
+    // assert.equal(find('h1').textContent.trim(), 'foo bar', 'should update observable value');
   });
 
   test('nested object updates when set without a validator', async function(assert) {
