@@ -58,6 +58,57 @@ module('Integration | main', function(hooks) {
 
     assert.equal(user.get('profile.firstName'), 'Terry');
     assert.equal(user.get('profile.lastName'), 'Bubblewinkles');
+
+    changeset.set('profile', null);
+    assert.equal(changeset.get('profile'), null, 'changeset profile is null');
+
+    changeset.execute();
+
+    assert.equal(changeset.get('profile'), null, 'changeset profile relationship is still null');
+    assert.equal(user.get('profile').get('firstName'), null, 'underlying user profile firstName is null');
+    assert.ok(user.get('profile'), 'user has yet to call save so still present as proxy');
+  });
+
+  test('can save user', function(assert) {
+    assert.expect(1);
+
+    run(() => {
+      let profile = this.store.createRecord('profile');
+      let save = () => {
+        assert.ok(true, 'user save was called')
+      }
+      this.dummyUser = this.store.createRecord('user', { profile, save });
+    });
+
+    let user = this.dummyUser;
+    let changeset = new Changeset(user);
+
+    changeset.set('profile.firstName', 'Grace');
+    changeset.execute();
+    changeset.save();
+  });
+
+  test('can save belongsTo via changeset', function(assert) {
+    assert.expect(2);
+
+    run(() => {
+      let save = () => {
+        assert.ok(true, 'user save was called')
+      }
+      let profile = this.store.createRecord('profile', { save });
+      this.dummyUser = this.store.createRecord('user', { profile });
+    });
+
+    let user = this.dummyUser;
+    let changeset = new Changeset(user);
+
+    changeset.set('profile.firstName', 'Grace');
+    let profile = changeset.get('profile');
+    let profileChangeset = new Changeset(profile);
+
+    assert.equal(profileChangeset.get('firstName'), 'Grace', 'changeset profile firstName is set');
+    profileChangeset.execute();
+    profileChangeset.save();
   });
 
   test('it works for hasMany / firstObject', function(assert) {
@@ -76,9 +127,17 @@ module('Integration | main', function(hooks) {
     assert.equal(dogs[2].get('breed'), 'Münsterländer');
 
     changeset.execute();
+
     dogs = user.get('dogs').toArray();
     assert.equal(dogs[0].get('breed'), 'rough collie');
     assert.equal(dogs[1].get('breed'), 'rough collie');
     assert.equal(dogs[2].get('breed'), 'Münsterländer');
+
+    changeset.set('dogs', []);
+
+    changeset.execute();
+
+    dogs = user.get('dogs').toArray();
+    assert.equal(dogs.length, 0, 'dogs removed');
   });
 });
