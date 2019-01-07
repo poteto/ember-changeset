@@ -161,7 +161,7 @@ module('Integration | Helper | changeset', function(hooks) {
     // assert.equal(find('h1').textContent.trim(), 'foo bar', 'should update observable value');
   });
 
-  test('nested object updates when set without a validator', async function(assert) {
+  skip('nested object updates when set without a validator', async function(assert) {
     let data = { person: { firstName: 'Jim', lastName: 'Bob' } };
     let changeset = new Changeset(data);
     this.set('changeset', changeset);
@@ -171,7 +171,7 @@ module('Integration | Helper | changeset', function(hooks) {
         id="first-name"
         type="text"
         value={{changeset.person.firstName}}
-        onchange={{action (mut changeset.person.firstName) value="target.value"}}>
+        onchange={{action (changeset-set changeset "person.firstName") value="target.value"}}>
       {{input id="last-name" value=changeset.person.lastName}}
     `);
 
