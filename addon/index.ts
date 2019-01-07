@@ -737,8 +737,8 @@ export function changeset(
       value: T
     ): void | Promise<ValidationResult | T | IErr<T>> | T | IErr<T> | ValidationResult {
       if (key.indexOf('.') > -1) {
-        // Adds new CHANGE
-        // TODO: issue with overriding is that `set(changeset, )` doesnt work
+        // Adds new CHANGE and avoids ember intenals setting directly on model
+        // TODO: overriding `set(changeset, )` doesnt work
         return this.setUnknownProperty(key, value);
       } else {
         return this._super(...arguments);
