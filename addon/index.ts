@@ -617,8 +617,7 @@ export function changeset(
 
       // Happy path: notify that `key` was added.
       this.notifyPropertyChange(CHANGES);
-      let [topLevelKey] = key.split('.');
-      this.notifyPropertyChange(topLevelKey);
+      this.notifyPropertyChange(key);
     },
 
     /**
