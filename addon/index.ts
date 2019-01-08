@@ -83,7 +83,7 @@ export function changeset(
 ) {
   assert('Underlying object for changeset is missing', isPresent(obj));
 
-  let changeset: ChangesetDef = {
+  let changeset: any = { // ChangesetDef
 
     // notifyPropertyChange: (s: string) => void,
     // trigger: (k: string, v: string | void) => void,
@@ -273,7 +273,7 @@ export function changeset(
       let e1: Errors<any> = get(this, ERRORS);
       let e2: Errors<any> = get(changeset, ERRORS);
 
-      let newChangeset: ChangesetDef = new Changeset(content, get(this, VALIDATOR));
+      let newChangeset: any = new Changeset(content, get(this, VALIDATOR)); // ChangesetDef
       let newErrors: Errors<any> = objectWithout(keys(c2), e1);
       let newChanges: Changes = objectWithout(keys(e2), c1);
       let mergedErrors: Errors<any> = mergeNested(newErrors, e2);
@@ -407,7 +407,7 @@ export function changeset(
      */
     pushErrors(
       key: keyof ChangesetDef,
-      ...newErrors
+      ...newErrors: string[] | ValidationErr[]
     ) {
       let errors: Errors<any> = get(this, ERRORS);
       let existingError: IErr<any> | Err = errors[key] || new Err(null, []);
