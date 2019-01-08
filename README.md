@@ -15,6 +15,10 @@ ember install ember-changeset
 >
 > <img alt="" src="https://user-images.githubusercontent.com/914228/34072730-9d2d0bcc-e25a-11e7-9ab5-405ddce05303.gif" width="25"> <img alt="" src="https://user-images.githubusercontent.com/914228/34072749-07a8ab50-e25b-11e7-80ba-d0f6250aad11.png" width="20.5">
 
+## Updates
+
+We have released a v2.0.0-beta.  This includes a solution for deeply nested sets with one big caveat.  Some history - Post v1.3.0, there was an elegant solution proposed and implemented for deeply nested sets - e.g. `changeset.set('profile.name', 'myname')`.  However, this caused many issues and was reverted in v2.0.0-beta.  Since `ember-changeset` relies on [Proxy](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Proxy) like behaviour, we are able to trap `changeset.set(...` and properly handle nested sets.  This, however, is a problem in templates where `mut changeset.profile.name` is implicitly `set(changeset, 'profile.name')`, thus subverting our trap.  This is the caveat with the v2.0.0-beta release.  Although it is an improvement over v1.3.0 and should be 1-1 behaviour if you are setting at a single level - e.g. `mut changeset.name` -, nested setters don't have an ideal solution.  So we are releasing v2.0.0-beta with this caveat and adding a `changeset-set` helper to use in templates.  This is a work in progress.
+
 ## Philosophy
 
 The idea behind a changeset is simple: it represents a set of valid changes to be applied onto any Object (`Ember.Object`, `DS.Model`, POJOs, etc). Each change is tested against an optional validation, and if valid, the change is stored and applied when executed.
@@ -55,9 +59,9 @@ First, create a new `Changeset` using the `changeset` helper or through JavaScri
 
 ```hbs
 {{! application/template.hbs}}
-{{#with (changeset model (action "validate")) as |changeset|}}
+{{#with (changeset model (action "validate")) as |changesetObj|}}
   {{dummy-form
-      changeset=changeset
+      changeset=changesetObj
       submit=(action "submit")
       rollback=(action "rollback")
   }}
@@ -129,7 +133,7 @@ let changeset = new Changeset(model, validatorFn, validationMap, { skipValidate:
 ```
 
 ```hbs
-{{#with (changeset model (action "validate") skipValidate=true) as |changeset|}}
+{{#with (changeset model (action "validate") skipValidate=true) as |changesetObj|}}
   ...
 {{/with}}
 ```
