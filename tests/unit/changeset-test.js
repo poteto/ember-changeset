@@ -79,7 +79,7 @@ module('Unit | Utility | changeset', function(hooks) {
     dummyChangeset.set('name', 'a');
 
     assert.deepEqual(get(dummyChangeset, 'error'), expectedResult, 'should return error object');
-    assert.deepEqual(get(dummyChangeset, 'change'), { name: 'a' }, 'should return error object');
+    assert.deepEqual(get(dummyChangeset, 'change'), { name: 'a' }, 'should return change object');
   });
 
   /**
