@@ -119,5 +119,6 @@ export interface ChangesetDef extends Any {
   _valueFor: (s: string) => any,
   _notifyVirtualProperties: (keys?: string[]) => void,
   _rollbackKeys: () => Array<string>,
-  _deleteKey: (objName: InternalMapKey, key: string) => void
+  _deleteKey: (objName: InternalMapKey, key: string) => void,
+  _setNestedKey: <T>(key: string, value: T) => T
 };

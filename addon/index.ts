@@ -739,10 +739,25 @@ export function changeset(
       if (key.indexOf('.') > -1) {
         // Adds new CHANGE and avoids ember intenals setting directly on model
         // TODO: overriding `set(changeset, )` doesnt work
+        this._setTopLevel(key, value);
         return this.setUnknownProperty(key, value);
       } else {
         return this._super(...arguments);
       }
+    },
+
+    _setTopLevel<T> (
+      key: string,
+      value: T
+    ): T {
+      let [topLevel, rest] = key.split('.');
+      set(this.get(topLevel), rest, value);
+
+      if (rest.indexOf('.') > -1) {
+        return this._setTopLevel(rest, value);
+      }
+
+      return value;
     }
   }
 
