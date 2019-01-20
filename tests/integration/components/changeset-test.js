@@ -161,7 +161,7 @@ module('Integration | Helper | changeset', function(hooks) {
     // assert.equal(find('h1').textContent.trim(), 'foo bar', 'should update observable value');
   });
 
-  test('nested object updates when set without a validator', async function(assert) {
+  skip('nested object updates when set without a validator', async function(assert) {
     let data = { person: { firstName: 'Jim', lastName: 'Bob' } };
     let changeset = new Changeset(data);
     this.set('changeset', changeset);
@@ -216,7 +216,7 @@ module('Integration | Helper | changeset', function(hooks) {
     }
   });
 
-  test('nested object updates when set with async validator', async function(assert) {
+  skip('nested object updates when set with async validator', async function(assert) {
     let data = { person: { firstName: 'Jim' } };
     let validator = () => resolve(true);
     let c = new Changeset(data, validator);
