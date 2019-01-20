@@ -5,8 +5,6 @@
 <a href="https://badge.fury.io/js/ember-changeset"><img alt="npm version" src="https://badge.fury.io/js/ember-changeset.svg"></a>
 <a href="https://emberobserver.com/addons/ember-changeset"><img alt="Ember Observer Score" src="https://emberobserver.com/badges/ember-changeset.svg"></a>
 
-To install:
-
 ```
 ember install ember-changeset
 ```
@@ -17,7 +15,7 @@ ember install ember-changeset
 
 ## Updates
 
-We have released a v2.0.0-beta.  This includes a solution for deeply nested sets with one big caveat.  Some history - Post v1.3.0, there was an elegant solution proposed and implemented for deeply nested sets - e.g. `changeset.set('profile.name', 'myname')`.  However, this caused many issues and was reverted in v2.0.0-beta.  Since `ember-changeset` relies on [Proxy](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Proxy) like behaviour, we are able to trap `changeset.set(...` and properly handle nested sets.  This, however, is a problem in templates where `mut changeset.profile.name` is implicitly `set(changeset, 'profile.name')`, thus subverting our trap.  This is the caveat with the v2.0.0-beta release.  Although it is an improvement over v1.3.0 and should be 1-1 behaviour if you are setting at a single level - e.g. `mut changeset.name` -, nested setters don't have an ideal solution.  So we are releasing v2.0.0-beta with this caveat and adding a `changeset-set` helper to use in templates.  This is a work in progress.
+We have released `v2.0.0-beta`.  This includes a solution for deeply nested sets with one big caveat.  Some history - Post v1.3.0, there was an elegant solution proposed and implemented for deeply nested sets - e.g. `changeset.set('profile.name', 'myname')`.  However, this caused many issues and was reverted in v2.0.0-beta.  Since `ember-changeset` relies on [Proxy](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Proxy) like behaviour, we are able to trap `changeset.set(...` and properly handle nested sets.  This, however, is a problem in templates where `mut changeset.profile.name` is implicitly `set(changeset, 'profile.name')`, thus subverting our trap.  This is the caveat with the v2.0.0-beta release.  Although it is an improvement over v1.3.0 and should be 1-1 behaviour if you are setting at a single level - e.g. `mut changeset.name` -, nested setters don't have an ideal solution.  So we are releasing v2.0.0-beta with this caveat and adding a `changeset-set` template helper.  This is a work in progress.
 
 ## Philosophy
 
@@ -123,6 +121,19 @@ Then, in your favorite form library, simply pass in the `changeset` in place of 
 In the above example, when the input changes, only the changeset's internal values are updated. When the submit button is clicked, the changes are only executed if *all changes* are valid.
 
 On rollback, all changes are dropped and the underlying Object is left untouched.
+
+## Changeset template helper
+`ember-changeset` overrides `set` in order to handle deeply nested setters.  `mut` is simply an alias for `set(changeset`, thus we provide a `changeset-set` template helper.
+
+```hbs
+<form>
+  <input
+    id="first-name"
+    type="text"
+    value={{changeset.person.firstName}}
+    onchange={{action (changeset-set changeset "person.firstName") value="target.value"}}>
+</form>
+```
 
 ## Disabling Automatic Validation
 
