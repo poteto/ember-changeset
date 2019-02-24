@@ -130,6 +130,8 @@ export function changeset(
 
     /**
      * Stores change on the changeset.
+     *
+     * @method setUnknownProperty
      */
     setUnknownProperty<T> (
       key: string,
@@ -176,6 +178,8 @@ export function changeset(
      *  })
      *  .execute(); // execute the changes
      * ```
+     *
+     * @method prepare
      */
     prepare(
       prepareChangesFn: PrepareChangesFn
@@ -198,6 +202,8 @@ export function changeset(
 
     /**
      * Executes the changeset if in a valid state.
+     *
+     * @method execute
      */
     execute(): ChangesetDef {
       if (get(this, 'isValid') && get(this, 'isDirty')) {
@@ -212,6 +218,7 @@ export function changeset(
     /**
      * Executes the changeset and saves the underlying content.
      *
+     * @method save
      * @param {Object} options optional object to pass to content save method
      */
     save(
@@ -222,15 +229,14 @@ export function changeset(
       this.execute();
 
       if (typeof content.save === 'function') {
-        let result: any | Promise<any> = content.save(options);
-        savePromise = result;
+        savePromise = content.save(options);
       } else if (typeof get(content, 'save') === 'function') {
         // we might be getting this off a proxy object.  For example, when a
         // belongsTo relationship (a proxy on the parent model)
         // another way would be content(belongsTo).content.save
-        let result: Function | undefined = get(content, 'save');
-        if (result) {
-          savePromise = result(options);
+        let saveFunc: Function | undefined = get(content, 'save');
+        if (saveFunc) {
+          savePromise = saveFunc(options);
         }
       }
 
@@ -256,6 +262,8 @@ export function changeset(
      * user.get('firstName'); // "Jimmy"
      * user.get('lastName'); // "Fallon"
      * ```
+     *
+     * @method merge
      */
     merge(
       changeset: ChangesetDef
@@ -288,6 +296,8 @@ export function changeset(
     /**
      * Returns the changeset to its pristine state, and discards changes and
      * errors.
+     *
+     * @method rollback
      */
     rollback(): ChangesetDef {
       // Get keys before reset.
@@ -308,6 +318,7 @@ export function changeset(
      *
      * @public
      * @chainable
+     * @method rollbackInvalid
      * @param {String} key optional key to rollback invalid values
      * @return {Changeset}
      */
@@ -338,6 +349,7 @@ export function changeset(
      *
      * @public
      * @chainable
+     * @method rollbackProperty
      * @param {String} key key to delete off of changes and errors
      * @return {Changeset}
      */
@@ -353,6 +365,8 @@ export function changeset(
      * If no key is passed into this method, it will validate all fields on the
      * validationMap and set errors accordingly. Will throw an error if no
      * validationMap is present.
+     *
+     * @method validate
      */
     validate(
       key: string | undefined
@@ -375,6 +389,8 @@ export function changeset(
     /**
      * Manually add an error to the changeset. If there is an existing
      * error or change for `key`, it will be overwritten.
+     *
+     * @method addError
      */
     addError<T> (
       key: string,
@@ -404,6 +420,8 @@ export function changeset(
 
     /**
      * Manually push multiple errors to the changeset as an array.
+     *
+     * @method pushErrors
      */
     pushErrors(
       key: keyof ChangesetDef,
@@ -430,6 +448,8 @@ export function changeset(
 
     /**
      * Creates a snapshot of the changeset's errors and changes.
+     *
+     * @method snapshot
      */
     snapshot(): Snapshot {
       let changes: Changes = get(this, CHANGES);
@@ -452,6 +472,8 @@ export function changeset(
     /**
      * Restores a snapshot of changes and errors. This overrides existing
      * changes and errors.
+     *
+     * @method restore
      */
     restore({ changes, errors }: Snapshot): ChangesetDef {
       validateNestedObj('snapshot.changes', changes);
@@ -479,6 +501,8 @@ export function changeset(
      * Unlike `Ecto.Changeset.cast`, `cast` will take allowed keys and
      * remove unwanted keys off of the changeset. For example, this method
      * can be used to only allow specified changes through prior to saving.
+     *
+     * @method cast
      */
     cast(allowed: string[] = []): ChangesetDef {
       let changes: Changes = get(this, CHANGES);
@@ -497,6 +521,8 @@ export function changeset(
     /**
      * Checks to see if async validator for a given key has not resolved.
      * If no key is provided it will check to see if any async validator is running.
+     *
+     * @method isValidating
      */
     isValidating(key: string | void): boolean {
       let runningValidations: RunningValidations = get(this, RUNNING_VALIDATIONS);

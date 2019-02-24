@@ -779,6 +779,8 @@ module('Unit | Utility | changeset', function(hooks) {
   });
 
   test('#save handles rejected proxy content', function(assert) {
+    assert.expect(1);
+
     let done = assert.async();
     let dummyChangeset = new Changeset(dummyModel);
 
@@ -790,12 +792,14 @@ module('Unit | Utility | changeset', function(hooks) {
       });
     });
 
-    run(() => {
-      dummyChangeset.save().catch((error) => {
+    dummyChangeset.save()
+      .then(() => {
+        assert.ok(false, 'WAT?!');
+      })
+      .catch((error) => {
         assert.equal(error.message, 'some ember data error');
       })
-        .finally(() => done());
-    });
+      .finally(() => done());
   });
 
   test('#save proxies to content even if it does not implement #save', function(assert) {
