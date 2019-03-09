@@ -183,6 +183,13 @@ module('Unit | Utility | changeset', function(hooks) {
     assert.ok(dummyChangeset.get('isPristine'), 'should be pristine');
   });
 
+  test('isPristine after execute', function(assert) {
+    let dummyChangeset = new Changeset(dummyModel);
+    dummyChangeset.set('name', null);
+    dummyChangeset.execute();
+    assert.ok(dummyChangeset.get('isPristine'), 'should be pristine');
+  });
+
   /**
    * #isDirty
    */
