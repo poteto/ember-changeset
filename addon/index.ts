@@ -369,7 +369,7 @@ export function changeset(
      * @method validate
      */
     validate(
-      key: string | undefined
+      key?: string | undefined
     ): Promise<null> | Promise<any | IErr<any>> | Promise<Array<any | IErr<any>>> {
       if (keys(validationMap).length === 0) {
         return resolve(null);
