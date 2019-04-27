@@ -1,12 +1,11 @@
-import { module, test } from 'qunit';
+import { fillIn, find, render } from '@ember/test-helpers';
 import { setupRenderingTest } from 'ember-qunit';
-import { fillIn, find, settled, render } from '@ember/test-helpers';
-import hbs from 'htmlbars-inline-precompile';
-
-import Changeset from 'ember-changeset';
-import { run } from '@ember/runloop';
-
 import { TestContext } from 'ember-test-helpers';
+import hbs from 'htmlbars-inline-precompile';
+import { module, test } from 'qunit';
+
+import { run } from '@ember/runloop';
+import Changeset from 'ember-changeset';
 
 interface ModelType {
   name: { first: string; last: string };
