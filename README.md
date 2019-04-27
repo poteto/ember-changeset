@@ -122,15 +122,15 @@ In the above example, when the input changes, only the changeset's internal valu
 
 On rollback, all changes are dropped and the underlying Object is left untouched.
 
-## Changeset template helper
-`ember-changeset` overrides `set` in order to handle deeply nested setters.  `mut` is simply an alias for `set(changeset`, thus we provide a `changeset-set` template helper if you are dealing with nested setters.
+## Changeset template helpers
+`ember-changeset` overrides `set` and `get` in order to handle deeply nested setters.  `mut` is simply an alias for `set(changeset`, thus we provide a `changeset-set` template helper if you are dealing with nested setters. Additionally, `{{get changeset` is an alias for `get(changeset`, and so a `changeset-get` template helper is provided to deal with retrieving deeply nested properties.
 
 ```hbs
 <form>
   <input
     id="first-name"
     type="text"
-    value={{changeset.person.firstName}}
+    value={{changeset-get changeset "person.firstname"}}
     onchange={{action (changeset-set changeset "person.firstName") value="target.value"}}>
 </form>
 ```
