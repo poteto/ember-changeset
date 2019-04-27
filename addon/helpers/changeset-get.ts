@@ -14,12 +14,6 @@ export default class ChangesetGet extends Helper.extend({
 }) {
   changeset: ChangesetDef | null = null;
 
-  init() {
-    // @ts-ignore
-    super.init(...arguments);
-    this.set('changeset', null);
-  }
-
   compute(this: ChangesetGet, [changeset, fieldPath]: [ChangesetDef, string]) {
     if (this.changeset === null) {
       this.set('changeset', changeset);
