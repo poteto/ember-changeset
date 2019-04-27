@@ -1,12 +1,12 @@
-import { module, test } from "qunit";
-import { setupRenderingTest } from "ember-qunit";
-import { fillIn, find, settled, render } from "@ember/test-helpers";
-import hbs from "htmlbars-inline-precompile";
+import { module, test } from 'qunit';
+import { setupRenderingTest } from 'ember-qunit';
+import { fillIn, find, settled, render } from '@ember/test-helpers';
+import hbs from 'htmlbars-inline-precompile';
 
-import Changeset from "ember-changeset";
-import { run } from "@ember/runloop";
+import Changeset from 'ember-changeset';
+import { run } from '@ember/runloop';
 
-import { TestContext } from "ember-test-helpers";
+import { TestContext } from 'ember-test-helpers';
 
 interface ModelType {
   name: { first: string; last: string };
@@ -14,7 +14,7 @@ interface ModelType {
   url: string;
 }
 
-module("Integration | Helper | changeset-get", function(hooks) {
+module('Integration | Helper | changeset-get', function(hooks) {
   setupRenderingTest(hooks);
 
   let model: ModelType;
@@ -22,18 +22,18 @@ module("Integration | Helper | changeset-get", function(hooks) {
   hooks.beforeEach(function(this: TestContext) {
     model = {
       name: {
-        first: "Bob",
-        last: "Loblaw"
+        first: 'Bob',
+        last: 'Loblaw'
       },
-      email: "bob@lob.law",
-      url: "http://bobloblawslawblog.com"
+      email: 'bob@lob.law',
+      url: 'http://bobloblawslawblog.com'
     };
 
-    this.set("changeset", new Changeset(model));
-    this.set("fieldName", "name.first");
+    this.set('changeset', new Changeset(model));
+    this.set('fieldName', 'name.first');
   });
 
-  test("it fails to retrieve the current value using {{get}}", async function(assert) {
+  test('it fails to retrieve the current value using {{get}}', async function(assert) {
     await render(hbs`
       <input
         type="text"
@@ -49,25 +49,25 @@ module("Integration | Helper | changeset-get", function(hooks) {
       </ul>
     `);
 
-    const input = find("input") as HTMLInputElement;
-    const testEl = find("#test-el");
+    const input = find('input') as HTMLInputElement;
+    const testEl = find('#test-el');
 
     try {
-      await fillIn(input!, "Robert");
+      await fillIn(input!, 'Robert');
 
-      assert.equal(testEl!.textContent, "Bob");
+      assert.equal(testEl!.textContent, 'Bob');
 
       run(() => {
-        this.get("changeset").rollback();
+        this.get('changeset').rollback();
       });
 
-      assert.equal(testEl!.textContent, "Bob");
+      assert.equal(testEl!.textContent, 'Bob');
     } catch (e) {
       assert.ok(false, e.message);
     }
   });
 
-  test("it succeeds in retrieving the current value using {{changeset-get}}", async function(assert) {
+  test('it succeeds in retrieving the current value using {{changeset-get}}', async function(assert) {
     await render(hbs`
       <input
         type="text"
@@ -83,19 +83,19 @@ module("Integration | Helper | changeset-get", function(hooks) {
       </ul>
     `);
 
-    const input = find("input") as HTMLInputElement;
-    const testEl = find("#test-el");
+    const input = find('input') as HTMLInputElement;
+    const testEl = find('#test-el');
 
     try {
-      await fillIn(input!, "Robert");
+      await fillIn(input!, 'Robert');
 
-      assert.equal(testEl!.textContent, "Robert");
+      assert.equal(testEl!.textContent, 'Robert');
 
       run(() => {
-        this.get("changeset").rollback();
+        this.get('changeset').rollback();
       });
 
-      assert.equal(testEl!.textContent, "Bob");
+      assert.equal(testEl!.textContent, 'Bob');
     } catch (e) {
       assert.ok(false, e.message);
     }
