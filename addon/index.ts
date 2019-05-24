@@ -78,7 +78,7 @@ const defaultOptions = { skipValidate: false };
 export function changeset(
   obj: object,
   validateFn: ValidatorFunc = defaultValidatorFn,
-  validationMap: { [s: string]: ValidatorFunc } = {},
+  validationMap: { [s: string]: ValidatorFunc | ValidatorFunc[] } = {},
   options: Config = {}
 ) {
   assert('Underlying object for changeset is missing', isPresent(obj));
@@ -785,7 +785,7 @@ export default class Changeset {
   constructor(
     obj: object,
     validateFn: ValidatorFunc = defaultValidatorFn,
-    validationMap: { [s: string]: ValidatorFunc } = {},
+    validationMap: { [s: string]: ValidatorFunc | ValidatorFunc[] } = {},
     options: Config = {}
   ) {
     return changeset(obj, validateFn, validationMap, options).create();
