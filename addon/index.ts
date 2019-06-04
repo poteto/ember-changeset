@@ -438,11 +438,12 @@ export function changeset(
 
       let v = existingError.validation;
       validation = [...v, ...newErrors];
+      let newError = new Err(value, validation);
+      setNestedProperty(errors, (<string>key), newError);
 
       this.notifyPropertyChange(ERRORS);
       this.notifyPropertyChange((<string>key));
 
-      errors[key] = new Err(value, validation);
       return { value, validation };
     },
 
