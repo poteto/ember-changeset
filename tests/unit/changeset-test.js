@@ -4,8 +4,10 @@ import { module, test } from 'qunit';
 import EmberObject, {
   get,
   set,
-  setProperties
+  setProperties,
 } from '@ember/object';
+
+import { reads } from '@ember/object/computed';
 import ObjectProxy from '@ember/object/proxy';
 import { Promise, resolve } from 'rsvp';
 import { dasherize } from '@ember/string';
@@ -1332,6 +1334,18 @@ module('Unit | Utility | changeset', function(hooks) {
     assert.deepEqual(get(dummyChangeset, 'changes')[0], { key: 'email', value: 'unique@email.com' }, 'has correct changes');
   });
 
+  test('#addError adds an error to the changeset on a nested property', function(assert) {
+    let dummyChangeset = new Changeset(dummyModel);
+    dummyChangeset.addError('email.localPart', 'Cannot contain +');
+
+
+    assert.ok(get(dummyChangeset, 'isInvalid'), 'should be invalid');
+    assert.equal(get(dummyChangeset, 'error.email.localPart.validation'), 'Cannot contain +', 'should add the error');
+    dummyChangeset.set('email.localPart', 'ok');
+    assert.ok(get(dummyChangeset, 'isValid'), 'should be valid');
+  });
+
+
   /**
    * #pushErrors
    */
@@ -1362,6 +1376,41 @@ module('Unit | Utility | changeset', function(hooks) {
     dummyChangeset.set('name', 'Good name');
     assert.ok(get(dummyChangeset, 'isValid'), 'should be valid');
   });
+
+  test('#pushErrors updates error object in a KVO compatible way', function (assert) {
+    let dummyChangeset = new Changeset(dummyModel);
+
+    let aComponentOrSomething = EmberObject.extend({
+      errorsOnName: reads('changeset.error.name.validation')
+    }).create({changeset: dummyChangeset});
+
+    assert.notOk(get(aComponentOrSomething, 'errorsOnName'), 'starts off with no errors');
+
+    dummyChangeset.set('name', 'J');
+    dummyChangeset.pushErrors('name', 'cannot be J');
+
+    assert.ok(get(dummyChangeset, 'isInvalid'), 'should be invalid');
+    assert.deepEqual(get(dummyChangeset, 'error.name.validation'), ['cannot be J'], 'should push the error');
+    assert.equal(get(dummyChangeset, 'error.name.value'), 'J', 'pushErrors uses already present value');
+    assert.deepEqual(get(aComponentOrSomething, 'errorsOnName'), ['cannot be J'], 'pushErrors updates error object in a way that can be bound to');
+    dummyChangeset.set('name', 'Good name');
+    assert.ok(get(dummyChangeset, 'isValid'), 'should be valid');
+    assert.notOk(get(aComponentOrSomething, 'errorsOnName'), 'clearing of errors can be bound to');
+  });
+
+
+
+  test('#pushErrors adds an error to the changeset on a nested property', function(assert) {
+    let dummyChangeset = new Changeset(dummyModel);
+    dummyChangeset.pushErrors('email.localPart', 'Cannot contain +');
+    dummyChangeset.pushErrors('email.localPart', 'is too short');
+
+    assert.ok(get(dummyChangeset, 'isInvalid'), 'should be invalid');
+    assert.deepEqual(get(dummyChangeset, 'error.email.localPart.validation'), ['Cannot contain +', 'is too short'], 'should add the error');
+    dummyChangeset.set('email.localPart', 'ok');
+    assert.ok(get(dummyChangeset, 'isValid'), 'should be valid');
+  });
+
 
   /**
    * #snapshot
