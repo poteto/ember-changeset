@@ -1,7 +1,29 @@
 # Change Log
 
-## [2.0.0](https://github.com/poteto/ember-changeset/tree/v2.0.0) (2019-01-07)
-[Full Changelog](https://github.com/poteto/ember-changeset/compare/v1.3.0...v2.0.0)
+## [2.1.2](https://github.com/poteto/ember-changeset/tree/v2.1.2) (2019-05-24)
+[Full Changelog](https://github.com/poteto/ember-changeset/compare/v2.1.1...v2.1.2)
+
+- Fix push errors to update error property pr [#355](https://github.com/poteto/ember-changeset/pull/355)
+
+## [2.1.1](https://github.com/poteto/ember-changeset/tree/v2.1.1) (2019-05-24)
+[Full Changelog](https://github.com/poteto/ember-changeset/compare/v2.1.0...v2.1.1)
+
+- Fix validationMap type signature [#352](https://github.com/poteto/ember-changeset/pull/352)
+
+## [2.1.0](https://github.com/poteto/ember-changeset/tree/v2.1.0) (2019-04-27)
+[Full Changelog](https://github.com/poteto/ember-changeset/compare/v2.0.1...v2.1.0)
+
+- Add changeset-get helper [#351](https://github.com/poteto/ember-changeset/pull/351)
+
+## [2.0.1](https://github.com/poteto/ember-changeset/tree/v2.0.1) (2019-04-08)
+[Full Changelog](https://github.com/poteto/ember-changeset/compare/v2.0.0...v2.0.1)
+
+- Optional key [#348](https://github.com/poteto/ember-changeset/pull/348)
+- Minor updates [#343](https://github.com/poteto/ember-changeset/pull/343)
+- Change app helper to ts [#341](https://github.com/poteto/ember-changeset/pull/341)
+
+## [2.0.0](https://github.com/poteto/ember-changeset/tree/v2.0.0) (2019-02-03)
+[Full Changelog](https://github.com/poteto/ember-changeset/compare/v1.6.0...v2.0.0)
 
 - Nested setters and getters improvement [#335](https://github.com/poteto/ember-changeset/pull/335)
 - Belongs-To set to null or undefined [#333](https://github.com/poteto/ember-changeset/pull/333)
