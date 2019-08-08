@@ -1,6 +1,6 @@
 # Change Log
 
-## [2.1.2](https://github.com/poteto/ember-changeset/tree/v2.1.2) (2019-05-24)
+## [2.1.2](https://github.com/poteto/ember-changeset/tree/v2.1.2) (2019-06-04)
 [Full Changelog](https://github.com/poteto/ember-changeset/compare/v2.1.1...v2.1.2)
 
 - Fix push errors to update error property pr [#355](https://github.com/poteto/ember-changeset/pull/355)
