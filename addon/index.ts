@@ -698,9 +698,7 @@ export function changeset(
             return value;
           }
           let result = get(value, keyParts.join('.'));
-          if (result) {
-            return result;
-          }
+          return result;
         }
       }
 
