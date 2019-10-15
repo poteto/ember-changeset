@@ -38,7 +38,7 @@ jobs:
       install:
         - yarn install --non-interactive
       script:
-        - yarn lint:js
+        - yarn lint
         - yarn test
 
     - name: "Floating Dependencies"
