@@ -485,7 +485,7 @@ export function changeset(
         return newObj;
       }, {});
 
-      let newErrors: Errors<any> = keys(errors).reduce((newObj: Changes, key: keyof Changes) => {
+      let newErrors: Errors<any> = keys(errors).reduce((newObj: Errors<any>, key: keyof Changes) => {
         let e: IErr<any> = errors[key];
         newObj[key] = new Err(e.value, e.validation);
         return newObj;
