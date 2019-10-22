@@ -52,7 +52,7 @@
     "ember-cli-release": "^1.0.0-beta.2",
     "ember-cli-shims": "^1.2.0",
     "ember-cli-sri": "^2.1.1",
-    "ember-cli-typescript": "^3.0.0",
+    "ember-cli-typescript": "^1.5.0",
     "ember-cli-uglify": "^2.1.0",
     "ember-data": "^3.8.0",
     "ember-disable-prototype-extensions": "^1.1.3",
