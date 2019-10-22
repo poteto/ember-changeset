@@ -16,7 +16,7 @@
   "scripts": {
     "build": "ember build",
     "lint:eslint": "eslint .",
-    "lint": "yarn lint:eslint",
+    "lint": "yarn lint:eslint && yarn lint:tsc",
     "lint:fix": "yarn lint:eslint --fix",
     "lint:tsc": "tsc --noEmit",
     "start": "ember serve",
