@@ -15,6 +15,7 @@ import { isPresent, typeOf } from '@ember/utils';
 import { run, next } from '@ember/runloop';
 
 let dummyModel;
+let exampleArray = [];
 let dummyValidations = {
   name(value) {
     return isPresent(value) && value.length > 3 || 'too short';
@@ -55,7 +56,7 @@ module('Unit | Utility | changeset', function(hooks) {
         return resolve(this);
       }
     });
-    dummyModel = Dummy.create();
+    dummyModel = Dummy.create({ exampleArray });
   });
 
   /**
@@ -106,6 +107,15 @@ module('Unit | Utility | changeset', function(hooks) {
       get(dummyChangeset, 'change'), expectedResult,
       'property changed to `undefined` should be included in change object'
     );
+  });
+
+  test('#change works with arrays', function(assert) {
+    let dummyChangeset = new Changeset(dummyModel);
+    const newArray = [...exampleArray, 'new'];
+    let expectedResult = { exampleArray: newArray }
+    dummyChangeset.set('exampleArray', newArray);
+
+    assert.deepEqual(get(dummyChangeset, 'change'), expectedResult, 'should return changes object');
   });
 
   /**
