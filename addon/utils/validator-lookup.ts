@@ -5,6 +5,12 @@ import handleMultipleValidations from 'ember-changeset/utils/handle-multiple-val
 import isPromise from 'ember-changeset/utils/is-promise';
 import { ValidatorFunc, ValidationResult, ValidatorMap } from 'ember-changeset/types';
 
+/**
+ * returns a closure to lookup and validate k/v pairs set on a changeset
+ *
+ * @method lookupValidator
+ * @param validationMap
+ */
 export default function lookupValidator(validationMap: ValidatorMap): ValidatorFunc {
   return ({ key, newValue, oldValue, changes, content }) => {
     let validator: ValidatorFunc | ValidatorFunc[] = validationMap[key];
