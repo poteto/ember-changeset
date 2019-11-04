@@ -17,7 +17,9 @@ export function changeset(
 
   if (isObject(validations)) {
     if (isPromise(obj)) {
-      return (<Promise<any>>obj).then((resolved) => new Changeset(resolved, lookupValidator(<ValidatorMap>validations), <ValidatorMap>validations, options));
+      return (<Promise<any>>obj).then((resolved) =>
+        new Changeset(resolved, lookupValidator(<ValidatorMap>validations), <ValidatorMap>validations, options)
+      );
     }
 
     return new Changeset(obj, lookupValidator(<ValidatorMap>validations), <ValidatorMap>validations, options);

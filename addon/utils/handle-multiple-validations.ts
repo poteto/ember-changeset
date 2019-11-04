@@ -37,8 +37,10 @@ export default function handleMultipleValidations(
   { key, newValue, oldValue, changes, content }: { [s: string]: any }
 ): Boolean | any {
   let validations: Array<ValidationResult | Promise<ValidationResult>> = emberArray(
-    validators.map((validator: ValidatorFunc): ValidationResult | Promise<ValidationResult> => validator({ key, newValue, oldValue, changes, content })
-  ));
+    validators.map((validator: ValidatorFunc): ValidationResult | Promise<ValidationResult> =>
+      validator({ key, newValue, oldValue, changes, content })
+    )
+  );
 
   if (emberArray(validations).any(isPromise)) {
     return all(validations).then(handleValidations);
