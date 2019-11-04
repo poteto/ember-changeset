@@ -17,7 +17,7 @@ const { keys } = Object;
 export default function objectEqual(
   sourceKey: string,
   compareKey: string
-): ComputedProperty<boolean, boolean> {
+): ComputedProperty<{}, {}> {
   return computed(sourceKey, compareKey, function() {
     let source = get(this, sourceKey);
     let compare = get(this, compareKey);
