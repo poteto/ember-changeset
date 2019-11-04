@@ -7,7 +7,7 @@ const { keys } = Object;
 
 export default function isEmptyObject(
   dependentKey: string
-): ComputedProperty<boolean, boolean> {
+): ComputedProperty<{}, {}> {
   assert('`dependentKey` must be defined', isPresent(dependentKey));
 
   return computed(dependentKey, function() {

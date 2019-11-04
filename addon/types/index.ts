@@ -2,9 +2,9 @@ import {
   ValidationErr,
   ValidationResult,
 } from 'ember-changeset/types/validation-result';
-import { ValidatorFunc } from 'ember-changeset/types/validator-func';
+import { ValidatorFunc, ValidatorMap } from 'ember-changeset/types/validator-func';
 
-export { ValidatorFunc };
+export { ValidatorFunc, ValidatorMap };
 export { ValidationErr, ValidationResult };
 import { Config } from 'ember-changeset/types/config';
 export { Config };

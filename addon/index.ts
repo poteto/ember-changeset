@@ -55,6 +55,7 @@ import {
   ValidationErr,
   ValidationResult,
   ValidatorFunc,
+  ValidatorMap
 } from 'ember-changeset/types';
 
 const { keys } = Object;
@@ -78,7 +79,7 @@ const defaultOptions = { skipValidate: false };
 export function changeset(
   obj: object,
   validateFn: ValidatorFunc = defaultValidatorFn,
-  validationMap: { [s: string]: ValidatorFunc | ValidatorFunc[] } = {},
+  validationMap: ValidatorMap = {},
   options: Config = {}
 ) {
   assert('Underlying object for changeset is missing', isPresent(obj));
@@ -605,8 +606,8 @@ export function changeset(
      */
     _validate(
       key: string,
-      newValue: any,
-      oldValue: any
+      newValue: unknown,
+      oldValue: unknown
     ): ValidationResult | Promise<ValidationResult> {
       let validator: ValidatorFunc = get(this, VALIDATOR);
       let content: Content = get(this, CONTENT);
@@ -784,7 +785,7 @@ export default class Changeset {
   constructor(
     obj: object,
     validateFn: ValidatorFunc = defaultValidatorFn,
-    validationMap: { [s: string]: ValidatorFunc | ValidatorFunc[] } = {},
+    validationMap: ValidatorMap = {},
     options: Config = {}
   ) {
     return changeset(obj, validateFn, validationMap, options).create();

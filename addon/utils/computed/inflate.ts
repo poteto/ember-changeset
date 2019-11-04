@@ -1,5 +1,6 @@
 import { assert, runInDebug } from '@ember/debug';
 import { computed, get } from '@ember/object';
+import ComputedProperty from '@ember/object/computed';
 import { isBlank } from '@ember/utils';
 import isObject from 'ember-changeset/utils/is-object';
 import deepSet from 'ember-deep-set';
@@ -13,7 +14,7 @@ const { keys } = Object;
 export default function inflate<T>(
   dependentKey: string,
   transform: (arg: T) => any = a => a
-): { [key: string]: any } {
+): ComputedProperty<{}, {}> {
   return computed(dependentKey, function() {
     let obj: { [key: string]: any } = get(this, dependentKey);
 

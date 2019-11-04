@@ -1,4 +1,5 @@
 import { computed, get } from '@ember/object';
+import ComputedProperty from '@ember/object/computed';
 
 const { keys } = Object;
 
@@ -8,7 +9,7 @@ const { keys } = Object;
 export default function transform<T>(
   dependentKey: string,
   transform: (arg: T) => any
-): object {
+): ComputedProperty<{}, {}> {
   return computed(dependentKey, function() {
     let obj: { [key: string]: any } = get(this, dependentKey);
     return keys(obj).reduce((newObj: { [key: string]: any }, key: string) => {
