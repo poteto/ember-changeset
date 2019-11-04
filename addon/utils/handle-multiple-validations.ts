@@ -1,5 +1,5 @@
 import { A as emberArray } from '@ember/array';
-import { all, reject } from 'rsvp';
+import { all } from 'rsvp';
 import { get } from '@ember/object';
 import isPromise from 'ember-changeset/utils/is-promise';
 import { ValidatorFunc, ValidationResult } from 'ember-changeset/types';
