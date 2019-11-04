@@ -1,5 +1,8 @@
 # Change Log
 
+## [2.1.3](https://github.com/poteto/ember-changeset/tree/v2.1.2) (2019-10-20)
+[Full Changelog](https://github.com/poteto/ember-changeset/compare/v2.1.2...v2.1.3)
+
 ## [2.1.2](https://github.com/poteto/ember-changeset/tree/v2.1.2) (2019-06-04)
 [Full Changelog](https://github.com/poteto/ember-changeset/compare/v2.1.1...v2.1.2)
 
