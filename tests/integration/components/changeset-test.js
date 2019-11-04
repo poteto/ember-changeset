@@ -128,6 +128,44 @@ module('Integration | Helper | changeset', function(hooks) {
     assert.notOk(find('#errors-paragraph'), 'should be valid');
   });
 
+  test('it accepts validation map with multiple validations with promises', async function(assert) {
+    function validateLength() {
+      return ({ newValue: value }) => isPresent(value) && Promise.resolve(value.length > 3) || 'too short';
+    }
+    function validateStartsUppercase() {
+      return ({ newValue: value }) => isPresent(value) && value.charCodeAt(0) > 65 && value.charCodeAt(0) < 90 || Promise.resolve('not upper case');
+    }
+    let validations = {
+      firstName: [
+        validateLength(),
+        validateStartsUppercase()
+      ]
+    };
+    this.set('dummyModel', { firstName: 'Jim', lastName: 'Bobbie' });
+    this.set('validations', validations);
+    this.set('submit', (changeset) => changeset.validate());
+    this.set('reset', (changeset) => changeset.rollback());
+    await render(hbs`
+      {{#with (changeset dummyModel validations) as |changesetObj|}}
+        {{#if changesetObj.isInvalid}}
+          <p id="errors-paragraph">There were one or more errors in your form.</p>
+        {{/if}}
+        {{input id="first-name" value=changesetObj.firstName}}
+        {{input id="last-name" value=changesetObj.lastName}}
+        <button id="submit-btn" {{action submit changesetObj}}>Submit</button>
+        <button id="reset-btn" {{action reset changesetObj}}>Reset</button>
+      {{/with}}
+    `);
+
+    await fillIn('#first-name', 'A');
+    await click('#submit-btn');
+    assert.ok(find('#errors-paragraph'), 'should be invalid');
+
+    await fillIn('#first-name', 'Billy');
+    await click('#submit-btn');
+    assert.notOk(find('#errors-paragraph'), 'should be valid');
+  });
+
   test('it rollsback changes', async function(assert) {
     this.set('dummyModel', { firstName: 'Jim' });
     this.set('reset', (changeset) => changeset.rollback());
