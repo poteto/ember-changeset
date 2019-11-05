@@ -2,7 +2,7 @@ import { A as emberArray } from '@ember/array';
 import { all } from 'rsvp';
 import { get } from '@ember/object';
 import isPromise from 'ember-changeset/utils/is-promise';
-import { ValidatorFunc, ValidationResult } from 'ember-changeset/types';
+import { ValidatorMapFunc, ValidationResult } from 'ember-changeset/types';
 
 /**
  * Rejects `true` values from an array of validations. Returns `true` when there
@@ -33,12 +33,12 @@ function handleValidations(validations: Array<ValidationResult | Promise<Validat
  * @return {Promise|Boolean|Any}
  */
 export default function handleMultipleValidations(
-  validators: ValidatorFunc[],
+  validators: ValidatorMapFunc[],
   { key, newValue, oldValue, changes, content }: { [s: string]: any }
 ): Boolean | any {
   let validations: Array<ValidationResult | Promise<ValidationResult>> = emberArray(
-    validators.map((validator: ValidatorFunc): ValidationResult | Promise<ValidationResult> =>
-      validator({ key, newValue, oldValue, changes, content })
+    validators.map((validator: ValidatorMapFunc): ValidationResult | Promise<ValidationResult> =>
+      validator(key, newValue, oldValue, changes, content)
     )
   );
 
