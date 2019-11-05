@@ -54,7 +54,7 @@ import {
   Snapshot,
   ValidationErr,
   ValidationResult,
-  ValidatorFunc,
+  ValidatorAction,
   ValidatorMap
 } from 'ember-changeset/types';
 
@@ -78,7 +78,7 @@ const defaultOptions = { skipValidate: false };
  */
 export function changeset(
   obj: object,
-  validateFn: ValidatorFunc = defaultValidatorFn,
+  validateFn: ValidatorAction = defaultValidatorFn,
   validationMap: ValidatorMap = {},
   options: Config = {}
 ) {
@@ -609,7 +609,7 @@ export function changeset(
       newValue: unknown,
       oldValue: unknown
     ): ValidationResult | Promise<ValidationResult> {
-      let validator: ValidatorFunc = get(this, VALIDATOR);
+      let validator: ValidatorAction = get(this, VALIDATOR);
       let content: Content = get(this, CONTENT);
 
       if (typeof validator === 'function') {
@@ -784,7 +784,7 @@ export default class Changeset {
    */
   constructor(
     obj: object,
-    validateFn: ValidatorFunc = defaultValidatorFn,
+    validateFn: ValidatorAction = defaultValidatorFn,
     validationMap: ValidatorMap = {},
     options: Config = {}
   ) {

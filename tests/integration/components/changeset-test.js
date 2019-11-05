@@ -130,10 +130,10 @@ module('Integration | Helper | changeset', function(hooks) {
 
   test('it accepts validation map with multiple validations with promises', async function(assert) {
     function validateLength() {
-      return ({ newValue: value }) => isPresent(value) && Promise.resolve(value.length > 3) || 'too short';
+      return (key, newValue) => isPresent(newValue) && Promise.resolve(newValue.length > 3) || 'too short';
     }
     function validateStartsUppercase() {
-      return ({ newValue: value }) => isPresent(value) && value.charCodeAt(0) > 65 && value.charCodeAt(0) < 90 || Promise.resolve('not upper case');
+      return (key, newValue) => isPresent(newValue) && newValue.charCodeAt(0) > 65 && newValue.charCodeAt(0) < 90 || Promise.resolve('not upper case');
     }
     let validations = {
       firstName: [

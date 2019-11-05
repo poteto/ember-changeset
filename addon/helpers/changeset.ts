@@ -1,14 +1,14 @@
 import { helper } from '@ember/component/helper';
 import Changeset from 'ember-changeset';
 import { Config } from 'ember-changeset/types/config';
-import { ValidatorFunc, ValidatorMap } from 'ember-changeset/types/validator-func';
+import { ValidatorAction, ValidatorMap } from 'ember-changeset/types/validator-func';
 import lookupValidator from 'ember-changeset/utils/validator-lookup';
 import isChangeset from 'ember-changeset/utils/is-changeset';
 import isPromise from 'ember-changeset/utils/is-promise';
 import isObject from 'ember-changeset/utils/is-object';
 
 export function changeset(
-  [obj, validations]: [object | Promise<any>, ValidatorFunc | ValidatorMap],
+  [obj, validations]: [object | Promise<any>, ValidatorAction | ValidatorMap],
   options: Config = {}
 ): Changeset | Promise<Changeset> {
   if (isChangeset(obj)) {
@@ -26,10 +26,10 @@ export function changeset(
   }
 
   if (isPromise(obj)) {
-    return Promise.resolve(obj).then((resolved: any) => new Changeset(resolved, <ValidatorFunc>validations, {}, options));
+    return Promise.resolve(obj).then((resolved: any) => new Changeset(resolved, <ValidatorAction>validations, {}, options));
   }
 
-  return new Changeset(obj, <ValidatorFunc>validations, {}, options);
+  return new Changeset(obj, <ValidatorAction>validations, {}, options);
 }
 
 export default helper(changeset);

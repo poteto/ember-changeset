@@ -2,9 +2,9 @@ import {
   ValidationErr,
   ValidationResult,
 } from 'ember-changeset/types/validation-result';
-import { ValidatorFunc, ValidatorMap } from 'ember-changeset/types/validator-func';
+import { ValidatorAction, ValidatorMapFunc, ValidatorMap } from 'ember-changeset/types/validator-func';
 
-export { ValidatorFunc, ValidatorMap };
+export { ValidatorAction, ValidatorMapFunc, ValidatorMap };
 export { ValidationErr, ValidationResult };
 import { Config } from 'ember-changeset/types/config';
 export { Config };
@@ -73,7 +73,7 @@ export interface ChangesetDef extends Any {
   _content: object,
   _changes: Changes,
   _errors: Errors<any>,
-  _validator: ValidatorFunc,
+  _validator: ValidatorAction,
   _options: Config,
   _runningValidations: RunningValidations,
   _bareChanges: { [s: string]: any },
