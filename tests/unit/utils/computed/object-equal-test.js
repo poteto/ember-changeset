@@ -1,7 +1,6 @@
 import EmberObject from '@ember/object';
 import objectEqual from 'ember-changeset/utils/computed/object-equal';
 import { module, test } from 'qunit';
-import { run } from '@ember/runloop';
 
 module('Unit | Utility | computed/object equal');
 
@@ -39,8 +38,7 @@ test('it returns true if second obj KV pairs are set to equal first obj', async 
 
   assert.notOk(theThing.get('isFirstEqualToSecond'));
 
-  run(() => {
-    theThing.set('second', { name: 'Jim Bob' });
-    assert.ok(theThing.get('isFirstEqualToSecond'));
-  });
+  theThing.set('second', { name: 'Jim Bob' });
+
+  assert.ok(theThing.get('isFirstEqualToSecond'));
 });

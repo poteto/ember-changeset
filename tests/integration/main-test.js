@@ -1,6 +1,5 @@
 import { module, test, skip } from 'qunit';
 import { setupTest } from 'ember-qunit';
-import { run } from '@ember/runloop';
 import { set } from '@ember/object';
 import Changeset from 'ember-changeset';
 
@@ -12,17 +11,13 @@ module('Integration | main', function(hooks) {
     let container = this.owner || this.application.__container__;
     this.store = container.lookup('service:store');
 
-    run(() => {
-      let profile = this.store.createRecord('profile');
-      let user = this.store.createRecord('user', { profile });
-      this.dummyUser = user;
+    let profile = this.store.createRecord('profile');
+    let user = this.store.createRecord('user', { profile });
+    this.dummyUser = user;
 
-      return user.get('dogs').then(() => {
-        for (let i = 0; i < 2; i++) {
-          user.get('dogs').addObject(this.store.createRecord('dog'))
-        }
-      });
-    });
+    for (let i = 0; i < 2; i++) {
+      user.get('dogs').addObject(this.store.createRecord('dog'))
+    }
   });
 
   test('it works for belongsTo', async function(assert) {
@@ -48,9 +43,7 @@ module('Integration | main', function(hooks) {
     assert.equal(user.get('profile.nickname'), 'g');
 
     let profile;
-    run(() => {
-      profile = this.store.createRecord('profile', { firstName: 'Terry', lastName: 'Bubblewinkles', nickname: 't' });
-    });
+    profile = await this.store.createRecord('profile', { firstName: 'Terry', lastName: 'Bubblewinkles', nickname: 't' });
 
     changeset.set('profile', profile);
 
@@ -78,13 +71,11 @@ module('Integration | main', function(hooks) {
   test('can save user', async function(assert) {
     assert.expect(1);
 
-    run(() => {
-      let profile = this.store.createRecord('profile');
-      let save = () => {
-        assert.ok(true, 'user save was called')
-      }
-      this.dummyUser = this.store.createRecord('user', { profile, save });
-    });
+    let profile = this.store.createRecord('profile');
+    let save = () => {
+      assert.ok(true, 'user save was called')
+    }
+    this.dummyUser = this.store.createRecord('user', { profile, save });
 
     let user = this.dummyUser;
     let changeset = new Changeset(user);
@@ -97,19 +88,17 @@ module('Integration | main', function(hooks) {
   skip('can save belongsTo via changeset', async function(assert) {
     assert.expect(2);
 
-    run(() => {
-      let save = () => {
-        assert.ok(true, 'user save was called')
-      }
-      let profile = this.store.createRecord('profile', { save });
-      this.dummyUser = this.store.createRecord('user', { profile });
-    });
+    let save = () => {
+      assert.ok(true, 'user save was called')
+    }
+    let profile = this.store.createRecord('profile', { save });
+    this.dummyUser = this.store.createRecord('user', { profile });
 
     let user = this.dummyUser;
     let changeset = new Changeset(user);
 
     changeset.set('profile.firstName', 'Grace');
-    let profile = changeset.get('profile');
+    profile = changeset.get('profile');
     let profileChangeset = new Changeset(profile);
 
     assert.equal(profileChangeset.get('firstName'), 'Grace', 'changeset profile firstName is set');
@@ -121,13 +110,11 @@ module('Integration | main', function(hooks) {
     let user = this.dummyUser;
 
     let changeset = new Changeset(user);
-    run(() => {
-      let newDog = this.store.createRecord('dog', { breed: 'Münsterländer' });
-      let dogs = changeset.get('dogs');
-      dogs.pushObjects([newDog]);
-    });
+    let newDog = this.store.createRecord('dog', { breed: 'Münsterländer' });
+    let dogs = changeset.get('dogs');
+    dogs.pushObjects([newDog]);
 
-    let dogs = changeset.get('dogs').toArray();
+    dogs = changeset.get('dogs').toArray();
     assert.equal(dogs[0].get('breed'), 'rough collie');
     assert.equal(dogs[1].get('breed'), 'rough collie');
     assert.equal(dogs[2].get('breed'), 'Münsterländer');
