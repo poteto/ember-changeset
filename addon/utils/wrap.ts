@@ -1,5 +1,3 @@
-import { isArray, A as emberArray } from '@ember/array';
-
 /**
  * Wraps a value in an Ember.Array.
  *
@@ -8,10 +6,10 @@ import { isArray, A as emberArray } from '@ember/array';
  * @return {Ember.Array}
  */
 export default function wrapInArray<T>(value: T | T[]): T[] {
-  if (isArray(value)) {
-    return emberArray(value);
+  if (Array.isArray(value)) {
+    return value;
   }
 
-  return emberArray([value]);
+  return new Array((<T>value));
 }
 

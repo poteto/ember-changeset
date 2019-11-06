@@ -1,7 +1,3 @@
-import {
-  A as emberArray,
-  isArray,
-} from '@ember/array';
 import { assert } from '@ember/debug';
 import EmberObject, {
   get,
@@ -12,11 +8,9 @@ import {
   readOnly,
 } from '@ember/object/computed';
 import Evented from '@ember/object/evented';
+import { all, resolve } from 'rsvp';
 import {
-  isEmpty,
-  isEqual,
-  isNone,
-  isPresent,
+  isEqual
 } from '@ember/utils';
 import Change from 'ember-changeset/-private/change';
 import Err from 'ember-changeset/-private/err';
@@ -25,7 +19,6 @@ import inflate from 'ember-changeset/utils/computed/inflate';
 import isEmptyObject from 'ember-changeset/utils/computed/is-empty-object';
 import objectToArray from 'ember-changeset/utils/computed/object-to-array';
 import transform from 'ember-changeset/utils/computed/transform';
-import includes from 'ember-changeset/utils/includes';
 import isChangeset, { CHANGESET } from 'ember-changeset/utils/is-changeset';
 import isObject from 'ember-changeset/utils/is-object';
 import isPromise from 'ember-changeset/utils/is-promise';
@@ -35,11 +28,6 @@ import setNestedProperty from 'ember-changeset/utils/set-nested-property';
 import take from 'ember-changeset/utils/take';
 import validateNestedObj from 'ember-changeset/utils/validate-nested-obj';
 import deepSet from 'ember-deep-set';
-import {
-  all,
-  resolve,
-} from 'rsvp';
-
 import {
   Changes,
   ChangesetDef,
@@ -82,7 +70,7 @@ export function changeset(
   validationMap: ValidatorMap = {},
   options: Config = {}
 ) {
-  assert('Underlying object for changeset is missing', isPresent(obj));
+  assert('Underlying object for changeset is missing', Boolean(obj));
 
   let changeset: any = { // ChangesetDef
 
@@ -376,7 +364,7 @@ export function changeset(
         return resolve(null);
       }
 
-      if (isNone(key)) {
+      if (!Boolean(key)) {
         let maybePromise = keys(validationMap).map(validationKey => {
           return this._validateKey(validationKey, this._valueFor(validationKey));
         });
@@ -433,7 +421,7 @@ export function changeset(
       let validation: ValidationErr | ValidationErr[] = existingError.validation;
       let value: any = get(this, key);
 
-      if (!isArray(validation) && isPresent(validation)) {
+      if (!Array.isArray(validation) && Boolean(validation)) {
         existingError.validation = [validation];
       }
 
@@ -509,12 +497,12 @@ export function changeset(
     cast(allowed: string[] = []): ChangesetDef {
       let changes: Changes = get(this, CHANGES);
 
-      if (isArray(allowed) && allowed.length === 0) {
+      if (Array.isArray(allowed) && allowed.length === 0) {
         return this;
       }
 
       let changeKeys: string[] = keys(changes);
-      let validKeys = emberArray(changeKeys).filter((key: string) => includes(allowed, key));
+      let validKeys = changeKeys.filter((key: string) => allowed.includes(key));
       let casted = take(changes, validKeys);
       set(this, CHANGES, casted);
       return this;
@@ -528,11 +516,11 @@ export function changeset(
      */
     isValidating(key: string | void): boolean {
       let runningValidations: RunningValidations = get(this, RUNNING_VALIDATIONS);
-      let ks: string[] = emberArray(keys(runningValidations));
+      let ks: string[] = keys(runningValidations);
       if (key) {
-        return includes(ks, key);
+        return ks.includes(key);
       }
-      return !isEmpty(ks);
+      return ks.length > 0;
     },
 
     /**
@@ -583,7 +571,7 @@ export function changeset(
     ): T | IErr<T> | ValidationErr {
 
       let isValid: boolean = validation === true
-        || isArray(validation)
+        || Array.isArray(validation)
         && validation.length === 1
         && validation[0] === true;
 
@@ -621,7 +609,7 @@ export function changeset(
           content,
         });
 
-        return isPresent(isValid) ? isValid : true;
+        return typeof isValid === 'boolean' || Boolean(isValid) ? isValid : true;
       }
 
       return true;
@@ -729,7 +717,7 @@ export function changeset(
     _rollbackKeys(): string[] {
       let changes: Changes = get(this, CHANGES);
       let errors: Errors<any> = get(this, ERRORS);
-      return emberArray([...keys(changes), ...keys(errors)]).uniq();
+      return [...new Set([...keys(changes), ...keys(errors)])];
     },
 
     /**

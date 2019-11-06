@@ -15,6 +15,6 @@ export default function transform<T>(
     return keys(obj).reduce((newObj: { [key: string]: any }, key: string) => {
       newObj[key] = transform(obj[key]);
       return newObj;
-    }, {});
+    }, Object.create(null));
   });
 }
