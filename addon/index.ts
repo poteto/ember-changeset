@@ -8,7 +8,6 @@ import {
   readOnly,
 } from '@ember/object/computed';
 import Evented from '@ember/object/evented';
-import { all, resolve } from 'rsvp';
 import {
   isEqual
 } from '@ember/utils';
@@ -214,7 +213,7 @@ export function changeset(
       options: object
     ): Promise<ChangesetDef | any> {
       let content: Content = get(this, CONTENT);
-      let savePromise: any | Promise<ChangesetDef | any> = resolve(this);
+      let savePromise: any | Promise<ChangesetDef | any> = Promise.resolve(this);
       this.execute();
 
       if (typeof content.save === 'function') {
@@ -229,7 +228,7 @@ export function changeset(
         }
       }
 
-      return resolve(savePromise).then((result) => {
+      return Promise.resolve(savePromise).then((result) => {
         this.rollback();
         return result;
       });
@@ -361,7 +360,7 @@ export function changeset(
       key?: string | undefined
     ): Promise<null> | Promise<any | IErr<any>> | Promise<Array<any | IErr<any>>> {
       if (keys(validationMap).length === 0) {
-        return resolve(null);
+        return Promise.resolve(null);
       }
 
       if (!Boolean(key)) {
@@ -369,10 +368,10 @@ export function changeset(
           return this._validateKey(validationKey, this._valueFor(validationKey));
         });
 
-        return all(maybePromise);
+        return Promise.all(maybePromise);
       }
 
-      return resolve(this._validateKey(key, this._valueFor(key)));
+      return Promise.resolve(this._validateKey(key, this._valueFor(key)));
     },
 
     /**
