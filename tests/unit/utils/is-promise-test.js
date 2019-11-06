@@ -40,7 +40,7 @@ let testData = [
 ];
 
 testData.forEach(({ value, expected }) => {
-  test('it checks if an object is an instance of an RSVP.Promise', function(assert) {
+  test('it checks if an object is an instance of an RSVP.Promise', async function(assert) {
     let result = isPromise(value);
 
     assert.equal(result, expected, `should be ${expected}`);

@@ -4,7 +4,7 @@ import { module, test } from 'qunit';
 
 module('Unit | Utility | object to array');
 
-test('it converts an object into an array', function(assert) {
+test('it converts an object into an array', async function(assert) {
   let Dummy = EmberObject.extend({
     _object: {
       firstName: 'Jim',
@@ -21,7 +21,7 @@ test('it converts an object into an array', function(assert) {
   assert.deepEqual(result, expectedResult, 'should convert to array');
 });
 
-test('it maintains shallow objects when flattenObjects is false', function(assert) {
+test('it maintains shallow objects when flattenObjects is false', async function(assert) {
   let Dummy = EmberObject.extend({
     _object: {
       firstName: {
@@ -37,7 +37,7 @@ test('it maintains shallow objects when flattenObjects is false', function(asser
   assert.deepEqual(result, expectedResult, 'should convert to array');
 });
 
-test('it flattens shallow object values when flattenObjects is true', function(assert) {
+test('it flattens shallow object values when flattenObjects is true', async function(assert) {
   let Dummy = EmberObject.extend({
     _object: {
       firstName: {

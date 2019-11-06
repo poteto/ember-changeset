@@ -1,10 +1,8 @@
-import { fillIn, find, render } from '@ember/test-helpers';
+import { fillIn, find, render, settled } from '@ember/test-helpers';
 import { setupRenderingTest } from 'ember-qunit';
 import { TestContext } from 'ember-test-helpers';
 import hbs from 'htmlbars-inline-precompile';
 import { module, test } from 'qunit';
-
-import { run } from '@ember/runloop';
 import Changeset from 'ember-changeset';
 
 interface ModelType {
@@ -56,9 +54,7 @@ module('Integration | Helper | changeset-get', function(hooks) {
 
       assert.equal(testEl!.textContent, 'Bob');
 
-      run(() => {
-        this.get('changeset').rollback();
-      });
+      await this.get('changeset').rollback();
 
       assert.equal(testEl!.textContent, 'Bob');
     } catch (e) {
@@ -90,10 +86,9 @@ module('Integration | Helper | changeset-get', function(hooks) {
 
       assert.equal(testEl!.textContent, 'Robert');
 
-      run(() => {
-        this.get('changeset').rollback();
-      });
+      this.get('changeset').rollback();
 
+      await settled();
       assert.equal(testEl!.textContent, 'Bob');
     } catch (e) {
       assert.ok(false, e.message);

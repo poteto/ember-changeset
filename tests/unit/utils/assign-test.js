@@ -2,7 +2,7 @@ import pureAssign from 'ember-changeset/utils/assign';
 import { module, test } from 'qunit';
 
 module('Unit | Utility | assign', function() {
-  test(`it does not mutate destination or source objects`, function(assert) {
+  test(`it does not mutate destination or source objects`, async function(assert) {
     let foo = { name: 'foo' };
     let bar = { name: 'bar' };
     let result = pureAssign(foo, bar, { test: 1 });

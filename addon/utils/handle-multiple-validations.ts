@@ -1,6 +1,3 @@
-import { A as emberArray } from '@ember/array';
-import { all } from 'rsvp';
-import { get } from '@ember/object';
 import isPromise from 'ember-changeset/utils/is-promise';
 import { ValidatorMapFunc, ValidationResult } from 'ember-changeset/types';
 
@@ -12,11 +9,14 @@ import { ValidatorMapFunc, ValidationResult } from 'ember-changeset/types';
  * @param  {Array} validations
  * @return {Boolean|Any}
  */
-function handleValidations(validations: Array<ValidationResult | Promise<ValidationResult>>): Boolean | any {
-  let maybeRejected = emberArray(validations)
-    .reject((validation) => typeof validation === 'boolean' && validation);
+async function handleValidations(validations: Array<ValidationResult | Promise<ValidationResult>>): Promise<any> {
+  try {
+    const result = await Promise.all(validations);
 
-  return get(maybeRejected, 'length') === 0 || maybeRejected;
+    return result.every(val => typeof val === 'boolean' && val);
+  } catch(e) {
+    return e;
+  }
 }
 
 /**
@@ -36,16 +36,15 @@ export default function handleMultipleValidations(
   validators: ValidatorMapFunc[],
   { key, newValue, oldValue, changes, content }: { [s: string]: any }
 ): Boolean | any {
-  let validations: Array<ValidationResult | Promise<ValidationResult>> = emberArray(
+  let validations: Array<ValidationResult | Promise<ValidationResult>> = Array.from(
     validators.map((validator: ValidatorMapFunc): ValidationResult | Promise<ValidationResult> =>
       validator(key, newValue, oldValue, changes, content)
     )
   );
 
-  if (emberArray(validations).any(isPromise)) {
-    return all(validations).then(handleValidations);
+  if (validations.some(isPromise)) {
+    return Promise.all(validations).then(handleValidations);
   }
 
   return handleValidations(validations);
 }
-

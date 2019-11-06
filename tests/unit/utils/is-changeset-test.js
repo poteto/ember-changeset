@@ -5,12 +5,12 @@ import { module, test } from 'qunit';
 
 module('Unit | Utility | is changeset');
 
-test('it correctly identifies changesets', function(assert) {
+test('it correctly identifies changesets', async function(assert) {
   let dummy = new Changeset(EmberObject.create());
   assert.ok(isChangeset(dummy), 'should be true');
 });
 
-test('it correctly identifies non-changesets', function(assert) {
+test('it correctly identifies non-changesets', async function(assert) {
   let dummy = EmberObject.create();
   assert.notOk(isChangeset(dummy), 'should be false');
 });

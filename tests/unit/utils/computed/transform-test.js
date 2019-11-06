@@ -4,7 +4,7 @@ import { module, test } from 'qunit';
 
 module('Unit | Utility | computed/transform');
 
-test('it works', function(assert) {
+test('it works', async function(assert) {
   let Thing = EmberObject.extend({
     changes: {
       'foo.bar.baz': 42,

@@ -3,7 +3,7 @@ import { module, test } from 'qunit';
 
 module('Unit | Utility | object without');
 
-test('it exludes the given keys from all merged objects', function(assert) {
+test('it exludes the given keys from all merged objects', async function(assert) {
   let objA = { name: 'Ivan' };
   let objB = { name: 'John' };
   let objC = { age: 27 };
