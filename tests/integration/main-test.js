@@ -25,7 +25,7 @@ module('Integration | main', function(hooks) {
     });
   });
 
-  test('it works for belongsTo', function(assert) {
+  test('it works for belongsTo', async function(assert) {
     let user = this.dummyUser;
     let changeset = new Changeset(user);
 
@@ -75,7 +75,7 @@ module('Integration | main', function(hooks) {
     assert.ok(user.get('profile'), 'user has yet to call save so still present as proxy');
   });
 
-  test('can save user', function(assert) {
+  test('can save user', async function(assert) {
     assert.expect(1);
 
     run(() => {
@@ -94,7 +94,7 @@ module('Integration | main', function(hooks) {
     changeset.save();
   });
 
-  skip('can save belongsTo via changeset', function(assert) {
+  skip('can save belongsTo via changeset', async function(assert) {
     assert.expect(2);
 
     run(() => {
@@ -117,7 +117,7 @@ module('Integration | main', function(hooks) {
     profileChangeset.save();
   });
 
-  test('it works for hasMany / firstObject', function(assert) {
+  test('it works for hasMany / firstObject', async function(assert) {
     let user = this.dummyUser;
 
     let changeset = new Changeset(user);

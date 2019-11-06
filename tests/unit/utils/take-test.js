@@ -3,7 +3,7 @@ import { module, test } from 'qunit';
 
 module('Unit | Utility | take');
 
-test('it returns an object with only the specified keys', function(assert) {
+test('it returns an object with only the specified keys', async function(assert) {
   let employee = {
     name: 'Milton Waddams',
     stapler: 'Red',

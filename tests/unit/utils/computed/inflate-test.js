@@ -87,7 +87,7 @@ module('Unit | Utility | computed/inflate');
     method: 'deepEqual',
   },
 ].forEach(({ desc, classDef, actual, expected, method }) => {
-  test(`inflate - ${desc}`, function(assert) {
+  test(`inflate - ${desc}`, async function(assert) {
     let Thing    = EmberObject.extend(classDef);
     let actually = actual(Thing.create());
     assert[method](actually, expected);

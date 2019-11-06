@@ -5,7 +5,7 @@ import { run } from '@ember/runloop';
 
 module('Unit | Utility | computed/object equal');
 
-test('it returns true if all first obj KV pairs are present and equal to second obj', function(assert) {
+test('it returns true if all first obj KV pairs are present and equal to second obj', async function(assert) {
   let Thing = EmberObject.extend({
     first: { name: 'Jim Bob' },
     second: { name: 'Jim Bob', age: 21 },
@@ -17,7 +17,7 @@ test('it returns true if all first obj KV pairs are present and equal to second 
   assert.ok(result);
 });
 
-test('it returns false if not all first obj KV pairs are present and equal to second obj', function(assert) {
+test('it returns false if not all first obj KV pairs are present and equal to second obj', async function(assert) {
   let Thing = EmberObject.extend({
     first: { name: 'Jim Bob', age: 21 },
     second: { name: 'Jim Bob' },
@@ -29,7 +29,7 @@ test('it returns false if not all first obj KV pairs are present and equal to se
   assert.notOk(result);
 });
 
-test('it returns true if second obj KV pairs are set to equal first obj', function(assert) {
+test('it returns true if second obj KV pairs are set to equal first obj', async function(assert) {
   let Thing = EmberObject.extend({
     first: { name: 'Jim Bob' },
     second: { name: null },

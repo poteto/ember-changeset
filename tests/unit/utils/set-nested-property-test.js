@@ -92,7 +92,7 @@ module('Unit | Utility | set nested property');
     method: 'deepEqual',
   },
 ].forEach(({ desc, obj, key, value, actual, expected, method }) => {
-  test(`setNestedProperty - ${desc}`, function(assert) {
+  test(`setNestedProperty - ${desc}`, async function(assert) {
     assert[method](actual(obj, key, value), expected);
   });
 });

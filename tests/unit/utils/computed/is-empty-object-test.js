@@ -5,7 +5,7 @@ import { module, test } from 'qunit';
 
 module('Unit | Utility | is empty object');
 
-test('it returns true if the object has no keys', function(assert) {
+test('it returns true if the object has no keys', async function(assert) {
   let Dummy = EmberObject.extend({
     _object: {},
     isEmpty: isEmptyObject('_object')
@@ -14,7 +14,7 @@ test('it returns true if the object has no keys', function(assert) {
   assert.ok(result, 'should be true');
 });
 
-test('it returns false if the object has at least 1 key', function(assert) {
+test('it returns false if the object has at least 1 key', async function(assert) {
   let Dummy = EmberObject.extend({
     _object: { foo: 'bar' },
     isEmpty: isEmptyObject('_object')
@@ -23,7 +23,7 @@ test('it returns false if the object has at least 1 key', function(assert) {
   assert.notOk(result, 'should be false');
 });
 
-test('it throws if invoked without dependent key', function(assert) {
+test('it throws if invoked without dependent key', async function(assert) {
   try {
     EmberObject.extend({ isEmpty: isEmptyObject() });
   } catch({ message }) {

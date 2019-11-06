@@ -26,7 +26,7 @@ let testData = [
 ];
 
 testData.forEach(({ label, value, expected }) => {
-  test(`it works with ${label}`, function(assert) {
+  test(`it works with ${label}`, async function(assert) {
     let result = isObject(value);
     assert.equal(result, expected, `should be ${expected}`);
   });
