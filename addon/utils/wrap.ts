@@ -10,6 +10,6 @@ export default function wrapInArray<T>(value: T | T[]): T[] {
     return value;
   }
 
-  return new Array((<T>value));
+  return [(<T>value)];
 }
 
