@@ -12,7 +12,7 @@ export default function setNestedProperty<T>(
   obj: { [key: string]: T },
   key: string,
   value: T
-): T {
+): { [key: string]: T } {
   let objKeys = keys(obj);
 
   // Ensure object keys are in correct format.
@@ -37,5 +37,5 @@ export default function setNestedProperty<T>(
 
   // Set value and return.
   obj[key] = value;
-  return value;
+  return obj;
 }

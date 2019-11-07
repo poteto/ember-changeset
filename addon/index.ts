@@ -1,13 +1,9 @@
 import { assert } from '@ember/debug';
-import EmberObject, {
-  get,
-  set,
-} from '@ember/object';
 import {
   not,
   readOnly,
 } from '@ember/object/computed';
-import Evented from '@ember/object/evented';
+// import Evented from '@ember/object/evented';
 import {
   isEqual
 } from '@ember/utils';
@@ -52,9 +48,9 @@ const ERRORS = '_errors';
 const VALIDATOR = '_validator';
 const OPTIONS = '_options';
 const RUNNING_VALIDATIONS = '_runningValidations';
-const BEFORE_VALIDATION_EVENT = 'beforeValidation';
-const AFTER_VALIDATION_EVENT = 'afterValidation';
-const AFTER_ROLLBACK_EVENT = 'afterRollback';
+// const BEFORE_VALIDATION_EVENT = 'beforeValidation';
+// const AFTER_VALIDATION_EVENT = 'afterValidation';
+// const AFTER_ROLLBACK_EVENT = 'afterRollback';
 const defaultValidatorFn = () => true;
 const defaultOptions = { skipValidate: false };
 
@@ -71,41 +67,47 @@ export function changeset(
 ) {
   assert('Underlying object for changeset is missing', Boolean(obj));
 
-  let changeset: any = { // ChangesetDef
+  class Buffered {
+    /**
+     * Any property that is not one of the getter/setter/methods on the
+     * BufferedProxy instance. The value type is `unknown` in order to avoid
+     * having to predefine key/value pairs of the correct types in the target
+     * object. Setting the index signature to `[key: string]: T[K]` would allow us
+     * to typecheck the value that is set on the proxy. However, no
+     * getters/setters/methods can be added to the class. This is the tradeoff
+     * we make for this particular design pattern (class based BufferedProxy).
+    */
+    [key: string]: unknown;
 
     // notifyPropertyChange: (s: string) => void,
     // trigger: (k: string, v: string | void) => void,
-    __changeset__: CHANGESET,
+    __changeset__ = CHANGESET;
 
-    _content: {},
-    _changes: {},
-    _errors: {},
-    _validator: defaultValidatorFn,
-    _options: defaultOptions,
-    _runningValidations: {},
-    _bareChanges: transform(CHANGES, (c: Change) => c.value),
+    _content = {};
+    _changes = {};
+    _errors = {};
+    _validator = defaultValidatorFn;
+    _options = defaultOptions;
+    _runningValidations = {};
+    _bareChanges = transform(CHANGES, (c: Change) => c.value);
 
-    changes: objectToArray(CHANGES, (c: Change) => c.value, false),
-    errors: objectToArray(ERRORS, (e: Err) => ({ value: e.value, validation: e.validation }), true),
-    change: inflate(CHANGES, (c: Change) => c.value),
-    error: inflate(ERRORS, (e: IErr<any>) => ({ value: e.value, validation: e.validation })),
-    data: readOnly(CONTENT),
+    changes = objectToArray(CHANGES, (c: Change) => c.value, false);
+    errors = objectToArray(ERRORS, (e: Err) => ({ value: e.value, validation: e.validation }), true);
+    change = inflate(CHANGES, (c: Change) => c.value);
+    error = inflate(ERRORS, (e: IErr<any>) => ({ value: e.value, validation: e.validation }));
+    data = readOnly(CONTENT);
 
-    isValid:    isEmptyObject(ERRORS),
-    isPristine: isEmptyObject(CHANGES),
-    isInvalid:  not('isValid').readOnly(),
-    isDirty:    not('isPristine').readOnly(),
+    isValid = isEmptyObject(ERRORS);
+    isPristine = isEmptyObject(CHANGES);
+    isInvalid = not('isValid').readOnly();
+    isDirty = not('isPristine').readOnly();
 
-    init() {
-      let c: ChangesetDef = this;
-      c._super(...arguments);
-      c[CONTENT] = obj;
-      c[CHANGES] = {};
-      c[ERRORS] = {};
-      c[VALIDATOR] = validateFn;
-      c[OPTIONS] = pureAssign(defaultOptions, options);
-      c[RUNNING_VALIDATIONS] = {};
-    },
+    CONTENT = obj;
+    CHANGES = {};
+    ERRORS = {};
+    VALIDATOR = validateFn;
+    OPTIONS = pureAssign(defaultOptions, options);
+    RUNNING_VALIDATIONS = {};
 
     /**
      * Proxies `get` to the underlying content or changed value, if present.
@@ -114,7 +116,7 @@ export function changeset(
       key: string
     ): any {
       return this._valueFor(key);
-    },
+    }
 
     /**
      * Stores change on the changeset.
@@ -124,30 +126,30 @@ export function changeset(
     setUnknownProperty<T> (
       key: string,
       value: T
-    ): Promise<ValidationResult | T | IErr<T>> | T | IErr<T> | ValidationResult {
-      let config: Config = get(this, OPTIONS);
-      let skipValidate: boolean | undefined = get(config, 'skipValidate');
+    ): void {
+      let config: Config = this[OPTIONS];
+      let skipValidate: boolean | undefined = config['skipValidate'];
 
       if (skipValidate) {
-        let content: Content = get(this, CONTENT);
-        let oldValue = get(content, key);
+        let content: Content = this[CONTENT];
+        let oldValue = content[key];
         this._setProperty({ key, value, oldValue });
-        return this._handleValidation(true, { key, value });
+        this._handleValidation(true, { key, value });
       }
 
-      let content: Content = get(this, CONTENT);
-      let oldValue: any = get(content, key);
+      let content: Content = this[CONTENT];
+      let oldValue: any = content[key];
       this._setProperty({ key, value, oldValue });
-      return this._validateKey(key, value);
-    },
+      this._validateKey(key, value);
+    }
 
     /**
      * String representation for the changeset.
      */
     toString(): string {
-      let normalisedContent: object = pureAssign(get(this, CONTENT), {});
+      let normalisedContent: object = pureAssign(this[CONTENT], {});
       return `changeset:${normalisedContent.toString()}`;
-    },
+    }
 
     /**
      * Provides a function to run before emitting changes to the model. The
@@ -171,8 +173,8 @@ export function changeset(
      */
     prepare(
       prepareChangesFn: PrepareChangesFn
-    ): ChangesetDef {
-      let changes: { [s: string]: any } = get(this, '_bareChanges');
+    ): Buffered {
+      let changes: { [s: string]: any } = this['_bareChanges'];
       let preparedChanges = prepareChangesFn(changes);
 
       assert('Callback to `changeset.prepare` must return an object', isObject(preparedChanges));
@@ -184,24 +186,24 @@ export function changeset(
         return newObj;
       }, newObj);
 
-      set(this, CHANGES, newChanges);
+      this[CHANGES] = newChanges;
       return this;
-    },
+    }
 
     /**
      * Executes the changeset if in a valid state.
      *
      * @method execute
      */
-    execute(): ChangesetDef {
-      if (get(this, 'isValid') && get(this, 'isDirty')) {
-        let content: Content = get(this, CONTENT);
-        let changes: Changes = get(this, CHANGES);
+    execute(): Buffered {
+      if (this.isValid && this.isDirty) {
+        let content: Content = this[CONTENT];
+        let changes: Changes = this[CHANGES];
         keys(changes).forEach(key => deepSet(content, key, changes[key].value));
       }
 
       return this;
-    },
+    }
 
     /**
      * Executes the changeset and saves the underlying content.
@@ -211,18 +213,18 @@ export function changeset(
      */
     save(
       options: object
-    ): Promise<ChangesetDef | any> {
-      let content: Content = get(this, CONTENT);
-      let savePromise: any | Promise<ChangesetDef | any> = Promise.resolve(this);
+    ): Promise<Buffered | any> {
+      let content: Content = this[CONTENT];
+      let savePromise: any | Promise<Buffered | any> = Promise.resolve(this);
       this.execute();
 
       if (typeof content.save === 'function') {
         savePromise = content.save(options);
-      } else if (typeof get(content, 'save') === 'function') {
+      } else if (typeof content.save === 'function') {
         // we might be getting this off a proxy object.  For example, when a
         // belongsTo relationship (a proxy on the parent model)
         // another way would be content(belongsTo).content.save
-        let saveFunc: Function | undefined = get(content, 'save');
+        let saveFunc: Function = content.save;
         if (saveFunc) {
           savePromise = saveFunc(options);
         }
@@ -232,7 +234,7 @@ export function changeset(
         this.rollback();
         return result;
       });
-    },
+    }
 
     /**
      * Merges 2 valid changesets and returns a new changeset. Both changesets
@@ -254,22 +256,22 @@ export function changeset(
      * @method merge
      */
     merge(
-      changeset: ChangesetDef
-    ): ChangesetDef {
-      let content: Content = get(this, CONTENT);
+      changeset: Buffered
+    ): Buffered {
+      let content: Content = this[CONTENT];
       assert('Cannot merge with a non-changeset', isChangeset(changeset));
-      assert('Cannot merge with a changeset of different content', get(changeset, CONTENT) === content);
+      assert('Cannot merge with a changeset of different content', changeset[CONTENT] === content);
 
-      if (get(this, 'isPristine') && get(changeset, 'isPristine')) {
+      if (this.isPristine && changeset.isPristine) {
         return this;
       }
 
-      let c1: Changes = get(this, CHANGES);
-      let c2: Changes = get(changeset, CHANGES);
-      let e1: Errors<any> = get(this, ERRORS);
-      let e2: Errors<any> = get(changeset, ERRORS);
+      let c1: Changes = this[CHANGES];
+      let c2: Changes = changeset[CHANGES];
+      let e1: Errors<any> = this[ERRORS];
+      let e2: Errors<any> = changeset[ERRORS];
 
-      let newChangeset: any = new Changeset(content, get(this, VALIDATOR)); // ChangesetDef
+      let newChangeset: any = new Changeset(content, this[VALIDATOR]); // ChangesetDef
       let newErrors: Errors<any> = objectWithout(keys(c2), e1);
       let newChanges: Changes = objectWithout(keys(e2), c1);
       let mergedErrors: Errors<any> = mergeNested(newErrors, e2);
@@ -279,7 +281,7 @@ export function changeset(
       newChangeset[CHANGES] = mergedChanges;
       newChangeset._notifyVirtualProperties();
       return newChangeset;
-    },
+    }
 
     /**
      * Returns the changeset to its pristine state, and discards changes and
@@ -287,19 +289,19 @@ export function changeset(
      *
      * @method rollback
      */
-    rollback(): ChangesetDef {
+    rollback(): Buffered {
       // Get keys before reset.
-      let c: ChangesetDef = this;
+      let c: Buffered = this;
       let keys = c._rollbackKeys();
 
       // Reset.
-      set(this, CHANGES, {});
-      set(this, ERRORS, {});
+      this[CHANGES] = {};
+      this[ERRORS] = {};
       c._notifyVirtualProperties(keys)
 
-      c.trigger(AFTER_ROLLBACK_EVENT);
+      // c.trigger(AFTER_ROLLBACK_EVENT);
       return this;
-    },
+    }
 
     /**
      * Discards any errors, keeping only valid changes.
@@ -310,8 +312,8 @@ export function changeset(
      * @param {String} key optional key to rollback invalid values
      * @return {Changeset}
      */
-    rollbackInvalid(key: string | void): ChangesetDef {
-      let errorKeys = keys(get(this, ERRORS));
+    rollbackInvalid(key: string | void): Buffered {
+      let errorKeys = keys(this[ERRORS]);
 
       if (key) {
         this._notifyVirtualProperties([key]);
@@ -321,7 +323,7 @@ export function changeset(
         }
       } else {
         this._notifyVirtualProperties();
-        set(this, ERRORS, {});
+        this[ERRORS] = {};
 
         // if on CHANGES hash, rollback those as well
         errorKeys.forEach((errKey) => {
@@ -330,7 +332,7 @@ export function changeset(
       }
 
       return this;
-    },
+    }
 
     /**
      * Discards changes/errors for the specified properly only.
@@ -341,12 +343,12 @@ export function changeset(
      * @param {String} key key to delete off of changes and errors
      * @return {Changeset}
      */
-    rollbackProperty(key: string): ChangesetDef {
+    rollbackProperty(key: string): Buffered {
       this._deleteKey(CHANGES, key);
       this._deleteKey(ERRORS, key);
 
       return this;
-    },
+    }
 
     /**
      * Validates the changeset immediately against the validationMap passed in.
@@ -371,8 +373,8 @@ export function changeset(
         return Promise.all(maybePromise);
       }
 
-      return Promise.resolve(this._validateKey(key, this._valueFor(key)));
-    },
+      return Promise.resolve(this._validateKey(<string>key, this._valueFor(<string>key)));
+    }
 
     /**
      * Manually add an error to the changeset. If there is an existing
@@ -391,20 +393,20 @@ export function changeset(
         assert('Error must have validation.', error.hasOwnProperty('validation'));
         newError = new Err((<IErr<T>>error).value, (<IErr<T>>error).validation);
       } else {
-        newError = new Err(get(this, key), (<ValidationErr>error));
+        newError = new Err(this.key, (<ValidationErr>error));
       }
 
       // Add `key` to errors map.
-      let errors: Errors<any> = get(this, ERRORS);
+      let errors: Errors<any> = this[ERRORS];
       setNestedProperty(errors, key, newError);
-      this.notifyPropertyChange(ERRORS);
+      // this.notifyPropertyChange(ERRORS);
 
       // Notify that `key` has changed.
-      this.notifyPropertyChange(key);
+      // this.notifyPropertyChange(key);
 
       // Return passed-in `error`.
       return error;
-    },
+    }
 
     /**
      * Manually push multiple errors to the changeset as an array.
@@ -415,10 +417,10 @@ export function changeset(
       key: keyof ChangesetDef,
       ...newErrors: string[] | ValidationErr[]
     ) {
-      let errors: Errors<any> = get(this, ERRORS);
+      let errors: Errors<any> = this[ERRORS];
       let existingError: IErr<any> | Err = errors[key] || new Err(null, []);
       let validation: ValidationErr | ValidationErr[] = existingError.validation;
-      let value: any = get(this, key);
+      let value: any = this[key]
 
       if (!Array.isArray(validation) && Boolean(validation)) {
         existingError.validation = [validation];
@@ -429,11 +431,11 @@ export function changeset(
       let newError = new Err(value, validation);
       setNestedProperty(errors, (<string>key), newError);
 
-      this.notifyPropertyChange(ERRORS);
-      this.notifyPropertyChange((<string>key));
+      // this.notifyPropertyChange(ERRORS);
+      // this.notifyPropertyChange((<string>key));
 
       return { value, validation };
-    },
+    }
 
     /**
      * Creates a snapshot of the changeset's errors and changes.
@@ -441,8 +443,8 @@ export function changeset(
      * @method snapshot
      */
     snapshot(): Snapshot {
-      let changes: Changes = get(this, CHANGES);
-      let errors: Errors<any> = get(this, ERRORS);
+      let changes: Changes = this[CHANGES];
+      let errors: Errors<any> = this[ERRORS];
 
       return {
         changes: keys(changes).reduce((newObj: Changes, key: keyof Changes) => {
@@ -456,7 +458,7 @@ export function changeset(
           return newObj;
         }, {}),
       };
-    },
+    }
 
     /**
      * Restores a snapshot of changes and errors. This overrides existing
@@ -464,7 +466,7 @@ export function changeset(
      *
      * @method restore
      */
-    restore({ changes, errors }: Snapshot): ChangesetDef {
+    restore({ changes, errors }: Snapshot): Buffered {
       validateNestedObj('snapshot.changes', changes);
       validateNestedObj('snapshot.errors',  errors);
 
@@ -479,12 +481,12 @@ export function changeset(
         return newObj;
       }, {});
 
-      set(this, CHANGES, newChanges);
-      set(this, ERRORS,  newErrors);
+      this[CHANGES] = newChanges;
+      this[ERRORS] = newErrors;
 
       this._notifyVirtualProperties();
       return this;
-    },
+    }
 
     /**
      * Unlike `Ecto.Changeset.cast`, `cast` will take allowed keys and
@@ -493,8 +495,8 @@ export function changeset(
      *
      * @method cast
      */
-    cast(allowed: string[] = []): ChangesetDef {
-      let changes: Changes = get(this, CHANGES);
+    cast(allowed: string[] = []): Buffered {
+      let changes: Changes = this[CHANGES];
 
       if (Array.isArray(allowed) && allowed.length === 0) {
         return this;
@@ -503,9 +505,9 @@ export function changeset(
       let changeKeys: string[] = keys(changes);
       let validKeys = changeKeys.filter((key: string) => allowed.includes(key));
       let casted = take(changes, validKeys);
-      set(this, CHANGES, casted);
+      this[CHANGES] = casted;
       return this;
-    },
+    }
 
     /**
      * Checks to see if async validator for a given key has not resolved.
@@ -514,13 +516,13 @@ export function changeset(
      * @method isValidating
      */
     isValidating(key: string | void): boolean {
-      let runningValidations: RunningValidations = get(this, RUNNING_VALIDATIONS);
+      let runningValidations: RunningValidations = this[RUNNING_VALIDATIONS];
       let ks: string[] = keys(runningValidations);
       if (key) {
         return ks.includes(key);
       }
       return ks.length > 0;
-    },
+    }
 
     /**
      * Validates a specific key
@@ -532,12 +534,12 @@ export function changeset(
       key: string,
       value: T
     ): Promise<ValidationResult | T | IErr<T>> | T | IErr<T> | ValidationResult {
-      let content: Content = get(this, CONTENT);
-      let oldValue: any = get(content, key);
+      let content: Content = this[CONTENT];
+      let oldValue: any = content[key];
       let validation: ValidationResult | Promise<ValidationResult> =
         this._validate(key, value, oldValue);
 
-      this.trigger(BEFORE_VALIDATION_EVENT, key);
+      // this.trigger(BEFORE_VALIDATION_EVENT, key);
 
       // TODO: Address case when Promise is rejected.
       if (isPromise(validation)) {
@@ -545,18 +547,18 @@ export function changeset(
 
         return (<Promise<ValidationResult>>validation).then((resolvedValidation: ValidationResult) => {
           this._setIsValidating(key, false);
-          this.trigger(AFTER_VALIDATION_EVENT, key);
+          // this.trigger(AFTER_VALIDATION_EVENT, key);
 
           return this._handleValidation(resolvedValidation, { key, value });
         });
       }
 
-      let result = this._handleValidation(validation, { key, value });
+      let result = this._handleValidation(<ValidationResult>validation, { key, value });
 
-      this.trigger(AFTER_VALIDATION_EVENT, key);
+      // this.trigger(AFTER_VALIDATION_EVENT, key);
 
       return result;
-    },
+    }
 
     /**
      * Takes resolved validation and adds an error or simply returns the value
@@ -583,7 +585,7 @@ export function changeset(
       }
 
       return value;
-    },
+    }
 
     /**
      * runs the validator with the key and value
@@ -596,15 +598,15 @@ export function changeset(
       newValue: unknown,
       oldValue: unknown
     ): ValidationResult | Promise<ValidationResult> {
-      let validator: ValidatorAction = get(this, VALIDATOR);
-      let content: Content = get(this, CONTENT);
+      let validator: ValidatorAction = this[VALIDATOR];
+      let content: Content = this[CONTENT];
 
       if (typeof validator === 'function') {
         let isValid = validator({
           key,
           newValue,
           oldValue,
-          changes: get(this, 'change'),
+          changes: this[CHANGES],
           content,
         });
 
@@ -612,7 +614,7 @@ export function changeset(
       }
 
       return true;
-    },
+    }
 
     /**
      * Sets property or error on the changeset.
@@ -621,7 +623,7 @@ export function changeset(
     _setProperty<T> (
       { key, value, oldValue }: NewProperty<T>
     ): void {
-      let changes: Changes = get(this, CHANGES);
+      let changes: Changes = this[CHANGES];
 
       // Happy path: update change map.
       if (!isEqual(oldValue, value)) {
@@ -631,9 +633,9 @@ export function changeset(
       }
 
       // Happy path: notify that `key` was added.
-      this.notifyPropertyChange(CHANGES);
-      this.notifyPropertyChange(key);
-    },
+      // this.notifyPropertyChange(CHANGES);
+      // this.notifyPropertyChange(key);
+    }
 
     /**
      * Increment or decrement the number of running validations for a
@@ -643,8 +645,8 @@ export function changeset(
       key: string,
       value: boolean
     ): void {
-      let running: RunningValidations = get(this, RUNNING_VALIDATIONS);
-      let count: number = get(running, key) || 0;
+      let running: RunningValidations = this[RUNNING_VALIDATIONS];
+      let count: number = running[key] || 0;
 
       if (!value && count === 1) {
         delete running[key];
@@ -652,7 +654,7 @@ export function changeset(
       }
 
       deepSet(running, key, value ? count+1 : count-1);
-    },
+    }
 
     /**
      * Value for change or the original value.
@@ -660,16 +662,16 @@ export function changeset(
     _valueFor(
       key: string
     ): any {
-      let changes: Changes = get(this, CHANGES);
-      let errors: Errors<any> = get(this, ERRORS);
-      let content: Content = get(this, CONTENT);
+      let changes: Changes = this[CHANGES];
+      let errors: Errors<any> = this[ERRORS];
+      let content: Content = this[CONTENT];
 
       if (errors.hasOwnProperty(key)) {
         let e: Err = errors[key];
         return e.value;
       }
 
-      let original: any = get(content, key);
+      let original: any = content[key];
 
       if (changes.hasOwnProperty(key)) {
         let c: Change = changes[key];
@@ -685,13 +687,13 @@ export function changeset(
           if(!value) {
             return value;
           }
-          let result = get(value, keyParts.join('.'));
+          let result = value[keyParts.join('.')];
           return result;
         }
       }
 
       return original;
-    },
+    }
 
     /**
      * Notifies virtual properties set on the changeset of a change.
@@ -707,17 +709,17 @@ export function changeset(
       if (!keys) {
         keys = this._rollbackKeys()
       }
-      (keys || []).forEach(key => this.notifyPropertyChange(key));
-    },
+      // (keys || []).forEach(key => this.notifyPropertyChange(key));
+    }
 
     /**
      * Gets the changes and error keys.
      */
     _rollbackKeys(): string[] {
-      let changes: Changes = get(this, CHANGES);
-      let errors: Errors<any> = get(this, ERRORS);
+      let changes: Changes = this[CHANGES];
+      let errors: Errors<any> = this[ERRORS];
       return [...new Set([...keys(changes), ...keys(errors)])];
-    },
+    }
 
     /**
      * Deletes a key off an object and notifies observers.
@@ -726,40 +728,43 @@ export function changeset(
       objName: string,
       key = ''
     ): void {
-      let obj: InternalMap = get(this, objName);
+      let obj = this[objName] as InternalMap;
       if (obj.hasOwnProperty(key)) {
         delete obj[key];
       }
-      let c: ChangesetDef = this;
-      c.notifyPropertyChange(`${objName}.${key}`);
-      c.notifyPropertyChange(objName);
-    },
+      // let c: Buffered = this;
+      // this.notifyPropertyChange(`${objName}.${key}`);
+      // this.notifyPropertyChange(objName);
+    }
 
     get(key: string): any {
-      if (key.indexOf('.') > -1) {
-        // pull off changes hash with full key instead of
-        // breaking up key
-        return this.unknownProperty(key);
-      } else {
-        return this._super(...arguments);
+      if (Object.prototype.hasOwnProperty.apply(this[CHANGES], [key])) {
+        let changes: Changes = this[CHANGES];
+        return changes[key];
       }
-    },
+
+      // return getters/setters/methods on BufferedProxy instance
+      if (this[key]) {
+        return this[key];
+      }
+
+      let content: Content = this[CONTENT];
+      return content[key];
+    }
 
     set<T> (
       key: string,
       value: T
     ): void | Promise<ValidationResult | T | IErr<T>> | T | IErr<T> | ValidationResult {
-      if (key.indexOf('.') > -1) {
-        // Adds new CHANGE and avoids ember intenals setting directly on model
-        // TODO: overriding `set(changeset, )` doesnt work
-        return this.setUnknownProperty(key, value);
-      } else {
-        return this._super(...arguments);
+      if (this.hasOwnProperty(key)) {
+        this[key] = value;
       }
+
+      return this.setUnknownProperty(key, value);
     }
   }
 
-  return EmberObject.extend(Evented, changeset);
+  return new Buffered();
 }
 
 export default class Changeset {
@@ -775,6 +780,18 @@ export default class Changeset {
     validationMap: ValidatorMap = {},
     options: Config = {}
   ) {
-    return changeset(obj, validateFn, validationMap, options).create();
+    const c = changeset(obj, validateFn, validationMap, options);
+
+    return new Proxy(c, {
+      get(targetBuffer, key/*, receiver*/) {
+        const res = targetBuffer.get(key.toString());
+        return res;
+      },
+
+      set(targetBuffer, key, value/*, receiver*/) {
+        targetBuffer.set(key.toString(), value);
+        return true;
+      }
+    });
   }
 }
