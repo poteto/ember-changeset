@@ -604,7 +604,7 @@ export function changeset(
           key,
           newValue,
           oldValue,
-          changes: get(this, 'change'),
+          changes: get(this, CHANGES),
           content,
         });
 
