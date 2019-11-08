@@ -606,7 +606,7 @@ export function changeset(
           key,
           newValue,
           oldValue,
-          changes: this[CHANGES],
+          changes: this.change,
           content,
         });
 

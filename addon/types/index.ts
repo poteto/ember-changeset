@@ -2,7 +2,7 @@ import {
   ValidationErr,
   ValidationResult,
 } from 'ember-changeset/types/validation-result';
-import { ValidatorAction, ValidatorMapFunc, ValidatorMap } from 'ember-changeset/types/validator-func';
+import { ValidatorAction, ValidatorMapFunc, ValidatorMap } from 'ember-changeset/types/validator-action';
 
 export { ValidatorAction, ValidatorMapFunc, ValidatorMap };
 export { ValidationErr, ValidationResult };
