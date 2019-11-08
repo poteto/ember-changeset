@@ -1,13 +1,14 @@
 import { assert } from '@ember/debug';
+import EmberObject, { get } from '@ember/object';
 import {
   not,
   readOnly,
 } from '@ember/object/computed';
-// import Evented from '@ember/object/evented';
 import {
   isEqual
 } from '@ember/utils';
 import Change from 'ember-changeset/-private/change';
+import addEvented from 'ember-changeset/-private/evented';
 import Err from 'ember-changeset/-private/err';
 import pureAssign from 'ember-changeset/utils/assign';
 import inflate from 'ember-changeset/utils/computed/inflate';
@@ -48,9 +49,9 @@ const ERRORS = '_errors';
 const VALIDATOR = '_validator';
 const OPTIONS = '_options';
 const RUNNING_VALIDATIONS = '_runningValidations';
-// const BEFORE_VALIDATION_EVENT = 'beforeValidation';
-// const AFTER_VALIDATION_EVENT = 'afterValidation';
-// const AFTER_ROLLBACK_EVENT = 'afterRollback';
+const BEFORE_VALIDATION_EVENT = 'beforeValidation';
+const AFTER_VALIDATION_EVENT = 'afterValidation';
+const AFTER_ROLLBACK_EVENT = 'afterRollback';
 const defaultValidatorFn = () => true;
 const defaultOptions = { skipValidate: false };
 
@@ -67,7 +68,7 @@ export function changeset(
 ) {
   assert('Underlying object for changeset is missing', Boolean(obj));
 
-  class Buffered {
+  class Buffered extends addEvented(EmberObject) {
     /**
      * Any property that is not one of the getter/setter/methods on the
      * BufferedProxy instance. The value type is `unknown` in order to avoid
@@ -78,9 +79,9 @@ export function changeset(
      * we make for this particular design pattern (class based BufferedProxy).
     */
     [key: string]: unknown;
+    notifyPropertyChange: (s: string) => void;
+    trigger: (k: string, v: string | void) => void;
 
-    // notifyPropertyChange: (s: string) => void,
-    // trigger: (k: string, v: string | void) => void,
     __changeset__ = CHANGESET;
 
     _content = {};
@@ -299,7 +300,7 @@ export function changeset(
       this[ERRORS] = {};
       c._notifyVirtualProperties(keys)
 
-      // c.trigger(AFTER_ROLLBACK_EVENT);
+      c.trigger(AFTER_ROLLBACK_EVENT);
       return this;
     }
 
@@ -399,10 +400,10 @@ export function changeset(
       // Add `key` to errors map.
       let errors: Errors<any> = this[ERRORS];
       setNestedProperty(errors, key, newError);
-      // this.notifyPropertyChange(ERRORS);
+      this.notifyPropertyChange(ERRORS);
 
       // Notify that `key` has changed.
-      // this.notifyPropertyChange(key);
+      this.notifyPropertyChange(key);
 
       // Return passed-in `error`.
       return error;
@@ -431,8 +432,8 @@ export function changeset(
       let newError = new Err(value, validation);
       setNestedProperty(errors, (<string>key), newError);
 
-      // this.notifyPropertyChange(ERRORS);
-      // this.notifyPropertyChange((<string>key));
+      this.notifyPropertyChange(ERRORS);
+      this.notifyPropertyChange((<string>key));
 
       return { value, validation };
     }
@@ -539,7 +540,7 @@ export function changeset(
       let validation: ValidationResult | Promise<ValidationResult> =
         this._validate(key, value, oldValue);
 
-      // this.trigger(BEFORE_VALIDATION_EVENT, key);
+      this.trigger(BEFORE_VALIDATION_EVENT, key);
 
       // TODO: Address case when Promise is rejected.
       if (isPromise(validation)) {
@@ -547,7 +548,7 @@ export function changeset(
 
         return (<Promise<ValidationResult>>validation).then((resolvedValidation: ValidationResult) => {
           this._setIsValidating(key, false);
-          // this.trigger(AFTER_VALIDATION_EVENT, key);
+          this.trigger(AFTER_VALIDATION_EVENT, key);
 
           return this._handleValidation(resolvedValidation, { key, value });
         });
@@ -555,7 +556,7 @@ export function changeset(
 
       let result = this._handleValidation(<ValidationResult>validation, { key, value });
 
-      // this.trigger(AFTER_VALIDATION_EVENT, key);
+      this.trigger(AFTER_VALIDATION_EVENT, key);
 
       return result;
     }
@@ -606,7 +607,7 @@ export function changeset(
           key,
           newValue,
           oldValue,
-          changes: this.change,
+          changes: get(this, 'change'),
           content,
         });
 
@@ -633,8 +634,8 @@ export function changeset(
       }
 
       // Happy path: notify that `key` was added.
-      // this.notifyPropertyChange(CHANGES);
-      // this.notifyPropertyChange(key);
+      this.notifyPropertyChange(CHANGES);
+      this.notifyPropertyChange(key);
     }
 
     /**
@@ -709,7 +710,7 @@ export function changeset(
       if (!keys) {
         keys = this._rollbackKeys()
       }
-      // (keys || []).forEach(key => this.notifyPropertyChange(key));
+      (keys || []).forEach(key => this.notifyPropertyChange(key));
     }
 
     /**
@@ -733,11 +734,11 @@ export function changeset(
         delete obj[key];
       }
       // let c: Buffered = this;
-      // this.notifyPropertyChange(`${objName}.${key}`);
-      // this.notifyPropertyChange(objName);
+      this.notifyPropertyChange(`${objName}.${key}`);
+      this.notifyPropertyChange(objName);
     }
 
-    get(key: string): any {
+    getProperty(key: string): any {
       if (Object.prototype.hasOwnProperty.apply(this[CHANGES], [key])) {
         let changes: Changes = this[CHANGES];
         return changes[key];
@@ -764,7 +765,7 @@ export function changeset(
     }
   }
 
-  return new Buffered();
+  return Buffered.create();
 }
 
 export default class Changeset {
@@ -784,7 +785,7 @@ export default class Changeset {
 
     return new Proxy(c, {
       get(targetBuffer, key/*, receiver*/) {
-        const res = targetBuffer.get(key.toString());
+        const res = targetBuffer.getProperty(key.toString());
         return res;
       },
 
