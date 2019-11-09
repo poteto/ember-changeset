@@ -1319,6 +1319,15 @@ module('Unit | Utility | changeset', function(hooks) {
     assert.ok(get(dummyChangeset, 'isValid'), 'should be valid');
   });
 
+  test('#addError adds an array of errors to the changeset', async function(assert) {
+    let dummyChangeset = new Changeset(dummyModel);
+    dummyChangeset.addError('email', ['jim@bob.com', 'Email already taken'])
+
+    assert.ok(get(dummyChangeset, 'isInvalid'), 'should be invalid');
+    assert.deepEqual(get(dummyChangeset, 'error.email.validation'), ['jim@bob.com', 'Email already taken'], 'should add the error');
+    dummyChangeset.set('email', 'unique@email.com');
+    assert.ok(get(dummyChangeset, 'isValid'), 'should be valid');
+  });
 
   /**
    * #pushErrors
