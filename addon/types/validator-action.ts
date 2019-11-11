@@ -5,7 +5,7 @@ export type ValidatorAction = {
     key: string,
     newValue: unknown,
     oldValue: unknown,
-    changes: { [key: string]: unknown },
+    changes: unknown,
     content: object
   }): ValidationResult | Promise<ValidationResult>;
 }
@@ -15,7 +15,7 @@ export type ValidatorMapFunc = {
     key: string,
     newValue: unknown,
     oldValue: unknown,
-    changes: { [key: string]: unknown },
+    changes: unknown,
     content: object
   ): ValidationResult | Promise<ValidationResult>;
 }

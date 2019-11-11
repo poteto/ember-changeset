@@ -1,6 +1,7 @@
 // this statefull class holds and notifies
+import { INotifier } from '../types/evented';
 
-export default class Notifier {
+export default class Notifier implements INotifier {
   listeners: Function[]
 
   constructor() {

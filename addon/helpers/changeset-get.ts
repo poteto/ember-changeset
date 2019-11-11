@@ -1,6 +1,6 @@
 import Helper from '@ember/component/helper';
 import { observer } from '@ember/object';
-import { ChangesetDef } from 'ember-changeset/types';
+import { IChangeset } from 'ember-changeset/types';
 
 const CONTENT = '_content';
 const CHANGES = '_changes';
@@ -12,9 +12,9 @@ export default class ChangesetGet extends Helper.extend({
     this.recompute();
   })
 }) {
-  changeset: ChangesetDef | null = null;
+  changeset: IChangeset | null = null;
 
-  compute(this: ChangesetGet, [changeset, fieldPath]: [ChangesetDef, string]) {
+  compute(this: ChangesetGet, [changeset, fieldPath]: [IChangeset, string]) {
     if (this.changeset === null) {
       this.set('changeset', changeset);
     }
@@ -23,6 +23,6 @@ export default class ChangesetGet extends Helper.extend({
       return;
     }
 
-    return this.changeset.get(fieldPath);
+    return this.changeset.getProperty(fieldPath);
   }
 }

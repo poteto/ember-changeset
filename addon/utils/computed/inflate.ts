@@ -14,7 +14,7 @@ const { keys } = Object;
 export default function inflate<T>(
   dependentKey: string,
   transform: (arg: T) => any = a => a
-): ComputedProperty<{}, {}> {
+): ComputedProperty<unknown, unknown> {
   return computed(dependentKey, function() {
     let obj: { [key: string]: any } = get(this, dependentKey);
 

@@ -1,9 +1,12 @@
+import EmberObject from '@ember/object';
+import IEvented, { INotifier } from 'ember-changeset/types/evented';
 import {
   ValidationErr,
   ValidationResult,
 } from 'ember-changeset/types/validation-result';
 import { ValidatorAction, ValidatorMapFunc, ValidatorMap } from 'ember-changeset/types/validator-action';
 
+export { IEvented, INotifier };
 export { ValidatorAction, ValidatorMapFunc, ValidatorMap };
 export { ValidationErr, ValidationResult };
 import { Config } from 'ember-changeset/types/config';
@@ -63,12 +66,8 @@ export type Inflated<T> = {
 
 export type PrepareChangesFn = (obj: ({ [s: string]: any })) => ({ [s: string]: any })
 
-interface Any {
-  [s: string]: any
-}
-
-export interface ChangesetDef extends Any {
-  __changeset__: '__CHANGESET__',
+export interface ChangesetDef {
+  __changeset__: string,
 
   _content: object,
   _changes: Changes,
@@ -80,14 +79,14 @@ export interface ChangesetDef extends Any {
 
   changes: ComputedProperty<object[], object[]>,
   errors: ComputedProperty<object[], object[]>,
-  change: Inflated<any>,
-  error: Inflated<IErr<any>>,
+  error: ComputedProperty<unknown, unknown>,
+  change: ComputedProperty<unknown, unknown>,
   data: object,
 
-  isValid: ComputedProperty<boolean, boolean>,
-  isPristine: ComputedProperty<boolean, boolean>,
-  isInvalid: ComputedProperty<boolean, boolean>,
-  isDirty: ComputedProperty<boolean, boolean>,
+  isValid: ComputedProperty<unknown, unknown>,
+  isPristine: ComputedProperty<unknown, unknown>,
+  isInvalid: ComputedProperty<unknown, unknown>,
+  isDirty: ComputedProperty<unknown, unknown>,
 
   // _super: <T>(...args: Array<T>) => void,
   // notifyPropertyChange: (s: string) => void,
@@ -95,10 +94,9 @@ export interface ChangesetDef extends Any {
   // init: () => void,
   // unknownProperty: (s: string) => any,
   // setUnknownProperty: <T>(key: string, value: T) => (T | IErr<T> | Promise<T> | Promise<ValidationResult | T | IErr<T>> | ValidationResult),
-  get: (key: string) => any,
-  set: <T>(key: string, value: T) => (void | T | IErr<T> | Promise<T> | Promise<ValidationResult | T | IErr<T>> | ValidationResult),
-  toString: () => string,
-  prepare: PrepareChangesFn,
+  getProperty: (key: string) => any,
+  setProperty: <T>(key: string, value: T) => (void | T | IErr<T> | Promise<T> | Promise<ValidationResult | T | IErr<T>> | ValidationResult),
+  prepare(preparedChangedFn: PrepareChangesFn): ChangesetDef,
   execute: () => ChangesetDef,
   save: (options: object) => Promise<ChangesetDef | any>,
   merge: (changeset: ChangesetDef) => ChangesetDef,
@@ -120,3 +118,5 @@ export interface ChangesetDef extends Any {
   _rollbackKeys: () => Array<string>,
   _deleteKey: (objName: InternalMapKey, key: string) => void
 };
+
+export interface IChangeset extends EmberObject, ChangesetDef, IEvented {}
