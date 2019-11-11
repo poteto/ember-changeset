@@ -26,13 +26,11 @@ import validateNestedObj from 'ember-changeset/utils/validate-nested-obj';
 import deepSet from 'ember-deep-set';
 import {
   Changes,
-  ChangesetDef,
   Config,
   Content,
   Errors,
   IErr,
   IChangeset,
-  IEvented,
   INotifier,
   InternalMap,
   NewProperty,
@@ -58,7 +56,7 @@ const AFTER_ROLLBACK_EVENT = 'afterRollback';
 const defaultValidatorFn = () => true;
 const defaultOptions = { skipValidate: false };
 
-class Buffered extends EmberObject implements ChangesetDef, IEvented {
+class Buffered extends EmberObject implements IChangeset {
   constructor(obj: object, validateFn: ValidatorAction, validationMap: ValidatorMap, options: Config) {
     super(...arguments);
 
@@ -189,7 +187,7 @@ class Buffered extends EmberObject implements ChangesetDef, IEvented {
    */
   prepare(
     prepareChangesFn: PrepareChangesFn
-  ): ChangesetDef {
+  ): IChangeset {
     let changes: { [s: string]: any } = this['_bareChanges'];
     let preparedChanges = prepareChangesFn(changes);
 
@@ -211,7 +209,7 @@ class Buffered extends EmberObject implements ChangesetDef, IEvented {
    *
    * @method execute
    */
-  execute(): ChangesetDef {
+  execute(): IChangeset {
     if (this.isValid && this.isDirty) {
       let content: Content = this[CONTENT];
       let changes: Changes = this[CHANGES];
@@ -229,7 +227,7 @@ class Buffered extends EmberObject implements ChangesetDef, IEvented {
    */
   save(
     options: object
-  ): Promise<ChangesetDef | any> {
+  ): Promise<IChangeset | any> {
     let content: Content = this[CONTENT];
     let savePromise: any | Promise<Buffered | any> = Promise.resolve(this);
     this.execute();
@@ -272,8 +270,8 @@ class Buffered extends EmberObject implements ChangesetDef, IEvented {
    * @method merge
    */
   merge(
-    changeset: ChangesetDef
-  ): ChangesetDef {
+    changeset: IChangeset
+  ): IChangeset {
     let content: Content = this[CONTENT];
     assert('Cannot merge with a non-changeset', isChangeset(changeset));
     assert('Cannot merge with a changeset of different content', changeset[CONTENT] === content);
@@ -305,7 +303,7 @@ class Buffered extends EmberObject implements ChangesetDef, IEvented {
    *
    * @method rollback
    */
-  rollback(): ChangesetDef {
+  rollback(): IChangeset {
     // Get keys before reset.
     let c: Buffered = this;
     let keys = c._rollbackKeys();
@@ -328,7 +326,7 @@ class Buffered extends EmberObject implements ChangesetDef, IEvented {
    * @param {String} key optional key to rollback invalid values
    * @return {Changeset}
    */
-  rollbackInvalid(key: string | void): ChangesetDef {
+  rollbackInvalid(key: string | void): IChangeset {
     let errorKeys = keys(this[ERRORS]);
 
     if (key) {
@@ -359,7 +357,7 @@ class Buffered extends EmberObject implements ChangesetDef, IEvented {
    * @param {String} key key to delete off of changes and errors
    * @return {Changeset}
    */
-  rollbackProperty(key: string): ChangesetDef {
+  rollbackProperty(key: string): IChangeset {
     this._deleteKey(CHANGES, key);
     this._deleteKey(ERRORS, key);
 
@@ -430,7 +428,7 @@ class Buffered extends EmberObject implements ChangesetDef, IEvented {
    * @method pushErrors
    */
   pushErrors(
-    key: keyof ChangesetDef,
+    key: keyof IChangeset,
     ...newErrors: string[] | ValidationErr[]
   ) {
     let errors: Errors<any> = this[ERRORS];
@@ -482,7 +480,7 @@ class Buffered extends EmberObject implements ChangesetDef, IEvented {
    *
    * @method restore
    */
-  restore({ changes, errors }: Snapshot): ChangesetDef {
+  restore({ changes, errors }: Snapshot): IChangeset {
     validateNestedObj('snapshot.changes', changes);
     validateNestedObj('snapshot.errors',  errors);
 
@@ -511,7 +509,7 @@ class Buffered extends EmberObject implements ChangesetDef, IEvented {
    *
    * @method cast
    */
-  cast(allowed: string[] = []): ChangesetDef {
+  cast(allowed: string[] = []): IChangeset {
     let changes: Changes = this[CHANGES];
 
     if (Array.isArray(allowed) && allowed.length === 0) {
