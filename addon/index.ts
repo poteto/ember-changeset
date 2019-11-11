@@ -389,7 +389,7 @@ export function changeset(
     ): IErr<T> | ValidationErr {
       // Construct new `Err` instance.
       let newError;
-      if (isObject(error)) {
+      if (isObject(error) && !Array.isArray(error)) {
         assert('Error must have value.', error.hasOwnProperty('value'));
         assert('Error must have validation.', error.hasOwnProperty('validation'));
         newError = new Err((<IErr<T>>error).value, (<IErr<T>>error).validation);
