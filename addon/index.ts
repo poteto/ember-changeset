@@ -59,6 +59,15 @@ const defaultValidatorFn = () => true;
 const defaultOptions = { skipValidate: false };
 
 class Buffered extends EmberObject implements ChangesetDef, IEvented {
+  constructor(obj: object, validateFn: ValidatorAction, validationMap: ValidatorMap, options: Config) {
+    super(...arguments);
+
+    this.obj = obj;
+    this.validateFn = validateFn;
+    this.validationMap = validationMap;
+    this.options = options;
+  }
+
   /**
    * Any property that is not one of the getter/setter/methods on the
    * BufferedProxy instance. The value type is `unknown` in order to avoid
@@ -782,7 +791,7 @@ export function changeset(
 ): IChangeset {
   assert('Underlying object for changeset is missing', Boolean(obj));
 
-  return Buffered.create(obj, validateFn, validationMap, options);
+  return new Buffered(obj, validateFn, validationMap, options);
 }
 
 export default class Changeset {
