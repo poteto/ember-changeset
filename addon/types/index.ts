@@ -119,4 +119,4 @@ export interface ChangesetDef {
   _deleteKey: (objName: InternalMapKey, key: string) => void
 };
 
-export interface IChangeset extends EmberObject, ChangesetDef, IEvented {}
+export interface IChangeset extends ChangesetDef, IEvented {}

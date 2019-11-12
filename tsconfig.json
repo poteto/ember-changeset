@@ -1,9 +1,10 @@
 {
   "compilerOptions": {
-    "target": "es2017",
+    "target": "es2018",
     "allowJs": true,
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
+    "experimentalDecorators": true,
     "noImplicitAny": true,
     "noImplicitThis": true,
     "alwaysStrict": true,
