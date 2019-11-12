@@ -65,7 +65,6 @@ class EmberChangeset extends BufferedChangeset {
   ): void {
     super._setProperty({ key, value, oldValue })
 
-    debugger;
     // Happy path: notify that `key` was added.
     this.notifyPropertyChange(CHANGES);
     this.notifyPropertyChange(key);
@@ -150,7 +149,7 @@ export default class Changeset {
 
 function applyMixins(derivedCtor: any, baseCtors: any[]) {
   baseCtors.forEach(baseCtor => {
-      Object.getOwnPropertyNames(baseCtor.prototype).forEach(name => {
+      Object.getOwnPropertyNames(baseCtor.prototype).filter(i => i !== 'constructor').forEach(name => {
           Object.defineProperty(
             derivedCtor.prototype,
             name,

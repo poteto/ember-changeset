@@ -1,7 +1,6 @@
 import { assert } from '@ember/debug';
 import { get } from '@ember/object';
 import {
-  not,
   readOnly,
 } from '@ember/object/computed';
 import {
@@ -12,7 +11,6 @@ import { notifierForEvent } from 'ember-changeset/-private/evented';
 import Err from 'ember-changeset/-private/err';
 import pureAssign from 'ember-changeset/utils/assign';
 import inflate from 'ember-changeset/utils/computed/inflate';
-import isEmptyObject from 'ember-changeset/utils/computed/is-empty-object';
 import objectToArray from 'ember-changeset/utils/computed/object-to-array';
 import transform from 'ember-changeset/utils/computed/transform';
 import isChangeset, { CHANGESET } from 'ember-changeset/utils/is-changeset';
@@ -57,18 +55,23 @@ const defaultValidatorFn = () => true;
 const defaultOptions = { skipValidate: false };
 
 export class BufferedChangeset implements IChangeset {
-  constructor(obj: object, validateFn: ValidatorAction, validationMap: ValidatorMap, options: Config) {
+  constructor(
+    obj: object,
+    validateFn: ValidatorAction = defaultValidatorFn,
+    validationMap: ValidatorMap = {},
+    options: Config = {}
+  ) {
     this.obj = obj;
     this.validateFn = validateFn;
     this.validationMap = validationMap;
     this.options = options;
 
-    this.CONTENT = this.obj;
-    this.CHANGES = {};
-    this.ERRORS = {};
-    this.VALIDATOR = this.validateFn;
-    this.OPTIONS = pureAssign(defaultOptions, this.options as object);
-    this.RUNNING_VALIDATIONS = {};
+    this[CONTENT] = obj;
+    this[CHANGES] = {};
+    this[ERRORS] = {};
+    this[VALIDATOR] = validateFn;
+    this[OPTIONS] = pureAssign(defaultOptions, options);
+    this[RUNNING_VALIDATIONS] = {};
   }
 
   /**
@@ -81,16 +84,16 @@ export class BufferedChangeset implements IChangeset {
    * we make for this particular design pattern (class based BufferedProxy).
   */
   [key: string]: unknown;
+  [CONTENT]: object;
+  [CHANGES]: Changes;
+  [ERRORS]: Errors<any>;
+  [VALIDATOR]: ValidatorAction;
+  [OPTIONS]: {};
+  [RUNNING_VALIDATIONS]: {};
 
   __changeset__ = CHANGESET;
 
   _eventedNotifiers = {};
-  _content = {};
-  _changes = {};
-  _errors = {};
-  _validator = defaultValidatorFn;
-  _options = defaultOptions;
-  _runningValidations = {};
   _bareChanges = transform(CHANGES, (c: Change) => c.value);
 
   on(eventName: string, callback: Function): INotifier {
@@ -116,10 +119,18 @@ export class BufferedChangeset implements IChangeset {
   error = inflate(ERRORS, (e: IErr<any>) => ({ value: e.value, validation: e.validation }));
   data = readOnly(CONTENT);
 
-  isValid = isEmptyObject(ERRORS);
-  isPristine = isEmptyObject(CHANGES);
-  isInvalid = not('isValid').readOnly();
-  isDirty = not('isPristine').readOnly();
+  get isValid() {
+    return Object.keys(this[ERRORS]).length === 0;
+  }
+  get isPristine() {
+    return Object.keys(this[CHANGES]).length === 0;
+  }
+  get isInvalid() {
+    return !this.isValid;
+  }
+  get isDirty() {
+    return !this.isPristine;
+  }
 
   /**
    * Proxies `get` to the underlying content or changed value, if present.
@@ -752,7 +763,7 @@ export class BufferedChangeset implements IChangeset {
   getProperty(key: string): any {
     if (Object.prototype.hasOwnProperty.apply(this[CHANGES], [key])) {
       let changes: Changes = this[CHANGES];
-      return changes[key];
+      return changes[key].value;
     }
 
     // return getters/setters/methods on BufferedProxy instance

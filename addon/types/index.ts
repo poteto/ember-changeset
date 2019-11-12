@@ -1,4 +1,3 @@
-import EmberObject from '@ember/object';
 import IEvented, { INotifier } from 'ember-changeset/types/evented';
 import {
   ValidationErr,
@@ -83,10 +82,10 @@ export interface ChangesetDef {
   change: ComputedProperty<unknown, unknown>,
   data: object,
 
-  isValid: ComputedProperty<unknown, unknown>,
-  isPristine: ComputedProperty<unknown, unknown>,
-  isInvalid: ComputedProperty<unknown, unknown>,
-  isDirty: ComputedProperty<unknown, unknown>,
+  isValid: boolean,
+  isPristine: boolean,
+  isInvalid: boolean,
+  isDirty: boolean,
 
   // _super: <T>(...args: Array<T>) => void,
   // notifyPropertyChange: (s: string) => void,
