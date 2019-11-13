@@ -11,8 +11,6 @@ export { ValidationErr, ValidationResult };
 import { Config } from 'ember-changeset/types/config';
 export { Config };
 
-import ComputedProperty from '@ember/object/computed';
-
 export interface IChange {
   value: any
 }
@@ -76,10 +74,10 @@ export interface ChangesetDef {
   _runningValidations: RunningValidations,
   _bareChanges: { [s: string]: any },
 
-  changes: ComputedProperty<object[], object[]>,
-  errors: ComputedProperty<object[], object[]>,
-  error: ComputedProperty<unknown, unknown>,
-  change: ComputedProperty<unknown, unknown>,
+  changes: { key: string; value: any; }[], //ComputedProperty<object[], object[]>,
+  errors: { key: string; value: any; }[], //ComputedProperty<object[], object[]>,
+  error: object,
+  change: object,
   data: object,
 
   isValid: boolean,

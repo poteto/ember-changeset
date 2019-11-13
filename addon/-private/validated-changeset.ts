@@ -1,8 +1,5 @@
+/* TODO: extract */
 import { assert } from '@ember/debug';
-import { get } from '@ember/object';
-import {
-  readOnly,
-} from '@ember/object/computed';
 import {
   isEqual
 } from '@ember/utils';
@@ -11,7 +8,6 @@ import { notifierForEvent } from 'ember-changeset/-private/evented';
 import Err from 'ember-changeset/-private/err';
 import pureAssign from 'ember-changeset/utils/assign';
 import inflate from 'ember-changeset/utils/computed/inflate';
-import objectToArray from 'ember-changeset/utils/computed/object-to-array';
 import transform from 'ember-changeset/utils/computed/transform';
 import isChangeset, { CHANGESET } from 'ember-changeset/utils/is-changeset';
 import isObject from 'ember-changeset/utils/is-object';
@@ -41,7 +37,7 @@ import {
   ValidatorMap
 } from 'ember-changeset/types';
 
-const { keys } = Object;
+const { assign, keys } = Object;
 const CONTENT = '_content';
 const CHANGES = '_changes';
 const ERRORS = '_errors';
@@ -113,11 +109,57 @@ export class BufferedChangeset implements IChangeset {
     }
   }
 
-  changes = objectToArray(CHANGES, (c: Change) => c.value, false);
-  errors = objectToArray(ERRORS, (e: Err) => ({ value: e.value, validation: e.validation }), true);
-  change = inflate(CHANGES, (c: Change) => c.value);
-  error = inflate(ERRORS, (e: IErr<any>) => ({ value: e.value, validation: e.validation }));
-  data = readOnly(CONTENT);
+  get changes() {
+    let obj = this[CHANGES];
+
+    function transform(c: Change) {
+      return c.value;
+    }
+
+    return keys(obj).map(key => {
+      let value = transform(obj[key]);
+
+      return { key, value };
+    });
+  }
+
+  get errors() {
+    let obj = this[ERRORS];
+
+    function transform(e: Err) {
+      return { value: e.value, validation: e.validation };
+    }
+
+    return keys(obj).map(key => {
+      let value = transform(obj[key]);
+
+      if (isObject(value)) {
+        return assign({ key }, value);
+      }
+
+      return { key, value };
+    });
+  }
+
+  get change() {
+    let obj: Changes = this[CHANGES];
+    function transform(c: Change) {
+      return c.value;
+    }
+    return inflate(obj, transform);
+  }
+
+  get error() {
+    let obj: Errors<any> = this[ERRORS];
+    function transform(e: Err) {
+      return { value: e.value, validation: e.validation };
+    }
+    return inflate(obj, transform);
+  }
+
+  get data() {
+    return this[CONTENT];
+  }
 
   get isValid() {
     return Object.keys(this[ERRORS]).length === 0;
@@ -629,7 +671,7 @@ export class BufferedChangeset implements IChangeset {
         key,
         newValue,
         oldValue,
-        changes: get(this, 'change'),
+        changes: this.change,
         content,
       });
 
