@@ -1,6 +1,6 @@
 import { assert } from '@ember/debug';
 import { BufferedChangeset } from './-private/validated-changeset';
-import EmberObject from '@ember/object';
+import { notifyPropertyChange } from '@ember/object';
 import {
   Config,
   IErr,
@@ -16,10 +16,6 @@ const ERRORS = '_errors';
 const defaultValidatorFn = () => true;
 
 class EmberChangeset extends BufferedChangeset {
-  notifyPropertyChange(arg: any) {
-    return arg;
-  }
-
   /**
    * Manually add an error to the changeset. If there is an existing
    * error or change for `key`, it will be overwritten.
@@ -32,9 +28,9 @@ class EmberChangeset extends BufferedChangeset {
   ): IErr<T> | ValidationErr {
     super.addError(key, error);
 
-    this.notifyPropertyChange(ERRORS);
+    notifyPropertyChange(this, ERRORS);
     // Notify that `key` has changed.
-    this.notifyPropertyChange(key);
+    notifyPropertyChange(this, key);
 
     // Return passed-in `error`.
     return error;
@@ -50,8 +46,8 @@ class EmberChangeset extends BufferedChangeset {
   ) {
     const { value, validation } = super.pushErrors(key, ...newErrors);
 
-    this.notifyPropertyChange(ERRORS);
-    this.notifyPropertyChange((<string>key));
+    notifyPropertyChange(this, ERRORS);
+    notifyPropertyChange(this, (<string>key));
 
     return { value, validation };
   }
@@ -66,8 +62,8 @@ class EmberChangeset extends BufferedChangeset {
     super._setProperty({ key, value, oldValue })
 
     // Happy path: notify that `key` was added.
-    this.notifyPropertyChange(CHANGES);
-    this.notifyPropertyChange(key);
+    notifyPropertyChange(this, CHANGES);
+    notifyPropertyChange(this, key);
   }
 
   /**
@@ -83,7 +79,7 @@ class EmberChangeset extends BufferedChangeset {
   ): void {
     super._notifyVirtualProperties(keys);
 
-    (keys || []).forEach(key => this.notifyPropertyChange(key));
+    (keys || []).forEach(key => notifyPropertyChange(this, key));
   }
 
   /**
@@ -95,12 +91,10 @@ class EmberChangeset extends BufferedChangeset {
   ): void {
     super._deleteKey(objName, key);
 
-    this.notifyPropertyChange(`${objName}.${key}`);
-    this.notifyPropertyChange(objName);
+    notifyPropertyChange(this, `${objName}.${key}`);
+    notifyPropertyChange(this, objName);
   }
 }
-
-applyMixins(EmberChangeset, [EmberObject]);
 
 /**
  * Creates new changesets.
@@ -145,16 +139,4 @@ export default class Changeset {
       }
     });
   }
-}
-
-function applyMixins(derivedCtor: any, baseCtors: any[]) {
-  baseCtors.forEach(baseCtor => {
-      Object.getOwnPropertyNames(baseCtor.prototype).filter(i => i !== 'constructor').forEach(name => {
-          Object.defineProperty(
-            derivedCtor.prototype,
-            name,
-            Object.getOwnPropertyDescriptor(baseCtor.prototype, name)
-          );
-      });
-  });
 }
