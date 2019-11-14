@@ -13,7 +13,9 @@ async function handleValidations(validations: Array<ValidationResult | Promise<V
   try {
     const result = await Promise.all(validations);
 
-    return result.every(val => typeof val === 'boolean' && val);
+    const maybeFailed = result.filter(val => typeof val !== 'boolean' && val);
+    return maybeFailed.length === 0 || maybeFailed;
+
   } catch(e) {
     return e;
   }
