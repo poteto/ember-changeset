@@ -111,9 +111,9 @@ export interface ChangesetDef {
   _setProperty: <T>(obj: NewProperty<T>) => void,
   _setIsValidating: (key: string, value: boolean) => void,
   _valueFor: (s: string) => any,
-  _notifyVirtualProperties: (keys?: string[]) => void,
+  _notifyVirtualProperties: (keys?: string[]) => string[] | undefined,
   _rollbackKeys: () => Array<string>,
-  _deleteKey: (objName: InternalMapKey, key: string) => void
+  _deleteKey: (objName: InternalMapKey, key: string) => InternalMap
 };
 
 export interface IChangeset extends ChangesetDef, IEvented {}

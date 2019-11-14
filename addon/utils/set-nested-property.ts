@@ -7,6 +7,7 @@ const { keys } = Object;
  *
  * This function deletes every key prefixed by `key` in `obj`, as well
  * as every key in the path leading up to `key`.
+ * Then sets original key on obj after aforementioned cleanup
  */
 export default function setNestedProperty<T>(
   obj: { [key: string]: T },

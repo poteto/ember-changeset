@@ -382,9 +382,9 @@ export class BufferedChangeset implements IChangeset {
 
     if (key) {
       this._notifyVirtualProperties([key]);
-      this._deleteKey(ERRORS, key);
+      this[ERRORS] = this._deleteKey(ERRORS, key) as Errors<any>;
       if (errorKeys.indexOf(key) > -1) {
-        this._deleteKey(CHANGES, key);
+        this[CHANGES] = this._deleteKey(CHANGES, key) as Changes;
       }
     } else {
       this._notifyVirtualProperties();
@@ -392,7 +392,7 @@ export class BufferedChangeset implements IChangeset {
 
       // if on CHANGES hash, rollback those as well
       errorKeys.forEach((errKey) => {
-        this._deleteKey(CHANGES, errKey);
+        this[CHANGES] = this._deleteKey(CHANGES, errKey) as Changes;
       })
     }
 
@@ -409,8 +409,8 @@ export class BufferedChangeset implements IChangeset {
    * @return {Changeset}
    */
   rollbackProperty(key: string): IChangeset {
-    this._deleteKey(CHANGES, key);
-    this._deleteKey(ERRORS, key);
+    this[CHANGES] = this._deleteKey(CHANGES, key) as Changes;
+    this[ERRORS] = this._deleteKey(ERRORS, key) as Errors<any>;
 
     return this;
   }
@@ -463,7 +463,7 @@ export class BufferedChangeset implements IChangeset {
 
     // Add `key` to errors map.
     let errors: Errors<any> = this[ERRORS];
-    setNestedProperty(errors, key, newError);
+    this[ERRORS] = setNestedProperty(errors, key, newError);
     // this.notifyPropertyChange(ERRORS);
 
     // Notify that `key` has changed.
@@ -494,7 +494,7 @@ export class BufferedChangeset implements IChangeset {
     let v = existingError.validation;
     validation = [...v, ...newErrors];
     let newError = new Err(value, validation);
-    setNestedProperty(errors, (<string>key), newError);
+    this[ERRORS] = setNestedProperty(errors, (<string>key), newError);
 
     // this.notifyPropertyChange(ERRORS);
     // this.notifyPropertyChange((<string>key));
@@ -642,7 +642,7 @@ export class BufferedChangeset implements IChangeset {
       && validation[0] === true;
 
     // Happy path: remove `key` from error map.
-    this._deleteKey(ERRORS, key);
+    this[ERRORS] = this._deleteKey(ERRORS, key) as Errors<any>;
 
     // Error case.
     if (!isValid) {
@@ -692,9 +692,9 @@ export class BufferedChangeset implements IChangeset {
 
     // Happy path: update change map.
     if (!isEqual(oldValue, value)) {
-      setNestedProperty(changes, key, new Change(value));
+      this[CHANGES] = setNestedProperty(changes, key, new Change(value));
     } else if (key in changes) {
-      this._deleteKey(CHANGES, key);
+      this[CHANGES] = this._deleteKey(CHANGES, key) as Changes;
     }
 
     // Happy path: notify that `key` was added.
@@ -770,11 +770,12 @@ export class BufferedChangeset implements IChangeset {
    */
   _notifyVirtualProperties(
     keys?: string[]
-  ): void {
+  ): string[] | undefined {
     if (!keys) {
       keys = this._rollbackKeys()
     }
-    // (keys || []).forEach(key => this.notifyPropertyChange(key));
+
+    return keys;
   }
 
   /**
@@ -792,14 +793,13 @@ export class BufferedChangeset implements IChangeset {
   _deleteKey(
     objName: string,
     key = ''
-  ): void {
+  ): InternalMap {
     let obj = this[objName] as InternalMap;
     if (obj.hasOwnProperty(key)) {
       delete obj[key];
     }
-    // let c: Buffered = this;
-    // this.notifyPropertyChange(`${objName}.${key}`);
-    // this.notifyPropertyChange(objName);
+
+    return obj;
   }
 
   getProperty(key: string): any {

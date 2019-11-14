@@ -1,10 +1,14 @@
 import { assert } from '@ember/debug';
 import { BufferedChangeset } from './-private/validated-changeset';
 import { notifyPropertyChange } from '@ember/object';
+import { tracked } from '@glimmer/tracking';
 import {
   Config,
+  Changes,
+  Errors,
   IErr,
   IChangeset,
+  InternalMap,
   NewProperty,
   ValidatorAction,
   ValidatorMap,
@@ -16,6 +20,9 @@ const ERRORS = '_errors';
 const defaultValidatorFn = () => true;
 
 class EmberChangeset extends BufferedChangeset {
+  @tracked [CHANGES]: Changes;
+  @tracked [ERRORS]: Errors<any>;
+
   /**
    * Manually add an error to the changeset. If there is an existing
    * error or change for `key`, it will be overwritten.
@@ -76,10 +83,12 @@ class EmberChangeset extends BufferedChangeset {
    */
   _notifyVirtualProperties(
     keys?: string[]
-  ): void {
-    super._notifyVirtualProperties(keys);
+  ): string[] | undefined {
+    keys = super._notifyVirtualProperties(keys);
 
     (keys || []).forEach(key => notifyPropertyChange(this, key));
+
+    return;
   }
 
   /**
@@ -88,11 +97,13 @@ class EmberChangeset extends BufferedChangeset {
   _deleteKey(
     objName: string,
     key = ''
-  ): void {
-    super._deleteKey(objName, key);
+  ): InternalMap {
+    const result = super._deleteKey(objName, key);
 
     notifyPropertyChange(this, `${objName}.${key}`);
     notifyPropertyChange(this, objName);
+
+    return result;
   }
 }
 
