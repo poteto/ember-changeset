@@ -29,7 +29,7 @@ async function handleValidationsAsync(validations: Array<ValidationResult | Prom
  * @param  {Array} validations
  * @return {Boolean|Any}
  */
-async function handleValidationsSync(validations: Array<ValidationResult | Promise<ValidationResult>>): Promise<any> {
+function handleValidationsSync(validations: Array<ValidationResult>): Boolean | any {
   const maybeFailed = validations.filter(val => typeof val !== 'boolean' && val);
   return maybeFailed.length === 0 || maybeFailed;
 }
@@ -60,5 +60,5 @@ export default function handleMultipleValidations(
     return Promise.all(validations).then(handleValidationsAsync);
   }
 
-  return handleValidationsSync(validations);
+  return handleValidationsSync(validations as Array<ValidationResult>);
 }
