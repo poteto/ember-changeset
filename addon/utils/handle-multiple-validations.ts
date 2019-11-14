@@ -7,18 +7,32 @@ import { ValidatorMapFunc, ValidationResult } from 'ember-changeset/types';
  *
  * @private
  * @param  {Array} validations
- * @return {Boolean|Any}
+ * @return {Promise<Boolean|Any>}
  */
-async function handleValidations(validations: Array<ValidationResult | Promise<ValidationResult>>): Promise<any> {
+async function handleValidationsAsync(validations: Array<ValidationResult | Promise<ValidationResult>>): Promise<any> {
   try {
     const result = await Promise.all(validations);
 
-    return result.every(val => typeof val === 'boolean' && val);
+    const maybeFailed = result.filter(val => typeof val !== 'boolean' && val);
+    return maybeFailed.length === 0 || maybeFailed;
+
   } catch(e) {
     return e;
   }
 }
 
+/**
+ * Rejects `true` values from an array of validations. Returns `true` when there
+ * are no errors, or the error object if there are errors.
+ *
+ * @private
+ * @param  {Array} validations
+ * @return {Boolean|Any}
+ */
+function handleValidationsSync(validations: Array<ValidationResult>): Boolean | any {
+  const maybeFailed = validations.filter(val => typeof val !== 'boolean' && val);
+  return maybeFailed.length === 0 || maybeFailed;
+}
 /**
  * Handles an array of validators and returns Promise.all if any value is a
  * Promise.
@@ -43,8 +57,8 @@ export default function handleMultipleValidations(
   );
 
   if (validations.some(isPromise)) {
-    return Promise.all(validations).then(handleValidations);
+    return Promise.all(validations).then(handleValidationsAsync);
   }
 
-  return handleValidations(validations);
+  return handleValidationsSync(validations as Array<ValidationResult>);
 }
