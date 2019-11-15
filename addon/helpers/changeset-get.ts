@@ -23,6 +23,6 @@ export default class ChangesetGet extends Helper.extend({
       return;
     }
 
-    return this.changeset.getProperty(fieldPath);
+    return this.changeset.get(fieldPath);
   }
 }

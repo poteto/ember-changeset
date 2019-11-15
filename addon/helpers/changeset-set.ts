@@ -13,7 +13,7 @@ export function changesetSet(
 ): Function | void {
   if (isChangeset(obj)) {
     return (value: any) => {
-      return obj.setProperty(path, value);
+      return obj.set(path, value);
     }
   }
 }

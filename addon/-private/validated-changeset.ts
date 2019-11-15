@@ -806,7 +806,7 @@ export class BufferedChangeset implements IChangeset {
     return obj;
   }
 
-  getProperty(key: string): any {
+  get(key: string): any {
     if (Object.prototype.hasOwnProperty.apply(this[CHANGES], [key])) {
       let changes: Changes = this[CHANGES];
       return changes[key].value;
@@ -821,7 +821,7 @@ export class BufferedChangeset implements IChangeset {
     return content[key];
   }
 
-  setProperty<T> (
+  set<T> (
     key: string,
     value: T
   ): void | Promise<ValidationResult | T | IErr<T>> | T | IErr<T> | ValidationResult {
@@ -863,12 +863,12 @@ export default class ValidatedChangeset {
 
     return new Proxy(c, {
       get(targetBuffer, key/*, receiver*/) {
-        const res = targetBuffer.getProperty(key.toString());
+        const res = targetBuffer.get(key.toString());
         return res;
       },
 
       set(targetBuffer, key, value/*, receiver*/) {
-        targetBuffer.setProperty(key.toString(), value);
+        targetBuffer.set(key.toString(), value);
         return true;
       }
     });

@@ -142,12 +142,12 @@ export default class Changeset {
 
     return new Proxy(c, {
       get(targetBuffer, key/*, receiver*/) {
-        const res = targetBuffer.getProperty(key.toString());
+        const res = targetBuffer.get(key.toString());
         return res;
       },
 
       set(targetBuffer, key, value/*, receiver*/) {
-        targetBuffer.setProperty(key.toString(), value);
+        targetBuffer.set(key.toString(), value);
         return true;
       }
     });
