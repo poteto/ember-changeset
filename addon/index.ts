@@ -17,11 +17,13 @@ import {
 
 const CHANGES = '_changes';
 const ERRORS = '_errors';
+const CONTENT = '_content';
 const defaultValidatorFn = () => true;
 
 class EmberChangeset extends BufferedChangeset {
   @tracked [CHANGES]: Changes;
   @tracked [ERRORS]: Errors<any>;
+  @tracked [CONTENT]: object;
 
   /**
    * Manually add an error to the changeset. If there is an existing

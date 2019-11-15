@@ -251,6 +251,7 @@ export class BufferedChangeset implements IChangeset {
       return newObj;
     }, newObj);
 
+    // @tracked
     this[CHANGES] = newChanges;
     return this;
   }
@@ -382,6 +383,7 @@ export class BufferedChangeset implements IChangeset {
 
     if (key) {
       this._notifyVirtualProperties([key]);
+      // @tracked
       this[ERRORS] = this._deleteKey(ERRORS, key) as Errors<any>;
       if (errorKeys.indexOf(key) > -1) {
         this[CHANGES] = this._deleteKey(CHANGES, key) as Changes;
@@ -409,7 +411,9 @@ export class BufferedChangeset implements IChangeset {
    * @return {Changeset}
    */
   rollbackProperty(key: string): IChangeset {
+    // @tracked
     this[CHANGES] = this._deleteKey(CHANGES, key) as Changes;
+    // @tracked
     this[ERRORS] = this._deleteKey(ERRORS, key) as Errors<any>;
 
     return this;
@@ -463,11 +467,8 @@ export class BufferedChangeset implements IChangeset {
 
     // Add `key` to errors map.
     let errors: Errors<any> = this[ERRORS];
+    // @tracked
     this[ERRORS] = setNestedProperty(errors, key, newError);
-    // this.notifyPropertyChange(ERRORS);
-
-    // Notify that `key` has changed.
-    // this.notifyPropertyChange(key);
 
     // Return passed-in `error`.
     return error;
@@ -494,6 +495,7 @@ export class BufferedChangeset implements IChangeset {
     let v = existingError.validation;
     validation = [...v, ...newErrors];
     let newError = new Err(value, validation);
+    // @tracked
     this[ERRORS] = setNestedProperty(errors, (<string>key), newError);
 
     // this.notifyPropertyChange(ERRORS);
@@ -546,7 +548,9 @@ export class BufferedChangeset implements IChangeset {
       return newObj;
     }, {});
 
+    // @tracked
     this[CHANGES] = newChanges;
+    // @tracked
     this[ERRORS] = newErrors;
 
     this._notifyVirtualProperties();
@@ -570,6 +574,7 @@ export class BufferedChangeset implements IChangeset {
     let changeKeys: string[] = keys(changes);
     let validKeys = changeKeys.filter((key: string) => allowed.includes(key));
     let casted = take(changes, validKeys);
+    // @tracked
     this[CHANGES] = casted;
     return this;
   }
@@ -642,6 +647,7 @@ export class BufferedChangeset implements IChangeset {
       && validation[0] === true;
 
     // Happy path: remove `key` from error map.
+    // @tracked
     this[ERRORS] = this._deleteKey(ERRORS, key) as Errors<any>;
 
     // Error case.
@@ -692,14 +698,12 @@ export class BufferedChangeset implements IChangeset {
 
     // Happy path: update change map.
     if (!isEqual(oldValue, value)) {
+      // @tracked
       this[CHANGES] = setNestedProperty(changes, key, new Change(value));
     } else if (key in changes) {
+      // @tracked
       this[CHANGES] = this._deleteKey(CHANGES, key) as Changes;
     }
-
-    // Happy path: notify that `key` was added.
-    // this.notifyPropertyChange(CHANGES);
-    // this.notifyPropertyChange(key);
   }
 
   /**
@@ -821,8 +825,9 @@ export class BufferedChangeset implements IChangeset {
     key: string,
     value: T
   ): void | Promise<ValidationResult | T | IErr<T>> | T | IErr<T> | ValidationResult {
-    if (this.hasOwnProperty(key)) {
+    if (this.hasOwnProperty(key) || key in this) {
       this[key] = value;
+      return;
     }
 
     return this.setUnknownProperty(key, value);
