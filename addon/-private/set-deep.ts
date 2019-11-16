@@ -1,4 +1,4 @@
-export function setDeep(target: any, path: string, value: unknown) {
+export default function setDeep(target: any, path: string, value: unknown) {
   const keys = split(path).filter(isValidKey);
 
   if (keys.length === 1) {
