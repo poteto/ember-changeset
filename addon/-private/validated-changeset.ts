@@ -206,15 +206,6 @@ export class BufferedChangeset implements IChangeset {
   }
 
   /**
-   * Proxies `get` to the underlying content or changed value, if present.
-   */
-  unknownProperty(
-    key: string
-  ): any {
-    return this._valueFor(key);
-  }
-
-  /**
    * Stores change on the changeset.
    *
    * @method setUnknownProperty
