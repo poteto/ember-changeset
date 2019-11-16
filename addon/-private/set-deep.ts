@@ -1,5 +1,6 @@
 export default function setDeep(target: any, path: string, value: unknown) {
   const keys = split(path).filter(isValidKey);
+  let orig = target;
 
   if (keys.length === 1) {
     result(target, keys[0], value);
@@ -21,7 +22,7 @@ export default function setDeep(target: any, path: string, value: unknown) {
     target = target[prop];
   }
 
-  return target;
+  return orig;
 }
 
 function result(target: any, path: string, value: unknown) {

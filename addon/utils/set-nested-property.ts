@@ -3,7 +3,7 @@ import { assert, runInDebug } from '@ember/debug';
 const { keys } = Object;
 
 /**
- * Set a property on an `obj`.
+ * Set a property on an `obj` with keys flattened to string.
  *
  * This function deletes every key prefixed by `key` in `obj`, as well
  * as every key in the path leading up to `key`. Keeps keys that don't match.

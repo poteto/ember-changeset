@@ -27,6 +27,7 @@ export default function inflate<T>(
   let result = keys(obj)
     .sort()
     .reduce((inflatedObj, key) => {
+      // set-deep will convert nested string key to single key per level
       setDeep(inflatedObj, key, transform(obj[key]));
       return inflatedObj;
     }, {});
