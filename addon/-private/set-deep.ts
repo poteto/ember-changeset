@@ -25,7 +25,7 @@ export default function setDeep(target: any, path: string, value: unknown) {
 }
 
 function result(target: any, path: string, value: unknown) {
-  if (isPlain(target[path]) && isPlain(value)) {
+  if (isPlainObject(target[path]) && isPlainObject(value)) {
     target[path] = Object.assign({}, target[path], value);
   } else {
     target[path] = value;
@@ -46,6 +46,6 @@ function isObject(val: unknown) {
   return val !== null && (typeof val === 'object' || typeof val === 'function');
 }
 
-function isPlain(o: unknown) {
+function isPlainObject(o: unknown) {
   return Object.prototype.toString.call(o) === '[object Object]';
 }
