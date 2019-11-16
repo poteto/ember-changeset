@@ -94,6 +94,7 @@ export interface ChangesetDef {
   get: (key: string) => any,
   set: <T>(key: string, value: T) => (void | T | IErr<T> | Promise<T> | Promise<ValidationResult | T | IErr<T>> | ValidationResult),
   getDeep: any;
+  setDeep: any;
   safeGet: (obj: any, key: string) => any,
   prepare(preparedChangedFn: PrepareChangesFn): ChangesetDef,
   execute: () => ChangesetDef,

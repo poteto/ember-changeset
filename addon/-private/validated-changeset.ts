@@ -16,7 +16,7 @@ import objectWithout from 'ember-changeset/utils/object-without';
 import setNestedProperty from 'ember-changeset/utils/set-nested-property';
 import take from 'ember-changeset/utils/take';
 import validateNestedObj from 'ember-changeset/utils/validate-nested-obj';
-import deepSet from 'ember-deep-set';
+import setDeep from './set-deep';
 import getDeep from './get-deep';
 import {
   Changes,
@@ -106,6 +106,12 @@ export class BufferedChangeset implements IChangeset {
       notifier.trigger.apply(notifier, args);
     }
   }
+
+  /**
+   * @property setDeep
+   * @override
+   */
+  setDeep = setDeep;
 
   /**
    * @property getDeep
@@ -291,7 +297,7 @@ export class BufferedChangeset implements IChangeset {
     if (this.isValid && this.isDirty) {
       let content: Content = this[CONTENT];
       let changes: Changes = this[CHANGES];
-      keys(changes).forEach(key => deepSet(content, key, changes[key].value));
+      keys(changes).forEach(key => this.setDeep(content, key, changes[key].value));
     }
 
     return this;
@@ -749,7 +755,7 @@ export class BufferedChangeset implements IChangeset {
       return;
     }
 
-    deepSet(running, key, value ? count+1 : count-1);
+    this.setDeep(running, key, value ? count+1 : count-1);
   }
 
   /**

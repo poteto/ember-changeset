@@ -15,6 +15,7 @@ import {
   ValidatorMap,
   ValidationErr,
 } from 'ember-changeset/types';
+import deepSet from 'ember-deep-set';
 
 const CHANGES = '_changes';
 const ERRORS = '_errors';
@@ -27,6 +28,7 @@ class EmberChangeset extends BufferedChangeset {
   @tracked [CONTENT]: object;
 
   getDeep = safeGet as any;
+  setDeep = deepSet as any;
 
   safeGet(obj: any, key: string) {
     return safeGet(obj, key);

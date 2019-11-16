@@ -1,6 +1,6 @@
 import { assert, runInDebug } from '@ember/debug';
 import isObject from 'ember-changeset/utils/is-object';
-import deepSet from 'ember-deep-set';
+import setDeep from '../-private/set-deep';
 
 const { keys } = Object;
 
@@ -27,7 +27,7 @@ export default function inflate<T>(
   let result = keys(obj)
     .sort()
     .reduce((inflatedObj, key) => {
-      deepSet(inflatedObj, key, transform(obj[key]));
+      setDeep(inflatedObj, key, transform(obj[key]));
       return inflatedObj;
     }, {});
 
