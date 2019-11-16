@@ -265,6 +265,8 @@ module('Integration | Helper | changeset', function(hooks) {
     await fillIn('#first-name', 'foo');
     await fillIn('#last-name', 'bar');
     assert.equal(changeset.get('person.firstName'), 'foo', 'should update observable value');
+    // TODO: nested keys
+    // assert.equal(changeset.get('person').firstName, 'foo', 'should update observable value');
     assert.equal(changeset.get('_content').person.firstName, 'Jim', 'keeps value on model as execute hasn\'t been called');
     // TODO: changeset-set will only apply to changeset and not underlying model
     // so mut will actually modify underlying object

@@ -6,8 +6,15 @@ const { keys } = Object;
  * Set a property on an `obj`.
  *
  * This function deletes every key prefixed by `key` in `obj`, as well
- * as every key in the path leading up to `key`.
+ * as every key in the path leading up to `key`. Keeps keys that don't match.
  * Then sets original key on obj after aforementioned cleanup
+ * example ```
+    obj: {
+      'foo': 'happy',
+      'foo.bar': 'freakin',
+      'foo.bar.baz': 'holidays',
+    },
+ * ```
  */
 export default function setNestedProperty<T>(
   obj: { [key: string]: T },
@@ -32,7 +39,7 @@ export default function setNestedProperty<T>(
 
   // Delete keys in path leading up to `key`.
   key.split('.').slice(0, -1).forEach((_, i, allParts) => {
-    let key = allParts.slice(0, i+1).join('.');
+    let key = allParts.slice(0, i + 1).join('.');
     delete obj[key];
   });
 

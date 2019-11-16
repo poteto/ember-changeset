@@ -2,6 +2,7 @@ import { assert } from '@ember/debug';
 import { BufferedChangeset } from './-private/validated-changeset';
 import { notifyPropertyChange } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
+import { get as safeGet } from '@ember/object';
 import {
   Config,
   Changes,
@@ -24,6 +25,12 @@ class EmberChangeset extends BufferedChangeset {
   @tracked [CHANGES]: Changes;
   @tracked [ERRORS]: Errors<any>;
   @tracked [CONTENT]: object;
+
+  getDeep = safeGet as any;
+
+  safeGet(obj: any, key: string) {
+    return safeGet(obj, key);
+  }
 
   /**
    * Manually add an error to the changeset. If there is an existing

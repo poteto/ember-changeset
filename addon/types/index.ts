@@ -93,6 +93,8 @@ export interface ChangesetDef {
   // setUnknownProperty: <T>(key: string, value: T) => (T | IErr<T> | Promise<T> | Promise<ValidationResult | T | IErr<T>> | ValidationResult),
   get: (key: string) => any,
   set: <T>(key: string, value: T) => (void | T | IErr<T> | Promise<T> | Promise<ValidationResult | T | IErr<T>> | ValidationResult),
+  getDeep: any;
+  safeGet: (obj: any, key: string) => any,
   prepare(preparedChangedFn: PrepareChangesFn): ChangesetDef,
   execute: () => ChangesetDef,
   save: (options: object) => Promise<ChangesetDef | any>,

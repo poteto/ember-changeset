@@ -8,7 +8,6 @@ import { notifierForEvent } from 'ember-changeset/-private/evented';
 import Err from 'ember-changeset/-private/err';
 import pureAssign from 'ember-changeset/utils/assign';
 import inflate from 'ember-changeset/utils/computed/inflate';
-import transform from 'ember-changeset/utils/computed/transform';
 import isChangeset, { CHANGESET } from 'ember-changeset/utils/is-changeset';
 import isObject from 'ember-changeset/utils/is-object';
 import isPromise from 'ember-changeset/utils/is-promise';
@@ -18,6 +17,7 @@ import setNestedProperty from 'ember-changeset/utils/set-nested-property';
 import take from 'ember-changeset/utils/take';
 import validateNestedObj from 'ember-changeset/utils/validate-nested-obj';
 import deepSet from 'ember-deep-set';
+import getDeep from './get-deep';
 import {
   Changes,
   Config,
@@ -60,7 +60,6 @@ export class BufferedChangeset implements IChangeset {
     this.obj = obj;
     this.validateFn = validateFn;
     this.validationMap = validationMap;
-    this.options = options;
 
     this[CONTENT] = obj;
     this[CHANGES] = {};
@@ -90,7 +89,6 @@ export class BufferedChangeset implements IChangeset {
   __changeset__ = CHANGESET;
 
   _eventedNotifiers = {};
-  _bareChanges = transform(CHANGES, (c: Change) => c.value);
 
   on(eventName: string, callback: Function): INotifier {
     const notifier = notifierForEvent(this, eventName);
@@ -107,6 +105,33 @@ export class BufferedChangeset implements IChangeset {
     if (notifier) {
       notifier.trigger.apply(notifier, args);
     }
+  }
+
+  /**
+   * @property getDeep
+   * @override
+   */
+  getDeep = getDeep;
+
+  /**
+   * @property safeGet
+   * @override
+   */
+  safeGet(obj: any, key: string) {
+    return obj[key];
+  }
+
+  get _bareChanges() {
+    function transform(c: Change) {
+      return c.value;
+    }
+
+    let obj = this[CHANGES];
+
+    return keys(obj).reduce((newObj: { [key: string]: any }, key: string) => {
+      newObj[key] = transform(obj[key]);
+      return newObj;
+    }, Object.create(null));
   }
 
   get changes() {
@@ -197,13 +222,14 @@ export class BufferedChangeset implements IChangeset {
 
     if (skipValidate) {
       let content: Content = this[CONTENT];
-      let oldValue = content[key];
+      let oldValue = this.safeGet(content, key);
       this._setProperty({ key, value, oldValue });
       this._handleValidation(true, { key, value });
+      return;
     }
 
     let content: Content = this[CONTENT];
-    let oldValue: any = content[key];
+    let oldValue: any = this.safeGet(content, key);
     this._setProperty({ key, value, oldValue });
     this._validateKey(key, value);
   }
@@ -462,7 +488,8 @@ export class BufferedChangeset implements IChangeset {
       assert('Error must have validation.', error.hasOwnProperty('validation'));
       newError = new Err((<IErr<T>>error).value, (<IErr<T>>error).validation);
     } else {
-      newError = new Err(this.key, (<ValidationErr>error));
+      let value = this[key];
+      newError = new Err(value, (<ValidationErr>error));
     }
 
     // Add `key` to errors map.
@@ -486,7 +513,7 @@ export class BufferedChangeset implements IChangeset {
     let errors: Errors<any> = this[ERRORS];
     let existingError: IErr<any> | Err = errors[key] || new Err(null, []);
     let validation: ValidationErr | ValidationErr[] = existingError.validation;
-    let value: any = this[key]
+    let value: any = this[key];
 
     if (!Array.isArray(validation) && Boolean(validation)) {
       existingError.validation = [validation];
@@ -605,7 +632,7 @@ export class BufferedChangeset implements IChangeset {
     value: T
   ): Promise<ValidationResult | T | IErr<T>> | T | IErr<T> | ValidationResult {
     let content: Content = this[CONTENT];
-    let oldValue: any = content[key];
+    let oldValue: any = this.safeGet(content, key);
     let validation: ValidationResult | Promise<ValidationResult> =
       this._validate(key, value, oldValue);
 
@@ -740,7 +767,7 @@ export class BufferedChangeset implements IChangeset {
       return e.value;
     }
 
-    let original: any = content[key];
+    let original: any = this.getDeep(content, key);
 
     if (changes.hasOwnProperty(key)) {
       let c: Change = changes[key];
@@ -807,9 +834,18 @@ export class BufferedChangeset implements IChangeset {
   }
 
   get(key: string): any {
+    // 'person'
     if (Object.prototype.hasOwnProperty.apply(this[CHANGES], [key])) {
       let changes: Changes = this[CHANGES];
       return changes[key].value;
+    }
+
+    // 'person.username'
+    let [baseKey, ...remaining] = key.split('.');
+    if (Object.prototype.hasOwnProperty.apply(this[CHANGES], [baseKey])) {
+      let changes: Changes = this[CHANGES];
+      let c: Change = changes[baseKey];
+      return this.getDeep(c.value, remaining.join('.'));
     }
 
     // return getters/setters/methods on BufferedProxy instance
@@ -817,8 +853,9 @@ export class BufferedChangeset implements IChangeset {
       return this[key];
     }
 
+    // finally return on underlying object
     let content: Content = this[CONTENT];
-    return content[key];
+    return this.getDeep(content, key);
   }
 
   set<T> (
