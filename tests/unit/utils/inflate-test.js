@@ -1,4 +1,4 @@
-import inflate from 'ember-changeset/utils/computed/inflate';
+import inflate from 'ember-changeset/utils/inflate';
 import { module, test } from 'qunit';
 
 module('Unit | Utility | computed/inflate');

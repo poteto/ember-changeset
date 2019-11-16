@@ -7,7 +7,7 @@ import Change from 'ember-changeset/-private/change';
 import { notifierForEvent } from 'ember-changeset/-private/evented';
 import Err from 'ember-changeset/-private/err';
 import pureAssign from 'ember-changeset/utils/assign';
-import inflate from 'ember-changeset/utils/computed/inflate';
+import inflate from 'ember-changeset/utils/inflate';
 import isChangeset, { CHANGESET } from 'ember-changeset/utils/is-changeset';
 import isObject from 'ember-changeset/utils/is-object';
 import isPromise from 'ember-changeset/utils/is-promise';
