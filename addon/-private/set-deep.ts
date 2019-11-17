@@ -1,4 +1,13 @@
-export default function setDeep(target: any, path: string, value: unknown) {
+/**
+ * TODO: consider
+ * https://github.com/emberjs/ember.js/blob/822452c4432620fc67a777aba3b150098fd6812d/packages/%40ember/-internals/metal/lib/property_set.ts
+ *
+ * @method setDeep
+ * @param target
+ * @param path
+ * @param value
+ */
+export default function setDeep(target: any, path: string, value: unknown): any {
   const keys = split(path).filter(isValidKey);
   let orig = target;
 
@@ -14,11 +23,13 @@ export default function setDeep(target: any, path: string, value: unknown) {
       target[prop] = {};
     }
 
+    // last iteration
     if (i === keys.length - 1) {
       result(target, prop, value);
       break;
     }
 
+    // assign next level of object for next loop
     target = target[prop];
   }
 

@@ -6,6 +6,7 @@ import {
 import Change from 'ember-changeset/-private/change';
 import { notifierForEvent } from 'ember-changeset/-private/evented';
 import Err from 'ember-changeset/-private/err';
+import normalizeObject from 'ember-changeset/-private/normalize-object';
 import pureAssign from 'ember-changeset/utils/assign';
 import inflate from 'ember-changeset/utils/inflate';
 import isChangeset, { CHANGESET } from 'ember-changeset/utils/is-changeset';
@@ -154,6 +155,8 @@ export class BufferedChangeset implements IChangeset {
     });
   }
 
+  // TODO: iterate and find all leaf errors
+  // can only provide leaf key
   get errors() {
     let obj = this[ERRORS];
 
@@ -182,10 +185,7 @@ export class BufferedChangeset implements IChangeset {
 
   get error() {
     let obj: Errors<any> = this[ERRORS];
-    function transform(e: Err) {
-      return { value: e.value, validation: e.validation };
-    }
-    return inflate(obj, transform);
+    return obj;
   }
 
   get data() {
@@ -823,8 +823,29 @@ export class BufferedChangeset implements IChangeset {
     key = ''
   ): InternalMap {
     let obj = this[objName] as InternalMap;
-    if (obj.hasOwnProperty(key)) {
+    let keys = key.split('.');
+
+    if (keys.length === 1 && obj.hasOwnProperty(key)) {
       delete obj[key];
+    } else if (obj[keys[0]]) {
+      let [base, ...remaining] = keys;
+      let previousNode: { [key: string]: any } = obj;
+      let currentNode: any = obj[base];
+      let currentKey: string | undefined = base;
+
+      // find leaf and delete from map
+      while (isObject(currentNode) && currentKey) {
+        let curr: { [key: string]: unknown } = currentNode
+        if (curr.value || curr.validation) {
+          delete previousNode[currentKey];
+        }
+
+        currentKey = remaining.shift();
+        previousNode = currentNode;
+        if (currentKey) {
+          currentNode = currentNode[currentKey];
+        }
+      }
     }
 
     return obj;
@@ -834,7 +855,12 @@ export class BufferedChangeset implements IChangeset {
     // 'person'
     if (Object.prototype.hasOwnProperty.apply(this[CHANGES], [key])) {
       let changes: Changes = this[CHANGES];
-      return changes[key].value;
+      let result: Change = changes[key];
+      if (isObject(result)) {
+        return normalizeObject(result);
+      }
+
+      return result.value;
     }
 
     // 'person.username'
@@ -842,17 +868,24 @@ export class BufferedChangeset implements IChangeset {
     if (Object.prototype.hasOwnProperty.apply(this[CHANGES], [baseKey])) {
       let changes: Changes = this[CHANGES];
       let c: Change = changes[baseKey];
-      return this.getDeep(c.value, remaining.join('.'));
+      let result = this.getDeep(normalizeObject(c), remaining.join('.'));
+      // just b/c top level key exists doesn't mean it has the nested key we are looking for
+      if (result) {
+        return result;
+      }
+    }
+
+    // finally return on underlying object
+    let content: Content = this[CONTENT];
+    const result = this.getDeep(content, key);
+    if (result) {
+      return result;
     }
 
     // return getters/setters/methods on BufferedProxy instance
     if (this[key]) {
       return this[key];
     }
-
-    // finally return on underlying object
-    let content: Content = this[CONTENT];
-    return this.getDeep(content, key);
   }
 
   set<T> (
@@ -864,7 +897,7 @@ export class BufferedChangeset implements IChangeset {
       return;
     }
 
-    return this.setUnknownProperty(key, value);
+    this.setUnknownProperty(key, value);
   }
 }
 

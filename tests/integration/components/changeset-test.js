@@ -254,25 +254,26 @@ module('Integration | Helper | changeset', function(hooks) {
       <h1>{{changeset.person.firstName}} {{changeset.person.lastName}}</h1>
       <input
         id="first-name"
-        type="text"
         value={{changeset.person.firstName}}
         onchange={{action (changeset-set changeset "person.firstName") value="target.value"}}>
       >
-      {{input id="last-name" value=changeset.person.lastName}}
+      <input id="last-name"
+        value={{changeset.person.lastName}}
+        onchange={{action (changeset-set changeset "person.lastName") value="target.value"}}>
     `);
 
     assert.equal(find('h1').textContent.trim(), 'Jim Bob', 'precondition');
+    assert.equal(changeset.get('person.firstName'), 'Jim', 'precondition firstName');
+    assert.equal(changeset.get('person.lastName'), 'Bob', 'precondition lastName');
     await fillIn('#first-name', 'foo');
     await fillIn('#last-name', 'bar');
     assert.equal(changeset.get('person.firstName'), 'foo', 'should update observable value');
-    // TODO: nested keys
-    // assert.equal(changeset.get('person').firstName, 'foo', 'should update observable value');
+    assert.equal(changeset.get('person.lastName'), 'bar', 'should update observable value lastName');
+    assert.equal(changeset.get('person').firstName, 'foo', 'should work with top level key');
+    assert.equal(changeset.get('person').lastName, 'bar', 'should work with top level key last name');
+    assert.equal(changeset.person.firstName, 'foo', 'should work with top level key');
     assert.equal(changeset.get('_content').person.firstName, 'Jim', 'keeps value on model as execute hasn\'t been called');
-    // TODO: changeset-set will only apply to changeset and not underlying model
-    // so mut will actually modify underlying object
-    // I don't think we have the right observers here to trigger an update on the input
-    // for a nested object
-    // assert.equal(find('h1').textContent.trim(), 'foo bar', 'should update observable value');
+    assert.equal(find('h1').textContent.trim(), 'foo bar', 'should update observable value');
   });
 
   skip('nested object updates when set without a validator', async function(assert) {
@@ -315,19 +316,15 @@ module('Integration | Helper | changeset', function(hooks) {
     await fillIn('#first-name', 'foo');
     await fillIn('#first-name', '');
 
-    {
-      let actual = find('#first-name-error').textContent.trim();
-      let expectedResult = 'need a first name';
-      assert.equal(actual, expectedResult, 'shows error message');
-    }
+    let actual = find('#first-name-error').textContent.trim();
+    let expectedResult = 'need a first name';
+    assert.equal(actual, expectedResult, 'shows error message');
 
     await fillIn('#first-name', 'foo');
 
-    {
-      let actual = find('#first-name-error').textContent.trim();
-      let expectedResult = '';
-      assert.equal(actual, expectedResult, 'hides error message');
-    }
+    actual = find('#first-name-error').textContent.trim();
+    expectedResult = '';
+    assert.equal(actual, expectedResult, 'hides error message');
   });
 
   skip('nested object updates when set with async validator', async function(assert) {

@@ -11,6 +11,7 @@ export default function getDeep<T extends object>(root: T, path: string | string
       return undefined;
     }
 
+    // next iteration has next level
     obj = obj[parts[i]];
   }
 
