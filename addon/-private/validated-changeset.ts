@@ -14,9 +14,9 @@ import isObject from 'ember-changeset/utils/is-object';
 import isPromise from 'ember-changeset/utils/is-promise';
 import mergeNested from 'ember-changeset/utils/merge-nested';
 import objectWithout from 'ember-changeset/utils/object-without';
-import setNestedProperty from 'ember-changeset/utils/set-nested-property';
 import take from 'ember-changeset/utils/take';
 import validateNestedObj from 'ember-changeset/utils/validate-nested-obj';
+import mergeDeep from './merge-deep';
 import setDeep from './set-deep';
 import getDeep from './get-deep';
 import {
@@ -279,9 +279,7 @@ export class BufferedChangeset implements IChangeset {
     if (this.isValid && this.isDirty) {
       let content: Content = this[CONTENT];
       let changes: Changes = this[CHANGES];
-      keys(changes).forEach(key => {
-        this[CONTENT] = this.setDeep(content, key, normalizeObject(changes)[key]);
-      });
+      this[CONTENT] = mergeDeep(content, normalizeObject(changes));
     }
 
     return this;
@@ -485,7 +483,7 @@ export class BufferedChangeset implements IChangeset {
     // Add `key` to errors map.
     let errors: Errors<any> = this[ERRORS];
     // @tracked
-    this[ERRORS] = setNestedProperty(errors, key, newError);
+    this[ERRORS] = this.setDeep(errors, key, newError);
 
     // Return passed-in `error`.
     return error;
@@ -514,7 +512,7 @@ export class BufferedChangeset implements IChangeset {
     validation = [...v, ...newErrors];
     let newError = new Err(value, validation);
     // @tracked
-    this[ERRORS] = setNestedProperty(errors, (<string>key), newError);
+    this[ERRORS] = this.setDeep(errors, (<string>key), newError);
 
     return { value, validation };
   }
@@ -714,7 +712,7 @@ export class BufferedChangeset implements IChangeset {
     // Happy path: update change map.
     if (!isEqual(oldValue, value)) {
       // @tracked
-      this[CHANGES] = setNestedProperty(changes, key, new Change(value));
+      this[CHANGES] = this.setDeep(changes, key, new Change(value));
     } else if (key in changes) {
       // @tracked
       this[CHANGES] = this._deleteKey(CHANGES, key) as Changes;

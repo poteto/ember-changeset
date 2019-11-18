@@ -688,7 +688,7 @@ module('scott Unit | Utility | changeset', function(hooks) {
         ['org', 'no usa for you'],
         ['org.usa.ca', 'bar'],
       ],
-      result: () => ({ org: { usa: { ca: 'bar' } } }),
+      result: () => ({ org: { usa: { ca: 'bar', ny: '' } } }),
     },
     {
       model: () => ({ org: { usa: { ny: '', ca: '' } } }),
@@ -739,7 +739,8 @@ module('scott Unit | Utility | changeset', function(hooks) {
     dummyChangeset.set('org.usa.ny', 'ny');
     dummyChangeset.set('org.usa.ma', { name: 'Massachusetts' });
     dummyChangeset.execute();
-    assert.deepEqual(get(dummyChangeset, 'change'), expectedResult, 'should have correct shape');
+    assert.deepEqual(dummyChangeset.change, expectedResult, 'should have correct shape');
+    assert.deepEqual(dummyChangeset._content.org, expectedResult.org, 'should have correct shape');
     assert.deepEqual(get(dummyModel, 'org'), expectedResult.org, 'should set value');
   });
 

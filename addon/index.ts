@@ -28,7 +28,6 @@ class EmberChangeset extends BufferedChangeset {
   @tracked [CONTENT]: object;
 
   getDeep = safeGet as any;
-  setDeep = deepSet as any;
 
   safeGet(obj: any, key: string) {
     return safeGet(obj, key);
