@@ -13,7 +13,7 @@ import {
   triggerEvent
 } from '@ember/test-helpers';
 
-module('Integration | Helper | changeset', function(hooks) {
+module('scott Integration | Helper | changeset', function(hooks) {
   setupRenderingTest(hooks);
 
   test('it validates changes', async function(assert) {

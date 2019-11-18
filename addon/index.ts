@@ -53,6 +53,7 @@ class EmberChangeset extends BufferedChangeset {
     // Return passed-in `error`.
     return error;
   }
+
   /**
    * Manually push multiple errors to the changeset as an array.
    *

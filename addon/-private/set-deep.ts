@@ -1,3 +1,4 @@
+import Change from './change';
 /**
  * TODO: consider
  * https://github.com/emberjs/ember.js/blob/822452c4432620fc67a777aba3b150098fd6812d/packages/%40ember/-internals/metal/lib/property_set.ts
@@ -12,7 +13,7 @@ export default function setDeep(target: any, path: string, value: unknown): any 
   let orig = target;
 
   if (keys.length === 1) {
-    result(target, keys[0], value);
+    target[path] = value;
     return target;
   }
 
@@ -20,6 +21,9 @@ export default function setDeep(target: any, path: string, value: unknown): any 
     let prop = keys[i];
 
     if (!isObject(target[prop])) {
+      target[prop] = {};
+    } else if (isObject(target[prop]) && target[prop] instanceof Change) {
+      // we don't want to merge new changes with a Change instance higher up in the obj tree
       target[prop] = {};
     }
 
@@ -38,7 +42,7 @@ export default function setDeep(target: any, path: string, value: unknown): any 
 
 function result(target: any, path: string, value: unknown) {
   if (isPlainObject(target[path]) && isPlainObject(value)) {
-    target[path] = Object.assign({}, target[path], value);
+    target[path] = { ...target[path], ...value };
   } else {
     target[path] = value;
   }

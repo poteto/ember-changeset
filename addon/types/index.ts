@@ -74,7 +74,7 @@ export interface ChangesetDef {
   _runningValidations: RunningValidations,
   _bareChanges: { [s: string]: any },
 
-  changes: { key: string; value: any; }[], //ComputedProperty<object[], object[]>,
+  changes: any, // { key: string; value: any; }[], //ComputedProperty<object[], object[]>,
   errors: { key: string; value: any; }[], //ComputedProperty<object[], object[]>,
   error: object,
   change: object,

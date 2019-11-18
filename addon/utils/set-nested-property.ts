@@ -33,18 +33,11 @@ export default function setNestedProperty<T>(
     });
   });
 
-  // // Delete keys prefixed by `key`.
-  // objKeys
-  //   .filter(k => k.indexOf(`${key}.`) === 0)
-  //   .forEach(k => delete obj[k]);
-
-  // Delete keys in path leading up to leaf key
-  // TODO: is this necessary?
-  if (key.split('.').length > 1) {
-    key.split('.').slice(-1).forEach(_ => {
-      delete obj[key];
-    });
-  }
+  // // Delete keys in path leading up to `key`.
+  // key.split('.').slice(0, -1).forEach((_, i, allParts) => {
+  //   let key = allParts.slice(0, i+1).join('.');
+  //   delete obj[key];
+  // });
 
   // Set value and return.
   // obj[key] = value;

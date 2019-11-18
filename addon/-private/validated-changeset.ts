@@ -4,11 +4,11 @@ import {
   isEqual
 } from '@ember/utils';
 import Change from 'ember-changeset/-private/change';
+import keyValues from 'ember-changeset/-private/key-values';
 import { notifierForEvent } from 'ember-changeset/-private/evented';
 import Err from 'ember-changeset/-private/err';
 import normalizeObject from 'ember-changeset/-private/normalize-object';
 import pureAssign from 'ember-changeset/utils/assign';
-import inflate from 'ember-changeset/utils/inflate';
 import isChangeset, { CHANGESET } from 'ember-changeset/utils/is-changeset';
 import isObject from 'ember-changeset/utils/is-object';
 import isPromise from 'ember-changeset/utils/is-promise';
@@ -144,15 +144,8 @@ export class BufferedChangeset implements IChangeset {
   get changes() {
     let obj = this[CHANGES];
 
-    function transform(c: Change) {
-      return c.value;
-    }
-
-    return keys(obj).map(key => {
-      let value = transform(obj[key]);
-
-      return { key, value };
-    });
+    // [{ key, value }, ...]
+    return keyValues(obj);
   }
 
   // TODO: iterate and find all leaf errors
@@ -177,15 +170,13 @@ export class BufferedChangeset implements IChangeset {
 
   get change() {
     let obj: Changes = this[CHANGES];
-    function transform(c: Change) {
-      return c.value;
-    }
-    return inflate(obj, transform);
+    return normalizeObject(obj);
   }
 
   get error() {
     let obj: Errors<any> = this[ERRORS];
-    return obj;
+    // TODO: whyy?
+    return JSON.parse(JSON.stringify(obj));
   }
 
   get data() {
@@ -193,7 +184,7 @@ export class BufferedChangeset implements IChangeset {
   }
 
   get isValid() {
-    return Object.keys(this[ERRORS]).length === 0;
+    return keyValues(this[ERRORS]).length === 0;
   }
   get isPristine() {
     return Object.keys(this[CHANGES]).length === 0;
@@ -288,7 +279,9 @@ export class BufferedChangeset implements IChangeset {
     if (this.isValid && this.isDirty) {
       let content: Content = this[CONTENT];
       let changes: Changes = this[CHANGES];
-      keys(changes).forEach(key => this.setDeep(content, key, changes[key].value));
+      keys(changes).forEach(key => {
+        this[CONTENT] = this.setDeep(content, key, normalizeObject(changes)[key]);
+      });
     }
 
     return this;
@@ -500,6 +493,7 @@ export class BufferedChangeset implements IChangeset {
 
   /**
    * Manually push multiple errors to the changeset as an array.
+   * key maybe in form 'name.short' so need to get deep
    *
    * @method pushErrors
    */
@@ -508,7 +502,7 @@ export class BufferedChangeset implements IChangeset {
     ...newErrors: string[] | ValidationErr[]
   ) {
     let errors: Errors<any> = this[ERRORS];
-    let existingError: IErr<any> | Err = errors[key] || new Err(null, []);
+    let existingError: IErr<any> | Err = this.getDeep(errors, key) || new Err(null, []);
     let validation: ValidationErr | ValidationErr[] = existingError.validation;
     let value: any = this[key];
 
@@ -521,9 +515,6 @@ export class BufferedChangeset implements IChangeset {
     let newError = new Err(value, validation);
     // @tracked
     this[ERRORS] = setNestedProperty(errors, (<string>key), newError);
-
-    // this.notifyPropertyChange(ERRORS);
-    // this.notifyPropertyChange((<string>key));
 
     return { value, validation };
   }
@@ -750,7 +741,7 @@ export class BufferedChangeset implements IChangeset {
   }
 
   /**
-   * Value for change or the original value.
+   * Value for change/error/content or the original value.
    */
   _valueFor(
     key: string
@@ -764,27 +755,28 @@ export class BufferedChangeset implements IChangeset {
       return e.value;
     }
 
-    let original: any = this.getDeep(content, key);
+    // 'person'
+    if (Object.prototype.hasOwnProperty.apply(changes, [key])) {
+      let result: Change = changes[key];
+      if (isObject(result)) {
+        return normalizeObject(result);
+      }
 
-    if (changes.hasOwnProperty(key)) {
-      let c: Change = changes[key];
-      return c.value;
+      return result.value;
     }
 
-    // nested thus circulate through `value` and see if match
-    if (key.indexOf('.') !== -1) {
-      let [baseKey, ...keyParts] = key.split('.');
-      if (changes.hasOwnProperty(baseKey)) {
-        let { value } = changes[baseKey];
-        // make sure to return value if not object
-        if(!value) {
-          return value;
-        }
-        let result = value[keyParts.join('.')];
+    // 'person.username'
+    let [baseKey, ...remaining] = key.split('.');
+    if (Object.prototype.hasOwnProperty.apply(changes, [baseKey])) {
+      let c: Change = changes[baseKey];
+      let result = this.getDeep(normalizeObject(c), remaining.join('.'));
+      // just b/c top level key exists doesn't mean it has the nested key we are looking for
+      if (result) {
         return result;
       }
     }
 
+    let original: any = this.getDeep(content, key);
     return original;
   }
 
@@ -855,7 +847,7 @@ export class BufferedChangeset implements IChangeset {
     // 'person'
     if (Object.prototype.hasOwnProperty.apply(this[CHANGES], [key])) {
       let changes: Changes = this[CHANGES];
-      let result: Change = changes[key];
+      let result = changes[key];
       if (isObject(result)) {
         return normalizeObject(result);
       }
@@ -867,7 +859,7 @@ export class BufferedChangeset implements IChangeset {
     let [baseKey, ...remaining] = key.split('.');
     if (Object.prototype.hasOwnProperty.apply(this[CHANGES], [baseKey])) {
       let changes: Changes = this[CHANGES];
-      let c: Change = changes[baseKey];
+      let c = changes[baseKey];
       let result = this.getDeep(normalizeObject(c), remaining.join('.'));
       // just b/c top level key exists doesn't mean it has the nested key we are looking for
       if (result) {
@@ -875,17 +867,15 @@ export class BufferedChangeset implements IChangeset {
       }
     }
 
-    // finally return on underlying object
-    let content: Content = this[CONTENT];
-    const result = this.getDeep(content, key);
-    if (result) {
-      return result;
-    }
-
     // return getters/setters/methods on BufferedProxy instance
     if (this[key]) {
       return this[key];
     }
+
+    // finally return on underlying object
+    let content: Content = this[CONTENT];
+    const result = this.getDeep(content, key);
+    return result;
   }
 
   set<T> (
