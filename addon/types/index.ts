@@ -57,10 +57,6 @@ export type Snapshot = {
   errors:  { [s: string]: IErr<any> },
 };
 
-export type Inflated<T> = {
-  [s: string]: Inflated<T> | T,
-};
-
 export type PrepareChangesFn = (obj: ({ [s: string]: any })) => ({ [s: string]: any })
 
 export interface ChangesetDef {
