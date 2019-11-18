@@ -279,6 +279,8 @@ export class BufferedChangeset implements IChangeset {
     if (this.isValid && this.isDirty) {
       let content: Content = this[CONTENT];
       let changes: Changes = this[CHANGES];
+      // we want mutation on original object
+      // @tracked
       this[CONTENT] = mergeDeep(content, normalizeObject(changes));
     }
 

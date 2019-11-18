@@ -55,7 +55,15 @@ function mergeObject(target: any, source: any) {
 	return target;
 }
 
-export default function mergeDeep(target: any, source: any) {
+/**
+ * goal is to mutate target with source's properties, ensuring we dont encounter
+ * pitfalls of { ..., ... } spread syntax overwriting keys on objects that we merged
+ *
+ * @method mergeDeep
+ * @param target
+ * @param source
+ */
+export default function mergeDeep(target: any, source: any): object | [any] {
 	var sourceIsArray = Array.isArray(source)
 	var targetIsArray = Array.isArray(target)
 	var sourceAndTargetTypesMatch = sourceIsArray === targetIsArray
