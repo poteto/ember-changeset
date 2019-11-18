@@ -12,22 +12,6 @@ function isSpecial(value: any): Boolean {
   return stringValue === '[object RegExp]' || stringValue === '[object Date]'
 }
 
-function emptyTarget(val: any): [] | {} {
-	return Array.isArray(val) ? [] : {}
-}
-
-function cloneUnlessOtherwiseSpecified(value: any): any {
-	return (isMergeableObject(value))
-		? mergeDeep(emptyTarget(value), value)
-		: value
-}
-
-function arrayMerge(target: any, source: any): object[] {
-	return target.concat(source).map((item: any) => {
-		return cloneUnlessOtherwiseSpecified(item)
-	})
-}
-
 function getEnumerableOwnPropertySymbols(target: any): any {
 	return Object.getOwnPropertySymbols
 		? Object.getOwnPropertySymbols(target).filter(symbol => {
@@ -56,12 +40,6 @@ function propertyIsUnsafe(target: any, key: string): Boolean {
 }
 
 function mergeObject(target: any, source: any) {
-	// var destination: { [k: string]: any } = {}
-	// if (isMergeableObject(target)) {
-	// 	getKeys(target).forEach(key => {
-	// 		destination[key] = target[key];//cloneUnlessOtherwiseSpecified(target[key])
-	// 	})
-	// }
 	getKeys(source).forEach(key => {
 		if (propertyIsUnsafe(target, key)) {
 			return;
@@ -70,7 +48,7 @@ function mergeObject(target: any, source: any) {
 		if (propertyIsOnObject(target, key) && isMergeableObject(source[key])) {
 			target[key] = mergeDeep(target[key], source[key]);
 		} else {
-			target[key] = source[key];// cloneUnlessOtherwiseSpecified(source[key])
+			target[key] = source[key];
 		}
   });
 
@@ -83,7 +61,7 @@ export default function mergeDeep(target: any, source: any) {
 	var sourceAndTargetTypesMatch = sourceIsArray === targetIsArray
 
 	if (!sourceAndTargetTypesMatch) {
-		return cloneUnlessOtherwiseSpecified(source)
+		return source;
 	} else if (sourceIsArray) {
 		return source;
 	} else {

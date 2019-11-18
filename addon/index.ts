@@ -15,7 +15,6 @@ import {
   ValidatorMap,
   ValidationErr,
 } from 'ember-changeset/types';
-import deepSet from 'ember-deep-set';
 
 const CHANGES = '_changes';
 const ERRORS = '_errors';
