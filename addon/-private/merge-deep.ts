@@ -1,15 +1,15 @@
 function isMergeableObject(value: any): Boolean {
-  return isNonNullObject(value) && !isSpecial(value)
+  return isNonNullObject(value) && !isSpecial(value);
 }
 
 function isNonNullObject(value: any): Boolean {
-  return !!value && typeof value === 'object'
+  return !!value && typeof value === 'object';
 }
 
 function isSpecial(value: any): Boolean {
-  var stringValue = Object.prototype.toString.call(value)
+  let stringValue = Object.prototype.toString.call(value);
 
-  return stringValue === '[object RegExp]' || stringValue === '[object Date]'
+  return stringValue === '[object RegExp]' || stringValue === '[object Date]';
 }
 
 function getEnumerableOwnPropertySymbols(target: any): any {
@@ -17,7 +17,7 @@ function getEnumerableOwnPropertySymbols(target: any): any {
 		? Object.getOwnPropertySymbols(target).filter(symbol => {
 			return target.propertyIsEnumerable(symbol)
 		})
-		: []
+		: [];
 }
 
 function getKeys(target: any) {
@@ -26,9 +26,9 @@ function getKeys(target: any) {
 
 function propertyIsOnObject(object: any, property: any) {
 	try {
-		return property in object
+		return property in object;
 	} catch(_) {
-		return false
+		return false;
 	}
 }
 
@@ -36,23 +36,27 @@ function propertyIsOnObject(object: any, property: any) {
 function propertyIsUnsafe(target: any, key: string): Boolean {
   return propertyIsOnObject(target, key) // Properties are safe to merge if they don't exist in the target yet,
 		&& !(Object.hasOwnProperty.call(target, key) // unsafe if they exist up the prototype chain,
-    && Object.propertyIsEnumerable.call(target, key)) // and also unsafe if they're nonenumerable.
+    && Object.propertyIsEnumerable.call(target, key)); // and also unsafe if they're nonenumerable.
 }
 
-function mergeObject(target: any, source: any) {
+function mergeObject(target: any, source: any, options: any) {
 	getKeys(source).forEach(key => {
 		if (propertyIsUnsafe(target, key)) {
 			return;
 		}
 
 		if (propertyIsOnObject(target, key) && isMergeableObject(source[key])) {
-			target[key] = mergeDeep(target[key], source[key]);
+			target[key] = mergeDeep(options.safeGet(target, key), options.safeGet(source, key), options);
 		} else {
 			target[key] = source[key];
 		}
   });
 
 	return target;
+}
+
+interface Options {
+  safeGet: any
 }
 
 /**
@@ -63,16 +67,17 @@ function mergeObject(target: any, source: any) {
  * @param target
  * @param source
  */
-export default function mergeDeep(target: any, source: any): object | [any] {
-	var sourceIsArray = Array.isArray(source)
-	var targetIsArray = Array.isArray(target)
-	var sourceAndTargetTypesMatch = sourceIsArray === targetIsArray
+export default function mergeDeep(target: any, source: any, options: Options): object | [any] {
+	options.safeGet = options.safeGet || function(obj: any, key: string): any { return obj[key] };
+	let sourceIsArray = Array.isArray(source);
+	let targetIsArray = Array.isArray(target);
+	let sourceAndTargetTypesMatch = sourceIsArray === targetIsArray;
 
 	if (!sourceAndTargetTypesMatch) {
 		return source;
 	} else if (sourceIsArray) {
 		return source;
 	} else {
-		return mergeObject(target, source)
+		return mergeObject(target, source, options);
 	}
 }
