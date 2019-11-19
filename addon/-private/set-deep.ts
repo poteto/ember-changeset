@@ -40,6 +40,7 @@ export default function setDeep(target: any, path: string, value: unknown): any 
   return orig;
 }
 
+// to avoid overwriting child keys of leaf node
 function result(target: any, path: string, value: unknown) {
   if (isPlainObject(target[path]) && isPlainObject(value)) {
     target[path] = { ...target[path], ...value };

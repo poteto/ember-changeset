@@ -16,9 +16,9 @@ import mergeNested from 'ember-changeset/utils/merge-nested';
 import objectWithout from 'ember-changeset/utils/object-without';
 import take from 'ember-changeset/utils/take';
 import validateNestedObj from 'ember-changeset/utils/validate-nested-obj';
-import mergeDeep from './merge-deep';
-import setDeep from './set-deep';
-import getDeep from './get-deep';
+import mergeDeep from 'ember-changeset/-private/merge-deep';
+import setDeep from 'ember-changeset/-private/set-deep';
+import getDeep from 'ember-changeset/-private/get-deep';
 import {
   Changes,
   Config,

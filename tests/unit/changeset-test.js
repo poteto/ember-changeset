@@ -50,7 +50,7 @@ function dummyValidator({ key, newValue, oldValue, changes, content }) {
   }
 }
 
-module('scott Unit | Utility | changeset', function(hooks) {
+module('Unit | Utility | changeset', function(hooks) {
   hooks.beforeEach(function() {
     let Dummy = EmberObject.extend({
       save() {

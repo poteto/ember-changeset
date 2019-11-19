@@ -3,9 +3,12 @@ import { BufferedChangeset } from './-private/validated-changeset';
 import { notifyPropertyChange } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
 import { get as safeGet } from '@ember/object';
+import mergeDeep from 'ember-changeset/-private/merge-deep';
+import normalizeObject from 'ember-changeset/-private/normalize-object';
 import {
   Config,
   Changes,
+  Content,
   Errors,
   IErr,
   IChangeset,
@@ -114,6 +117,23 @@ class EmberChangeset extends BufferedChangeset {
     notifyPropertyChange(this, objName);
 
     return result;
+  }
+
+  /**
+   * Executes the changeset if in a valid state.
+   *
+   * @method execute
+   */
+  execute(): IChangeset {
+    if (this.isValid && this.isDirty) {
+      let content: Content = this[CONTENT];
+      let changes: Changes = this[CHANGES];
+      // we want mutation on original object
+      // @tracked
+      this[CONTENT] = mergeDeep(content, normalizeObject(changes), { safeGet });
+    }
+
+    return this;
   }
 }
 

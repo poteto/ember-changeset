@@ -30,7 +30,7 @@ module('Integration | Helper | changeset-get', function(hooks) {
     this.set('fieldName', 'name.first');
   });
 
-  test('it fails to retrieve the current value using {{get}}', async function(assert) {
+  test('it retrieves the current value using {{get}}', async function(assert) {
     await render(hbs`
       <input
         type="text"
@@ -52,11 +52,11 @@ module('Integration | Helper | changeset-get', function(hooks) {
     try {
       await fillIn(input!, 'Robert');
 
-      assert.equal(testEl!.textContent, 'Bob');
+      assert.equal(testEl!.textContent, 'Robert');
 
       await this.get('changeset').rollback();
 
-      assert.equal(testEl!.textContent, 'Bob');
+      assert.equal(testEl!.textContent, 'Robert');
     } catch (e) {
       assert.ok(false, e.message);
     }
