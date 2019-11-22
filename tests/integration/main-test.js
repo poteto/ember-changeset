@@ -32,14 +32,14 @@ module('Integration | main', function(hooks) {
     changeset.set('profile.nickname', 'g');
     set(changeset, 'profile.lastName', 'Hopper');
 
-    assert.equal(changeset.get('profile.firstName'), 'Grace');
-    assert.equal(changeset.get('profile.nickname'), 'g');
-    assert.equal(changeset.get('profile.lastName'), 'Hopper');
+    assert.equal(changeset.get('profile.firstName'), 'Grace', 'has firstName after set');
+    assert.equal(changeset.get('profile.nickname'), 'g', 'has nickname after set');
+    assert.equal(changeset.get('profile.lastName'), 'Ross', 'has last name after test');
 
     changeset.execute();
 
     assert.equal(user.get('profile.firstName'), 'Grace', 'firstName after execute');
-    assert.equal(user.get('profile.lastName'), 'Hopper', 'lastName after execute');
+    assert.equal(user.get('profile.lastName'), 'Ross', 'lastName after execute');
     assert.equal(user.get('profile.nickname'), 'g', 'nickname after execute');
 
     let profile;
