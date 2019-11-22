@@ -73,10 +73,10 @@ function buildPathToValue(source: any, options: Options): void {
 }
 
 /**
- * `source` will always have a leaf key `value` with the proeprty we want to set
+ * `source` will always have a leaf key `value` with the property we want to set
  * @method mergeObject
  */
-function mergeObject(target: any, source: any, options: Options) {
+function mergeObject(target: any, source: any, options: Options): any {
 	getKeys(source).forEach(key => {
     // proto poisoning.  So can set by nested key path 'person.name'
 		if (propertyIsUnsafe(target, key)) {
@@ -111,13 +111,16 @@ function mergeObject(target: any, source: any, options: Options) {
  * goal is to mutate target with source's properties, ensuring we dont encounter
  * pitfalls of { ..., ... } spread syntax overwriting keys on objects that we merged
  *
+ * This is also adjusted for Ember peculiarities.  Specifically `options.setPath` will allows us
+ * to handle properties on Proxy objects (that aren't the target's own property)
+ *
  * @method mergeDeep
  * @param target
  * @param source
  */
 export default function mergeDeep(target: any, source: any, options: Options = { safeGet: undefined, safeSet: undefined }): object | [any] {
-	options['safeGet'] = options.safeGet || function(obj: any, key: string): any { return obj[key] };
-	options['safeSet'] = options.safeSet;
+	options.safeGet = options.safeGet || function(obj: any, key: string): any { return obj[key] };
+	options.safeSet = options.safeSet;
 	let sourceIsArray = Array.isArray(source);
 	let targetIsArray = Array.isArray(target);
 	let sourceAndTargetTypesMatch = sourceIsArray === targetIsArray;

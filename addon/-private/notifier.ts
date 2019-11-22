@@ -1,19 +1,18 @@
 // this statefull class holds and notifies
-import { INotifier } from '../types/evented';
 
-export default class Notifier implements INotifier {
-  listeners: Function[]
+export default class Notifier<T extends any[]>{
+  listeners: ((...args: T) => void)[]
 
   constructor() {
     this.listeners = [];
   }
 
-  addListener(callback: Function) {
+  addListener(callback: (...args: T) => void) {
     this.listeners.push(callback);
     return () => this.removeListener(callback);
   }
 
-  removeListener(callback: Function) {
+  removeListener(callback: (...args: T) => void) {
     this.listeners;
 
     for (let i = 0; i < this.listeners.length; i++) {
@@ -24,7 +23,7 @@ export default class Notifier implements INotifier {
     }
   }
 
-  trigger(...args: any[]) {
-    this.listeners.slice(0).forEach(callback => callback(...args));
+  trigger(...args: T) {
+    this.listeners.forEach(callback => callback(...args));
   }
 }

@@ -54,14 +54,10 @@ const defaultOptions = { skipValidate: false };
 export class BufferedChangeset implements IChangeset {
   constructor(
     obj: object,
-    validateFn: ValidatorAction = defaultValidatorFn,
-    validationMap: ValidatorMap = {},
+    public validateFn: ValidatorAction = defaultValidatorFn,
+    public validationMap: ValidatorMap = {},
     options: Config = {}
   ) {
-    this.obj = obj;
-    this.validateFn = validateFn;
-    this.validationMap = validationMap;
-
     this[CONTENT] = obj;
     this[CHANGES] = {};
     this[ERRORS] = {};
@@ -301,7 +297,7 @@ export class BufferedChangeset implements IChangeset {
    * @method save
    * @param {Object} options optional object to pass to content save method
    */
-  save(
+  async save(
     options: object
   ): Promise<IChangeset | any> {
     let content: Content = this[CONTENT];
@@ -320,10 +316,10 @@ export class BufferedChangeset implements IChangeset {
       }
     }
 
-    return Promise.resolve(savePromise).then((result) => {
-      this.rollback();
-      return result;
-    });
+    const result = await savePromise;
+
+    this.rollback();
+    return result;
   }
 
   /**
@@ -608,7 +604,7 @@ export class BufferedChangeset implements IChangeset {
    *
    * @method isValidating
    */
-  isValidating(key: string | void): boolean {
+  isValidating(key?: string | void): boolean {
     let runningValidations: RunningValidations = this[RUNNING_VALIDATIONS];
     let ks: string[] = keys(runningValidations);
     if (key) {
