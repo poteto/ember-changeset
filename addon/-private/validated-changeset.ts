@@ -4,10 +4,10 @@ import {
   isEqual
 } from '@ember/utils';
 import Change from 'ember-changeset/-private/change';
-import { getKeyValues } from 'ember-changeset/-private/get-key-values';
+import { getKeyValues } from 'ember-changeset/utils/get-key-values';
 import { notifierForEvent } from 'ember-changeset/-private/evented';
 import Err from 'ember-changeset/-private/err';
-import normalizeObject from 'ember-changeset/-private/normalize-object';
+import normalizeObject from 'ember-changeset/utils/normalize-object';
 import pureAssign from 'ember-changeset/utils/assign';
 import isChangeset, { CHANGESET } from 'ember-changeset/utils/is-changeset';
 import isObject from 'ember-changeset/utils/is-object';
@@ -16,9 +16,9 @@ import mergeNested from 'ember-changeset/utils/merge-nested';
 import objectWithout from 'ember-changeset/utils/object-without';
 import take from 'ember-changeset/utils/take';
 import validateNestedObj from 'ember-changeset/utils/validate-nested-obj';
-import mergeDeep from 'ember-changeset/-private/merge-deep';
-import setDeep from 'ember-changeset/-private/set-deep';
-import getDeep from 'ember-changeset/-private/get-deep';
+import mergeDeep from 'ember-changeset/utils/merge-deep';
+import setDeep from 'ember-changeset/utils/set-deep';
+import getDeep from 'ember-changeset/utils/get-deep';
 import {
   Changes,
   Config,

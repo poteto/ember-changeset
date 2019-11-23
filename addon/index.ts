@@ -3,7 +3,7 @@ import { BufferedChangeset } from './-private/validated-changeset';
 import { notifyPropertyChange } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
 import { get as safeGet, set as safeSet } from '@ember/object';
-import mergeDeep from 'ember-changeset/-private/merge-deep';
+import mergeDeep from 'ember-changeset/utils/merge-deep';
 import {
   Config,
   Changes,

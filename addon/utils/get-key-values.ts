@@ -1,4 +1,4 @@
-import isObject from '../utils/is-object';
+import isObject from './is-object';
 
 /**
  * traverse through target and return leaf nodes with `value` property and key as 'person.name'
