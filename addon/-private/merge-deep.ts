@@ -44,44 +44,43 @@ function propertyIsUnsafe(target: any, key: string): Boolean {
     && Object.propertyIsEnumerable.call(target, key)); // and also unsafe if they're nonenumerable.
 }
 
-let kv: { [k: string]: any } = {};
-let possibleKeys: string[] = [];
-
 /**
  * DFS - traverse depth first until find object with `value`.  Then go back up tree and try on next key
  * need to exhaust all possible avenues.
  *
  * @method buildPathToValue
  */
-function buildPathToValue(source: any, options: Options): void {
+function buildPathToValue(source: any, options: Options, kv: Record<string, any>, possibleKeys: string[]): Record<string, any> {
   Object.keys(source).forEach((key: string): void => {
     let possible = source[key];
     if (possible && possible.hasOwnProperty('value')) {
       possibleKeys.push(key);
       kv[possibleKeys.join('.')] = possible.value;
-      possibleKeys = [];
+      // reset
       return;
     }
 
     if (typeof possible === 'object') {
       possibleKeys.push(key);
-      buildPathToValue(possible, options);
-    } else {
-      possibleKeys = [];
+      buildPathToValue(possible, options, kv, possibleKeys);
     }
   });
+
+  return kv;
 }
 
 /**
  * `source` will always have a leaf key `value` with the property we want to set
+ *
  * @method mergeObject
  */
 function mergeObject(target: any, source: any, options: Options): any {
 	getKeys(source).forEach(key => {
     // proto poisoning.  So can set by nested key path 'person.name'
 		if (propertyIsUnsafe(target, key)) {
+      // if safeSet, we will find keys leading up to value and set
       if (options.safeSet) {
-        buildPathToValue(source, options);
+        const kv: Record<string, any> = buildPathToValue(source, options, {}, []);
         if (Object.keys(kv).length > 0) {
           // we found some keys!
           for (key in kv) {
@@ -89,8 +88,6 @@ function mergeObject(target: any, source: any, options: Options): any {
             options.safeSet(target, key, val);
           }
         }
-
-        kv = {};
       }
 
 			return;

@@ -3,13 +3,13 @@ import Change from './change';
  * TODO: consider
  * https://github.com/emberjs/ember.js/blob/822452c4432620fc67a777aba3b150098fd6812d/packages/%40ember/-internals/metal/lib/property_set.ts
  *
+ * Handles both single path or nested string paths ('person.name')
+ *
  * @method setDeep
- * @param target
- * @param path
- * @param value
  */
 export default function setDeep(target: any, path: string, value: unknown): any {
   const keys = split(path).filter(isValidKey);
+  // We will mutate target and through complex reference, we will mutate the orig
   let orig = target;
 
   if (keys.length === 1) {
