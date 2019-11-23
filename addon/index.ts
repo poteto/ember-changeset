@@ -1,7 +1,6 @@
 import { assert } from '@ember/debug';
 import { BufferedChangeset } from './-private/validated-changeset';
 import { notifyPropertyChange } from '@ember/object';
-// @ts-ignore
 import { tracked } from '@glimmer/tracking';
 import { get as safeGet, set as safeSet } from '@ember/object';
 import mergeDeep from 'ember-changeset/utils/merge-deep';
@@ -25,9 +24,12 @@ const CONTENT = '_content';
 const defaultValidatorFn = () => true;
 
 class EmberChangeset extends BufferedChangeset {
-  @tracked '_changes': Changes;
-  @tracked '_errors': Errors<any>;
-  @tracked '_content': object;
+  @tracked
+  '_changes': Changes;
+  @tracked
+  '_errors': Errors<any>;
+  @tracked
+  '_content': object;
 
   getDeep = safeGet as any;
 
