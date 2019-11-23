@@ -25,11 +25,11 @@ const defaultValidatorFn = () => true;
 
 class EmberChangeset extends BufferedChangeset {
   @tracked
-  '_changes': Changes;
+  CHANGES: Changes = {};
   @tracked
-  '_errors': Errors<any>;
+  ERRORS: Errors<any> = {};
   @tracked
-  '_content': object;
+  CONTENT: object | undefined;
 
   getDeep = safeGet as any;
 
