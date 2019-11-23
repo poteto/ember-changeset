@@ -27,6 +27,7 @@
   "bugs": "https://github.com/poteto/ember-changeset/issues",
   "homepage": "https://github.com/poteto/ember-changeset",
   "dependencies": {
+    "ember-cli-babel": "^7.13.0",
     "ember-cli-typescript": "2.0.2",
     "ember-deep-set": "^0.2.0"
   },
@@ -45,7 +46,6 @@
     "broccoli-asset-rev": "^3.0.0",
     "ember-auto-import": "^1.5.2",
     "ember-cli": "~3.14.0",
-    "ember-cli-babel": "^7.13.0",
     "ember-cli-dependency-checker": "^2.0.0",
     "ember-cli-eslint": "^5.1.0",
     "ember-cli-htmlbars": "^4.0.5",
