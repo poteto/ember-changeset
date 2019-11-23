@@ -471,10 +471,7 @@ export class BufferedChangeset implements IChangeset {
    *
    * @method addError
    */
-  addError<T> (
-    key: string,
-    error: IErr<T> | ValidationErr
-  ): IErr<T> | ValidationErr {
+  addError<T>(key: string, error: IErr<T> | ValidationErr) {
     // Construct new `Err` instance.
     let newError;
     if (isObject(error) && !Array.isArray(error)) {

@@ -40,10 +40,9 @@ class EmberChangeset extends BufferedChangeset {
    *
    * @method addError
    */
-  addError<T> (
-    key: string,
-    error: IErr<T> | ValidationErr
-  ): IErr<T> | ValidationErr {
+  addError<T>(key: string, error: IErr<T>): IErr<T>
+  addError(key: string, error: ValidationErr): ValidationErr
+  addError<T>(key: string, error: IErr<T> | ValidationErr) {
     super.addError(key, error);
 
     notifyPropertyChange(this, ERRORS);
