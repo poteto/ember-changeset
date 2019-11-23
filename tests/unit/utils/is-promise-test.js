@@ -1,12 +1,11 @@
 import isPromise from 'ember-changeset/utils/is-promise';
-import { Promise, resolve } from 'rsvp';
 import { module, test } from 'qunit';
 
 module('Unit | Utility | is promise');
 
 let testData = [
   {
-    value: resolve('foo'),
+    value: Promise.resolve('foo'),
     expected: true
   },
   {

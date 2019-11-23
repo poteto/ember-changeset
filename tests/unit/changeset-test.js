@@ -10,7 +10,6 @@ import EmberObject, {
 
 import { reads } from '@ember/object/computed';
 import ObjectProxy from '@ember/object/proxy';
-import { Promise, resolve } from 'rsvp';
 import { dasherize } from '@ember/string';
 import { isPresent, typeOf } from '@ember/utils';
 import { next } from '@ember/runloop';
@@ -28,7 +27,7 @@ let dummyValidations = {
     return isPresent(newValue) && (changedPassword === newValue || password === newValue) || "password doesn't match";
   },
   async(value) {
-    return resolve(value);
+    return Promise.resolve(value);
   },
   options(value) {
     return isPresent(value);
@@ -54,7 +53,7 @@ module('Unit | Utility | changeset', function(hooks) {
   hooks.beforeEach(function() {
     let Dummy = EmberObject.extend({
       save() {
-        return resolve(this);
+        return Promise.resolve(this);
       }
     });
     dummyModel = Dummy.create({ exampleArray });
@@ -755,7 +754,7 @@ module('Unit | Utility | changeset', function(hooks) {
     set(dummyModel, 'save', (dummyOptions) => {
       result = 'ok';
       options = dummyOptions;
-      return resolve('saveResult');
+      return Promise.resolve('saveResult');
     });
     let dummyChangeset = new Changeset(dummyModel);
     dummyChangeset.set('name', 'foo');
@@ -802,7 +801,7 @@ module('Unit | Utility | changeset', function(hooks) {
     assert.expect(1);
 
     set(dummyModel, 'save', () => {
-      return new Promise((resolve, reject) => {
+      return new Promise((_, reject) => {
         next(null, reject, new Error('some ember data error'));
       });
     });
@@ -1497,7 +1496,7 @@ module('Unit | Utility | changeset', function(hooks) {
 
   test('isValidating returns false when validations have resolved', async function(assert) {
     let dummyChangeset;
-    let _validator = () => resolve(true);
+    let _validator = () => Promise.resolve(true);
     let _validations = {
       reservations() {
         return _validator();
@@ -1564,7 +1563,7 @@ module('Unit | Utility | changeset', function(hooks) {
 
   test('afterValidation event is fired after validation', async function(assert) {
     let dummyChangeset;
-    let _validator = () => resolve(true);
+    let _validator = () => Promise.resolve(true);
     let _validations = {
       reservations() {
         return _validator();
@@ -1582,7 +1581,7 @@ module('Unit | Utility | changeset', function(hooks) {
 
   test('afterValidation event is triggered with the key', async function(assert) {
     let dummyChangeset;
-    let _validator = () => resolve(true);
+    let _validator = () => Promise.resolve(true);
     let _validations = {
       reservations() {
         return _validator();
@@ -1608,7 +1607,7 @@ module('Unit | Utility | changeset', function(hooks) {
 
   test('afterRollback event is fired after rollback', async function(assert) {
     let dummyChangeset;
-    let _validator = () => resolve(true);
+    let _validator = () => Promise.resolve(true);
     let _validations = {
       reservations() {
         return _validator();

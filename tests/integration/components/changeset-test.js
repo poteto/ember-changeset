@@ -1,6 +1,5 @@
 import { module, test, skip } from 'qunit';
 import { setupRenderingTest } from 'ember-qunit';
-import { resolve } from 'rsvp';
 import { typeOf, isPresent } from '@ember/utils';
 import Changeset from 'ember-changeset';
 import hbs from 'htmlbars-inline-precompile';
@@ -329,7 +328,7 @@ module('Integration | Helper | changeset', function(hooks) {
 
   skip('nested object updates when set with async validator', async function(assert) {
     let data = { person: { firstName: 'Jim' } };
-    let validator = () => resolve(true);
+    let validator = () => Promise.resolve(true);
     let c = new Changeset(data, validator);
     this.set('c', c);
      await render(hbs`
@@ -494,7 +493,7 @@ module('Integration | Helper | changeset', function(hooks) {
   });
 
   test('it handles models that are promises', async function(assert) {
-    this.set('dummyModel', resolve({ firstName: 'Jim', lastName: 'Bob' }));
+    this.set('dummyModel', Promise.resolve({ firstName: 'Jim', lastName: 'Bob' }));
     await render(hbs`
       {{#with (changeset dummyModel) as |changesetObj|}}
         <h1>{{changesetObj.firstName}} {{changesetObj.lastName}}</h1>
