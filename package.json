@@ -27,7 +27,7 @@
   "bugs": "https://github.com/poteto/ember-changeset/issues",
   "homepage": "https://github.com/poteto/ember-changeset",
   "dependencies": {
-    "@glimmer/component": "^1.0.0-beta.3",
+    "@glimmer/tracking": "^0.14.0-alpha.1",
     "ember-cli-babel": "^7.13.0",
     "ember-cli-typescript": "2.0.2",
     "ember-deep-set": "^0.2.0"
