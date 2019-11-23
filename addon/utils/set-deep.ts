@@ -63,6 +63,6 @@ function isObject(val: unknown) {
   return val !== null && (typeof val === 'object' || typeof val === 'function');
 }
 
-function isPlainObject(o: unknown) {
+function isPlainObject(o: unknown): o is object {
   return Object.prototype.toString.call(o) === '[object Object]';
 }
