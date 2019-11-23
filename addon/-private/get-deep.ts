@@ -1,5 +1,10 @@
-export default function getDeep<T extends object>(root: T, path: string | string[]): any {
-  let obj: any = root;
+/**
+ * Handles both single key or nested string keys ('person.name')
+ *
+ * @method getDeep
+ */
+export default function getDeep<T extends Record<string, any>>(root: T, path: string | string[]): any {
+  let obj: T = root;
 
   if (path.indexOf('.') === -1) {
     return obj[path as string];
