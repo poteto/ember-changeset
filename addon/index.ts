@@ -1,6 +1,7 @@
 import { assert } from '@ember/debug';
 import { BufferedChangeset } from './-private/validated-changeset';
 import { notifyPropertyChange } from '@ember/object';
+// @ts-ignore
 import { tracked } from '@glimmer/tracking';
 import { get as safeGet, set as safeSet } from '@ember/object';
 import mergeDeep from 'ember-changeset/utils/merge-deep';
