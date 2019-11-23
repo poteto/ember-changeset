@@ -474,10 +474,12 @@ export class BufferedChangeset implements IChangeset {
   addError<T>(key: string, error: IErr<T> | ValidationErr) {
     // Construct new `Err` instance.
     let newError;
-    if (isObject(error) && !Array.isArray(error)) {
+
+    const isIErr = <T>(error: unknown): error is IErr<T> => isObject(error) && !Array.isArray(error);
+    if (isIErr(error)) {
       assert('Error must have value.', error.hasOwnProperty('value'));
       assert('Error must have validation.', error.hasOwnProperty('validation'));
-      newError = new Err((<IErr<T>>error).value, (<IErr<T>>error).validation);
+      newError = new Err(error.value, error.validation);
     } else {
       let value = this[key];
       newError = new Err(value, (<ValidationErr>error));
