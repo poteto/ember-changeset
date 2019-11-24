@@ -13,8 +13,6 @@ export default class Notifier<T extends any[]>{
   }
 
   removeListener(callback: (...args: T) => void) {
-    this.listeners;
-
     for (let i = 0; i < this.listeners.length; i++) {
       if (this.listeners[i] === callback) {
         this.listeners.splice(i, 1);
