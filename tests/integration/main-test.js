@@ -34,7 +34,7 @@ module('Integration | main', function(hooks) {
 
     assert.equal(changeset.get('profile.firstName'), 'Grace', 'has firstName after set');
     assert.equal(changeset.get('profile.nickname'), 'g', 'has nickname after set');
-    assert.equal(changeset.get('profile.lastName'), 'Ross', 'has last name after test');
+    assert.equal(changeset.get('profile.lastName'), 'Ross', 'Ember.set does not change anything');
 
     changeset.execute();
 

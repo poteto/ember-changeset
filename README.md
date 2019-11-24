@@ -443,8 +443,8 @@ get(changeset, 'momentObj.content').format('dddd'); // => "Friday"
 Exactly the same semantics as `Ember.set`. This stores the change on the changeset.
 
 ```js
-set(changeset, 'firstName', 'Milton'); // "Milton"
-set(changeset, 'address.zipCode', '10001'); // "10001"
+changeset.set('firstName', 'Milton'); // "Milton"
+changeset.set('address.zipCode', '10001'); // "10001"
 ```
 
 You can use and bind this property in the template:
@@ -879,7 +879,7 @@ export default Component.extend({
     let snapshot = changeset.snapshot();
 
     // valuePath is the property on the changeset, e.g. firstName
-    set(changeset, valuePath, value);
+    changeset.set(valuePath, value);
 
     if (!changeset.get(`error.${valuePath}`)) {
       set(this, 'hasError', false);
@@ -898,7 +898,7 @@ export default Component.extend({
      * @param {Object} e
      */
     validateProperty(changeset, valuePath, e) {
-      set(changeset, valuePath, e.target.value);
+      changeset.set(valuePath, e.target.value);
 
       if (changeset.get(`error.${valuePath}`)) {
         set(this, 'hasError', true);
