@@ -357,6 +357,39 @@ module('Unit | Utility | changeset', function(hooks) {
     assert.deepEqual(changes, expectedChanges, 'should add change');
   });
 
+  test('#set Ember.set works', async function(assert) {
+    let expectedChanges = [{ key: 'name', value: 'foo' }];
+    let dummyChangeset = new Changeset(dummyModel);
+    set(dummyChangeset, 'name', 'foo');
+
+    assert.equal(dummyModel.name, undefined, 'should keep change');
+    assert.equal(dummyChangeset.get('name'), 'foo', 'should have new change');
+
+    let changes = get(dummyChangeset, 'changes');
+    assert.deepEqual(changes, expectedChanges, 'should add change');
+
+    dummyChangeset.execute();
+
+    assert.equal(dummyModel.name, 'foo', 'should be applied');
+    assert.equal(dummyChangeset.get('name'), 'foo', 'should have new change');
+  });
+
+  test('#set Ember.set doesnt work for nested', async function(assert) {
+    set(dummyModel, 'name', {});
+    let dummyChangeset = new Changeset(dummyModel);
+    set(dummyChangeset, 'name.short', 'foo');
+
+    assert.equal(dummyChangeset.get('name.short'), 'foo', 'should have new change');
+    assert.deepEqual(dummyModel.name.short, 'foo', 'has property on moel already before execute');
+
+    let changes = get(dummyChangeset, 'changes');
+    assert.deepEqual(changes, [], 'no changes with nested key Ember.set');
+
+    dummyChangeset.execute();
+
+    assert.equal(dummyModel.name.short, 'foo', 'still has property');
+  });
+
   test('#set adds a change if the key is an object', async function(assert) {
     set(dummyModel, 'org', {
       usa: {

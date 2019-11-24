@@ -440,7 +440,7 @@ get(changeset, 'momentObj.content').format('dddd'); // => "Friday"
 
 #### `set`
 
-Exactly the same semantics as `Ember.set`. This stores the change on the changeset.
+Exactly the same semantics as `Ember.set`. This stores the change on the changeset. It is recommended to use `changeset.set(...)` instead of `Ember.set(changeset, ...)`.  `Ember.set` will set the property for nested keys on the underlying model.
 
 ```js
 changeset.set('firstName', 'Milton'); // "Milton"

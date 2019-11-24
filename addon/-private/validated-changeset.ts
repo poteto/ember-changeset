@@ -201,6 +201,7 @@ export class BufferedChangeset implements IChangeset {
 
   /**
    * Stores change on the changeset.
+   * This approximately works just like the Ember API
    *
    * @method setUnknownProperty
    */
