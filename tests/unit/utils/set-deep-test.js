@@ -1,5 +1,5 @@
 import setDeep from 'ember-changeset/utils/set-deep';
-import { module, test } from 'ember-qunit';
+import { module, test } from 'qunit';
 
 module('Unit | Utility | set deep', () => {
   test('it sets value', async function(assert) {

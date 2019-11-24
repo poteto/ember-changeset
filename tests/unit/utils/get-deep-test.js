@@ -1,5 +1,5 @@
 import getDeep from 'ember-changeset/utils/get-deep';
-import { module, test } from 'ember-qunit';
+import { module, test } from 'qunit';
 
 module('Unit | Utility | get deep', () => {
   test('it returns value', async function(assert) {

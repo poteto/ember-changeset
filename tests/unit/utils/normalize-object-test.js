@@ -1,5 +1,5 @@
 import normalizeObject from 'ember-changeset/utils/normalize-object';
-import { module, test } from 'ember-qunit';
+import { module, test } from 'qunit';
 
 module('Unit | Utility | normalize object', () => {
   test('it returns value', async function(assert) {
