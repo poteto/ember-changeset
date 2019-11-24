@@ -44,11 +44,7 @@ export default function setDeep(target: any, path: string, value: unknown): any 
 
 // to avoid overwriting child keys of leaf node
 function result(target: any, path: string, value: unknown) {
-  if (isPlainObject(target[path]) && isPlainObject(value)) {
-    target[path] = { ...target[path], ...value };
-  } else {
-    target[path] = value;
-  }
+  target[path] = value;
 }
 
 function split(path: string): string[] {
@@ -65,6 +61,6 @@ function isObject(val: unknown) {
   return val !== null && (typeof val === 'object' || typeof val === 'function');
 }
 
-function isPlainObject(o: unknown): o is object {
-  return Object.prototype.toString.call(o) === '[object Object]';
-}
+// function isPlainObject(o: unknown): o is object {
+//   return Object.prototype.toString.call(o) === '[object Object]';
+// }

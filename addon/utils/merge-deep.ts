@@ -1,3 +1,5 @@
+import Change from '../-private/change';
+
 interface Options {
   safeGet: any
   safeSet: any
@@ -98,7 +100,7 @@ function mergeTargetAndSource(target: any, source: any, options: Options): any {
       target[key] = mergeDeep(options.safeGet(target, key), options.safeGet(source, key), options);
     } else {
       let next = source[key];
-      if (next && next.value) {
+      if (next && next instanceof Change) {
         return target[key] = next.value;
       }
 
