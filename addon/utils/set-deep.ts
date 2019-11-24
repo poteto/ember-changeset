@@ -1,4 +1,5 @@
 import Change from '../-private/change';
+
 /**
  * TODO: consider
  * https://github.com/emberjs/ember.js/blob/822452c4432620fc67a777aba3b150098fd6812d/packages/%40ember/-internals/metal/lib/property_set.ts

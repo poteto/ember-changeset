@@ -46,7 +46,7 @@ function propertyIsUnsafe(target: any, key: string): Boolean {
 
 /**
  * DFS - traverse depth first until find object with `value`.  Then go back up tree and try on next key
- * need to exhaust all possible avenues.
+ * Need to exhaust all possible avenues.
  *
  * @method buildPathToValue
  */
@@ -56,7 +56,6 @@ function buildPathToValue(source: any, options: Options, kv: Record<string, any>
     if (possible && possible.hasOwnProperty('value')) {
       possibleKeys.push(key);
       kv[possibleKeys.join('.')] = possible.value;
-      // reset
       return;
     }
 
@@ -72,15 +71,16 @@ function buildPathToValue(source: any, options: Options, kv: Record<string, any>
 /**
  * `source` will always have a leaf key `value` with the property we want to set
  *
- * @method mergeObject
+ * @method mergeTargetAndSource
  */
-function mergeObject(target: any, source: any, options: Options): any {
+function mergeTargetAndSource(target: any, source: any, options: Options): any {
   getKeys(source).forEach(key => {
     // proto poisoning.  So can set by nested key path 'person.name'
     if (propertyIsUnsafe(target, key)) {
       // if safeSet, we will find keys leading up to value and set
       if (options.safeSet) {
         const kv: Record<string, any> = buildPathToValue(source, options, {}, []);
+        // each key will be a path nested to the value `person.name.other`
         if (Object.keys(kv).length > 0) {
           // we found some keys!
           for (key in kv) {
@@ -97,7 +97,13 @@ function mergeObject(target: any, source: any, options: Options): any {
     if (propertyIsOnObject(target, key) && isMergeableObject(source[key]) && !source[key].hasOwnProperty('value')) {
       target[key] = mergeDeep(options.safeGet(target, key), options.safeGet(source, key), options);
     } else {
-      return target[key] = source[key].value;
+      let next = source[key];
+      if (next && next.value) {
+        return target[key] = next.value;
+      }
+
+      // if just some normal leaf value, then set
+      return target[key] = next;
     }
   });
 
@@ -125,6 +131,6 @@ export default function mergeDeep(target: any, source: any, options: Options = {
   } else if (sourceIsArray) {
     return source;
   } else {
-    return mergeObject(target, source, options);
+    return mergeTargetAndSource(target, source, options);
   }
 }
