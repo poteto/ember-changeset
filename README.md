@@ -15,7 +15,7 @@ ember install ember-changeset
 
 ## Updates
 
-We have released `v2.0.0`.  This includes a solution for deeply nested sets with one big caveat.  Some history - Post v1.3.0, there was an elegant solution proposed and implemented for deeply nested sets - e.g. `changeset.set('profile.name', 'myname')`.  However, this caused many issues and was reverted in v2.0.0-beta.  Since `ember-changeset` relies on [Proxy](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Proxy) like behaviour, we are able to trap `changeset.set(...` and properly handle nested sets.  This, however, is a problem in templates where `mut changeset.profile.name` is implicitly `set(changeset, 'profile.name')`, thus subverting our trap.  This is the caveat with the v2.0.0 release.  Although it is an improvement over v1.3.0 and should be 1-1 behaviour if you are setting at a single level - e.g. `mut changeset.name` -, nested setters don't have an ideal solution.  So we are releasing v2.0.0 with this caveat and adding a `changeset-set` template helper.  This is a work in progress.
+We have released `v3.0.0`.  This requires Ember >= 3.13 as the use of `@tracked` will help us monitor and propagate changes to the UI layer.  If your app is < 3.13, the you can install the 2.0 series `ember install ember-changeset@v2.2.4`.
 
 ## Philosophy
 
