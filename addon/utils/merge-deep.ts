@@ -112,8 +112,6 @@ function mergeObject(target: any, source: any, options: Options): any {
  * to handle properties on Proxy objects (that aren't the target's own property)
  *
  * @method mergeDeep
- * @param target
- * @param source
  */
 export default function mergeDeep(target: any, source: any, options: Options = { safeGet: undefined, safeSet: undefined }): object | [any] {
   options.safeGet = options.safeGet || function (obj: any, key: string): any { return obj[key] };

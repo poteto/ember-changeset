@@ -1316,8 +1316,8 @@ module('Unit | Utility | changeset', function(hooks) {
 
     assert.ok(get(dummyChangeset, 'isInvalid'), 'should be invalid');
     assert.equal(get(dummyChangeset, 'error.email.localPart.validation'), 'Cannot contain +', 'should add the error');
-    // dummyChangeset.set('email.localPart', 'ok');
-    // assert.ok(get(dummyChangeset, 'isValid'), 'should be valid');
+    dummyChangeset.set('email.localPart', 'ok');
+    assert.ok(get(dummyChangeset, 'isValid'), 'should be valid');
   });
 
   test('#addError adds an array of errors to the changeset', async function(assert) {
