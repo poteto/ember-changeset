@@ -48,7 +48,7 @@
     "ember-cli": "~3.14.0",
     "ember-cli-dependency-checker": "^3.1.0",
     "ember-cli-eslint": "^5.1.0",
-    "ember-cli-htmlbars": "^4.0.5",
+    "ember-cli-htmlbars": "^4.0.7",
     "ember-cli-inject-live-reload": "^2.0.1",
     "ember-cli-release": "^1.0.0-beta.2",
     "ember-cli-shims": "^1.2.0",
