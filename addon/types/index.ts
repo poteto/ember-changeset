@@ -81,12 +81,6 @@ export interface ChangesetDef {
   isInvalid: boolean,
   isDirty: boolean,
 
-  // _super: <T>(...args: Array<T>) => void,
-  // notifyPropertyChange: (s: string) => void,
-  // trigger: (k: string, v?: string | void) => void,
-  // init: () => void,
-  // unknownProperty: (s: string) => any,
-  // setUnknownProperty: <T>(key: string, value: T) => (T | IErr<T> | Promise<T> | Promise<ValidationResult | T | IErr<T>> | ValidationResult),
   get: (key: string) => any,
   set: <T>(key: string, value: T) => (void | T | IErr<T> | Promise<T> | Promise<ValidationResult | T | IErr<T>> | ValidationResult),
   getDeep: any;
