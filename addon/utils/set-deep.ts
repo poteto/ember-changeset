@@ -20,9 +20,10 @@ export default function setDeep(target: any, path: string, value: unknown): any 
   for (let i = 0; i < keys.length; i++) {
     let prop = keys[i];
 
-    if (!isObject(target[prop])) {
+    const obj = isObject(target[prop]);
+    if (!obj) {
       target[prop] = {};
-    } else if (isObject(target[prop]) && target[prop] instanceof Change) {
+    } else if (obj && target[prop] instanceof Change) {
       // we don't want to merge new changes with a Change instance higher up in the obj tree
       target[prop] = {};
     }
