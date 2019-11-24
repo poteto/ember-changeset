@@ -15,7 +15,6 @@ import isPromise from 'ember-changeset/utils/is-promise';
 import mergeNested from 'ember-changeset/utils/merge-nested';
 import objectWithout from 'ember-changeset/utils/object-without';
 import take from 'ember-changeset/utils/take';
-import validateNestedObj from 'ember-changeset/utils/validate-nested-obj';
 import mergeDeep from 'ember-changeset/utils/merge-deep';
 import setDeep from 'ember-changeset/utils/set-deep';
 import getDeep from 'ember-changeset/utils/get-deep';
@@ -261,7 +260,6 @@ export class BufferedChangeset implements IChangeset {
     let preparedChanges = prepareChangesFn(changes);
 
     assert('Callback to `changeset.prepare` must return an object', isObject(preparedChanges));
-    validateNestedObj('preparedChanges', preparedChanges);
 
     let newObj: Changes = {};
     let newChanges: Changes = keys(preparedChanges).reduce((newObj: Changes, key: keyof Changes) => {
@@ -552,9 +550,6 @@ export class BufferedChangeset implements IChangeset {
    * @method restore
    */
   restore({ changes, errors }: Snapshot): IChangeset {
-    validateNestedObj('snapshot.changes', changes);
-    validateNestedObj('snapshot.errors',  errors);
-
     let newChanges: Changes = keys(changes).reduce((newObj: Changes, key: keyof Changes) => {
       newObj[key] = new Change(changes[key]);
       return newObj;
