@@ -145,6 +145,7 @@ export function changeset(
   options: Config = {}
 ) {
   assert('Underlying object for changeset is missing', Boolean(obj));
+  assert('Array is not a valid type to pass as the first argument to `changeset`', !Array.isArray(obj));
 
   const c = new EmberChangeset(obj, validateFn, validationMap, options);
 

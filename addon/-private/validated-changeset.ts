@@ -52,7 +52,7 @@ const defaultOptions = { skipValidate: false };
 
 export class BufferedChangeset implements IChangeset {
   constructor(
-    obj: any,
+    obj: object,
     public validateFn: ValidatorAction = defaultValidatorFn,
     public validationMap: ValidatorMap = {},
     options: Config = {}
