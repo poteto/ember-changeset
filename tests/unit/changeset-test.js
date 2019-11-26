@@ -409,6 +409,36 @@ module('Unit | Utility | changeset', function(hooks) {
     assert.deepEqual(changes, expectedChanges, 'should add change');
   });
 
+  test('#set use native setters with nested doesnt work', async function(assert) {
+    set(dummyModel, 'org', {
+      usa: {
+        ny: 'ny',
+      }
+    });
+
+    let c = new Changeset(dummyModel);
+    c.org.usa.ny = 'foo';
+
+    assert.equal(dummyModel.org.usa.ny, 'foo', 'change applied to model');
+    assert.equal(c.get('org.usa.ny'), 'foo', 'should have new change');
+
+    let changes = get(c, 'changes');
+    assert.deepEqual(changes, [], 'no changes');
+  });
+
+  test('#set use native setters at single level', async function(assert) {
+    dummyModel.org = 'ny';
+
+    let c = new Changeset(dummyModel);
+    c.org = 'foo';
+
+    assert.equal(dummyModel.org, 'ny', 'should keep change');
+    assert.equal(c.org, 'foo', 'should have new change');
+
+    let changes = get(c, 'changes');
+    assert.deepEqual(changes, [{ key: 'org', value: 'foo' }], 'should add change');
+  });
+
   test('#set adds a change if value is an object', async function(assert) {
     class Moment {
       constructor(date) {
