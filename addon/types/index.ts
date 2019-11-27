@@ -1,15 +1,15 @@
+import IEvented, { INotifier } from 'ember-changeset/types/evented';
 import {
   ValidationErr,
   ValidationResult,
 } from 'ember-changeset/types/validation-result';
-import { ValidatorAction, ValidatorMapFunc, ValidatorMap } from 'ember-changeset/types/validator-func';
+import { ValidatorAction, ValidatorMapFunc, ValidatorMap } from 'ember-changeset/types/validator-action';
 
+export { IEvented, INotifier };
 export { ValidatorAction, ValidatorMapFunc, ValidatorMap };
 export { ValidationErr, ValidationResult };
 import { Config } from 'ember-changeset/types/config';
 export { Config };
-
-import ComputedProperty from '@ember/object/computed';
 
 export interface IChange {
   value: any
@@ -57,18 +57,10 @@ export type Snapshot = {
   errors:  { [s: string]: IErr<any> },
 };
 
-export type Inflated<T> = {
-  [s: string]: Inflated<T> | T,
-};
-
 export type PrepareChangesFn = (obj: ({ [s: string]: any })) => ({ [s: string]: any })
 
-interface Any {
-  [s: string]: any
-}
-
-export interface ChangesetDef extends Any {
-  __changeset__: '__CHANGESET__',
+export interface ChangesetDef {
+  __changeset__: string,
 
   _content: object,
   _changes: Changes,
@@ -78,27 +70,23 @@ export interface ChangesetDef extends Any {
   _runningValidations: RunningValidations,
   _bareChanges: { [s: string]: any },
 
-  changes: ComputedProperty<object[], object[]>,
-  errors: ComputedProperty<object[], object[]>,
-  change: Inflated<any>,
-  error: Inflated<IErr<any>>,
+  changes: any, // { key: string; value: any; }[], //ComputedProperty<object[], object[]>,
+  errors: { key: string; value: any; }[], //ComputedProperty<object[], object[]>,
+  error: object,
+  change: object,
   data: object,
 
-  isValid: ComputedProperty<boolean, boolean>,
-  isPristine: ComputedProperty<boolean, boolean>,
-  isInvalid: ComputedProperty<boolean, boolean>,
-  isDirty: ComputedProperty<boolean, boolean>,
+  isValid: boolean,
+  isPristine: boolean,
+  isInvalid: boolean,
+  isDirty: boolean,
 
-  _super: <T>(...args: Array<T>) => void,
-  notifyPropertyChange: (s: string) => void,
-  trigger: (k: string, v?: string | void) => void,
-  init: () => void,
-  unknownProperty: (s: string) => any,
-  setUnknownProperty: <T>(key: string, value: T) => (T | IErr<T> | Promise<T> | Promise<ValidationResult | T | IErr<T>> | ValidationResult),
   get: (key: string) => any,
   set: <T>(key: string, value: T) => (void | T | IErr<T> | Promise<T> | Promise<ValidationResult | T | IErr<T>> | ValidationResult),
-  toString: () => string,
-  prepare: PrepareChangesFn,
+  getDeep: any;
+  setDeep: any;
+  safeGet: (obj: any, key: string) => any,
+  prepare(preparedChangedFn: PrepareChangesFn): ChangesetDef,
   execute: () => ChangesetDef,
   save: (options: object) => Promise<ChangesetDef | any>,
   merge: (changeset: ChangesetDef) => ChangesetDef,
@@ -116,7 +104,9 @@ export interface ChangesetDef extends Any {
   _setProperty: <T>(obj: NewProperty<T>) => void,
   _setIsValidating: (key: string, value: boolean) => void,
   _valueFor: (s: string) => any,
-  _notifyVirtualProperties: (keys?: string[]) => void,
+  _notifyVirtualProperties: (keys?: string[]) => string[] | undefined,
   _rollbackKeys: () => Array<string>,
-  _deleteKey: (objName: InternalMapKey, key: string) => void
+  _deleteKey: (objName: InternalMapKey, key: string) => InternalMap
 };
+
+export interface IChangeset extends ChangesetDef, IEvented {}

@@ -32,26 +32,29 @@ module('Integration | main', function(hooks) {
     changeset.set('profile.nickname', 'g');
     set(changeset, 'profile.lastName', 'Hopper');
 
-    assert.equal(changeset.get('profile.firstName'), 'Grace');
-    assert.equal(changeset.get('profile.nickname'), 'g');
-    assert.equal(changeset.get('profile.lastName'), 'Hopper');
+    assert.equal(changeset.get('profile.firstName'), 'Grace', 'has firstName after set');
+    assert.equal(changeset.get('profile.nickname'), 'g', 'has nickname after set');
+    assert.equal(changeset.get('profile.lastName'), 'Ross', 'Ember.set does not change anything');
 
     changeset.execute();
 
-    assert.equal(user.get('profile.firstName'), 'Grace');
-    assert.equal(user.get('profile.lastName'), 'Hopper');
-    assert.equal(user.get('profile.nickname'), 'g');
+    assert.equal(user.get('profile.firstName'), 'Grace', 'firstName after execute');
+    assert.equal(user.get('profile.lastName'), 'Ross', 'lastName after execute');
+    assert.equal(user.get('profile.nickname'), 'g', 'nickname after execute');
 
     let profile;
     profile = await this.store.createRecord('profile', { firstName: 'Terry', lastName: 'Bubblewinkles', nickname: 't' });
 
     changeset.set('profile', profile);
 
-    assert.equal(changeset.get('profile').get('firstName'), 'Terry');
-    assert.equal(changeset.get('profile').get('lastName'), 'Bubblewinkles');
-    assert.equal(changeset.get('profile.firstName'), 'Terry');
-    assert.equal(changeset.get('profile.lastName'), 'Bubblewinkles');
-    assert.equal(changeset.get('profile.nickname'), 't');
+    assert.equal(changeset.get('profile').get('firstName'), 'Terry', 'firstName after set');
+    assert.equal(changeset.get('profile').get('lastName'), 'Bubblewinkles', 'lastName after set');
+    assert.equal(changeset.get('profile.firstName'), 'Terry', 'firstName after set nested');
+    assert.equal(changeset.profile.firstName, 'Terry', 'firstName after set nested');
+    assert.equal(changeset.get('profile.lastName'), 'Bubblewinkles', 'lastName after set nested');
+    assert.equal(changeset.profile.lastName, 'Bubblewinkles', 'lastName after set nested');
+    assert.equal(changeset.get('profile.nickname'), 't', 'nickname after set nested');
+    assert.equal(changeset.profile.nickname, 't', 'nickname after set nested');
 
     changeset.execute();
 
