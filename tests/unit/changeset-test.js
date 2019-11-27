@@ -82,7 +82,11 @@ module('Unit | Utility | changeset', function(hooks) {
     dummyChangeset.set('name', 'a');
 
     assert.deepEqual(dummyChangeset.error, expectedResult, 'should return error object');
+    assert.deepEqual(dummyChangeset.get('error').name, expectedResult.name, 'should return nested error');
+    assert.deepEqual(dummyChangeset.get('error.name'), expectedResult.name, 'should return nested error');
     assert.deepEqual(dummyChangeset.change, { name: 'a' }, 'should return change object');
+    assert.deepEqual(dummyChangeset.get('change.name'), 'a', 'should return nested change');
+    assert.deepEqual(dummyChangeset.get('change').name, 'a', 'should return nested change');
   });
 
   /**

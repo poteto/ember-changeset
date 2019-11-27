@@ -844,31 +844,41 @@ export class BufferedChangeset implements IChangeset {
 
   get(key: string): any {
     // 'person'
-    if (Object.prototype.hasOwnProperty.apply(this[CHANGES], [key])) {
+    // 'person.username'
+    let [baseKey, ...remaining] = key.split('.');
+
+    if (Object.prototype.hasOwnProperty.call(this[CHANGES], baseKey)) {
       let changes: Changes = this[CHANGES];
-      let result = changes[key];
-      if (isObject(result)) {
+      let result;
+
+      if (remaining.length > 0) {
+        let c = changes[baseKey];
+        result = this.getDeep(normalizeObject(c), remaining.join('.'));
+        if (result) {
+          return result;
+        }
+      } else {
+        result = changes[baseKey];
+      }
+
+      if (result && isObject(result)) {
         return normalizeObject(result);
       }
 
-      return result.value;
-    }
-
-    // 'person.username'
-    let [baseKey, ...remaining] = key.split('.');
-    if (Object.prototype.hasOwnProperty.apply(this[CHANGES], [baseKey])) {
-      let changes: Changes = this[CHANGES];
-      let c = changes[baseKey];
-      let result = this.getDeep(normalizeObject(c), remaining.join('.'));
-      // just b/c top level key exists doesn't mean it has the nested key we are looking for
       if (result) {
-        return result;
+        return result.value;
       }
     }
 
     // return getters/setters/methods on BufferedProxy instance
     if (this[key]) {
       return this[key];
+    } else if (this[baseKey]) {
+      const v: unknown = this[baseKey];
+      if (isObject(v)) {
+        const result = this.getDeep(v as Record<string, any>, remaining.join('.'));
+        return result;
+      }
     }
 
     // finally return on underlying object
