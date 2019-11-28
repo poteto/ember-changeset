@@ -1,4 +1,4 @@
-import { module, test, skip } from 'qunit';
+import { module, test } from 'qunit';
 import { setupTest } from 'ember-qunit';
 import { set } from '@ember/object';
 import Changeset from 'ember-changeset';
@@ -88,13 +88,8 @@ module('Integration | main', function(hooks) {
     changeset.save();
   });
 
-  skip('can save belongsTo via changeset', async function(assert) {
-    assert.expect(2);
-
-    let save = () => {
-      assert.ok(true, 'user save was called')
-    }
-    let profile = this.store.createRecord('profile', { save });
+  test('can work with belongsTo via changeset', async function(assert) {
+    let profile = this.store.createRecord('profile');
     this.dummyUser = this.store.createRecord('user', { profile });
 
     let user = this.dummyUser;
@@ -104,9 +99,18 @@ module('Integration | main', function(hooks) {
     profile = changeset.get('profile');
     let profileChangeset = new Changeset(profile);
 
-    assert.equal(profileChangeset.get('firstName'), 'Grace', 'changeset profile firstName is set');
+    assert.equal(profileChangeset.get('firstName'), 'Grace', 'profileChangeset profile firstName is set');
+    assert.equal(changeset.get('profile.firstName'), 'Grace', 'changeset profile firstName is set');
+
     profileChangeset.execute();
-    profileChangeset.save();
+
+    assert.equal(profile.firstName, 'Grace', 'profile has first name');
+    assert.equal(user.get('profile.firstName'), 'Bob', 'user still has profile has first name');
+
+    changeset.execute();
+
+    assert.equal(profile.firstName, 'Grace', 'profile has first name');
+    assert.equal(user.get('profile.firstName'), 'Grace', 'user now has profile has first name');
   });
 
   test('it works for hasMany / firstObject', async function(assert) {
@@ -135,5 +139,21 @@ module('Integration | main', function(hooks) {
 
     dogs = user.get('dogs').toArray();
     assert.equal(dogs.length, 0, 'dogs removed');
+  });
+
+  test('it can rollback hasMany', async function(assert) {
+    let user = this.dummyUser;
+
+    let changeset = new Changeset(user);
+    let newDog = this.store.createRecord('dog', { breed: 'Münsterländer' });
+    changeset.set('dogs', [...changeset.get('dogs').toArray(), newDog]);
+
+    let dogs = changeset.get('dogs');
+    assert.equal(dogs.length, 3, 'changeset has 3 dogs');
+
+    changeset.rollback();
+
+    dogs = changeset.get('dogs');
+    assert.equal(dogs.length, 2, 'changeset has 2 dogs');
   });
 });
