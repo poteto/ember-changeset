@@ -1,4 +1,4 @@
-import { module, test, skip } from 'qunit';
+import { module, test } from 'qunit';
 import { setupRenderingTest } from 'ember-qunit';
 import { typeOf, isPresent } from '@ember/utils';
 import Changeset from 'ember-changeset';
@@ -275,7 +275,7 @@ module('Integration | Helper | changeset', function(hooks) {
     assert.equal(find('h1').textContent.trim(), 'foo bar', 'should update observable value');
   });
 
-  skip('nested object updates when set without a validator', async function(assert) {
+  test('nested object updates when set without a validator', async function(assert) {
     let data = { person: { firstName: 'Jim', lastName: 'Bob' } };
     let changeset = new Changeset(data);
     this.set('changeset', changeset);
@@ -283,10 +283,12 @@ module('Integration | Helper | changeset', function(hooks) {
       <h1>{{changeset.person.firstName}} {{changeset.person.lastName}}</h1>
       <input
         id="first-name"
-        type="text"
         value={{changeset.person.firstName}}
         onchange={{action (changeset-set changeset "person.firstName") value="target.value"}}>
-      {{input id="last-name" value=changeset.person.lastName}}
+      <input
+        id="last-name"
+        value={{changeset.person.lastName}}
+        onchange={{action (changeset-set changeset "person.lastName") value="target.value"}}>
     `);
 
     assert.equal(find('h1').textContent.trim(), 'Jim Bob', 'precondition');
@@ -326,7 +328,7 @@ module('Integration | Helper | changeset', function(hooks) {
     assert.equal(actual, expectedResult, 'hides error message');
   });
 
-  skip('nested object updates when set with async validator', async function(assert) {
+  test('nested object updates when set with async validator', async function(assert) {
     let data = { person: { firstName: 'Jim' } };
     let validator = () => Promise.resolve(true);
     let c = new Changeset(data, validator);
@@ -379,7 +381,7 @@ module('Integration | Helper | changeset', function(hooks) {
     }
   });
 
-  skip('a rollback propagates binding to deeply nested changesets', async function(assert) {
+  test('a rollback propagates binding to deeply nested changesets', async function(assert) {
     let data = { person: { firstName: 'Jim', lastName: 'Bob' } };
     let changeset = new Changeset(data);
     this.set('changeset', changeset);
@@ -388,10 +390,12 @@ module('Integration | Helper | changeset', function(hooks) {
       <h1>{{changeset.person.firstName}} {{changeset.person.lastName}}</h1>
       <input
         id="first-name"
-        type="text"
         value={{changeset.person.firstName}}
         onchange={{action (changeset-set changeset "person.firstName") value="target.value"}}>
-      {{input id="last-name" value=changeset.person.lastName}}
+      <input
+        id="last-name"
+        value={{changeset.person.lastName}}
+        onchange={{action (changeset-set changeset "person.lastName") value="target.value"}}>
       <button id="reset-btn" {{action reset}}>Reset</button>
     `);
 
