@@ -28,7 +28,8 @@
     "start": "ember serve",
     "test": "ember try:each",
     "prepublishOnly": "ember ts:precompile",
-    "postpublish": "ember ts:clean"
+    "postpublish": "ember ts:clean",
+    "contributors": "npx contributor-faces -e \"(*-bot|*\\[bot\\]|*-tomster|homu|bors)\""
   },
   "bugs": "https://github.com/poteto/ember-changeset/issues",
   "homepage": "https://github.com/poteto/ember-changeset",
