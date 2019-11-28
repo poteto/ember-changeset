@@ -36,7 +36,7 @@ module('Integration | Helper | changeset-get', function(hooks) {
         type="text"
         oninput={{action (changeset-set changeset fieldName) value="target.value"}}
         onchange={{action (changeset-set changeset fieldName) value="target.value"}}
-        value={{changeset-get changeset fieldName}}
+        value={{get changeset fieldName}}
       />
       <p id="test-el">{{get changeset fieldName}}</p>
       <ul>
@@ -68,9 +68,9 @@ module('Integration | Helper | changeset-get', function(hooks) {
         type="text"
         oninput={{action (changeset-set changeset fieldName) value="target.value"}}
         onchange={{action (changeset-set changeset fieldName) value="target.value"}}
-        value={{changeset-get changeset fieldName}}
+        value={{get changeset fieldName}}
       />
-      <p id="test-el">{{changeset-get changeset fieldName}}</p>
+      <p id="test-el">{{get changeset fieldName}}</p>
       <ul>
         {{#each (get changeset "changes") as |change|}}
           <li>{{change.key}}: {{change.value}}</li>
