@@ -123,9 +123,9 @@ In the above example, when the input changes, only the changeset's internal valu
 On rollback, all changes are dropped and the underlying Object is left untouched.
 
 ## Changeset template helpers
-`ember-changeset` overrides `set` and `get` in order to handle deeply nested setters.  `mut` is simply an alias for `set(changeset`, thus we provide a `changeset-set` template helper if you are dealing with nested setters.
+`ember-changeset` overrides `set` and `get` in order to handle deeply nested setters.  `mut` is simply an alias for `Ember.set(changeset, ...)`, thus we provide a `changeset-set` template helper if you are dealing with nested setters.
 
-**Removed in 3.0.0 series** `changeset-get`. Unecessary for nested getters if on Ember >= 3.13.
+**Removed** in the 3.0.0 series was `changeset-get`. Unecessary for nested getters if on Ember >= 3.13.
 
 ```hbs
 <form>
