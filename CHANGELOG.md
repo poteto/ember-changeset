@@ -1,9 +1,14 @@
 # Change Log
 
+## [3.0.0-beta.1](https://github.com/poteto/ember-changeset/tree/v3.0.0-beta.1) (2019-11-29)
+[Full Changelog](https://github.com/poteto/ember-changeset/compare/v3.0.0-beta.0...v3.0.0-beta.1)
+
+- Remove changeset-get helper [#382](https://github.com/poteto/ember-changeset/pull/382)
+
 ## [3.0.0-beta.0](https://github.com/poteto/ember-changeset/tree/v3.0.0-beta.0) (2019-11-27)
 [Full Changelog](https://github.com/poteto/ember-changeset/compare/v2.2.4...v3.0.0-beta.0)
 
-- [MAJOR]: rewrite for v3 [#355](https://github.com/poteto/ember-changeset/pull/379)
+- [MAJOR]: rewrite for v3 [#379](https://github.com/poteto/ember-changeset/pull/379)
 
 ## [2.2.4](https://github.com/poteto/ember-changeset/tree/v2.2.0) (2019-11-14)
 [Full Changelog](https://github.com/poteto/ember-changeset/compare/v2.1.3...v2.2.4)
