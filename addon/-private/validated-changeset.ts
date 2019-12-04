@@ -447,21 +447,19 @@ export class BufferedChangeset implements IChangeset {
    * @method validate
    */
   validate(
-    key?: string | undefined
+    ...validationKeys: string[]
   ): Promise<null> | Promise<any | IErr<any>> | Promise<Array<any | IErr<any>>> {
     if (keys(this.validationMap as object).length === 0) {
       return Promise.resolve(null);
     }
 
-    if (!Boolean(key)) {
-      let maybePromise = keys(this.validationMap as object).map(validationKey => {
-        return this._validateKey(validationKey, this._valueFor(validationKey));
-      });
+    validationKeys = validationKeys.length > 0 ? validationKeys : keys(this.validationMap as object);
 
-      return Promise.all(maybePromise);
-    }
+    let maybePromise = validationKeys.map((key) => {
+      return this._validateKey(<string>key, this._valueFor(<string>key))
+    });
 
-    return Promise.resolve(this._validateKey(<string>key, this._valueFor(<string>key)));
+    return Promise.all(maybePromise);
   }
 
   /**
