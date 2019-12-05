@@ -58,27 +58,25 @@ First, create a new `Changeset` using the `changeset` helper or through JavaScri
 ```hbs
 {{! application/template.hbs}}
 {{#with (changeset model (action "validate")) as |changesetObj|}}
-  {{dummy-form
-      changeset=changesetObj
-      submit=(action "submit")
-      rollback=(action "rollback")
-  }}
+  <DummyForm
+      @changeset={{changesetObj}}
+      @submit={{this.submit}}
+      @rollback={{this.rollback}} />
 {{/with}}
 ```
 
 ```js
 import Component from '@ember/component';
-import { get }   from '@ember/object';
 import Changeset from 'ember-changeset';
 
-export default Component.extend({
-  init() {
-    this._super(...arguments);
-    let model = get(this, 'model');
-    let validator = get(this, 'validate');
-    this.changeset = new Changeset(model, validator);
+export default FormComponent extends Component {
+  init(...args) {
+    super.init(...args)
+
+    let validator = this.validate;
+    this.changeset = new Changeset(this.model, validator);
   }
-});
+}
 ```
 
 The helper receives any Object (including `DS.Model`, `Ember.Object`, or even POJOs) and an optional `validator` action. If a `validator` is passed into the helper, the changeset will attempt to call that function when a value changes.
@@ -86,23 +84,25 @@ The helper receives any Object (including `DS.Model`, `Ember.Object`, or even PO
 ```js
 // application/controller.js
 import Controller from '@ember/controller';
+import { action } from '@ember/object';
 
-export default Controller.extend({
-  actions: {
-    submit(changeset) {
-      return changeset.save();
-    },
-
-    rollback(changeset) {
-      return changeset.rollback();
-    },
-
-    validate({ key, newValue, oldValue, changes, content }) {
-      // lookup a validator function on your favorite validation library
-      // should return a Boolean
-    }
+export default class FormController extends Controller {
+  @action
+  submit(changeset) {
+    return changeset.save();
   }
-});
+
+  @action
+  rollback(changeset) {
+    return changeset.rollback();
+  }
+
+  @action
+  validate({ key, newValue, oldValue, changes, content }) {
+    // lookup a validator function on your favorite validation library
+    // should return a Boolean
+  }
+}
 ```
 
 Then, in your favorite form library, simply pass in the `changeset` in place of the original model.
@@ -110,11 +110,11 @@ Then, in your favorite form library, simply pass in the `changeset` in place of 
 ```hbs
 {{! dummy-form/template.hbs}}
 <form>
-  {{input value=changeset.firstName}}
-  {{input value=changeset.lastName}}
+  <Input @value={{changeset.firstName}} />
+  <Input @value={{changeset.lastName}} />
 
-  <button {{action submit changeset}}>Submit</button>
-  <button {{action rollback changeset}}>Cancel</button>
+  <button {{on "click" this.submit changeset}}>Submit</button>
+  <button {{on "click" this.rollback changeset}}>Cancel</button>
 </form>
 ```
 
@@ -577,7 +577,7 @@ user.get('lastName'); // "Bob"
 
 #### `validate`
 
-Validates all or a single field on the changeset. This will also validate the property on the underlying object, and is a useful method if you require the changeset to validate immediately on render.
+Validates all, single or multiple fields on the changeset. This will also validate the property on the underlying object, and is a useful method if you require the changeset to validate immediately on render.
 
 **Note:** This method requires a validation map to be passed in when the changeset is first instantiated.
 
@@ -598,6 +598,8 @@ changeset.get('isValid'); // true
 // validate single field; returns Promise
 changeset.validate('lastName');
 changeset.validate('address.zipCode');
+// multiple keys
+changeset.validate('lastName', 'address.zipCode');
 
 // validate all fields; returns Promise
 changeset.validate().then(() => {
@@ -813,20 +815,20 @@ To use with your favorite validation library, you should create a custom `valida
 ```js
 // application/controller.js
 import Controller from '@ember/controller';
+import { action } from '@ember/object';
 
-export default Controller.extend({
-  actions: {
-    validate({ key, newValue, oldValue, changes, content }) {
-      // lookup a validator function on your favorite validation library
-      // should return a Boolean
-    }
+export default class FormController extends Controller {
+  @action
+  validate({ key, newValue, oldValue, changes, content }) {
+    // lookup a validator function on your favorite validation library
+    // should return a Boolean
   }
-});
+}
 ```
 
 ```hbs
 {{! application/template.hbs}}
-{{dummy-form changeset=(changeset model (action "validate"))}}
+<DummyForm @changeset={{changeset model (action "validate")}} />
 ```
 
 Your action will receive a single POJO containing the `key`, `newValue`, `oldValue`, a one way reference to `changes`, and the original object `content`.
