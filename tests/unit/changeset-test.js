@@ -1269,6 +1269,17 @@ module('Unit | Utility | changeset', function(hooks) {
     assert.equal(get(dummyChangeset, 'errors.length'), 1, 'should only have 1 error');
   });
 
+  test('#validate validates a multiple field immediately', async function(assert) {
+    dummyModel.setProperties({ name: 'J', password: false });
+    let dummyChangeset = new Changeset(dummyModel, dummyValidator, dummyValidations);
+
+    await dummyChangeset.validate('name', 'password');
+    assert.deepEqual(get(dummyChangeset, 'error.name'), { validation: 'too short', value: 'J' }, 'should validate immediately');
+    assert.deepEqual(get(dummyChangeset, 'error.password'), { validation: ['foo', 'bar'], value: false }, 'should validate immediately');
+    assert.deepEqual(get(dummyChangeset, 'changes'), [], 'should not set changes');
+    assert.equal(get(dummyChangeset, 'errors.length'), 2, 'should only have 2 error');
+  });
+
   test('#validate works correctly with changeset values', async function(assert) {
     dummyModel.setProperties({ name: undefined, password: false, async: true, passwordConfirmation: false, options: {}});
     let dummyChangeset = new Changeset(dummyModel, dummyValidator, dummyValidations);
