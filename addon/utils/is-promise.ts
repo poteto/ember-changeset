@@ -1,4 +1,3 @@
-import { typeOf } from '@ember/utils';
 import isObject from './is-object';
 
 function isPromiseLike(obj:any): boolean {
@@ -6,9 +5,9 @@ function isPromiseLike(obj:any): boolean {
     && !!obj.then
     && !!obj.catch
     && !!obj.finally
-    && typeOf(obj.then) === 'function'
-    && typeOf(obj.catch) === 'function'
-    && typeOf(obj.finally) === 'function';
+    && typeof(obj.then) === 'function'
+    && typeof(obj.catch) === 'function'
+    && typeof(obj.finally) === 'function';
 }
 
 export default function isPromise(obj: any): boolean {

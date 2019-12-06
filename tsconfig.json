@@ -4,6 +4,7 @@
     "allowJs": true,
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
+    "experimentalDecorators": true,
     "noImplicitAny": true,
     "noImplicitThis": true,
     "alwaysStrict": true,
@@ -19,6 +20,7 @@
     "inlineSources": true,
     "baseUrl": ".",
     "module": "es6",
+    "skipLibCheck": true,
     "paths": {
       "dummy/tests/*": [
         "tests/*"

@@ -1,5 +1,6 @@
-import { assign } from '@ember/polyfills';
-
+// keep getters and setters
 export default function pureAssign(...objects: object[]): object {
-  return assign({}, ...objects);
+  return objects.reduce((acc, obj) => {
+    return Object.defineProperties(acc, Object.getOwnPropertyDescriptors(obj));
+  }, {});
 }

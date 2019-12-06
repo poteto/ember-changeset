@@ -15,7 +15,7 @@ ember install ember-changeset
 
 ## Updates
 
-We have released `v2.0.0`.  This includes a solution for deeply nested sets with one big caveat.  Some history - Post v1.3.0, there was an elegant solution proposed and implemented for deeply nested sets - e.g. `changeset.set('profile.name', 'myname')`.  However, this caused many issues and was reverted in v2.0.0-beta.  Since `ember-changeset` relies on [Proxy](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Proxy) like behaviour, we are able to trap `changeset.set(...` and properly handle nested sets.  This, however, is a problem in templates where `mut changeset.profile.name` is implicitly `set(changeset, 'profile.name')`, thus subverting our trap.  This is the caveat with the v2.0.0 release.  Although it is an improvement over v1.3.0 and should be 1-1 behaviour if you are setting at a single level - e.g. `mut changeset.name` -, nested setters don't have an ideal solution.  So we are releasing v2.0.0 with this caveat and adding a `changeset-set` template helper.  This is a work in progress.
+We have released `v3.0.0`.  This requires Ember >= 3.13 as the use of `@tracked` will help us monitor and propagate changes to the UI layer.  If your app is < 3.13, the you can install the 2.0 series `ember install ember-changeset@v2.2.4`.
 
 ## Philosophy
 
@@ -58,27 +58,25 @@ First, create a new `Changeset` using the `changeset` helper or through JavaScri
 ```hbs
 {{! application/template.hbs}}
 {{#with (changeset model (action "validate")) as |changesetObj|}}
-  {{dummy-form
-      changeset=changesetObj
-      submit=(action "submit")
-      rollback=(action "rollback")
-  }}
+  <DummyForm
+      @changeset={{changesetObj}}
+      @submit={{this.submit}}
+      @rollback={{this.rollback}} />
 {{/with}}
 ```
 
 ```js
 import Component from '@ember/component';
-import { get }   from '@ember/object';
 import Changeset from 'ember-changeset';
 
-export default Component.extend({
-  init() {
-    this._super(...arguments);
-    let model = get(this, 'model');
-    let validator = get(this, 'validate');
-    this.changeset = new Changeset(model, validator);
+export default FormComponent extends Component {
+  init(...args) {
+    super.init(...args)
+
+    let validator = this.validate;
+    this.changeset = new Changeset(this.model, validator);
   }
-});
+}
 ```
 
 The helper receives any Object (including `DS.Model`, `Ember.Object`, or even POJOs) and an optional `validator` action. If a `validator` is passed into the helper, the changeset will attempt to call that function when a value changes.
@@ -86,23 +84,25 @@ The helper receives any Object (including `DS.Model`, `Ember.Object`, or even PO
 ```js
 // application/controller.js
 import Controller from '@ember/controller';
+import { action } from '@ember/object';
 
-export default Controller.extend({
-  actions: {
-    submit(changeset) {
-      return changeset.save();
-    },
-
-    rollback(changeset) {
-      return changeset.rollback();
-    },
-
-    validate({ key, newValue, oldValue, changes, content }) {
-      // lookup a validator function on your favorite validation library
-      // should return a Boolean
-    }
+export default class FormController extends Controller {
+  @action
+  submit(changeset) {
+    return changeset.save();
   }
-});
+
+  @action
+  rollback(changeset) {
+    return changeset.rollback();
+  }
+
+  @action
+  validate({ key, newValue, oldValue, changes, content }) {
+    // lookup a validator function on your favorite validation library
+    // should return a Boolean
+  }
+}
 ```
 
 Then, in your favorite form library, simply pass in the `changeset` in place of the original model.
@@ -110,11 +110,11 @@ Then, in your favorite form library, simply pass in the `changeset` in place of 
 ```hbs
 {{! dummy-form/template.hbs}}
 <form>
-  {{input value=changeset.firstName}}
-  {{input value=changeset.lastName}}
+  <Input @value={{changeset.firstName}} />
+  <Input @value={{changeset.lastName}} />
 
-  <button {{action submit changeset}}>Submit</button>
-  <button {{action rollback changeset}}>Cancel</button>
+  <button {{on "click" this.submit changeset}}>Submit</button>
+  <button {{on "click" this.rollback changeset}}>Cancel</button>
 </form>
 ```
 
@@ -122,15 +122,17 @@ In the above example, when the input changes, only the changeset's internal valu
 
 On rollback, all changes are dropped and the underlying Object is left untouched.
 
-## Changeset template helper
-`ember-changeset` overrides `set` in order to handle deeply nested setters.  `mut` is simply an alias for `set(changeset`, thus we provide a `changeset-set` template helper if you are dealing with nested setters.
+## Changeset template helpers
+`ember-changeset` overrides `set` and `get` in order to handle deeply nested setters.  `mut` is simply an alias for `Ember.set(changeset, ...)`, thus we provide a `changeset-set` template helper if you are dealing with nested setters.
+
+**Removed** in the 3.0.0 series was `changeset-get`. Unecessary for nested getters if on Ember >= 3.13.
 
 ```hbs
 <form>
   <input
     id="first-name"
     type="text"
-    value={{changeset.person.firstName}}
+    value={{get changeset "person.firstname"}}
     onchange={{action (changeset-set changeset "person.firstName") value="target.value"}}>
 </form>
 ```
@@ -440,11 +442,11 @@ get(changeset, 'momentObj.content').format('dddd'); // => "Friday"
 
 #### `set`
 
-Exactly the same semantics as `Ember.set`. This stores the change on the changeset.
+Exactly the same semantics as `Ember.set`. This stores the change on the changeset. It is recommended to use `changeset.set(...)` instead of `Ember.set(changeset, ...)`.  `Ember.set` will set the property for nested keys on the underlying model.
 
 ```js
-set(changeset, 'firstName', 'Milton'); // "Milton"
-set(changeset, 'address.zipCode', '10001'); // "10001"
+changeset.set('firstName', 'Milton'); // "Milton"
+changeset.set('address.zipCode', '10001'); // "10001"
 ```
 
 You can use and bind this property in the template:
@@ -575,7 +577,7 @@ user.get('lastName'); // "Bob"
 
 #### `validate`
 
-Validates all or a single field on the changeset. This will also validate the property on the underlying object, and is a useful method if you require the changeset to validate immediately on render.
+Validates all, single or multiple fields on the changeset. This will also validate the property on the underlying object, and is a useful method if you require the changeset to validate immediately on render.
 
 **Note:** This method requires a validation map to be passed in when the changeset is first instantiated.
 
@@ -596,6 +598,8 @@ changeset.get('isValid'); // true
 // validate single field; returns Promise
 changeset.validate('lastName');
 changeset.validate('address.zipCode');
+// multiple keys
+changeset.validate('lastName', 'address.zipCode');
 
 // validate all fields; returns Promise
 changeset.validate().then(() => {
@@ -811,20 +815,20 @@ To use with your favorite validation library, you should create a custom `valida
 ```js
 // application/controller.js
 import Controller from '@ember/controller';
+import { action } from '@ember/object';
 
-export default Controller.extend({
-  actions: {
-    validate({ key, newValue, oldValue, changes, content }) {
-      // lookup a validator function on your favorite validation library
-      // should return a Boolean
-    }
+export default class FormController extends Controller {
+  @action
+  validate({ key, newValue, oldValue, changes, content }) {
+    // lookup a validator function on your favorite validation library
+    // should return a Boolean
   }
-});
+}
 ```
 
 ```hbs
 {{! application/template.hbs}}
-{{dummy-form changeset=(changeset model (action "validate"))}}
+<DummyForm @changeset={{changeset model (action "validate")}} />
 ```
 
 Your action will receive a single POJO containing the `key`, `newValue`, `oldValue`, a one way reference to `changes`, and the original object `content`.
@@ -879,7 +883,7 @@ export default Component.extend({
     let snapshot = changeset.snapshot();
 
     // valuePath is the property on the changeset, e.g. firstName
-    set(changeset, valuePath, value);
+    changeset.set(valuePath, value);
 
     if (!changeset.get(`error.${valuePath}`)) {
       set(this, 'hasError', false);
@@ -898,7 +902,7 @@ export default Component.extend({
      * @param {Object} e
      */
     validateProperty(changeset, valuePath, e) {
-      set(changeset, valuePath, e.target.value);
+      changeset.set(valuePath, e.target.value);
 
       if (changeset.get(`error.${valuePath}`)) {
         set(this, 'hasError', true);
@@ -928,6 +932,43 @@ export default Component.extend({
   disabled={{disabled}}
   placeholder={{placeholder}}>
 ```
+
+## Contributors
+
+We're grateful to these wonderful contributors who've contributed to `ember-changeset`:
+
+[//]: contributor-faces
+<a href="https://github.com/poteto"><img src="https://avatars0.githubusercontent.com/u/1390709?v=4" title="poteto" width="80" height="80"></a>
+<a href="https://github.com/snewcomer"><img src="https://avatars0.githubusercontent.com/u/7374640?v=4" title="snewcomer" width="80" height="80"></a>
+<a href="https://github.com/nucleartide"><img src="https://avatars3.githubusercontent.com/u/914228?v=4" title="nucleartide" width="80" height="80"></a>
+<a href="https://github.com/dustinfarris"><img src="https://avatars3.githubusercontent.com/u/1087165?v=4" title="dustinfarris" width="80" height="80"></a>
+<a href="https://github.com/SergeAstapov"><img src="https://avatars1.githubusercontent.com/u/322983?v=4" title="SergeAstapov" width="80" height="80"></a>
+<a href="https://github.com/krishandley"><img src="https://avatars1.githubusercontent.com/u/521598?v=4" title="krishandley" width="80" height="80"></a>
+<a href="https://github.com/martndemus"><img src="https://avatars2.githubusercontent.com/u/903637?v=4" title="martndemus" width="80" height="80"></a>
+<a href="https://github.com/willrax"><img src="https://avatars1.githubusercontent.com/u/94960?v=4" title="willrax" width="80" height="80"></a>
+<a href="https://github.com/bgentry"><img src="https://avatars2.githubusercontent.com/u/114033?v=4" title="bgentry" width="80" height="80"></a>
+<a href="https://github.com/jeffreybiles"><img src="https://avatars2.githubusercontent.com/u/839123?v=4" title="jeffreybiles" width="80" height="80"></a>
+<a href="https://github.com/webark"><img src="https://avatars1.githubusercontent.com/u/852194?v=4" title="webark" width="80" height="80"></a>
+<a href="https://github.com/jelhan"><img src="https://avatars3.githubusercontent.com/u/4965703?v=4" title="jelhan" width="80" height="80"></a>
+<a href="https://github.com/0xadada"><img src="https://avatars2.githubusercontent.com/u/51207?v=4" title="0xadada" width="80" height="80"></a>
+<a href="https://github.com/alexgaribay"><img src="https://avatars2.githubusercontent.com/u/911605?v=4" title="alexgaribay" width="80" height="80"></a>
+<a href="https://github.com/alexspeller"><img src="https://avatars3.githubusercontent.com/u/1217?v=4" title="alexspeller" width="80" height="80"></a>
+<a href="https://github.com/acburdine"><img src="https://avatars2.githubusercontent.com/u/5167581?v=4" title="acburdine" width="80" height="80"></a>
+<a href="https://github.com/bendemboski"><img src="https://avatars3.githubusercontent.com/u/559001?v=4" title="bendemboski" width="80" height="80"></a>
+<a href="https://github.com/baroquon"><img src="https://avatars2.githubusercontent.com/u/4078?v=4" title="baroquon" width="80" height="80"></a>
+<a href="https://github.com/bbtb1982"><img src="https://avatars0.githubusercontent.com/u/696284?v=4" title="bbtb1982" width="80" height="80"></a>
+<a href="https://github.com/bcardarella"><img src="https://avatars0.githubusercontent.com/u/18524?v=4" title="bcardarella" width="80" height="80"></a>
+<a href="https://github.com/Dhaulagiri"><img src="https://avatars1.githubusercontent.com/u/1672302?v=4" title="Dhaulagiri" width="80" height="80"></a>
+<a href="https://github.com/chengz"><img src="https://avatars1.githubusercontent.com/u/960322?v=4" title="chengz" width="80" height="80"></a>
+<a href="https://github.com/makepanic"><img src="https://avatars3.githubusercontent.com/u/1205444?v=4" title="makepanic" width="80" height="80"></a>
+<a href="https://github.com/pangratz"><img src="https://avatars1.githubusercontent.com/u/341877?v=4" title="pangratz" width="80" height="80"></a>
+<a href="https://github.com/dpatz"><img src="https://avatars1.githubusercontent.com/u/1715091?v=4" title="dpatz" width="80" height="80"></a>
+<a href="https://github.com/HeroicEric"><img src="https://avatars0.githubusercontent.com/u/602204?v=4" title="HeroicEric" width="80" height="80"></a>
+<a href="https://github.com/GendelfLugansk"><img src="https://avatars2.githubusercontent.com/u/1709712?v=4" title="GendelfLugansk" width="80" height="80"></a>
+<a href="https://github.com/gordonbisnor"><img src="https://avatars2.githubusercontent.com/u/16955?v=4" title="gordonbisnor" width="80" height="80"></a>
+<a href="https://github.com/ivanvanderbyl"><img src="https://avatars2.githubusercontent.com/u/24278?v=4" title="ivanvanderbyl" width="80" height="80"></a>
+
+[//]: contributor-faces
 
 ## Installation
 

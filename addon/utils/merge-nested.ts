@@ -1,4 +1,4 @@
-import setNestedProperty from 'ember-changeset/utils/set-nested-property';
+import setDeep from './set-deep';
 
 const { keys } = Object;
 
@@ -15,7 +15,7 @@ export default function mergeNested<T>(
 
   objects.forEach(obj =>
     keys(obj).forEach(key =>
-      setNestedProperty(finalObj, key, obj[key])
+      setDeep(finalObj, key, obj[key])
     )
   );
 

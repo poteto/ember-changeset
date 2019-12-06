@@ -1,5 +1,5 @@
 import { helper } from '@ember/component/helper';
-import { ChangesetDef } from 'ember-changeset/types';
+import { IChangeset } from 'ember-changeset/types';
 import isChangeset from 'ember-changeset/utils/is-changeset';
 
 /**
@@ -9,7 +9,7 @@ import isChangeset from 'ember-changeset/utils/is-changeset';
  * @param params
  */
 export function changesetSet(
-  [obj, path]: [ChangesetDef, string],
+  [obj, path]: [IChangeset, string],
 ): Function | void {
   if (isChangeset(obj)) {
     return (value: any) => {
