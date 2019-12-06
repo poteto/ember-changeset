@@ -89,6 +89,14 @@ module('Unit | Utility | changeset', function(hooks) {
     assert.deepEqual(dummyChangeset.get('change').name, 'a', 'should return nested change');
   });
 
+  test('can get nested values in the error object', function(assert) {
+    let dummyChangeset = new Changeset(dummyModel, dummyValidator);
+    let expectedResult = { validation: 'too short', value: 'a' };
+    dummyChangeset.set('name', 'a');
+
+    assert.deepEqual(dummyChangeset.get('error.name'), expectedResult, 'should return error object for `name` key');
+  });
+
   /**
    * #change
    */
