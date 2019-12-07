@@ -9,6 +9,11 @@
 [Full Changelog](https://github.com/poteto/ember-changeset/compare/v2.2.4...v3.0.0-beta.0)
 
 - [MAJOR]: rewrite for v3 [#379](https://github.com/poteto/ember-changeset/pull/379)
+    - This rewrite involved removing Ember.Object and implementing Proxies for get and set traps to the underlying Changeset object.
+    - `@tracked` is relied on heavily to ensure the UI reflects the most recent updates to internal changeset properties.
+    - Moreover, instead of storing paths to values (e.g. `person.firstName`), we instead rely on plain JavaScript access, simplifying nested operations on your changesets.
+    - Tests were added and previously failing tests were brought back.
+    - See this blog [post](https://www.pzuraq.com/do-you-need-ember-object/) for the "why".
 
 ## [2.2.4](https://github.com/poteto/ember-changeset/tree/v2.2.0) (2019-11-14)
 [Full Changelog](https://github.com/poteto/ember-changeset/compare/v2.1.3...v2.2.4)
