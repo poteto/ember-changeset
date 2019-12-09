@@ -1364,6 +1364,22 @@ module('Unit | Utility | changeset', function(hooks) {
     assert.equal(dummyChangeset.errors.length, 1, 'should only have 1 error');
   });
 
+  test('#validate marks actual valid changes', async function(assert) {
+    dummyModel.setProperties({ name: 'Jim Bob', password: true, passwordConfirmation: true });
+    let dummyChangeset = new Changeset(dummyModel, dummyValidator, dummyValidations);
+
+    dummyChangeset.set('name', 'foo bar');
+    dummyChangeset.set('password', false);
+    dummyChangeset.set('async', true);
+
+    await dummyChangeset.validate();
+    assert.deepEqual(get(dummyChangeset, 'changes'), [
+      { key: 'name', value: 'foo bar' },
+      { key: 'password', value: false },
+      { key: 'async', value: true }
+    ]);
+  });
+
   /**
    * #addError
    */
