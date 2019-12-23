@@ -1,5 +1,16 @@
 # Change Log
 
+## [3.0.0-beta.3](https://github.com/poteto/ember-changeset/tree/v3.0.0-beta.3) (2019-12-13)
+[Full Changelog](https://github.com/poteto/ember-changeset/compare/v3.0.0-beta.2...v3.0.0-beta.3)
+
+- Upgrade @glimmer/tracking to v1.0.0 [#387](https://github.com/poteto/ember-changeset/pull/387)
+- [TEST] #get nested error with key path [#385](https://github.com/poteto/ember-changeset/pull/385)
+
+## [3.0.0-beta.2](https://github.com/poteto/ember-changeset/tree/v3.0.0-beta.2) (2019-12-04)
+[Full Changelog](https://github.com/poteto/ember-changeset/compare/v3.0.0-beta.1...v3.0.0-beta.2)
+
+- allow multiple keys for .validate [#384](https://github.com/poteto/ember-changeset/pull/384)
+
 ## [3.0.0-beta.1](https://github.com/poteto/ember-changeset/tree/v3.0.0-beta.1) (2019-11-29)
 [Full Changelog](https://github.com/poteto/ember-changeset/compare/v3.0.0-beta.0...v3.0.0-beta.1)
 
