@@ -26,11 +26,40 @@
     - Tests were added and previously failing tests were brought back.
     - See this blog [post](https://www.pzuraq.com/do-you-need-ember-object/) for the "why".
 
-## [2.2.4](https://github.com/poteto/ember-changeset/tree/v2.2.0) (2019-11-14)
-[Full Changelog](https://github.com/poteto/ember-changeset/compare/v2.1.3...v2.2.4)
+## [2.2.4](https://github.com/poteto/ember-changeset/tree/v2.2.4) (2019-11-14)
+[Full Changelog](https://github.com/poteto/ember-changeset/compare/v2.2.3...v2.2.4)
+
+- No async needed [24e5bb4](https://github.com/poteto/ember-changeset/commit/24e5bb410d2e838c4be0886b03caeec8fc0d1886)
+
+## [2.2.3](https://github.com/poteto/ember-changeset/tree/v2.2.3) (2019-11-04)
+[Full Changelog](https://github.com/poteto/ember-changeset/compare/v2.2.2...v2.2.3)
+
+- [BUGFIX]: handling multiple validations [#378](https://github.com/poteto/ember-changeset/pull/378)
+
+## [2.2.2](https://github.com/poteto/ember-changeset/tree/v2.2.2) (2019-11-04)
+[Full Changelog](https://github.com/poteto/ember-changeset/compare/v2.2.1...v2.2.2)
+
+- Minor cleanup to native JS [#374](https://github.com/poteto/ember-changeset/pull/374)
+- Ensure can add array of strings to addError [#377](https://github.com/poteto/ember-changeset/pull/377)
+
+## [2.2.1](https://github.com/poteto/ember-changeset/tree/v2.2.1) (2019-11-04)
+[Full Changelog](https://github.com/poteto/ember-changeset/compare/v2.2.0...v2.2.1)
+
+- Ensure closure over validation map accepts objects first [#373](https://github.com/poteto/ember-changeset/pull/373)
+
+## [2.2.0](https://github.com/poteto/ember-changeset/tree/v2.2.0) (2019-11-04)
+[Full Changelog](https://github.com/poteto/ember-changeset/compare/v2.1.3...v2.2.0)
+
+- Cleanup ts build [#368](https://github.com/poteto/ember-changeset/pull/368)
+- array set test [#370](https://github.com/poteto/ember-changeset/pull/370)
+- Allow changeset to accept validation map [#372](https://github.com/poteto/ember-changeset/pull/372)
 
 ## [2.1.3](https://github.com/poteto/ember-changeset/tree/v2.1.2) (2019-10-20)
 [Full Changelog](https://github.com/poteto/ember-changeset/compare/v2.1.2...v2.1.3)
+
+- Fix null/falsey results [#365](https://github.com/poteto/ember-changeset/pull/365)
+- Keep property descriptors on assign [#366](https://github.com/poteto/ember-changeset/pull/366)
+- Update Ember CLI to 3.8 [#367](https://github.com/poteto/ember-changeset/pull/367)
 
 ## [2.1.2](https://github.com/poteto/ember-changeset/tree/v2.1.2) (2019-06-04)
 [Full Changelog](https://github.com/poteto/ember-changeset/compare/v2.1.1...v2.1.2)
