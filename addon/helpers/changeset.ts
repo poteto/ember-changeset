@@ -1,10 +1,10 @@
 import { helper } from '@ember/component/helper';
-import Changeset from 'ember-changeset';
-import { Config } from 'ember-changeset/types/config';
-import { ValidatorAction, ValidatorMap } from 'ember-changeset/types/validator-action';
-import lookupValidator from 'ember-changeset/utils/validator-lookup';
-import isChangeset from 'ember-changeset/utils/is-changeset';
-import isPromise from 'ember-changeset/utils/is-promise';
+import { Changeset } from 'validated-changeset';
+import { Config } from 'validated-changeset/types/config';
+import { ValidatorAction, ValidatorMap } from 'validated-changeset/types/validator-action';
+import lookupValidator from 'validated-changeset/utils/validator-lookup';
+import isChangeset from 'validated-changeset/utils/is-changeset';
+import isPromise from 'validated-changeset/utils/is-promise';
 import isObject from 'ember-changeset/utils/is-object';
 
 export function changeset(

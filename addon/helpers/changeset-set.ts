@@ -1,6 +1,6 @@
 import { helper } from '@ember/component/helper';
-import { IChangeset } from 'ember-changeset/types';
-import isChangeset from 'ember-changeset/utils/is-changeset';
+import { IChangeset } from 'validated-changeset/types';
+import isChangeset from 'validated-changeset/utils/is-changeset';
 
 /**
  * This is a drop in replacement for the `mut` helper

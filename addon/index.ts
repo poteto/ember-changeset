@@ -1,9 +1,9 @@
 import { assert } from '@ember/debug';
-import { BufferedChangeset } from './-private/validated-changeset';
+import { BufferedChangeset } from 'validated-changeset';
 import { notifyPropertyChange } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
 import { get as safeGet, set as safeSet } from '@ember/object';
-import mergeDeep from 'ember-changeset/utils/merge-deep';
+import mergeDeep from 'validated-changeset/utils/merge-deep';
 import {
   Config,
   Changes,
@@ -16,7 +16,7 @@ import {
   ValidatorAction,
   ValidatorMap,
   ValidationErr,
-} from 'ember-changeset/types';
+} from 'validated-changeset/types';
 
 const CHANGES = '_changes';
 const ERRORS = '_errors';
