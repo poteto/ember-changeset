@@ -1,22 +1,8 @@
 import { assert } from '@ember/debug';
-import { BufferedChangeset } from 'validated-changeset';
+import { BufferedChangeset, mergeDeep, Types } from 'validated-changeset';
 import { notifyPropertyChange } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
 import { get as safeGet, set as safeSet } from '@ember/object';
-import mergeDeep from 'validated-changeset/utils/merge-deep';
-import {
-  Config,
-  Changes,
-  Content,
-  Errors,
-  IErr,
-  IChangeset,
-  InternalMap,
-  NewProperty,
-  ValidatorAction,
-  ValidatorMap,
-  ValidationErr,
-} from 'validated-changeset/types';
 
 const CHANGES = '_changes';
 const ERRORS = '_errors';
@@ -24,8 +10,8 @@ const CONTENT = '_content';
 const defaultValidatorFn = () => true;
 
 class EmberChangeset extends BufferedChangeset {
-  @tracked '_changes': Changes;
-  @tracked '_errors': Errors<any>;
+  @tracked '_changes': Types.Changes;
+  @tracked '_errors': Types.Errors<any>;
   @tracked '_content': any;
 
   getDeep = safeGet as any;
@@ -40,9 +26,9 @@ class EmberChangeset extends BufferedChangeset {
    *
    * @method addError
    */
-  addError<T>(key: string, error: IErr<T>): IErr<T>
-  addError(key: string, error: ValidationErr): ValidationErr
-  addError<T>(key: string, error: IErr<T> | ValidationErr) {
+  addError<T>(key: string, error: Types.IErr<T>): Types.IErr<T>
+  addError(key: string, error: Types.ValidationErr): Types.ValidationErr
+  addError<T>(key: string, error: Types.IErr<T> | Types.ValidationErr) {
     super.addError(key, error);
 
     notifyPropertyChange(this, ERRORS);
@@ -59,8 +45,8 @@ class EmberChangeset extends BufferedChangeset {
    * @method pushErrors
    */
   pushErrors(
-    key: keyof IChangeset,
-    ...newErrors: string[] | ValidationErr[]
+    key: keyof Types.IChangeset,
+    ...newErrors: string[] | Types.ValidationErr[]
   ) {
     const { value, validation } = super.pushErrors(key, ...newErrors);
 
@@ -75,7 +61,7 @@ class EmberChangeset extends BufferedChangeset {
    * Returns value or error
    */
   _setProperty<T> (
-    { key, value, oldValue }: NewProperty<T>
+    { key, value, oldValue }: Types.NewProperty<T>
   ): void {
     super._setProperty({ key, value, oldValue })
 
@@ -108,7 +94,7 @@ class EmberChangeset extends BufferedChangeset {
   _deleteKey(
     objName: string,
     key = ''
-  ): InternalMap {
+  ): Types.InternalMap {
     const result = super._deleteKey(objName, key);
 
     notifyPropertyChange(this, `${objName}.${key}`);
@@ -122,10 +108,10 @@ class EmberChangeset extends BufferedChangeset {
    *
    * @method execute
    */
-  execute(): IChangeset {
+  execute(): this {
     if (this.isValid && this.isDirty) {
-      let content: Content = this[CONTENT];
-      let changes: Changes = this[CHANGES];
+      let content: Types.Content = this[CONTENT];
+      let changes: Types.Changes = this[CHANGES];
       // we want mutation on original object
       // @tracked
       this[CONTENT] = mergeDeep(content, changes, { safeGet, safeSet });
@@ -140,9 +126,9 @@ class EmberChangeset extends BufferedChangeset {
  */
 export function changeset(
   obj: object,
-  validateFn: ValidatorAction = defaultValidatorFn,
-  validationMap: ValidatorMap = {},
-  options: Config = {}
+  validateFn: Types.ValidatorAction = defaultValidatorFn,
+  validationMap: Types.ValidatorMap = {},
+  options: Types.Config = {}
 ) {
   assert('Underlying object for changeset is missing', Boolean(obj));
   assert('Array is not a valid type to pass as the first argument to `changeset`', !Array.isArray(obj));
@@ -161,11 +147,11 @@ export default class Changeset {
    */
   constructor(
     obj: object,
-    validateFn: ValidatorAction = defaultValidatorFn,
-    validationMap: ValidatorMap = {},
-    options: Config = {}
+    validateFn: Types.ValidatorAction = defaultValidatorFn,
+    validationMap: Types.ValidatorMap = {},
+    options: Types.Config = {}
   ) {
-    const c: IChangeset = changeset(obj, validateFn, validationMap, options);
+    const c: Types.IChangeset = changeset(obj, validateFn, validationMap, options);
 
     return new Proxy(c, {
       get(targetBuffer, key/*, receiver*/) {
