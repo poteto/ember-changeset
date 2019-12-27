@@ -1,5 +1,5 @@
 // Types for compiled templates
-declare module 'ember-changeset/templates/*' { 
+declare module 'ember-changeset/templates/*' {
   import { TemplateFactory } from 'htmlbars-inline-precompile';
   const tmpl: TemplateFactory;
   export default tmpl;

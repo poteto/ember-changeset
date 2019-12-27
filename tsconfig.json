@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es2017",
+    "target": "es2018",
     "allowJs": true,
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
@@ -20,7 +20,6 @@
     "inlineSources": true,
     "baseUrl": ".",
     "module": "es6",
-    "skipLibCheck": true,
     "paths": {
       "dummy/tests/*": [
         "tests/*"
