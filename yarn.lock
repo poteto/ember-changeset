@@ -2618,14 +2618,6 @@ broccoli-debug@^0.6.4, broccoli-debug@^0.6.5:
     symlink-or-copy "^1.1.8"
     tree-sync "^1.2.2"
 
-broccoli-file-creator@^1.1.1:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/broccoli-file-creator/-/broccoli-file-creator-1.2.0.tgz#27f1b25b1b00e7bb7bf3d5d7abed5f4d5388df4d"
-  integrity sha512-l9zthHg6bAtnOfRr/ieZ1srRQEsufMZID7xGYRW3aBDv3u/3Eux+Iawl10tAGYE5pL9YB4n5X4vxkp6iNOoZ9g==
-  dependencies:
-    broccoli-plugin "^1.1.0"
-    mkdirp "^0.5.1"
-
 broccoli-file-creator@^2.1.1:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/broccoli-file-creator/-/broccoli-file-creator-2.1.1.tgz#7351dd2496c762cfce7736ce9b49e3fce0c7b7db"
@@ -4367,17 +4359,6 @@ ember-cli-release@^1.0.0-beta.2:
     semver "^4.3.1"
     silent-error "^1.0.0"
 
-ember-cli-shims@^1.2.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/ember-cli-shims/-/ember-cli-shims-1.2.0.tgz#0f53aff0aab80b5f29da3a9731bac56169dd941f"
-  integrity sha1-D1Ov8Kq4C18p2jqXMbrFYWndlB8=
-  dependencies:
-    broccoli-file-creator "^1.1.1"
-    broccoli-merge-trees "^2.0.0"
-    ember-cli-version-checker "^2.0.0"
-    ember-rfc176-data "^0.3.1"
-    silent-error "^1.0.1"
-
 ember-cli-sri@^2.1.1:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/ember-cli-sri/-/ember-cli-sri-2.1.1.tgz#971620934a4b9183cf7923cc03e178b83aa907fd"
@@ -4653,7 +4634,7 @@ ember-resolver@^5.3.0:
     ember-cli-version-checker "^3.1.3"
     resolve "^1.12.0"
 
-ember-rfc176-data@^0.3.1, ember-rfc176-data@^0.3.12:
+ember-rfc176-data@^0.3.12:
   version "0.3.12"
   resolved "https://registry.yarnpkg.com/ember-rfc176-data/-/ember-rfc176-data-0.3.12.tgz#90d82878e69e2ac9a5438e8ce14d12c6031c5bd2"
   integrity sha512-g9HeZj/gU5bfIIrGXkP7MhS2b3Vu5DfNUrYr14hy99TgIvtZETO+96QF4WOEUXGjIJdfTRjerVnQlqngPQSv1g==
@@ -10932,10 +10913,10 @@ validate-npm-package-name@~2.2.2:
   dependencies:
     builtins "0.0.7"
 
-validated-changeset@~0.0.9:
-  version "0.0.9"
-  resolved "https://registry.yarnpkg.com/validated-changeset/-/validated-changeset-0.0.9.tgz#141fa7c028e4249adfea128502b2b3a874fb5709"
-  integrity sha512-RI1gmkN9m7tA+dF/8Q5pPT4A4wucWYSWDf1KT/mb0oO78uRBrUbHVy+eOUuK+oFBSi6/u9Ln1+Abh01J4TWwrg==
+validated-changeset@~0.0.12:
+  version "0.0.12"
+  resolved "https://registry.yarnpkg.com/validated-changeset/-/validated-changeset-0.0.12.tgz#b1076256e793fb7a0bd4074bd41cd193373e7eb5"
+  integrity sha512-14PS83BSK8yon7Nv4WTBKvqHYruLAArIv32e9YbIJ0HTnTzes0trL2L8XVJ5qqLtkmg1zH8PST2nFYQMLqTmZw==
 
 vary@~1.1.2:
   version "1.1.2"
