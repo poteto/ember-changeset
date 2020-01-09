@@ -71,7 +71,7 @@ export interface ChangesetDef {
   _bareChanges: { [s: string]: any },
 
   changes: any, // { key: string; value: any; }[], //ComputedProperty<object[], object[]>,
-  errors: { key: string; value: any; }[], //ComputedProperty<object[], object[]>,
+  errors: { key: string; value: any; validation: ValidationErr | ValidationErr[] }[], //ComputedProperty<object[], object[]>,
   error: object,
   change: object,
   data: object,
