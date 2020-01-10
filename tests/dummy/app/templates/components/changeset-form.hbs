@@ -1,0 +1,15 @@
+Changeset value: "{{this.changeset.email}}"
+<br />
+Model value: "{{this.model.email}}"
+
+<form
+  {{on "submit" (fn this.submitForm this.changeset)}}
+>
+  <input
+    type="text"
+    value={{this.changeset.email}}
+    oninput={{action (changeset-set this.changeset "email") value="target.value"}}
+  >
+  <button type="submit">Submit form 1</button>
+
+</form>
