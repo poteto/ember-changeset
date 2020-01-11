@@ -140,10 +140,7 @@ module('Unit | Utility | changeset', function(hooks) {
 
     assert.deepEqual(dummyChangeset.errors, expectedResult, 'should return errors object');
     assert.deepEqual(dummyChangeset.get('errors'), expectedResult, 'should return nested errors');
-    assert.deepEqual(dummyChangeset.get('errors.name'), expectedResult.name, 'should return nested errors');
     assert.deepEqual(dummyChangeset.change, { name: 'a' }, 'should return change object');
-    assert.deepEqual(dummyChangeset.get('change.name'), 'a', 'should return nested change');
-    assert.deepEqual(dummyChangeset.get('change').name, 'a', 'should return nested change');
   });
 
   test('can get nested values in the errors object', function(assert) {
@@ -683,6 +680,60 @@ module('Unit | Utility | changeset', function(hooks) {
     c.set('foo', 'not an object anymore');
     c.execute();
     assert.equal(c.get('foo'), get(model, 'foo'));
+  });
+
+  test('#set works after save', async function(assert) {
+    dummyModel['org'] = {
+      usa: {
+        mn: 'mn',
+        ny: 'ny'
+      }
+    };
+
+    const c = new Changeset(dummyModel);
+    c.set('org.usa.ny', 'NY');
+    c.set('org.usa.mn', 'MN');
+
+    assert.equal(c.get('org.usa.ny'), 'NY');
+    assert.equal(c.get('org.usa.mn'), 'MN');
+    assert.equal(dummyModel.org.usa.ny, 'ny');
+    assert.equal(dummyModel.org.usa.mn, 'mn');
+
+    c.save();
+
+    assert.equal(c.get('org.usa.ny'), 'NY');
+    assert.equal(c.get('org.usa.mn'), 'MN');
+    assert.equal(dummyModel.org.usa.ny, 'NY');
+    assert.equal(dummyModel.org.usa.mn, 'MN');
+
+    c.set('org.usa.ny', 'nil');
+
+    assert.equal(c.get('org.usa.ny'), 'nil');
+    assert.equal(c.get('org.usa.mn'), 'MN');
+    assert.equal(dummyModel.org.usa.ny, 'NY');
+    assert.equal(dummyModel.org.usa.mn ,'MN');
+
+    c.save();
+
+    assert.equal(c.get('org.usa.ny'), 'nil');
+    assert.equal(c.get('org.usa.mn'), 'MN');
+    assert.equal(dummyModel.org.usa.ny, 'nil');
+    assert.equal(dummyModel.org.usa.mn, 'MN');
+
+    c.set('org.usa.ny', 'nil2');
+    c.set('org.usa.mn', 'undefined');
+
+    assert.equal(c.get('org.usa.ny'), 'nil2');
+    assert.equal(c.get('org.usa.mn'), 'undefined');
+    assert.equal(dummyModel.org.usa.ny, 'nil');
+    assert.equal(dummyModel.org.usa.mn, 'MN');
+
+    c.save();
+
+    assert.equal(c.get('org.usa.ny'), 'nil2');
+    assert.equal(c.get('org.usa.mn'), 'undefined');
+    assert.equal(dummyModel.org.usa.ny, 'nil2');
+    assert.equal(dummyModel.org.usa.mn, 'undefined');
   });
 
   /**
