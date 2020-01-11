@@ -4,7 +4,10 @@ import Changeset from 'ember-changeset'
 
 export default class ChangesetForm extends Component {
   model = {
-    email: 'something'
+    user: {
+      email: 'something'
+    },
+    cid: '1'
   }
 
   changeset = new Changeset(this.model)
