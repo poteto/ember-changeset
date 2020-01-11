@@ -1,0 +1,16 @@
+<h2>Changeset value: <span data-test-changeset-email>{{this.changeset.email}}</span></h2>
+<br />
+<h2>Model value: <span data-test-model-email>{{this.model.email}}</span></h2>
+
+<form
+  {{on "submit" (fn this.submitForm this.changeset)}}
+>
+  <input
+    data-test-email
+    type="text"
+    value={{this.changeset.email}}
+    oninput={{action (changeset-set this.changeset "email") value="target.value"}}
+  >
+  <button data-test-submit type="submit">Submit form 1</button>
+
+</form>

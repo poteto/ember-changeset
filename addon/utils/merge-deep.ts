@@ -101,11 +101,11 @@ function mergeTargetAndSource(target: any, source: any, options: Options): any {
     } else {
       let next = source[key];
       if (next && next instanceof Change) {
-        return target[key] = next.value;
+        return options.safeSet(target, key, next.value);
       }
 
       // if just some normal leaf value, then set
-      return target[key] = next;
+      return options.safeSet(target, key, next);
     }
   });
 
@@ -123,7 +123,7 @@ function mergeTargetAndSource(target: any, source: any, options: Options): any {
  */
 export default function mergeDeep(target: any, source: any, options: Options = { safeGet: undefined, safeSet: undefined }): object | [any] {
   options.safeGet = options.safeGet || function (obj: any, key: string): any { return obj[key] };
-  options.safeSet = options.safeSet;
+  options.safeSet = options.safeSet || function(obj: any, key: string, value: unknown): any { return obj[key] = value };
   let sourceIsArray = Array.isArray(source);
   let targetIsArray = Array.isArray(target);
   let sourceAndTargetTypesMatch = sourceIsArray === targetIsArray;
