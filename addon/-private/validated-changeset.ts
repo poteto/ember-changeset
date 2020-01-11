@@ -4,7 +4,7 @@ import {
   isEqual
 } from '@ember/utils';
 import Change from 'ember-changeset/-private/change';
-import { getKeyValues } from 'ember-changeset/utils/get-key-values';
+import { getKeyValues, getKeyErrorValues } from 'ember-changeset/utils/get-key-values';
 import { notifierForEvent } from 'ember-changeset/-private/evented';
 import Err from 'ember-changeset/-private/err';
 import normalizeObject from 'ember-changeset/utils/normalize-object';
@@ -147,20 +147,15 @@ export class BufferedChangeset implements IChangeset {
     return getKeyValues(obj);
   }
 
-  // TODO: iterate and find all leaf errors
-  // can only provide leaf key
+  /**
+   * @property errors
+   * @type {Array}
+   */
   get errors() {
     let obj = this[ERRORS];
 
-    function transform(e: Err) {
-      return { value: e.value, validation: e.validation };
-    }
-
-    return keys(obj).map(key => {
-      let { value, validation } = transform(obj[key]);
-
-      return { key, value, validation };
-    });
+    // [{ key, validation, value }, ...]
+    return getKeyErrorValues(obj);
   }
 
   get change() {
