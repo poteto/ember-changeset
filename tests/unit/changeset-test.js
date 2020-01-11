@@ -147,19 +147,19 @@ module('Unit | Utility | changeset', function(hooks) {
   });
 
 
-  test("can get nested values in the errors object", function(assert) {
+  test('can get nested values in the errors object', function(assert) {
     let dummyChangeset = new Changeset(dummyModel, dummyValidator);
-    dummyChangeset.set("org.usa.ny", "");
-    dummyChangeset.set("name", "");
+    dummyChangeset.set('org.usa.ny', '');
+    dummyChangeset.set('name', '');
 
     let expectedErrors = [
-      { key: "org.usa.ny", validation: "must be present", value: "" },
-      { key: "name", validation: "too short", value: "" }
+      { key: 'org.usa.ny', validation: 'must be present', value: '' },
+      { key: 'name', validation: 'too short', value: '' }
     ];
     assert.deepEqual(
-      dummyChangeset.get("errors"),
+      dummyChangeset.get('errors'),
       expectedErrors,
-      "should return errors object for `org.usa.ny` key and `name` key"
+      'should return errors object for `org.usa.ny` key and `name` key'
     );
   });
 
