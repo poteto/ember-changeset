@@ -1,15 +1,26 @@
-<h2>Changeset value: <span data-test-changeset-email>{{this.changeset.email}}</span></h2>
+<h2>Changeset Email: <span data-test-changeset-user-email>{{this.changeset.user.email}}</span></h2>
+<h2>Changeset cid: <span data-test-changeset-cid>{{this.changeset.cid}}</span></h2>
 <br />
-<h2>Model value: <span data-test-model-email>{{this.model.email}}</span></h2>
+<h2>Model Email: <span data-test-model-user-email>{{this.model.user.email}}</span></h2>
+<h2>Model cid: <span data-test-model-cid>{{this.model.cid}}</span></h2>
 
 <form
   {{on "submit" (fn this.submitForm this.changeset)}}
 >
+  <label>cid</label>
   <input
-    data-test-email
+    data-test-cid
+    type="number"
+    value={{this.changeset.cid}}
+    oninput={{action (changeset-set this.changeset "cid") value="target.value"}}
+  >
+
+  <label>email</label>
+  <input
+    data-test-user-email
     type="text"
-    value={{this.changeset.email}}
-    oninput={{action (changeset-set this.changeset "email") value="target.value"}}
+    value={{this.changeset.user.email}}
+    oninput={{action (changeset-set this.changeset "user.email") value="target.value"}}
   >
   <button data-test-submit type="submit">Submit form 1</button>
 
