@@ -149,6 +149,7 @@ module('Unit | Utility | changeset', function(hooks) {
 
   test('can get nested values in the errors object', function(assert) {
     let dummyChangeset = new Changeset(dummyModel, dummyValidator);
+    dummyChangeset.set('unknown', 'wat');
     dummyChangeset.set('org.usa.ny', '');
     dummyChangeset.set('name', '');
 

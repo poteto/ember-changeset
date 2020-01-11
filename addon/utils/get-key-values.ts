@@ -2,6 +2,7 @@ import isObject from './is-object';
 import Err from '../-private/err';
 
 let keysUpToValue: string[] = [];
+
 /**
  * traverse through target and return leaf nodes with `value` property and key as 'person.name'
  *
@@ -25,6 +26,7 @@ export function getKeyValues<T extends Record<string, any>>(obj: T): object[] {
     }
   }
 
+  keysUpToValue = [];
   return map;
 }
 
@@ -53,5 +55,6 @@ export function getKeyErrorValues<T extends Record<string, any>>(obj: T): object
     }
   }
 
+  errorKeysUpToValue = [];
   return map;
 }
