@@ -87,9 +87,10 @@ module('Integration | main', function(hooks) {
       assert.ok(true, 'user save was called')
     }
 
-    let user = this.store.createRecord(userType, { profile, save });
+    let user = this.store.createRecord(userType, { save });
     let changeset = new Changeset(user);
 
+    changeset.set('profile', profile);
     changeset.set('profile.firstName', 'Grace');
     changeset.save();
   }
