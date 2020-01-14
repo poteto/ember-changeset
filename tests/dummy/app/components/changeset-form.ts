@@ -5,6 +5,7 @@ import Changeset from 'ember-changeset'
 export default class ChangesetForm extends Component {
   model = {
     user: {
+      name: 'someone',
       email: 'something'
     },
     cid: '1'
