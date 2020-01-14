@@ -41,6 +41,11 @@ function propertyIsOnObject(object: any, property: any) {
 
 // Protects from prototype poisoning and unexpected merging up the prototype chain.
 function propertyIsUnsafe(target: any, key: string): Boolean {
+   // Special case for ember data model attributes.
+  if(target.constructor && target.constructor.attributes && target.constructor.attributes.has(key)) {
+    return false;
+  }
+
   return propertyIsOnObject(target, key) // Properties are safe to merge if they don't exist in the target yet,
     && !(Object.hasOwnProperty.call(target, key) // unsafe if they exist up the prototype chain,
       && Object.propertyIsEnumerable.call(target, key)); // and also unsafe if they're nonenumerable.
