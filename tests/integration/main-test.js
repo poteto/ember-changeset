@@ -164,10 +164,12 @@ module('Integration | main', function(hooks) {
       assert.ok(true, "user save was called");
     };
     let profile = this.store.createRecord("profile", { save });
+    let pet = this.store.createRecord('dog')
     let profileChangeset = new Changeset(profile);
 
     profileChangeset.set("firstName", "bo");
     profileChangeset.set("lastName", "jackson");
+    profileChangeset.set('pet', pet)
 
     profileChangeset.save();
   });

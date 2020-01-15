@@ -39,10 +39,16 @@ function propertyIsOnObject(object: any, property: any) {
   }
 }
 
+// Ember Data models don't respond as expected to foo.hasOwnProperty, so we do a special check
+function hasEmberDataProperty(target: any, key: string, options: Options): Boolean {
+  let fields: Map<string, any> | null = options.safeGet(target, 'constructor.fields');
+
+  return fields instanceof Map && fields.has(key);
+}
+
 // Protects from prototype poisoning and unexpected merging up the prototype chain.
-function propertyIsUnsafe(target: any, key: string): Boolean {
-   // Special case for ember data model attributes.
-  if(target.constructor && target.constructor.attributes && target.constructor.attributes.has(key)) {
+function propertyIsUnsafe(target: any, key: string, options: Options): Boolean {
+  if(hasEmberDataProperty(target, key, options)) {
     return false;
   }
 
@@ -83,7 +89,7 @@ function buildPathToValue(source: any, options: Options, kv: Record<string, any>
 function mergeTargetAndSource(target: any, source: any, options: Options): any {
   getKeys(source).forEach(key => {
     // proto poisoning.  So can set by nested key path 'person.name'
-    if (propertyIsUnsafe(target, key)) {
+    if (propertyIsUnsafe(target, key, options)) {
       // if safeSet, we will find keys leading up to value and set
       if (options.safeSet) {
         const kv: Record<string, any> = buildPathToValue(source, options, {}, []);
