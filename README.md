@@ -110,12 +110,8 @@ Then, in your favorite form library, simply pass in the `changeset` in place of 
 ```hbs
 {{! dummy-form/template.hbs}}
 <form>
-  <input
-    value={{model.firstName}}
-    oninput={{action (changeset-set this.changeset "model.lastName") value="target.value"}}>
-  <input
-    value={{model.lastName}}
-    oninput={{action (changeset-set this.changeset "model.lastName") value="target.value"}}>
+  <Input @value={{changeset.firstName}} />
+  <Input @value={{changeset.lastName}} />
 
   <button {{on "click" this.submit changeset}}>Submit</button>
   <button {{on "click" this.rollback changeset}}>Cancel</button>
@@ -136,8 +132,8 @@ On rollback, all changes are dropped and the underlying Object is left untouched
   <input
     id="first-name"
     type="text"
-    value={{get model "person.firstname"}}
-    onchange={{action (changeset-set this.changeset "person.firstName") value="target.value"}}>
+    value={{get changeset "person.firstname"}}
+    onchange={{action (changeset-set changeset "person.firstName") value="target.value"}}>
 </form>
 ```
 
