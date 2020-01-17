@@ -49,6 +49,12 @@ const AFTER_VALIDATION_EVENT = 'afterValidation';
 const AFTER_ROLLBACK_EVENT = 'afterRollback';
 const defaultValidatorFn = () => true;
 const defaultOptions = { skipValidate: false };
+const isEmberDataObject = (obj: Object) => {
+  let keys = Object.keys(obj)
+  return keys.indexOf('content') !== -1 &&
+         keys.indexOf('isFulfilled') !== -1 &&
+         keys.indexOf('isRejected') !== -1
+}
 
 export class BufferedChangeset implements IChangeset {
   constructor(
@@ -851,13 +857,30 @@ export class BufferedChangeset implements IChangeset {
       }
 
       if (result && isObject(result)) {
-        return normalizeObject(result);
+        result = normalizeObject(result);
+        let content: Content = this[CONTENT];
+
+        // Merge the content with the changes to have a complete object for a nested property.
+        // Given a object with nested property and multiple properties inside of it, if the 
+        // requested key is the top most nested property and we have changes in of the properties, we need to 
+        // merge the original model data with the changes to have the complete object.
+        // eg. model = { user: { name: 'not changed', email: 'changed@prop.com'} }
+        if (isObject(content[baseKey]) && !isEmberDataObject(content[baseKey])) {
+          let data: Record<string, any> = {}
+          Object.keys(content[baseKey]).forEach(k => {
+            data[k] = this.getDeep(content, `${baseKey}.${k}`)
+          })
+          return Object.assign(data, result);
+        }
+
+        return result
       }
 
       if (result) {
         return result.value;
       }
     }
+
 
     // return getters/setters/methods on BufferedProxy instance
     if (this[key]) {
