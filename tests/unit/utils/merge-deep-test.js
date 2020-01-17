@@ -35,4 +35,32 @@ module('Unit | Utility | merge deep', () => {
 
     assert.deepEqual(value, { company: { employees: ['Jull', 'Olafur']} }, 'has right employees');
   });
+
+  test('it works with unsafe properties', async function(assert) {
+    class A {
+      _boo = 'bo';
+
+      get boo() {
+        return this._boo;
+      }
+      set boo(value) {
+        this._boo = value;
+      }
+
+      foo = { baz: 'ba' };
+    }
+
+    class B extends A {
+      other = 'Ivan';
+    }
+
+    const objA = new B();
+    const objB = { boo: new Change('doo'), foo: { baz: new Change('bar') } };
+
+    const value = mergeDeep(objA, objB, { safeGet: get, safeSet: set });
+
+    assert.equal(value.boo, 'doo', 'unsafe plain property is merged');
+    assert.equal(value.other, 'Ivan', 'safe property is not touched');
+    assert.deepEqual(value.foo, { baz: 'bar' }, 'unsafe object property is merged');
+  });
 });
