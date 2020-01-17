@@ -67,14 +67,12 @@ function buildPathToValue(source: any, options: Options, kv: Record<string, any>
   Object.keys(source).forEach((key: string): void => {
     let possible = source[key];
     if (possible && possible.hasOwnProperty('value')) {
-      possibleKeys.push(key);
-      kv[possibleKeys.join('.')] = possible.value;
+      kv[[...possibleKeys, key].join('.')] = possible.value;
       return;
     }
 
     if (typeof possible === 'object') {
-      possibleKeys.push(key);
-      buildPathToValue(possible, options, kv, possibleKeys);
+      buildPathToValue(possible, options, kv, [...possibleKeys, key]);
     }
   });
 
