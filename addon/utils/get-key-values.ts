@@ -1,5 +1,8 @@
 import isObject from './is-object';
 import Err from '../-private/err';
+import {
+  PublicErrors
+} from 'ember-changeset/types';
 
 let keysUpToValue: string[] = [];
 
@@ -9,7 +12,7 @@ let keysUpToValue: string[] = [];
  * @method getKeyValues
  * @return {Array} [{ 'person.name': value }]
  */
-export function getKeyValues<T extends Record<string, any>>(obj: T): object[] {
+export function getKeyValues<T extends Record<string, any>>(obj: T): Record<string, any>[] {
   let map = [];
 
   for (let key in obj) {
@@ -38,7 +41,7 @@ let errorKeysUpToValue: string[] = [];
  * @method getKeyErrorValues
  * @return {Array} [{ key: 'person.name', validation: '', value: '' }]
  */
-export function getKeyErrorValues<T extends Record<string, any>>(obj: T): object[] {
+export function getKeyErrorValues<T extends Record<string, any>>(obj: T): PublicErrors {
   let map = [];
 
   for (let key in obj) {
