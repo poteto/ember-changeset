@@ -68,8 +68,7 @@ module('Integration | main', function(hooks) {
     changeset.execute();
 
     assert.equal(changeset.get('profile'), null, 'changeset profile relationship is still null');
-    assert.equal(user.get('profile').get('firstName'), null, 'underlying user profile firstName is null');
-    assert.ok(user.get('profile'), 'user has yet to call save so still present as proxy');
+    assert.equal(user.get('profile.firstName'), null, 'underlying user profile firstName is null');
   }
 
   test('it works for belongsTo', async function(assert) {
