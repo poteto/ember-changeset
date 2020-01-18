@@ -8,6 +8,7 @@ export default class ChangesetForm extends Component {
       name: 'someone',
       email: 'something'
     },
+    address: null,
     cid: '1'
   }
 
