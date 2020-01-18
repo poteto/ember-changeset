@@ -296,6 +296,20 @@ module('Unit | Utility | changeset', function(hooks) {
     assert.equal(result, undefined, 'should proxy to change');
   });
 
+  test('#get returns change that is has undefined as value', async function(assert) {
+    set(dummyModel, 'name', 'Bob');
+    set(dummyModel, 'creds', ['burgers']);
+    let dummyChangeset = new Changeset(dummyModel);
+    set(dummyChangeset, 'name', 'Burdger');
+
+    assert.equal(get(dummyChangeset, 'name'), 'Burdger', 'should proxy name to change');
+    assert.deepEqual(get(dummyChangeset, 'creds'), ['burgers'], 'should proxy creds to change');
+
+    set(dummyChangeset, 'creds', ['fries']);
+    assert.equal(get(dummyChangeset, 'name'), 'Burdger', 'should proxy name to change');
+    assert.deepEqual(get(dummyChangeset, 'creds'), ['fries'], 'should proxy creds to change after change');
+  });
+
   test('nested objects will return correct values', async function(assert) {
     set(dummyModel, 'org', {
       asia: { sg: '_initial' },  // for the sake of disambiguating nulls

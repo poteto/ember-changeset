@@ -865,7 +865,7 @@ export class BufferedChangeset implements IChangeset {
         // requested key is the top most nested property and we have changes in of the properties, we need to
         // merge the original model data with the changes to have the complete object.
         // eg. model = { user: { name: 'not changed', email: 'changed@prop.com'} }
-        if (isObject(content[baseKey]) && !isEmberDataObject(content[baseKey])) {
+        if (!Array.isArray(result) && isObject(content[baseKey]) && !isEmberDataObject(content[baseKey])) {
           let data: Record<string, any> = {}
           Object.keys(content[baseKey]).forEach(k => {
             data[k] = this.getDeep(content, `${baseKey}.${k}`)
