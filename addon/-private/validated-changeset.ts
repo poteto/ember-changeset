@@ -49,8 +49,8 @@ const AFTER_VALIDATION_EVENT = 'afterValidation';
 const AFTER_ROLLBACK_EVENT = 'afterRollback';
 const defaultValidatorFn = () => true;
 const defaultOptions = { skipValidate: false };
-const isEmberDataObject = (obj: Object = {}) => {
-  let keys = Object.keys(obj)
+const isEmberDataObject = (obj: Object) => {
+  let keys = Object.keys(obj || {})
   return keys.indexOf('content') !== -1 &&
          keys.indexOf('isFulfilled') !== -1 &&
          keys.indexOf('isRejected') !== -1
