@@ -209,4 +209,33 @@ module('Integration | main', function(hooks) {
   test('it can rollback sync hasMany', async function(assert) {
     await testRollbackHasMany.call(this, assert, 'sync-user');
   });
+
+  async function testInitiallyEmptyRelationships(assert, userType) {
+    let profile = this.store.createRecord('profile');
+    let user =  this.store.createRecord(userType);
+
+    let changeset = new Changeset(user);
+
+    changeset.set('profile', profile);
+    const dogs = [
+      this.store.createRecord('dog'),
+      this.store.createRecord('dog', { breed: 'Münsterländer' })
+    ];
+
+    changeset.set('dogs', dogs);
+
+    changeset.execute();
+
+    assert.equal(user.get('profile.firstName'), 'Bob', 'Profile is set on user');
+    assert.equal(user.get('dogs.firstObject.breed'), 'rough collie');
+    assert.equal(user.get('dogs.lastObject.breed'), 'Münsterländer');
+  }
+
+  test('it sets relationships which were empty initially', async function(assert) {
+    await testInitiallyEmptyRelationships.call(this, assert, 'user');
+  });
+
+  test('it sets sync relationships which were empty initially', async function(assert) {
+    await testInitiallyEmptyRelationships.call(this, assert, 'sync-user');
+  });
 });
