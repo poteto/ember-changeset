@@ -125,7 +125,7 @@ On rollback, all changes are dropped and the underlying Object is left untouched
 ## Changeset template helpers
 `ember-changeset` overrides `set` and `get` in order to handle deeply nested setters.  `mut` is simply an alias for `Ember.set(changeset, ...)`, thus we provide a `changeset-set` template helper if you are dealing with nested setters.
 
-`changeset-get` is necessary for nested getters to easily retrieve leaf keys without error.  Ember's templating layer will ask us the first key it finds.  We keep track of the changes, but to also keep track of unchanged values and properly represent them in the template is difficult.
+`changeset-get` is necessary for nested getters to easily retrieve leaf keys without error.  Ember's templating layer will ask us for the first key it finds.  We keep track of the changes, but to also keep track of unchanged values and properly merge them in the changeset is difficult.
 
 ```hbs
 <form>
