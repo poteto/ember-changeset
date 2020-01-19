@@ -287,7 +287,7 @@ module('Unit | Utility | changeset', function(hooks) {
     assert.equal(result, '', 'should proxy to change');
   });
 
-  test('#get returns change that is has undefined as value', async function(assert) {
+  test('#get returns change that has undefined as value', async function(assert) {
     set(dummyModel, 'name', 'Jim Bob');
     let dummyChangeset = new Changeset(dummyModel);
     set(dummyChangeset, 'name', undefined);
@@ -296,7 +296,7 @@ module('Unit | Utility | changeset', function(hooks) {
     assert.equal(result, undefined, 'should proxy to change');
   });
 
-  test('#get returns change that is has undefined as value', async function(assert) {
+  test('#get returns change that has array as sibling', async function(assert) {
     set(dummyModel, 'name', 'Bob');
     set(dummyModel, 'creds', ['burgers']);
     let dummyChangeset = new Changeset(dummyModel);

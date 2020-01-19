@@ -1,7 +1,8 @@
 import Helper from '@ember/component/helper';
+import { IChangeset } from 'ember-changeset/types';
 
 export default class ChangesetGet extends Helper.extend() {
-  compute() {
-    throw new Error('changeset-get is now removed as of 3.0.0-beta.1.  See `https://github.com/poteto/ember-changeset/issues/379`');
+  compute(this: ChangesetGet, [changeset, fieldPath]: [IChangeset, string]) {
+    return changeset.get(fieldPath);
   }
 }
