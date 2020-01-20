@@ -1,10 +1,14 @@
 <h2>Changeset cid: <span data-test-changeset-cid>{{this.changeset.cid}}</span></h2>
 <h2>Changeset Email: <span data-test-changeset-user-email>{{changeset-get this.changeset "user.email"}}</span></h2>
 <h2>Changeset Name: <span data-test-changeset-user-name>{{changeset-get this.changeset "user.name"}}</span></h2>
+<h2>Changeset notifications email: <span data-test-changeset-notifications-email>{{changeset-get this.changeset "notifications.email"}}</span></h2>
+<h2>Changeset notifications sms: <span data-test-changeset-notifications-sms>{{changeset-get this.changeset "notifications.sms"}}</span></h2>
 <br />
 <h2>Model Email: <span data-test-model-user-name>{{this.model.user.name}}</span></h2>
 <h2>Model Email: <span data-test-model-user-email>{{this.model.user.email}}</span></h2>
 <h2>Model cid: <span data-test-model-cid>{{this.model.cid}}</span></h2>
+<h2>Model notifications email: <span data-test-model-notifications-email>{{this.model.notifications.email}}</span></h2>
+<h2>Model notifications sms: <span data-test-model-notifications-sms>{{this.model.notifications.sms}}</span></h2>
 
 <form
   {{on "submit" (fn this.submitForm this.changeset)}}
@@ -32,6 +36,22 @@
     value={{this.changeset.user.email}}
     oninput={{action (changeset-set this.changeset "user.email") value="target.value"}}
   >
+
+  <label>Notifications email</label>
+  <input
+    data-test-notifications-email
+    type="checkbox"
+    checked={{this.changeset.notifications.email}}
+    onchange={{action (changeset-set this.changeset "notifications.email") value="target.checked"}}
+  >
+  <label>Notifications sms</label>
+  <input
+    data-test-notifications-sms
+    type="checkbox"
+    checked={{this.changeset.notifications.sms}}
+    onchange={{action (changeset-set this.changeset "notifications.sms") value="target.checked"}}
+  >
+
   <button data-test-submit type="submit">Submit form 1</button>
 
 </form>
