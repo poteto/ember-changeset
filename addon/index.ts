@@ -23,7 +23,7 @@ const ERRORS = '_errors';
 const CONTENT = '_content';
 const defaultValidatorFn = () => true;
 
-class EmberChangeset extends BufferedChangeset {
+export class EmberChangeset extends BufferedChangeset {
   @tracked '_changes': Changes;
   @tracked '_errors': Errors<any>;
   @tracked '_content': any;
@@ -147,8 +147,11 @@ export function changeset(
   assert('Underlying object for changeset is missing', Boolean(obj));
   assert('Array is not a valid type to pass as the first argument to `changeset`', !Array.isArray(obj));
 
-  const c = new EmberChangeset(obj, validateFn, validationMap, options);
+  if (options.changeset) {
+    return new options.changeset(obj, validateFn, validationMap, options);
+  }
 
+  const c = new EmberChangeset(obj, validateFn, validationMap, options);
   return c;
 }
 
