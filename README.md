@@ -32,7 +32,7 @@ See also the [plugins](#plugins) section for addons that extend `ember-changeset
 #### tl;dr
 
 ```js
-let changeset = new Changeset(user, validatorFn);
+let changeset = Changeset(user, validatorFn);
 user.get('firstName'); // "Michael"
 user.get('lastName'); // "Bolton"
 
@@ -53,7 +53,7 @@ user.get('lastName'); // "Bob"
 
 ## Usage
 
-First, create a new `Changeset` using the `changeset` helper or through JavaScript:
+First, create a new `Changeset` using the `changeset` helper or through JavaScript via a factory function:
 
 ```hbs
 {{! application/template.hbs}}
@@ -67,14 +67,14 @@ First, create a new `Changeset` using the `changeset` helper or through JavaScri
 
 ```js
 import Component from '@ember/component';
-import Changeset from 'ember-changeset';
+import { Changeset } from 'ember-changeset';
 
 export default FormComponent extends Component {
   init(...args) {
     super.init(...args)
 
     let validator = this.validate;
-    this.changeset = new Changeset(this.model, validator);
+    this.changeset = Changeset(this.model, validator);
   }
 }
 ```
@@ -142,7 +142,7 @@ On rollback, all changes are dropped and the underlying Object is left untouched
 The default behavior of `Changeset` is to automatically validate a field when it is set. Automatic validation can be disabled by passing `skipValidate` as an option when creating a changeset.
 
 ```js
-let changeset = new Changeset(model, validatorFn, validationMap, { skipValidate: true });
+let changeset = Changeset(model, validatorFn, validationMap, { skipValidate: true });
 ```
 
 ```hbs
@@ -325,7 +325,7 @@ Returns the Object that was wrapped in the changeset.
 
 ```js
 let user = { name: 'Bobby', age: 21, address: { zipCode: '10001' } };
-let changeset = new Changeset(user);
+let changeset = Changeset(user);
 
 changeset.get('data'); // user
 ```
@@ -516,8 +516,8 @@ The `save` method will also remove the internal list of changes if the `save` is
 Merges 2 changesets and returns a new changeset with the same underlying content and validator as the origin. Both changesets must point to the same underlying object. For example:
 
 ```js
-let changesetA = new Changeset(user, validatorFn);
-let changesetB = new Changeset(user, validatorFn);
+let changesetA = Changeset(user, validatorFn);
+let changesetB = Changeset(user, validatorFn);
 
 changesetA.set('firstName', 'Jim');
 changesetA.set('address.zipCode', '94016');
@@ -564,7 +564,7 @@ Rolls back unsaved changes for the specified property only. All other changes wi
 
 ```js
 // user = { firstName: "Jim", lastName: "Bob" };
-let changeset = new Changeset(user);
+let changeset = Changeset(user);
 changeset.set('firstName', 'Jimmy');
 changeset.set('lastName', 'Fallon');
 changeset.rollbackProperty('lastName'); // returns changeset
@@ -592,7 +592,7 @@ let validationMap = {
   'address.zipCode': validateLength({ is: 5 }),
 };
 
-let changeset = new Changeset(user, validatorFn, validationMap);
+let changeset = Changeset(user, validatorFn, validationMap);
 changeset.get('isValid'); // true
 
 // validate single field; returns Promise
@@ -668,7 +668,7 @@ Restores a snapshot of changes and errors to the changeset. This overrides exist
 
 ```js
 let user = { name: 'Adam', address: { country: 'United States' } };
-let changeset = new Changeset(user, validatorFn);
+let changeset = Changeset(user, validatorFn);
 
 changeset.set('name', 'Jim Bob');
 changeset.set('address.country', 'North Korea');
@@ -690,7 +690,7 @@ Unlike `Ecto.Changeset.cast`, `cast` will take an array of allowed keys and remo
 
 ```js
 let allowed = ['name', 'password', 'address.country'];
-let changeset = new Changeset(user, validatorFn);
+let changeset = Changeset(user, validatorFn);
 
 changeset.set('name', 'Jim Bob');
 changeset.set('address.country', 'United States');
