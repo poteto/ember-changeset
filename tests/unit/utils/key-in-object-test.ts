@@ -1,4 +1,4 @@
-import keyInObject from 'dummy/utils/key-in-object';
+import keyInObject from 'ember-changeset/utils/key-in-object';
 import { module, test } from 'qunit';
 
 module('Unit | Utility | key-in-object', function() {
