@@ -155,11 +155,36 @@ export function changeset(
   return c;
 }
 
-export default class Changeset {
+/**
+ * Creates new changesets.
+ * @function Changeset
+ */
+export function Changeset(
+  obj: object,
+  validateFn: ValidatorAction = defaultValidatorFn,
+  validationMap: ValidatorMap = {},
+  options: Config = {}
+) {
+  const c: IChangeset = changeset(obj, validateFn, validationMap, options);
+
+  return new Proxy(c, {
+    get(targetBuffer, key/*, receiver*/) {
+      const res = targetBuffer.get(key.toString());
+      return res;
+    },
+
+    set(targetBuffer, key, value/*, receiver*/) {
+      targetBuffer.set(key.toString(), value);
+      return true;
+    }
+  });
+}
+
+export default class ChangesetKlass {
   /**
    * Changeset factory
    *
-   * @class ValidatedChangeset
+   * @class ChangesetKlass
    * @constructor
    */
   constructor(
