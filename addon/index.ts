@@ -151,7 +151,7 @@ export function changeset(
     return new options.changeset(obj, validateFn, validationMap, options);
   }
 
-  const c = new EmberChangeset(obj, validateFn, validationMap, options);
+  const c = Changeset(obj, validateFn, validationMap, options);
   return c;
 }
 
@@ -164,7 +164,7 @@ export function Changeset(
   validateFn: ValidatorAction = defaultValidatorFn,
   validationMap: ValidatorMap = {},
   options: Config = {}
-) {
+): IChangeset {
   const c: IChangeset = changeset(obj, validateFn, validationMap, options);
 
   return new Proxy(c, {
