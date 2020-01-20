@@ -765,7 +765,7 @@ export class BufferedChangeset implements IChangeset {
       let c: Change = changes[baseKey];
       let result = this.getDeep(normalizeObject(c), remaining.join('.'));
       // just b/c top level key exists doesn't mean it has the nested key we are looking for
-      if (result) {
+      if (typeof result !== 'undefined') {
         return result;
       }
     }
@@ -822,7 +822,7 @@ export class BufferedChangeset implements IChangeset {
       // find leaf and delete from map
       while (isObject(currentNode) && currentKey) {
         let curr: { [key: string]: unknown } = currentNode
-        if (curr.value || curr.validation) {
+        if (typeof curr.value !== 'undefined' || curr.validation) {
           delete previousNode[currentKey];
         }
 
@@ -849,14 +849,14 @@ export class BufferedChangeset implements IChangeset {
       if (remaining.length > 0) {
         let c = changes[baseKey];
         result = this.getDeep(normalizeObject(c), remaining.join('.'));
-        if (result) {
+        if (typeof result !== 'undefined') {
           return result;
         }
       } else {
         result = changes[baseKey];
       }
 
-      if (result && isObject(result)) {
+      if ((result !== undefined && result !== null) && isObject(result)) {
         result = normalizeObject(result);
         let content: Content = this[CONTENT];
 
