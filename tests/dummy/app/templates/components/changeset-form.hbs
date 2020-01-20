@@ -1,6 +1,6 @@
-<h2>Changeset Name: <span data-test-changeset-user-name>{{this.changeset.user.name}}</span></h2>
-<h2>Changeset Email: <span data-test-changeset-user-email>{{this.changeset.user.email}}</span></h2>
 <h2>Changeset cid: <span data-test-changeset-cid>{{this.changeset.cid}}</span></h2>
+<h2>Changeset Email: <span data-test-changeset-user-email>{{changeset-get this.changeset "user.email"}}</span></h2>
+<h2>Changeset Name: <span data-test-changeset-user-name>{{changeset-get this.changeset "user.name"}}</span></h2>
 <br />
 <h2>Model Email: <span data-test-model-user-name>{{this.model.user.name}}</span></h2>
 <h2>Model Email: <span data-test-model-user-email>{{this.model.user.email}}</span></h2>
@@ -21,7 +21,7 @@
   <input
     data-test-user-name
     type="text"
-    value={{this.changeset.user.name}}
+    value={{get this.changeset "user.name"}}
     oninput={{action (changeset-set this.changeset "user.name") value="target.value"}}
   >
 
