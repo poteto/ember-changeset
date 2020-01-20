@@ -10,7 +10,11 @@ export default class ChangesetForm extends Component {
       email: 'something'
     },
     address: null,
-    cid: '1'
+    cid: '1',
+    notifications: {
+      email: false,
+      sms: true
+    }
   }
 
   changeset = new Changeset(this.model)

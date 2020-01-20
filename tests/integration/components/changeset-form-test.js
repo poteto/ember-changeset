@@ -38,4 +38,20 @@ module('Integration | Component | changeset-form', function(hooks) {
     assert.equal(find('[data-test-user-email]').value, 'foo', 'has email input value');
     assert.equal(find('[data-test-user-name]').value, 'bar', 'has name input value');
   });
+
+  test('it correctly toggle boolean values', async function(assert) {
+    await render(hbs`<ChangesetForm />`);
+
+    assert.equal(find('[data-test-changeset-notifications-email]').textContent.trim(), 'false', 'has initial value');
+    await click('[data-test-notifications-email]');
+    assert.equal(find('[data-test-changeset-notifications-email]').textContent.trim(), 'true', 'has updated value');
+    await click('[data-test-notifications-email]');
+    assert.equal(find('[data-test-changeset-notifications-email]').textContent.trim(), 'false', 'has original value again');
+
+    assert.equal(find('[data-test-changeset-notifications-sms]').textContent.trim(), 'true', 'has initial value');
+    await click('[data-test-notifications-sms]');
+    assert.equal(find('[data-test-changeset-notifications-sms]').textContent.trim(), 'false', 'has updated value');
+    await click('[data-test-notifications-sms]');
+    assert.equal(find('[data-test-changeset-notifications-sms]').textContent.trim(), 'true', 'has original value again');
+  });
 });
