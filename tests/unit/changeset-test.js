@@ -682,6 +682,19 @@ module('Unit | Utility | changeset', function(hooks) {
     assert.notOk(get(dummyChangeset, 'isInvalid'), 'should be valid');
   });
 
+  test('it clears errors when setting to original value when nested', async function(assert) {
+    set(dummyModel, 'org', {
+      usa: { ny: 'vaca' }
+    });
+    let dummyChangeset = new Changeset(dummyModel, dummyValidator);
+    dummyChangeset.set('org.usa.ny', '');
+
+    assert.ok(get(dummyChangeset, 'isInvalid'), 'should be invalid');
+    dummyChangeset.set('org.usa.ny', 'vaca');
+    assert.ok(get(dummyChangeset, 'isValid'), 'should be valid');
+    assert.notOk(get(dummyChangeset, 'isInvalid'), 'should be valid');
+  });
+
   test('#set should delete nested changes when equal', async function(assert) {
     set(dummyModel, 'org', {
       usa: { ny: 'i need a vacation' }
