@@ -15,6 +15,7 @@ import isPromise from 'ember-changeset/utils/is-promise';
 import mergeNested from 'ember-changeset/utils/merge-nested';
 import objectWithout from 'ember-changeset/utils/object-without';
 import take from 'ember-changeset/utils/take';
+import keyInObject from 'ember-changeset/utils/key-in-object';
 import mergeDeep from 'ember-changeset/utils/merge-deep';
 import setDeep from 'ember-changeset/utils/set-deep';
 import getDeep from 'ember-changeset/utils/get-deep';
@@ -209,16 +210,15 @@ export class BufferedChangeset implements IChangeset {
     let config: Config = this[OPTIONS];
     let skipValidate: boolean | undefined = config['skipValidate'];
 
+    let content: Content = this[CONTENT];
+    let oldValue = this.safeGet(content, key);
+
     if (skipValidate) {
-      let content: Content = this[CONTENT];
-      let oldValue = this.safeGet(content, key);
       this._setProperty({ key, value, oldValue });
       this._handleValidation(true, { key, value });
       return;
     }
 
-    let content: Content = this[CONTENT];
-    let oldValue: any = this.safeGet(content, key);
     this._setProperty({ key, value, oldValue });
     this._validateKey(key, value);
   }
@@ -709,7 +709,7 @@ export class BufferedChangeset implements IChangeset {
     if (!isEqual(oldValue, value)) {
       // @tracked
       this[CHANGES] = this.setDeep(changes, key, new Change(value));
-    } else if (key in changes) {
+    } else if (keyInObject(changes, key)) {
       // @tracked
       this[CHANGES] = this._deleteKey(CHANGES, key) as Changes;
     }
@@ -903,7 +903,7 @@ export class BufferedChangeset implements IChangeset {
     key: string,
     value: T
   ): void | Promise<ValidationResult | T | IErr<T>> | T | IErr<T> | ValidationResult {
-    if (this.hasOwnProperty(key) || key in this) {
+    if (this.hasOwnProperty(key) || keyInObject(this, key)) {
       this[key] = value;
       return;
     }
