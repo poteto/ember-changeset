@@ -151,7 +151,7 @@ export function changeset(
     return new options.changeset(obj, validateFn, validationMap, options);
   }
 
-  const c = Changeset(obj, validateFn, validationMap, options);
+  const c = new EmberChangeset(obj, validateFn, validationMap, options);
   return c;
 }
 
