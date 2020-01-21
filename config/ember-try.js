@@ -24,6 +24,7 @@ module.exports = async function() {
       },
       {
         name: 'ember-beta',
+        allowedToFail: true,
         npm: {
           devDependencies: {
             'ember-source': await getChannelURL('beta')
