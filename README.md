@@ -100,7 +100,7 @@ export default class FormController extends Controller {
   @action
   validate({ key, newValue, oldValue, changes, content }) {
     // lookup a validator function on your favorite validation library
-    // should return a Boolean
+    // and return a Boolean
   }
 }
 ```
