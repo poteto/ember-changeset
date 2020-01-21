@@ -183,6 +183,7 @@ export function Changeset(
 export default class ChangesetKlass {
   /**
    * Changeset factory
+   * TODO: deprecate in favor of factory function
    *
    * @class ChangesetKlass
    * @constructor
