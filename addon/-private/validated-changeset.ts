@@ -50,11 +50,29 @@ const AFTER_VALIDATION_EVENT = 'afterValidation';
 const AFTER_ROLLBACK_EVENT = 'afterRollback';
 const defaultValidatorFn = () => true;
 const defaultOptions = { skipValidate: false };
-const isEmberDataObject = (obj: Object) => {
-  let keys = Object.keys(obj || {})
-  return keys.indexOf('content') !== -1 &&
-         keys.indexOf('isFulfilled') !== -1 &&
-         keys.indexOf('isRejected') !== -1
+
+// TODO: Get rid of this heuristic check by passing an option to the Changeset constructor
+const isBelongsToRelationship = (obj: Object) => {
+  if (!obj) {
+    return false;
+  }
+
+  if (obj.hasOwnProperty('content') &&
+      obj.hasOwnProperty('isFulfilled') &&
+      obj.hasOwnProperty('isRejected')) {
+    // Async belongsTo()
+    return true;
+  }
+
+  if ('isLoading' in obj &&
+      'isLoaded' in obj &&
+      'isNew' in obj &&
+      'hasDirtyAttributes' in obj) {
+    // Sync belongsTo()
+    return true;
+  }
+
+  return false;
 }
 
 export class BufferedChangeset implements IChangeset {
@@ -865,7 +883,7 @@ export class BufferedChangeset implements IChangeset {
         // requested key is the top most nested property and we have changes in of the properties, we need to
         // merge the original model data with the changes to have the complete object.
         // eg. model = { user: { name: 'not changed', email: 'changed@prop.com'} }
-        if (!Array.isArray(result) && isObject(content[baseKey]) && !isEmberDataObject(content[baseKey])) {
+        if (!Array.isArray(result) && isObject(content[baseKey]) && !isBelongsToRelationship(content[baseKey])) {
           let data: Record<string, any> = {}
           Object.keys(content[baseKey]).forEach(k => {
             data[k] = this.getDeep(content, `${baseKey}.${k}`)
