@@ -1,4 +1,4 @@
-import Changeset from 'ember-changeset';
+import Changeset, { EmberChangeset, Changeset as ChangesetFactory } from 'ember-changeset';
 import { settled } from '@ember/test-helpers';
 import { module, test } from 'qunit';
 
@@ -1865,5 +1865,32 @@ module('Unit | Utility | changeset', function(hooks) {
     c.validate('org.usa.ny')
       .then(() => c.set('org.usa.ny', 'should not fail'))
       .finally(done);
+  });
+
+  test('can call Changeset Factory function', async function(assert) {
+    set(dummyModel, 'org', {
+      usa: { ny: 'vaca' }
+    });
+    let dummyChangeset = ChangesetFactory(dummyModel, dummyValidator);
+    dummyChangeset.set('org.usa.ny', '');
+
+    assert.ok(get(dummyChangeset, 'isInvalid'), 'should be invalid');
+    dummyChangeset.set('org.usa.ny', 'vaca');
+    assert.ok(get(dummyChangeset, 'isValid'), 'should be valid');
+    assert.notOk(get(dummyChangeset, 'isInvalid'), 'should be valid');
+  });
+
+  test('can call with extended Changeset', async function(assert) {
+    set(dummyModel, 'org', {
+      usa: { ny: 'vaca' }
+    });
+    let extended = class ExtendedChangeset extends EmberChangeset {}
+    let dummyChangeset = ChangesetFactory(dummyModel, dummyValidator, null, { changeset: extended });
+    dummyChangeset.set('org.usa.ny', '');
+
+    assert.ok(get(dummyChangeset, 'isInvalid'), 'should be invalid');
+    dummyChangeset.set('org.usa.ny', 'vaca');
+    assert.ok(get(dummyChangeset, 'isValid'), 'should be valid');
+    assert.notOk(get(dummyChangeset, 'isInvalid'), 'should be valid');
   });
 });
