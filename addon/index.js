@@ -134,6 +134,13 @@ export class EmberChangeset extends BufferedChangeset {
     return this;
   }
 
+  /**
+   * Proxied getter
+   * TODO: Evaluate Ember Data particularities here and see how we can use
+   * base class `get`
+   *
+   * @method get
+   */
   get(key) {
     // 'person'
     // 'person.username'
