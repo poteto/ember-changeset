@@ -13,7 +13,7 @@ module('Unit | Utility | merge deep', () => {
 
   test('it unsets', async function(assert) {
     let objA = { other: 'Ivan' };
-    let objB = { other: { value: null } };
+    let objB = { other: null };
     let value = mergeDeep(objA, objB);
 
     assert.deepEqual(value, { other: null }, 'unsets value');
@@ -21,7 +21,7 @@ module('Unit | Utility | merge deep', () => {
 
   test('it works with Ember.get and Ember.set', async function(assert) {
     let objA = { other: 'Ivan' };
-    let objB = { other: { value: null } };
+    let objB = { other: null };
     let value = mergeDeep(objA, objB, { safeGet: get, safeSet: set });
 
     assert.deepEqual(value, { other: null }, 'unsets value');
