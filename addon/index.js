@@ -1,5 +1,5 @@
 import { assert } from '@ember/debug';
-import { BufferedChangeset } from 'validated-changeset';
+import { BufferedChangeset, isObject, normalizeObject } from 'validated-changeset';
 import mergeDeep from './utils/merge-deep';
 import { notifyPropertyChange } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
@@ -9,6 +9,30 @@ const CHANGES = '_changes';
 const ERRORS = '_errors';
 const CONTENT = '_content';
 const defaultValidatorFn = () => true;
+
+// TODO: Get rid of this heuristic check by passing an option to the Changeset constructor
+const isBelongsToRelationship = (obj) => {
+  if (!obj) {
+    return false;
+  }
+
+  if (obj.hasOwnProperty('content') &&
+      obj.hasOwnProperty('isFulfilled') &&
+      obj.hasOwnProperty('isRejected')) {
+    // Async belongsTo()
+    return true;
+  }
+
+  if ('isLoading' in obj &&
+      'isLoaded' in obj &&
+      'isNew' in obj &&
+      'hasDirtyAttributes' in obj) {
+    // Sync belongsTo()
+    return true;
+  }
+
+  return false;
+}
 
 export class EmberChangeset extends BufferedChangeset {
   @tracked '_changes';
@@ -107,6 +131,68 @@ export class EmberChangeset extends BufferedChangeset {
     }
 
     return this;
+  }
+
+  get(key) {
+    // 'person'
+    // 'person.username'
+    let [baseKey, ...remaining] = key.split('.');
+
+    if (Object.prototype.hasOwnProperty.call(this[CHANGES], baseKey)) {
+      let changes = this[CHANGES];
+      let result;
+
+      if (remaining.length > 0) {
+        let c = changes[baseKey];
+        result = this.getDeep(normalizeObject(c), remaining.join('.'));
+        if (typeof result !== 'undefined') {
+          return result;
+        }
+      } else {
+        result = changes[baseKey];
+      }
+
+      if ((result !== undefined && result !== null) && isObject(result)) {
+        result = normalizeObject(result);
+        let content = this[CONTENT];
+
+        // Merge the content with the changes to have a complete object for a nested property.
+        // Given a object with nested property and multiple properties inside of it, if the
+        // requested key is the top most nested property and we have changes in of the properties, we need to
+        // merge the original model data with the changes to have the complete object.
+        // eg. model = { user: { name: 'not changed', email: 'changed@prop.com'} }
+        if (!Array.isArray(result) && isObject(content[baseKey]) && !isBelongsToRelationship(content[baseKey])) {
+          let data = {};
+          Object.keys(content[baseKey]).forEach(k => {
+            data[k] = this.getDeep(content, `${baseKey}.${k}`)
+          })
+          return Object.assign(data, result);
+        }
+
+        return result
+      }
+
+      if (result) {
+        return result.value;
+      }
+    }
+
+
+    // return getters/setters/methods on BufferedProxy instance
+    if (this[key]) {
+      return this[key];
+    } else if (this[baseKey]) {
+      const v = this[baseKey];
+      if (isObject(v)) {
+        const result = this.getDeep(v, remaining.join('.'));
+        return result;
+      }
+    }
+
+    // finally return on underlying object
+    let content = this[CONTENT];
+    const result = this.getDeep(content, key);
+    return result;
   }
 }
 
