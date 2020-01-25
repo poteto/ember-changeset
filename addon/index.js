@@ -1,5 +1,6 @@
 import { assert } from '@ember/debug';
-import { BufferedChangeset, mergeDeep } from 'validated-changeset';
+import { BufferedChangeset } from 'validated-changeset';
+import { mergeDeep } from './utils/merge-deep';
 import { notifyPropertyChange } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
 import { get as safeGet, set as safeSet } from '@ember/object';
@@ -134,12 +135,12 @@ export function changeset(
  * @function Changeset
  */
 export function Changeset(
-  obj: object,
-  validateFn: ValidatorAction = defaultValidatorFn,
-  validationMap: ValidatorMap = {},
-  options: Config = {}
-): IChangeset {
-  const c: IChangeset = changeset(obj, validateFn, validationMap, options);
+  obj,
+  validateFn,
+  validationMap,
+  options
+) {
+  const c = changeset(obj, validateFn, validationMap, options);
 
   return new Proxy(c, {
     get(targetBuffer, key/*, receiver*/) {

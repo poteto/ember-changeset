@@ -1,8 +1,7 @@
-import Helper from '@ember/component/helper';
-import { IChangeset } from 'ember-changeset/types';
+import { helper } from '@ember/component/helper';
 
-export default class ChangesetGet extends Helper.extend() {
-  compute(this: ChangesetGet, [changeset, fieldPath]: [IChangeset, string]) {
-    return changeset.get(fieldPath);
-  }
+export function changesetGet([changeset, fieldPath]) {
+  return changeset.get(fieldPath);
 }
+
+export default helper(changesetGet);
