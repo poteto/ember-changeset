@@ -1,6 +1,6 @@
 import { assert } from '@ember/debug';
 import { BufferedChangeset } from 'validated-changeset';
-import { mergeDeep } from './utils/merge-deep';
+import mergeDeep from './utils/merge-deep';
 import { notifyPropertyChange } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
 import { get as safeGet, set as safeSet } from '@ember/object';
@@ -136,9 +136,9 @@ export function changeset(
  */
 export function Changeset(
   obj,
-  validateFn,
-  validationMap,
-  options
+  validateFn = defaultValidatorFn,
+  validationMap = {},
+  options = {}
 ) {
   const c = changeset(obj, validateFn, validationMap, options);
 
