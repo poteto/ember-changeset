@@ -9,7 +9,7 @@ const ERRORS = '_errors';
 const CONTENT = '_content';
 const defaultValidatorFn = () => true;
 
-class EmberChangeset extends BufferedChangeset {
+export class EmberChangeset extends BufferedChangeset {
   @tracked '_changes';
   @tracked '_errors';
   @tracked '_content';
@@ -121,16 +121,45 @@ export function changeset(
   assert('Underlying object for changeset is missing', Boolean(obj));
   assert('Array is not a valid type to pass as the first argument to `changeset`', !Array.isArray(obj));
 
-  const c = new EmberChangeset(obj, validateFn, validationMap, options);
+  if (options.changeset) {
+    return new options.changeset(obj, validateFn, validationMap, options);
+  }
 
+  const c = new EmberChangeset(obj, validateFn, validationMap, options);
   return c;
 }
 
-export default class Changeset {
+/**
+ * Creates new changesets.
+ * @function Changeset
+ */
+export function Changeset(
+  obj: object,
+  validateFn: ValidatorAction = defaultValidatorFn,
+  validationMap: ValidatorMap = {},
+  options: Config = {}
+): IChangeset {
+  const c: IChangeset = changeset(obj, validateFn, validationMap, options);
+
+  return new Proxy(c, {
+    get(targetBuffer, key/*, receiver*/) {
+      const res = targetBuffer.get(key.toString());
+      return res;
+    },
+
+    set(targetBuffer, key, value/*, receiver*/) {
+      targetBuffer.set(key.toString(), value);
+      return true;
+    }
+  });
+}
+
+export default class ChangesetKlass {
   /**
    * Changeset factory
+   * TODO: deprecate in favor of factory function
    *
-   * @class ValidatedChangeset
+   * @class ChangesetKlass
    * @constructor
    */
   constructor(

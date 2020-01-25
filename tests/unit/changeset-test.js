@@ -1,4 +1,4 @@
-import Changeset from 'ember-changeset';
+import Changeset, { EmberChangeset, Changeset as ChangesetFactory } from 'ember-changeset';
 import { settled } from '@ember/test-helpers';
 import { module, test } from 'qunit';
 
@@ -33,6 +33,9 @@ let dummyValidations = {
     return isPresent(value);
   },
   org: {
+    isCompliant(value) {
+      return !!value;
+    },
     usa: {
       ny(value) {
         return isPresent(value) || "must be present";
@@ -133,6 +136,33 @@ module('Unit | Utility | changeset', function(hooks) {
   /**
    * #errors
    */
+  test('#errors returns the error object and keeps changes', async function(assert) {
+    let dummyChangeset = new Changeset(dummyModel, dummyValidator);
+    let expectedResult = [{ key: 'name', validation: 'too short', value: 'a' }];
+    dummyChangeset.set('name', 'a');
+
+    assert.deepEqual(dummyChangeset.errors, expectedResult, 'should return errors object');
+    assert.deepEqual(dummyChangeset.get('errors'), expectedResult, 'should return nested errors');
+    assert.deepEqual(dummyChangeset.change, { name: 'a' }, 'should return change object');
+  });
+
+
+  test('can get nested values in the errors object', function(assert) {
+    let dummyChangeset = new Changeset(dummyModel, dummyValidator);
+    dummyChangeset.set('unknown', 'wat');
+    dummyChangeset.set('org.usa.ny', '');
+    dummyChangeset.set('name', '');
+
+    let expectedErrors = [
+      { key: 'org.usa.ny', validation: 'must be present', value: '' },
+      { key: 'name', validation: 'too short', value: '' }
+    ];
+    assert.deepEqual(
+      dummyChangeset.get('errors'),
+      expectedErrors,
+      'should return errors object for `org.usa.ny` key and `name` key'
+    );
+  });
 
   /**
    * #changes
@@ -260,13 +290,27 @@ module('Unit | Utility | changeset', function(hooks) {
     assert.equal(result, '', 'should proxy to change');
   });
 
-  test('#get returns change that is has undefined as value', async function(assert) {
+  test('#get returns change that has undefined as value', async function(assert) {
     set(dummyModel, 'name', 'Jim Bob');
     let dummyChangeset = new Changeset(dummyModel);
     set(dummyChangeset, 'name', undefined);
     let result = get(dummyChangeset, 'name');
 
     assert.equal(result, undefined, 'should proxy to change');
+  });
+
+  test('#get returns change that has array as sibling', async function(assert) {
+    set(dummyModel, 'name', 'Bob');
+    set(dummyModel, 'creds', ['burgers']);
+    let dummyChangeset = new Changeset(dummyModel);
+    set(dummyChangeset, 'name', 'Burdger');
+
+    assert.equal(get(dummyChangeset, 'name'), 'Burdger', 'should proxy name to change');
+    assert.deepEqual(get(dummyChangeset, 'creds'), ['burgers'], 'should proxy creds to change');
+
+    set(dummyChangeset, 'creds', ['fries']);
+    assert.equal(get(dummyChangeset, 'name'), 'Burdger', 'should proxy name to change');
+    assert.deepEqual(get(dummyChangeset, 'creds'), ['fries'], 'should proxy creds to change after change');
   });
 
   test('nested objects will return correct values', async function(assert) {
@@ -641,6 +685,32 @@ module('Unit | Utility | changeset', function(hooks) {
     assert.notOk(get(dummyChangeset, 'isInvalid'), 'should be valid');
   });
 
+  test('it clears errors when setting to original value when nested', async function(assert) {
+    set(dummyModel, 'org', {
+      usa: { ny: 'vaca' }
+    });
+    let dummyChangeset = new Changeset(dummyModel, dummyValidator);
+    dummyChangeset.set('org.usa.ny', '');
+
+    assert.ok(get(dummyChangeset, 'isInvalid'), 'should be invalid');
+    dummyChangeset.set('org.usa.ny', 'vaca');
+    assert.ok(get(dummyChangeset, 'isValid'), 'should be valid');
+    assert.notOk(get(dummyChangeset, 'isInvalid'), 'should be valid');
+  });
+
+  test('it clears errors when setting to original value when nested Booleans', async function(assert) {
+    set(dummyModel, 'org', {
+      isCompliant: true
+    });
+    let dummyChangeset = new Changeset(dummyModel, dummyValidator);
+    dummyChangeset.set('org.isCompliant', false);
+
+    assert.ok(get(dummyChangeset, 'isInvalid'), 'should be invalid');
+    dummyChangeset.set('org.isCompliant', true);
+    assert.ok(get(dummyChangeset, 'isValid'), 'should be valid');
+    assert.notOk(get(dummyChangeset, 'isInvalid'), 'should be valid');
+  });
+
   test('#set should delete nested changes when equal', async function(assert) {
     set(dummyModel, 'org', {
       usa: { ny: 'i need a vacation' }
@@ -663,6 +733,60 @@ module('Unit | Utility | changeset', function(hooks) {
     c.set('foo', 'not an object anymore');
     c.execute();
     assert.equal(c.get('foo'), get(model, 'foo'));
+  });
+
+  test('#set works after save', async function(assert) {
+    dummyModel['org'] = {
+      usa: {
+        mn: 'mn',
+        ny: 'ny'
+      }
+    };
+
+    const c = new Changeset(dummyModel);
+    c.set('org.usa.ny', 'NY');
+    c.set('org.usa.mn', 'MN');
+
+    assert.equal(c.get('org.usa.ny'), 'NY');
+    assert.equal(c.get('org.usa.mn'), 'MN');
+    assert.equal(dummyModel.org.usa.ny, 'ny');
+    assert.equal(dummyModel.org.usa.mn, 'mn');
+
+    c.save();
+
+    assert.equal(c.get('org.usa.ny'), 'NY');
+    assert.equal(c.get('org.usa.mn'), 'MN');
+    assert.equal(dummyModel.org.usa.ny, 'NY');
+    assert.equal(dummyModel.org.usa.mn, 'MN');
+
+    c.set('org.usa.ny', 'nil');
+
+    assert.equal(c.get('org.usa.ny'), 'nil');
+    assert.equal(c.get('org.usa.mn'), 'MN');
+    assert.equal(dummyModel.org.usa.ny, 'NY');
+    assert.equal(dummyModel.org.usa.mn ,'MN');
+
+    c.save();
+
+    assert.equal(c.get('org.usa.ny'), 'nil');
+    assert.equal(c.get('org.usa.mn'), 'MN');
+    assert.equal(dummyModel.org.usa.ny, 'nil');
+    assert.equal(dummyModel.org.usa.mn, 'MN');
+
+    c.set('org.usa.ny', 'nil2');
+    c.set('org.usa.mn', 'undefined');
+
+    assert.equal(c.get('org.usa.ny'), 'nil2');
+    assert.equal(c.get('org.usa.mn'), 'undefined');
+    assert.equal(dummyModel.org.usa.ny, 'nil');
+    assert.equal(dummyModel.org.usa.mn, 'MN');
+
+    c.save();
+
+    assert.equal(c.get('org.usa.ny'), 'nil2');
+    assert.equal(c.get('org.usa.mn'), 'undefined');
+    assert.equal(dummyModel.org.usa.ny, 'nil2');
+    assert.equal(dummyModel.org.usa.mn, 'undefined');
   });
 
   /**
@@ -1741,5 +1865,32 @@ module('Unit | Utility | changeset', function(hooks) {
     c.validate('org.usa.ny')
       .then(() => c.set('org.usa.ny', 'should not fail'))
       .finally(done);
+  });
+
+  test('can call Changeset Factory function', async function(assert) {
+    set(dummyModel, 'org', {
+      usa: { ny: 'vaca' }
+    });
+    let dummyChangeset = ChangesetFactory(dummyModel, dummyValidator);
+    dummyChangeset.set('org.usa.ny', '');
+
+    assert.ok(get(dummyChangeset, 'isInvalid'), 'should be invalid');
+    dummyChangeset.set('org.usa.ny', 'vaca');
+    assert.ok(get(dummyChangeset, 'isValid'), 'should be valid');
+    assert.notOk(get(dummyChangeset, 'isInvalid'), 'should be valid');
+  });
+
+  test('can call with extended Changeset', async function(assert) {
+    set(dummyModel, 'org', {
+      usa: { ny: 'vaca' }
+    });
+    let extended = class ExtendedChangeset extends EmberChangeset {}
+    let dummyChangeset = ChangesetFactory(dummyModel, dummyValidator, null, { changeset: extended });
+    dummyChangeset.set('org.usa.ny', '');
+
+    assert.ok(get(dummyChangeset, 'isInvalid'), 'should be invalid');
+    dummyChangeset.set('org.usa.ny', 'vaca');
+    assert.ok(get(dummyChangeset, 'isValid'), 'should be valid');
+    assert.notOk(get(dummyChangeset, 'isInvalid'), 'should be valid');
   });
 });

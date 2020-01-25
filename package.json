@@ -1,6 +1,6 @@
 {
   "name": "ember-changeset",
-  "version": "3.0.0-beta.3",
+  "version": "3.0.0-beta.17",
   "description": "Changesets for Ember",
   "keywords": [
     "ember-addon",
@@ -65,7 +65,7 @@
     "prettier": "^1.19.1"
   },
   "engines": {
-    "node": "8.* || >= 10.*"
+    "node": "10.* || >= 12.*"
   },
   "ember-addon": {
     "configPath": "tests/dummy/config"

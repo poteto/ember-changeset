@@ -7,21 +7,23 @@ module('Integration | main', function(hooks) {
   setupTest(hooks);
 
   hooks.beforeEach(function() {
-    // for backwards compatibility with pre 3.0 versions of ember
-    let container = this.owner || this.application.__container__;
-    this.store = container.lookup('service:store');
+    this.store = this.owner.lookup('service:store');
 
-    let profile = this.store.createRecord('profile');
-    let user = this.store.createRecord('user', { profile });
-    this.dummyUser = user;
+    this.createUser = (userType, withDogs) => {
+      let profile = this.store.createRecord('profile');
+      let user = this.store.createRecord(userType, { profile });
 
-    for (let i = 0; i < 2; i++) {
-      user.get('dogs').addObject(this.store.createRecord('dog'))
+      if (withDogs) {
+        for (let i = 0; i < 2; i++) {
+          user.get('dogs').addObject(this.store.createRecord('dog'))
+        }
+      }
+      return user;
     }
   });
 
-  test('it works for belongsTo', async function(assert) {
-    let user = this.dummyUser;
+  async function testBasicBelongsTo(assert, userType) {
+    let user = this.createUser(userType, false);
     let changeset = new Changeset(user);
 
     assert.equal(changeset.get('profile'), user.get('profile'));
@@ -42,8 +44,7 @@ module('Integration | main', function(hooks) {
     assert.equal(user.get('profile.lastName'), 'Ross', 'lastName after execute');
     assert.equal(user.get('profile.nickname'), 'g', 'nickname after execute');
 
-    let profile;
-    profile = await this.store.createRecord('profile', { firstName: 'Terry', lastName: 'Bubblewinkles', nickname: 't' });
+    let profile = this.store.createRecord('profile', { firstName: 'Terry', lastName: 'Bubblewinkles', nickname: 't' });
 
     changeset.set('profile', profile);
 
@@ -67,32 +68,61 @@ module('Integration | main', function(hooks) {
     changeset.execute();
 
     assert.equal(changeset.get('profile'), null, 'changeset profile relationship is still null');
-    assert.equal(user.get('profile').get('firstName'), null, 'underlying user profile firstName is null');
-    assert.ok(user.get('profile'), 'user has yet to call save so still present as proxy');
+    assert.equal(user.get('profile.firstName'), null, 'underlying user profile firstName is null');
+  }
+
+  test('it works for belongsTo', async function(assert) {
+    await testBasicBelongsTo.call(this, assert, 'user');
   });
 
-  test('can save user', async function(assert) {
+  test('it works for sync belongsTo', async function(assert) {
+    await testBasicBelongsTo.call(this, assert, 'sync-user');
+  });
+
+  async function testSaveUser(assert, userType) {
     assert.expect(1);
 
     let profile = this.store.createRecord('profile');
     let save = () => {
       assert.ok(true, 'user save was called')
     }
-    this.dummyUser = this.store.createRecord('user', { profile, save });
 
-    let user = this.dummyUser;
+    let user = this.store.createRecord(userType, { profile, save });
     let changeset = new Changeset(user);
 
     changeset.set('profile.firstName', 'Grace');
-    changeset.execute();
+    changeset.save();
+  }
+
+  test('can save user', async function(assert) {
+    await testSaveUser.call(this, assert, 'user');
+  });
+
+  test('can save sync user', async function(assert) {
+    await testSaveUser.call(this, assert, 'sync-user');
+  });
+
+  test('can save ember data model with multiple attributes', async function (assert) {
+    assert.expect(1);
+
+    let save = () => {
+      assert.ok(true, 'profile save was called');
+    };
+    let profile = this.store.createRecord('profile', { save });
+    let pet = this.store.createRecord('dog')
+    let changeset = new Changeset(profile);
+
+    changeset.set('firstName', 'bo');
+    changeset.set('lastName', 'jackson');
+    changeset.set('pet', pet)
+
     changeset.save();
   });
 
-  test('can work with belongsTo via changeset', async function(assert) {
+  async function testBelongsToViaChangeset(assert, userType) {
     let profile = this.store.createRecord('profile');
-    this.dummyUser = this.store.createRecord('user', { profile });
+    let user = this.store.createRecord(userType, { profile });
 
-    let user = this.dummyUser;
     let changeset = new Changeset(user);
 
     changeset.set('profile.firstName', 'Grace');
@@ -111,11 +141,18 @@ module('Integration | main', function(hooks) {
 
     assert.equal(profile.firstName, 'Grace', 'profile has first name');
     assert.equal(user.get('profile.firstName'), 'Grace', 'user now has profile has first name');
+  }
+
+  test('can work with belongsTo via changeset', async function(assert) {
+    await testBelongsToViaChangeset.call(this, assert, 'user');
   });
 
-  test('it works for hasMany / firstObject', async function(assert) {
-    let user = this.dummyUser;
+  test('can work with sync belongsTo via changeset', async function(assert) {
+    await testBelongsToViaChangeset.call(this, assert, 'sync-user');
+  });
 
+  async function testHasMany(assert, userType) {
+    let user = this.createUser(userType, true);
     let changeset = new Changeset(user);
     let newDog = this.store.createRecord('dog', { breed: 'Münsterländer' });
     let dogs = changeset.get('dogs');
@@ -139,10 +176,18 @@ module('Integration | main', function(hooks) {
 
     dogs = user.get('dogs').toArray();
     assert.equal(dogs.length, 0, 'dogs removed');
+  }
+
+  test('it works for hasMany / firstObject', async function(assert) {
+    await testHasMany.call(this, assert, 'user');
   });
 
-  test('it can rollback hasMany', async function(assert) {
-    let user = this.dummyUser;
+  test('it works for sync hasMany / firstObject', async function(assert) {
+    await testHasMany.call(this, assert, 'sync-user');
+  });
+
+  async function testRollbackHasMany(assert, userType) {
+    let user = this.createUser(userType, true);
 
     let changeset = new Changeset(user);
     let newDog = this.store.createRecord('dog', { breed: 'Münsterländer' });
@@ -155,5 +200,42 @@ module('Integration | main', function(hooks) {
 
     dogs = changeset.get('dogs');
     assert.equal(dogs.length, 2, 'changeset has 2 dogs');
+  }
+
+  test('it can rollback hasMany', async function(assert) {
+    await testRollbackHasMany.call(this, assert, 'user');
+  });
+
+  test('it can rollback sync hasMany', async function(assert) {
+    await testRollbackHasMany.call(this, assert, 'sync-user');
+  });
+
+  async function testInitiallyEmptyRelationships(assert, userType) {
+    let profile = this.store.createRecord('profile');
+    let user =  this.store.createRecord(userType);
+
+    let changeset = new Changeset(user);
+
+    changeset.set('profile', profile);
+    const dogs = [
+      this.store.createRecord('dog'),
+      this.store.createRecord('dog', { breed: 'Münsterländer' })
+    ];
+
+    changeset.set('dogs', dogs);
+
+    changeset.execute();
+
+    assert.equal(user.get('profile.firstName'), 'Bob', 'Profile is set on user');
+    assert.equal(user.get('dogs.firstObject.breed'), 'rough collie');
+    assert.equal(user.get('dogs.lastObject.breed'), 'Münsterländer');
+  }
+
+  test('it sets relationships which were empty initially', async function(assert) {
+    await testInitiallyEmptyRelationships.call(this, assert, 'user');
+  });
+
+  test('it sets sync relationships which were empty initially', async function(assert) {
+    await testInitiallyEmptyRelationships.call(this, assert, 'sync-user');
   });
 });
