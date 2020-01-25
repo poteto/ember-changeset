@@ -1,5 +1,5 @@
 import { assert } from '@ember/debug';
-import { BufferedChangeset, normalizeObject } from 'validated-changeset';
+import { BufferedChangeset, normalizeObject, pureAssign } from 'validated-changeset';
 import mergeDeep from './utils/merge-deep';
 import isObject from './utils/is-object';
 import { notifyPropertyChange } from '@ember/object';
@@ -167,7 +167,7 @@ export class EmberChangeset extends BufferedChangeset {
           Object.keys(content[baseKey]).forEach(k => {
             data[k] = this.getDeep(content, `${baseKey}.${k}`)
           })
-          return Object.assign(data, result);
+          return pureAssign(data, result);
         }
 
         return result
