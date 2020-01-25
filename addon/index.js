@@ -1,6 +1,7 @@
 import { assert } from '@ember/debug';
-import { BufferedChangeset, isObject, normalizeObject } from 'validated-changeset';
+import { BufferedChangeset, normalizeObject } from 'validated-changeset';
 import mergeDeep from './utils/merge-deep';
+import isObject from './utils/is-object';
 import { notifyPropertyChange } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
 import { get as safeGet, set as safeSet } from '@ember/object';
@@ -190,8 +191,7 @@ export class EmberChangeset extends BufferedChangeset {
     }
 
     // finally return on underlying object
-    let content = this[CONTENT];
-    const result = this.getDeep(content, key);
+    const result = this.getDeep(this[CONTENT], key);
     return result;
   }
 }
