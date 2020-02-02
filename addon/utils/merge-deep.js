@@ -1,25 +1,20 @@
-import Change from '../-private/change';
+import { Change } from 'validated-changeset';
 
-interface Options {
-  safeGet: any
-  safeSet: any
-}
-
-function isMergeableObject(value: any): Boolean {
+function isMergeableObject(value) {
   return isNonNullObject(value) && !isSpecial(value);
 }
 
-function isNonNullObject(value: any): Boolean {
+function isNonNullObject(value) {
   return !!value && typeof value === 'object';
 }
 
-function isSpecial(value: any): Boolean {
+function isSpecial(value) {
   let stringValue = Object.prototype.toString.call(value);
 
   return stringValue === '[object RegExp]' || stringValue === '[object Date]';
 }
 
-function getEnumerableOwnPropertySymbols(target: any): any {
+function getEnumerableOwnPropertySymbols(target) {
   return Object.getOwnPropertySymbols
     ? Object.getOwnPropertySymbols(target).filter(symbol => {
       return target.propertyIsEnumerable(symbol)
@@ -27,11 +22,11 @@ function getEnumerableOwnPropertySymbols(target: any): any {
     : [];
 }
 
-function getKeys(target: any) {
+function getKeys(target) {
   return Object.keys(target).concat(getEnumerableOwnPropertySymbols(target))
 }
 
-function propertyIsOnObject(object: any, property: any) {
+function propertyIsOnObject(object, property) {
   try {
     return property in object;
   } catch (_) {
@@ -40,14 +35,14 @@ function propertyIsOnObject(object: any, property: any) {
 }
 
 // Ember Data models don't respond as expected to foo.hasOwnProperty, so we do a special check
-function hasEmberDataProperty(target: any, key: string, options: Options): Boolean {
-  let fields: Map<string, any> | null = options.safeGet(target, 'constructor.fields');
+function hasEmberDataProperty(target, key, options) {
+  let fields = options.safeGet(target, 'constructor.fields');
 
   return fields instanceof Map && fields.has(key);
 }
 
 // Protects from prototype poisoning and unexpected merging up the prototype chain.
-function propertyIsUnsafe(target: any, key: string, options: Options): Boolean {
+function propertyIsUnsafe(target, key, options) {
   if(hasEmberDataProperty(target, key, options)) {
     return false;
   }
@@ -63,8 +58,8 @@ function propertyIsUnsafe(target: any, key: string, options: Options): Boolean {
  *
  * @method buildPathToValue
  */
-function buildPathToValue(source: any, options: Options, kv: Record<string, any>, possibleKeys: string[]): Record<string, any> {
-  Object.keys(source).forEach((key: string): void => {
+function buildPathToValue(source, options, kv, possibleKeys) {
+  Object.keys(source).forEach(key => {
     let possible = source[key];
     if (possible && possible.hasOwnProperty('value')) {
       kv[[...possibleKeys, key].join('.')] = possible.value;
@@ -84,13 +79,13 @@ function buildPathToValue(source: any, options: Options, kv: Record<string, any>
  *
  * @method mergeTargetAndSource
  */
-function mergeTargetAndSource(target: any, source: any, options: Options): any {
+function mergeTargetAndSource(target, source, options) {
   getKeys(source).forEach(key => {
     // proto poisoning.  So can set by nested key path 'person.name'
     if (propertyIsUnsafe(target, key, options)) {
       // if safeSet, we will find keys leading up to value and set
       if (options.safeSet) {
-        const kv: Record<string, any> = buildPathToValue(source, options, {}, []);
+        const kv = buildPathToValue(source, options, {}, []);
         // each key will be a path nested to the value `person.name.other`
         if (Object.keys(kv).length > 0) {
           // we found some keys!
@@ -130,9 +125,9 @@ function mergeTargetAndSource(target: any, source: any, options: Options): any {
  *
  * @method mergeDeep
  */
-export default function mergeDeep(target: any, source: any, options: Options = { safeGet: undefined, safeSet: undefined }): object | [any] {
-  options.safeGet = options.safeGet || function (obj: any, key: string): any { return obj[key] };
-  options.safeSet = options.safeSet || function(obj: any, key: string, value: unknown): any { return obj[key] = value };
+export default function mergeDeep(target, source, options = {}) {
+  options.safeGet = options.safeGet || function (obj, key) { return obj[key] };
+  options.safeSet = options.safeSet || function(obj, key, value) { return obj[key] = value };
   let sourceIsArray = Array.isArray(source);
   let targetIsArray = Array.isArray(target);
   let sourceAndTargetTypesMatch = sourceIsArray === targetIsArray;

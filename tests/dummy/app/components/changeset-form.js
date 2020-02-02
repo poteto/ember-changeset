@@ -19,7 +19,8 @@ export default class ChangesetForm extends Component {
 
   changeset = Changeset(this.model)
 
-  @action submitForm(changeset: any, event: any) {
+  @action
+  submitForm(changeset, event) {
     event.preventDefault()
     changeset.save()
   }

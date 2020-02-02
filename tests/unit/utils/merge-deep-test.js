@@ -1,5 +1,5 @@
 import mergeDeep from 'ember-changeset/utils/merge-deep';
-import Change from 'ember-changeset/-private/change';
+import { Change } from 'validated-changeset';
 import { module, test } from 'qunit';
 import { get, set } from '@ember/object';
 

@@ -1,6 +1,5 @@
 import { helper } from '@ember/component/helper';
-import { IChangeset } from 'ember-changeset/types';
-import isChangeset from 'ember-changeset/utils/is-changeset';
+import { isChangeset } from 'validated-changeset';
 
 /**
  * This is a drop in replacement for the `mut` helper
@@ -8,11 +7,9 @@ import isChangeset from 'ember-changeset/utils/is-changeset';
  * @method changesetSet
  * @param params
  */
-export function changesetSet(
-  [obj, path]: [IChangeset, string],
-): Function | void {
+export function changesetSet([obj, path]) {
   if (isChangeset(obj)) {
-    return (value: any) => {
+    return value => {
       return obj.set(path, value);
     }
   }
