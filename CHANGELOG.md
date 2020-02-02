@@ -1,5 +1,22 @@
 # Change Log
 
+## [3.0.0](https://github.com/poteto/ember-changeset/tree/v3.0.0) (2020-02-02)
+[Full Changelog](https://github.com/poteto/ember-changeset/compare/v3.0.0-beta.3...v3.0.0)
+
+- validated-changeset - exit beta [#391](https://github.com/poteto/ember-changeset/pull/391)
+- add fallback for getOwnPropertyDescriptors [#421](https://github.com/poteto/ember-changeset/pull/421)
+- Extend test coverage to sync relationships [#409](https://github.com/poteto/ember-changeset/pull/409)
+- Export Changeset class to allow overriding [#418](https://github.com/poteto/ember-changeset/pull/418)
+- Add failing test for nested properties with booleans [#415](https://github.com/poteto/ember-changeset/pull/415)
+- Ensure key in obj works with dot separated [#416](https://github.com/poteto/ember-changeset/pull/416)
+- Bring back changeset-get for nested getter [#414](https://github.com/poteto/ember-changeset/pull/414)
+- Fix a bug with unsafe properties [#408](https://github.com/poteto/ember-changeset/pull/408)
+- Fix changeset get for nested properties with changes [#404](https://github.com/poteto/ember-changeset/pull/404)
+- Failing test for ember data model [#406](https://github.com/poteto/ember-changeset/pull/406)
+- Properly manage error keys [#402](https://github.com/poteto/ember-changeset/pull/402)
+- Collect errors correctly [#399](https://github.com/poteto/ember-changeset/pull/399)
+- Add safeSet for Ember tracking context [#395](https://github.com/poteto/ember-changeset/pull/395)
+
 ## [3.0.0-beta.3](https://github.com/poteto/ember-changeset/tree/v3.0.0-beta.3) (2019-12-13)
 [Full Changelog](https://github.com/poteto/ember-changeset/compare/v3.0.0-beta.2...v3.0.0-beta.3)
 
