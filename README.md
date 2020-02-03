@@ -15,7 +15,7 @@ ember install ember-changeset
 
 ## Updates
 
-We have released `v3.0.0`.  See the CHANGELOG [here](https://github.com/poteto/ember-changeset/blob/master/CHANGELOG.md).  This requires Ember >= 3.13 as the use of `@tracked` will help us monitor and propagate changes to the UI layer.  If your app is < 3.13, the you can install the 2.0 series `ember install ember-changeset@v2.2.4`.
+We have released `v3.0.0`.  See the CHANGELOG [here](https://github.com/poteto/ember-changeset/blob/master/CHANGELOG.md).  This requires Ember >= 3.13 as the use of `@tracked` will help us monitor and propagate changes to the UI layer.  If your app is < 3.13 or you need to support IE11, then you can install the 2.0 series `ember install ember-changeset@v2.2.4`.
 
 ## Philosophy
 
