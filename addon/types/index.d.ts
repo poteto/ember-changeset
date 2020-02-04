@@ -1,8 +1,8 @@
 
 import {
-  BufferedChangeset as ChangesetDef,
+  BufferedChangeset,
   Changeset,
   ValidatedChangeset
 } from 'validated-changeset/dist/types';
 
-export { ChangesetDef, Changeset, ValidatedChangeset };
+export { BufferedChangeset, Changeset, ValidatedChangeset };
