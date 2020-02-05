@@ -153,6 +153,19 @@ let changeset = Changeset(model, validatorFn, validationMap, { skipValidate: tru
 
 Be sure to call `validate()` on the `changeset` before saving or committing changes.
 
+## Types
+
+Do you consume `ember-changeset` and need to type an object?
+
+
+```ts
+import { BufferedChangeset } from 'ember-changeset/types';
+
+export default class Foo extends Component {
+  changeset?: BufferedChangeset;
+}
+```
+
 ## API
 
 * Properties
