@@ -4,4 +4,17 @@ import {
   ValidatedChangeset
 } from 'validated-changeset/dist/types';
 
-export { BufferedChangeset, Changeset, ValidatedChangeset };
+import {
+  ValidationResult,
+  ValidatorMapFunc,
+  ValidatorAction
+} from 'validated-changeset/dist/types/types';
+
+export {
+  BufferedChangeset,
+  Changeset,
+  ValidatedChangeset,
+  ValidationResult,
+  ValidatorMapFunc,
+  ValidatorAction
+};
