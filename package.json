@@ -27,7 +27,8 @@
     "lint:tsc": "tsc --noEmit",
     "start": "ember serve",
     "test": "ember try:each",
-    "contributors": "npx contributor-faces -e \"(*-bot|*\\[bot\\]|*-tomster|homu|bors)\""
+    "contributors": "npx contributor-faces -e \"(*-bot|*\\[bot\\]|*-tomster|homu|bors)\"",
+    "release": "release-it"
   },
   "bugs": "https://github.com/poteto/ember-changeset/issues",
   "homepage": "https://github.com/poteto/ember-changeset",
@@ -61,8 +62,11 @@
     "ember-try": "^1.2.1",
     "eslint-plugin-ember": "^7.1.0",
     "eslint-plugin-node": "^10.0.0",
+    "lerna-changelog": "^1.0.0",
     "loader.js": "^4.7.0",
-    "prettier": "^1.19.1"
+    "prettier": "^1.19.1",
+    "release-it": "^12.4.3",
+    "release-it-lerna-changelog": "^1.0.3"
   },
   "engines": {
     "node": "10.* || >= 12.*"
