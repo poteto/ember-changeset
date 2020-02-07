@@ -156,7 +156,8 @@ Be sure to call `validate()` on the `changeset` before saving or committing chan
 ## Types
 
 ```ts
-import { BufferedChangeset, Changeset } from 'ember-changeset';
+import { BufferedChangeset } from 'ember-changeset/types';
+import { Changeset } from 'ember-changeset';
 
 export default class Foo extends Component {
   changeset?: BufferedChangeset;
