@@ -2,13 +2,13 @@ import {
   BufferedChangeset,
   Changeset,
   ValidatedChangeset
-} from 'validated-changeset/dist/types';
+} from 'validated-changeset/dist';
 
 import {
   ValidationResult,
   ValidatorMapFunc,
   ValidatorAction
-} from 'validated-changeset/dist/types/types';
+} from 'validated-changeset/dist/types';
 
 export {
   BufferedChangeset,
