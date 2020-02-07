@@ -164,6 +164,7 @@ export default class Foo extends Component {
 
   constructor() {
     super(...arguments);
+
     this.changeset = new Changeset(obj);
   }
 }
