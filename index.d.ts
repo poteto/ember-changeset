@@ -18,3 +18,5 @@ export {
   ValidatorMapFunc,
   ValidatorAction
 };
+
+export default Changeset;
