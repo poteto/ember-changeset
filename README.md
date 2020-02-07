@@ -155,17 +155,16 @@ Be sure to call `validate()` on the `changeset` before saving or committing chan
 
 ## Types
 
-Do you consume `ember-changeset` and need to type an object?
-
 ```ts
-import Changeset from 'ember-changeset';
-```
-
-```ts
-import { BufferedChangeset } from 'ember-changeset';
+import { BufferedChangeset, Changeset } from 'ember-changeset';
 
 export default class Foo extends Component {
   changeset?: BufferedChangeset;
+
+  constructor() {
+    super(...arguments);
+    this.changeset = new Changeset(obj);
+  }
 }
 ```
 
