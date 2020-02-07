@@ -166,6 +166,16 @@ export default class Foo extends Component {
 }
 ```
 
+Other available types include the following.  Please put in a PR if you need more types or access directly in `validated-changeset`!
+
+```js
+import {
+  ValidationResult,
+  ValidatorMapFunc,
+  ValidatorAction
+} from 'ember-changeset/types';
+```
+
 ## API
 
 * Properties
