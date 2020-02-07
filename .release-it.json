@@ -1,0 +1,21 @@
+{
+  "git": {
+    "tagName": "v${version}",
+    "commitMessage": "v${version}",
+    "pushArgs": "--follow-tags"
+  },
+
+  "npm": {
+    "publish": true
+  },
+
+  "github": {
+    "release": true
+  },
+
+  "plugins": {
+    "release-it-lerna-changelog": {
+      "infile": "CHANGELOG.md"
+    }
+  }
+}
