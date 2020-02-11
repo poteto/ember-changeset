@@ -1,5 +1,12 @@
 # Change Log
 
+## [3.0.3](https://github.com/poteto/ember-changeset/tree/v3.0.3) (2020-02-11)
+[Full Changelog](https://github.com/poteto/ember-changeset/compare/v3.0.0...v3.0.3)
+
+- enhancement (🚀 Enhancement) declare typings [#427](https://github.com/poteto/ember-changeset/pull/427)
+- enhancement (🚀 Enhancement) Moar types [#425](https://github.com/poteto/ember-changeset/pull/425)
+- enhancement (🚀 Enhancement) Reexport validated-changeset types[#423](https://github.com/poteto/ember-changeset/pull/423)
+
 ## [3.0.0](https://github.com/poteto/ember-changeset/tree/v3.0.0) (2020-02-02)
 [Full Changelog](https://github.com/poteto/ember-changeset/compare/v3.0.0-beta.3...v3.0.0)
 
