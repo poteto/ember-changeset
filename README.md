@@ -155,14 +155,25 @@ Be sure to call `validate()` on the `changeset` before saving or committing chan
 
 ## Types
 
-Do you consume `ember-changeset` and need to type an object?
-
-
 ```ts
+import Component from '@glimmer/component';
 import { BufferedChangeset } from 'ember-changeset/types';
+import { Changeset } from 'ember-changeset';
 
-export default class Foo extends Component {
-  changeset?: BufferedChangeset;
+interface Args {
+  user: {
+    name: string;
+    age: number;
+  }
+}
+
+export default class Foo extends Component<Args> {
+  changeset: BufferedChangeset;
+
+  constructor(owner, args) {
+    super(owner, args);
+    this.changeset = new Changeset(args.user);
+  }
 }
 ```
 
