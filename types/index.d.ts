@@ -7,6 +7,7 @@ import {
 import {
   ValidationResult,
   ValidatorMapFunc,
+  ValidatorMap,
   ValidatorAction
 } from 'validated-changeset/dist/types';
 
@@ -15,6 +16,7 @@ export {
   Changeset,
   ValidatedChangeset,
   ValidationResult,
+  ValidatorMap,
   ValidatorMapFunc,
   ValidatorAction
 };
