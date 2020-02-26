@@ -888,7 +888,7 @@ changeset.save()
 If you're uncertain whether or not you're dealing with a `Changeset`, you can use the `isChangeset` util.
 
 ```js
-import isChangeset from 'ember-changeset/utils/is-changeset';
+import { isChangeset } from 'validated-changeset';
 
 if (isChangeset(model)) {
   model.execute();
