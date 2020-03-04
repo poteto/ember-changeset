@@ -100,6 +100,20 @@ module('Unit | Utility | changeset', function(hooks) {
     assert.deepEqual(dummyChangeset.get('error.name'), expectedResult, 'should return error object for `name` key');
   });
 
+  test('can observe validation result of one property in error object', function(assert) {
+    let dummyChangeset = new Changeset(dummyModel, dummyValidator);
+    let emberObject = EmberObject.extend({
+      errorForName: reads('changeset.error.name.validation'),
+    }).create({
+      changeset: dummyChangeset
+    });
+
+    assert.equal(emberObject.errorForName, undefined);
+
+    dummyChangeset.set('name', 'a');
+    assert.equal(emberObject.errorForName, 'too short');
+  });
+
   /**
    * #change
    */
