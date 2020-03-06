@@ -1,4 +1,4 @@
-import Changeset, { EmberChangeset, Changeset as ChangesetFactory } from 'ember-changeset';
+import ChangesetKlass, { Changeset, EmberChangeset, Changeset as ChangesetFactory } from 'ember-changeset';
 import { settled } from '@ember/test-helpers';
 import { module, test } from 'qunit';
 
@@ -70,7 +70,7 @@ module('Unit | Utility | changeset', function(hooks) {
     assert.expect(1);
 
     let emptyObject = Object.create(null);
-    let dummyChangeset = new Changeset(emptyObject, dummyValidator);
+    let dummyChangeset = Changeset(emptyObject, dummyValidator);
 
     assert.equal(dummyChangeset.toString(), 'changeset:[object Object]');
   });
@@ -80,7 +80,7 @@ module('Unit | Utility | changeset', function(hooks) {
    */
 
   test('#error returns the error object and keeps changes', async function(assert) {
-    let dummyChangeset = Changeset(dummyModel, dummyValidator);
+    let dummyChangeset = new ChangesetKlass(dummyModel, dummyValidator);
     let expectedResult = { name: { validation: 'too short', value: 'a' } };
     dummyChangeset.set('name', 'a');
 
@@ -93,7 +93,7 @@ module('Unit | Utility | changeset', function(hooks) {
   });
 
   test('can get nested values in the error object', function(assert) {
-    let dummyChangeset = new Changeset(dummyModel, dummyValidator);
+    let dummyChangeset = new ChangesetKlass(dummyModel, dummyValidator);
     let expectedResult = { validation: 'too short', value: 'a' };
     dummyChangeset.set('name', 'a');
 
@@ -105,7 +105,7 @@ module('Unit | Utility | changeset', function(hooks) {
    */
 
   test('#change returns the changes object', async function(assert) {
-    let dummyChangeset = new Changeset(dummyModel);
+    let dummyChangeset = new ChangesetKlass(dummyModel);
     let expectedResult = { name: 'a' };
     dummyChangeset.set('name', 'a');
 
@@ -114,7 +114,7 @@ module('Unit | Utility | changeset', function(hooks) {
 
   test('#change supports `undefined`', async function(assert) {
     let model = { name: 'a' };
-    let dummyChangeset = new Changeset(model);
+    let dummyChangeset = new ChangesetKlass(model);
     let expectedResult = { name: undefined };
     dummyChangeset.set('name', undefined);
 
@@ -125,7 +125,7 @@ module('Unit | Utility | changeset', function(hooks) {
   });
 
   test('#change works with arrays', async function(assert) {
-    let dummyChangeset = new Changeset(dummyModel);
+    let dummyChangeset = new ChangesetKlass(dummyModel);
     const newArray = [...exampleArray, 'new'];
     let expectedResult = { exampleArray: newArray }
     dummyChangeset.set('exampleArray', newArray);
@@ -137,7 +137,7 @@ module('Unit | Utility | changeset', function(hooks) {
    * #errors
    */
   test('#errors returns the error object and keeps changes', async function(assert) {
-    let dummyChangeset = new Changeset(dummyModel, dummyValidator);
+    let dummyChangeset = new ChangesetKlass(dummyModel, dummyValidator);
     let expectedResult = [{ key: 'name', validation: 'too short', value: 'a' }];
     dummyChangeset.set('name', 'a');
 
@@ -148,7 +148,7 @@ module('Unit | Utility | changeset', function(hooks) {
 
 
   test('can get nested values in the errors object', function(assert) {
-    let dummyChangeset = new Changeset(dummyModel, dummyValidator);
+    let dummyChangeset = new ChangesetKlass(dummyModel, dummyValidator);
     dummyChangeset.set('unknown', 'wat');
     dummyChangeset.set('org.usa.ny', '');
     dummyChangeset.set('name', '');
@@ -173,13 +173,13 @@ module('Unit | Utility | changeset', function(hooks) {
    */
 
   test("data reads the changeset CONTENT", async function(assert) {
-    let dummyChangeset = new Changeset(dummyModel);
+    let dummyChangeset = new ChangesetKlass(dummyModel);
 
     assert.equal(get(dummyChangeset, 'data'), dummyModel, 'should return data');
   });
 
   test("data is readonly", async function(assert) {
-    let dummyChangeset = new Changeset(dummyModel);
+    let dummyChangeset = new ChangesetKlass(dummyModel);
 
     try {
       set(dummyChangeset, 'data', { foo: 'bar' });
@@ -207,7 +207,7 @@ module('Unit | Utility | changeset', function(hooks) {
     dummyModel.set('name', 'Bobby');
     dummyModel.set('thing', 123);
     dummyModel.set('nothing', null);
-    let dummyChangeset = new Changeset(dummyModel, dummyValidator);
+    let dummyChangeset = new ChangesetKlass(dummyModel, dummyValidator);
     dummyChangeset.set('name', 'Bobby');
     dummyChangeset.set('nothing', null);
 
@@ -216,7 +216,7 @@ module('Unit | Utility | changeset', function(hooks) {
 
   test("isPristine returns false if changes are not equal to content's values", async function(assert) {
     dummyModel.set('name', 'Bobby');
-    let dummyChangeset = new Changeset(dummyModel, dummyValidator);
+    let dummyChangeset = new ChangesetKlass(dummyModel, dummyValidator);
     dummyChangeset.set('name', 'Bobby');
     dummyChangeset.set('thing', 123);
 
@@ -226,7 +226,7 @@ module('Unit | Utility | changeset', function(hooks) {
   test('isPristine works with `null` values', async function(assert) {
     dummyModel.set('name', null);
     dummyModel.set('age', 15);
-    let dummyChangeset = new Changeset(dummyModel);
+    let dummyChangeset = new ChangesetKlass(dummyModel);
 
     assert.ok(dummyChangeset.get('isPristine'), 'should be pristine');
 
@@ -247,7 +247,7 @@ module('Unit | Utility | changeset', function(hooks) {
 
   test('#get proxies to content', async function(assert) {
     set(dummyModel, 'name', 'Jim Bob');
-    let dummyChangeset = new Changeset(dummyModel);
+    let dummyChangeset = new ChangesetKlass(dummyModel);
     let result = get(dummyChangeset, 'name');
 
     assert.equal(result, 'Jim Bob', 'should proxy to content');
@@ -262,7 +262,7 @@ module('Unit | Utility | changeset', function(hooks) {
 
     let d = new Date('2015');
     let momentInstance = new Moment(d);
-    let c = new Changeset({
+    let c = new ChangesetKlass({
       startDate: momentInstance
     });
 
@@ -274,7 +274,7 @@ module('Unit | Utility | changeset', function(hooks) {
 
   test('#get returns change if present', async function(assert) {
     set(dummyModel, 'name', 'Jim Bob');
-    let dummyChangeset = new Changeset(dummyModel);
+    let dummyChangeset = new ChangesetKlass(dummyModel);
     set(dummyChangeset, 'name', 'Milton Waddams');
     let result = get(dummyChangeset, 'name');
 
@@ -283,7 +283,7 @@ module('Unit | Utility | changeset', function(hooks) {
 
   test('#get returns change that is a blank value', async function(assert) {
     set(dummyModel, 'name', 'Jim Bob');
-    let dummyChangeset = new Changeset(dummyModel);
+    let dummyChangeset = new ChangesetKlass(dummyModel);
     set(dummyChangeset, 'name', '');
     let result = get(dummyChangeset, 'name');
 
@@ -292,7 +292,7 @@ module('Unit | Utility | changeset', function(hooks) {
 
   test('#get returns change that has undefined as value', async function(assert) {
     set(dummyModel, 'name', 'Jim Bob');
-    let dummyChangeset = new Changeset(dummyModel);
+    let dummyChangeset = new ChangesetKlass(dummyModel);
     set(dummyChangeset, 'name', undefined);
     let result = get(dummyChangeset, 'name');
 
@@ -302,7 +302,7 @@ module('Unit | Utility | changeset', function(hooks) {
   test('#get returns change that has array as sibling', async function(assert) {
     set(dummyModel, 'name', 'Bob');
     set(dummyModel, 'creds', ['burgers']);
-    let dummyChangeset = new Changeset(dummyModel);
+    let dummyChangeset = new ChangesetKlass(dummyModel);
     set(dummyChangeset, 'name', 'Burdger');
 
     assert.equal(get(dummyChangeset, 'name'), 'Burdger', 'should proxy name to change');
@@ -323,7 +323,7 @@ module('Unit | Utility | changeset', function(hooks) {
       }
     });
 
-    let dummyChangeset = new Changeset(dummyModel, dummyValidator);
+    let dummyChangeset = new ChangesetKlass(dummyModel, dummyValidator);
     assert.equal(dummyChangeset.get('org.asia.sg'), '_initial', 'returns initial value');
     dummyChangeset.set('org.asia.sg', 'sg');
     assert.equal(dummyChangeset.get('org.asia.sg'), 'sg', 'returns newly set value');
@@ -339,7 +339,7 @@ module('Unit | Utility | changeset', function(hooks) {
     });
 
     assert.deepEqual(dummyModel.get('contact.emails'), [ 'bob@email.com', 'the_bob@email.com' ], 'returns initial model value');
-    let dummyChangeset = new Changeset(dummyModel, dummyValidator);
+    let dummyChangeset = new ChangesetKlass(dummyModel, dummyValidator);
     assert.equal(dummyChangeset.get('name'), 'Bob', 'returns changeset initial value');
     assert.deepEqual(dummyChangeset.get('contact.emails'), [ 'bob@email.com', 'the_bob@email.com' ], 'returns changeset initial value');
 
@@ -376,21 +376,21 @@ module('Unit | Utility | changeset', function(hooks) {
     };
 
     {
-      let c = new Changeset(model);
+      let c = new ChangesetKlass(model);
       let actual = c.get('foo.bar.dog').bark();
       let expectedResult = "woof i'm a shiba inu, wow";
       assert.equal(actual, expectedResult, 'should proxy to underlying method');
     }
 
     {
-      let c = new Changeset(model);
+      let c = new ChangesetKlass(model);
       let actual = get(c, 'foo.bar.dog');
       let expectedResult = get(model, 'foo.bar.dog');
       assert.equal(actual, expectedResult, "using Ember.get will work");
     }
 
     {
-      let c = new Changeset(model);
+      let c = new ChangesetKlass(model);
       let actual = get(c, 'foo.bar.dog');
       let expectedResult = get(model, 'foo.bar.dog');
       assert.equal(actual, expectedResult, "you dont have to use .content");
@@ -403,7 +403,7 @@ module('Unit | Utility | changeset', function(hooks) {
 
   test('#set adds a change if valid', async function(assert) {
     let expectedChanges = [{ key: 'name', value: 'foo' }];
-    let dummyChangeset = new Changeset(dummyModel);
+    let dummyChangeset = new ChangesetKlass(dummyModel);
     dummyChangeset.set('name', 'foo');
     let changes = get(dummyChangeset, 'changes');
 
@@ -415,7 +415,7 @@ module('Unit | Utility | changeset', function(hooks) {
 
   test('#set Ember.set works', async function(assert) {
     let expectedChanges = [{ key: 'name', value: 'foo' }];
-    let dummyChangeset = new Changeset(dummyModel);
+    let dummyChangeset = new ChangesetKlass(dummyModel);
     set(dummyChangeset, 'name', 'foo');
 
     assert.equal(dummyModel.name, undefined, 'should keep change');
@@ -432,7 +432,7 @@ module('Unit | Utility | changeset', function(hooks) {
 
   test('#set Ember.set doesnt work for nested', async function(assert) {
     set(dummyModel, 'name', {});
-    let dummyChangeset = new Changeset(dummyModel);
+    let dummyChangeset = new ChangesetKlass(dummyModel);
     set(dummyChangeset, 'name.short', 'foo');
 
     assert.equal(dummyChangeset.get('name.short'), 'foo', 'should have new change');
@@ -453,7 +453,7 @@ module('Unit | Utility | changeset', function(hooks) {
       }
     });
 
-    let c = new Changeset(dummyModel);
+    let c = new ChangesetKlass(dummyModel);
     c.set('org.usa.ny', 'foo');
 
     assert.equal(dummyModel.org.usa.ny, 'ny', 'should keep change');
@@ -472,7 +472,7 @@ module('Unit | Utility | changeset', function(hooks) {
       }
     });
 
-    let c = new Changeset(dummyModel);
+    let c = new ChangesetKlass(dummyModel);
     c.org.usa.ny = 'foo';
 
     assert.equal(dummyModel.org.usa.ny, 'foo', 'change applied to model');
@@ -485,7 +485,7 @@ module('Unit | Utility | changeset', function(hooks) {
   test('#set use native setters at single level', async function(assert) {
     dummyModel.org = 'ny';
 
-    let c = new Changeset(dummyModel);
+    let c = new ChangesetKlass(dummyModel);
     c.org = 'foo';
 
     assert.equal(dummyModel.org, 'ny', 'should keep change');
@@ -501,7 +501,7 @@ module('Unit | Utility | changeset', function(hooks) {
         this.date = date;
       }
     }
-    let c = new Changeset(dummyModel);
+    let c = new ChangesetKlass(dummyModel);
     let d = new Date();
     let momentInstance = new Moment(d);
     c.set('startDate', momentInstance);
@@ -524,7 +524,7 @@ module('Unit | Utility | changeset', function(hooks) {
 
   test('#set supports `undefined`', async function(assert) {
     let model = EmberObject.create({ name: 'foo' });
-    let dummyChangeset = new Changeset(model);
+    let dummyChangeset = new ChangesetKlass(model);
 
     dummyChangeset.set('name', undefined);
     assert.equal(
@@ -541,7 +541,7 @@ module('Unit | Utility | changeset', function(hooks) {
 
   test('#set does not add a change if new value equals old value', async function(assert) {
     let model = EmberObject.create({ name: 'foo' });
-    let dummyChangeset = new Changeset(model);
+    let dummyChangeset = new ChangesetKlass(model);
 
     dummyChangeset.set('name', 'foo');
     assert.deepEqual(
@@ -553,7 +553,7 @@ module('Unit | Utility | changeset', function(hooks) {
 
   test('#set does not add a change if new value equals old value and `skipValidate` is true', async function(assert) {
     let model = EmberObject.create({ name: 'foo' });
-    let dummyChangeset = new Changeset(model, {}, null, {skipValidate: true});
+    let dummyChangeset = new ChangesetKlass(model, {}, null, {skipValidate: true});
 
     dummyChangeset.set('name', 'foo');
     assert.deepEqual(
@@ -565,7 +565,7 @@ module('Unit | Utility | changeset', function(hooks) {
 
   test('#set removes a change if set back to original value', async function(assert) {
     let model = EmberObject.create({ name: 'foo' });
-    let dummyChangeset = new Changeset(model);
+    let dummyChangeset = new ChangesetKlass(model);
 
     dummyChangeset.set('name', 'bar');
     assert.deepEqual(
@@ -584,7 +584,7 @@ module('Unit | Utility | changeset', function(hooks) {
 
   test('#set removes a change if set back to original value when obj is ProxyObject', async function(assert) {
     let model = ObjectProxy.create({ content: { name: 'foo' } });
-    let dummyChangeset = new Changeset(model);
+    let dummyChangeset = new ChangesetKlass(model);
 
     dummyChangeset.set('name', 'bar');
     assert.deepEqual(
@@ -606,7 +606,7 @@ module('Unit | Utility | changeset', function(hooks) {
       { key: 'name', validation: 'too short', value: 'a' },
       { key: 'password', validation: ['foo', 'bar'], value: false }
     ];
-    let dummyChangeset = new Changeset(dummyModel, dummyValidator);
+    let dummyChangeset = new ChangesetKlass(dummyModel, dummyValidator);
     dummyChangeset.set('name', 'a');
     dummyChangeset.set('password', false);
     let changes = get(dummyChangeset, 'changes');
@@ -624,7 +624,7 @@ module('Unit | Utility | changeset', function(hooks) {
   test('#set adds the change without validation if `skipValidate` option is set', async function(assert) {
     let expectedChanges = [{ key: 'password', value: false }];
 
-    let dummyChangeset = new Changeset(dummyModel, dummyValidator, null, {skipValidate: true});
+    let dummyChangeset = new ChangesetKlass(dummyModel, dummyValidator, null, {skipValidate: true});
     dummyChangeset.set('password', false);
     let changes = get(dummyChangeset, 'changes');
 
@@ -639,7 +639,7 @@ module('Unit | Utility | changeset', function(hooks) {
       },
     });
 
-    let c = new Changeset(dummyModel);
+    let c = new ChangesetKlass(dummyModel);
     c.set('org.usa.ny', 'foo');
     c.set('org.usa.ca', 'bar');
     c.set('org', 'no usa for you')
@@ -650,7 +650,7 @@ module('Unit | Utility | changeset', function(hooks) {
   });
 
   test('it works with setProperties', async function(assert) {
-    let dummyChangeset = new Changeset(dummyModel);
+    let dummyChangeset = new ChangesetKlass(dummyModel);
     let expectedResult = [
       { key: 'firstName', value: 'foo' },
       { key: 'lastName', value: 'bar' }
@@ -661,7 +661,7 @@ module('Unit | Utility | changeset', function(hooks) {
   });
 
   test('it accepts async validations', async function(assert) {
-    let dummyChangeset = new Changeset(dummyModel, dummyValidator);
+    let dummyChangeset = new ChangesetKlass(dummyModel, dummyValidator);
     let expectedChanges = [{ key: 'async', value: true }];
     let expectedError = { async: { validation: 'is invalid', value: 'is invalid' } };
 
@@ -676,7 +676,7 @@ module('Unit | Utility | changeset', function(hooks) {
 
   test('it clears errors when setting to original value', async function(assert) {
     set(dummyModel, 'name', 'Jim Bob');
-    let dummyChangeset = new Changeset(dummyModel, dummyValidator);
+    let dummyChangeset = new ChangesetKlass(dummyModel, dummyValidator);
     dummyChangeset.set('name', '');
 
     assert.ok(get(dummyChangeset, 'isInvalid'), 'should be invalid');
@@ -689,7 +689,7 @@ module('Unit | Utility | changeset', function(hooks) {
     set(dummyModel, 'org', {
       usa: { ny: 'vaca' }
     });
-    let dummyChangeset = new Changeset(dummyModel, dummyValidator);
+    let dummyChangeset = new ChangesetKlass(dummyModel, dummyValidator);
     dummyChangeset.set('org.usa.ny', '');
 
     assert.ok(get(dummyChangeset, 'isInvalid'), 'should be invalid');
@@ -702,7 +702,7 @@ module('Unit | Utility | changeset', function(hooks) {
     set(dummyModel, 'org', {
       isCompliant: true
     });
-    let dummyChangeset = new Changeset(dummyModel, dummyValidator);
+    let dummyChangeset = new ChangesetKlass(dummyModel, dummyValidator);
     dummyChangeset.set('org.isCompliant', false);
 
     assert.ok(get(dummyChangeset, 'isInvalid'), 'should be invalid');
@@ -716,7 +716,7 @@ module('Unit | Utility | changeset', function(hooks) {
       usa: { ny: 'i need a vacation' }
     });
 
-    let c = new Changeset(dummyModel, dummyValidator, dummyValidations);
+    let c = new ChangesetKlass(dummyModel, dummyValidator, dummyValidations);
     c.set('org.usa.br', 'whoop');
 
     let actual = get(c, 'change.org.usa.ny');
@@ -727,7 +727,7 @@ module('Unit | Utility | changeset', function(hooks) {
   test('#set works when replacing an Object with an primitive', async function(assert) {
     let model = { foo: { bar: { baz: 42 } } };
 
-    let c = new Changeset(model);
+    let c = new ChangesetKlass(model);
     assert.deepEqual(c.get('foo'), get(model, 'foo'));
 
     c.set('foo', 'not an object anymore');
@@ -743,7 +743,7 @@ module('Unit | Utility | changeset', function(hooks) {
       }
     };
 
-    const c = new Changeset(dummyModel);
+    const c = new ChangesetKlass(dummyModel);
     c.set('org.usa.ny', 'NY');
     c.set('org.usa.mn', 'MN');
 
@@ -795,7 +795,7 @@ module('Unit | Utility | changeset', function(hooks) {
 
   test('#prepare provides callback to modify changes', async function(assert) {
     let date = new Date();
-    let dummyChangeset = new Changeset(dummyModel);
+    let dummyChangeset = new ChangesetKlass(dummyModel);
     dummyChangeset.set('first_name', 'foo');
     dummyChangeset.set('date_of_birth', date);
     dummyChangeset.prepare((changes) => {
@@ -816,7 +816,7 @@ module('Unit | Utility | changeset', function(hooks) {
   });
 
   test('#prepare throws if callback does not return object', async function(assert) {
-    let dummyChangeset = new Changeset(dummyModel);
+    let dummyChangeset = new ChangesetKlass(dummyModel);
     dummyChangeset.set('first_name', 'foo');
 
     try {
@@ -834,7 +834,7 @@ module('Unit | Utility | changeset', function(hooks) {
    */
 
   test('#execute applies changes to content if valid', async function(assert) {
-    let dummyChangeset = new Changeset(dummyModel);
+    let dummyChangeset = new ChangesetKlass(dummyModel);
     dummyChangeset.set('name', 'foo');
 
     assert.equal(get(dummyModel, 'name'), undefined, 'precondition');
@@ -844,7 +844,7 @@ module('Unit | Utility | changeset', function(hooks) {
   });
 
   test('#execute does not apply changes to content if invalid', async function(assert) {
-    let dummyChangeset = new Changeset(dummyModel, dummyValidator);
+    let dummyChangeset = new ChangesetKlass(dummyModel, dummyValidator);
     dummyChangeset.set('name', 'a');
 
     assert.equal(get(dummyModel, 'name'), undefined, 'precondition');
@@ -861,7 +861,7 @@ module('Unit | Utility | changeset', function(hooks) {
     dog.info.name = 'mishka';
     dog.info.breed = 'husky';
 
-    let c = new Changeset(dog);
+    let c = new ChangesetKlass(dog);
     c.set('info.name', 'laika');
     c.execute();
 
@@ -900,7 +900,7 @@ module('Unit | Utility | changeset', function(hooks) {
   ].forEach(({ model, setCalls, result }, i) => {
     test(`#execute - table-driven test ${i+1}`, async function(assert) {
       let m = model();
-      let c = new Changeset(m);
+      let c = new ChangesetKlass(m);
 
       setCalls.forEach(([k, v]) => c.set(k, v));
       c.execute();
@@ -931,7 +931,7 @@ module('Unit | Utility | changeset', function(hooks) {
       }
     });
 
-    let dummyChangeset = new Changeset(dummyModel, dummyValidator);
+    let dummyChangeset = new ChangesetKlass(dummyModel, dummyValidator);
     dummyChangeset.set('org.asia.sg', 'sg');
     dummyChangeset.set('org.usa.ca', 'ca');
     dummyChangeset.set('org.usa.ny', 'ny');
@@ -955,7 +955,7 @@ module('Unit | Utility | changeset', function(hooks) {
       options = dummyOptions;
       return Promise.resolve('saveResult');
     });
-    let dummyChangeset = new Changeset(dummyModel);
+    let dummyChangeset = new ChangesetKlass(dummyModel);
     dummyChangeset.set('name', 'foo');
 
     assert.equal(result, undefined, 'precondition');
@@ -978,7 +978,7 @@ module('Unit | Utility | changeset', function(hooks) {
       options = dummyOptions;
       return Promise.resolve('saveResult');
     });
-    let dummyChangeset = new Changeset(dummyModel);
+    let dummyChangeset = new ChangesetKlass(dummyModel);
     dummyChangeset.set('name', 'foo');
 
     assert.equal(result, undefined, 'precondition');
@@ -995,7 +995,7 @@ module('Unit | Utility | changeset', function(hooks) {
     assert.expect(1);
 
     let done = assert.async();
-    let dummyChangeset = new Changeset(dummyModel);
+    let dummyChangeset = new ChangesetKlass(dummyModel);
 
     assert.expect(1);
 
@@ -1018,7 +1018,7 @@ module('Unit | Utility | changeset', function(hooks) {
   test('#save proxies to content even if it does not implement #save', async function(assert) {
     let done = assert.async();
     let person = { name: 'Jim' };
-    let dummyChangeset = new Changeset(person);
+    let dummyChangeset = new ChangesetKlass(person);
     dummyChangeset.set('name', 'foo');
 
     return dummyChangeset.save().then(() => {
@@ -1032,8 +1032,8 @@ module('Unit | Utility | changeset', function(hooks) {
    */
 
   test('#merge merges 2 valid changesets', async function(assert) {
-    let dummyChangesetA = new Changeset(dummyModel);
-    let dummyChangesetB = new Changeset(dummyModel);
+    let dummyChangesetA = new ChangesetKlass(dummyModel);
+    let dummyChangesetB = new ChangesetKlass(dummyModel);
     dummyChangesetA.set('firstName', 'Jim');
     dummyChangesetB.set('lastName', 'Bob');
     let dummyChangesetC = dummyChangesetA.merge(dummyChangesetB);
@@ -1045,9 +1045,9 @@ module('Unit | Utility | changeset', function(hooks) {
   });
 
   test('#merge merges invalid changesets', async function(assert) {
-    let dummyChangesetA = new Changeset(dummyModel, dummyValidator);
-    let dummyChangesetB = new Changeset(dummyModel, dummyValidator);
-    let dummyChangesetC = new Changeset(dummyModel, dummyValidator);
+    let dummyChangesetA = new ChangesetKlass(dummyModel, dummyValidator);
+    let dummyChangesetB = new ChangesetKlass(dummyModel, dummyValidator);
+    let dummyChangesetC = new ChangesetKlass(dummyModel, dummyValidator);
     dummyChangesetA.set('age', 21);
     dummyChangesetA.set('name', 'a');
     dummyChangesetB.set('name', 'Tony Stark');
@@ -1068,7 +1068,7 @@ module('Unit | Utility | changeset', function(hooks) {
   });
 
   test('#merge does not merge a changeset with a non-changeset', async function(assert) {
-    let dummyChangesetA = new Changeset(dummyModel, dummyValidator);
+    let dummyChangesetA = new ChangesetKlass(dummyModel, dummyValidator);
     let dummyChangesetB = { _changes: { name: 'b' } };
     dummyChangesetA.set('name', 'a');
 
@@ -1083,8 +1083,8 @@ module('Unit | Utility | changeset', function(hooks) {
   });
 
   test('#merge does not merge a changeset with different content', async function(assert) {
-    let dummyChangesetA = new Changeset(dummyModel, dummyValidator);
-    let dummyChangesetB = new Changeset(EmberObject.create(), dummyValidator);
+    let dummyChangesetA = new ChangesetKlass(dummyModel, dummyValidator);
+    let dummyChangesetB = new ChangesetKlass(EmberObject.create(), dummyValidator);
 
     try {
       dummyChangesetA.merge(dummyChangesetB);
@@ -1097,8 +1097,8 @@ module('Unit | Utility | changeset', function(hooks) {
   });
 
   test('#merge preserves content and validator of origin changeset', async function(assert) {
-    let dummyChangesetA = new Changeset(dummyModel, dummyValidator);
-    let dummyChangesetB = new Changeset(dummyModel);
+    let dummyChangesetA = new ChangesetKlass(dummyModel, dummyValidator);
+    let dummyChangesetB = new ChangesetKlass(dummyModel);
     let dummyChangesetC = dummyChangesetA.merge(dummyChangesetB);
     let expectedErrors = [{ key: 'name', validation: 'too short', value: 'a' }];
 
@@ -1116,7 +1116,7 @@ module('Unit | Utility | changeset', function(hooks) {
    */
 
   test('#rollback restores old values', async function(assert) {
-    let dummyChangeset = new Changeset(dummyModel, dummyValidator);
+    let dummyChangeset = new ChangesetKlass(dummyModel, dummyValidator);
     let expectedChanges = [
       { key: 'firstName', value: 'foo' },
       { key: 'lastName', value: 'bar' },
@@ -1135,7 +1135,7 @@ module('Unit | Utility | changeset', function(hooks) {
   });
 
   test('#rollback resets valid state', async function(assert) {
-    let dummyChangeset = new Changeset(dummyModel, dummyValidator);
+    let dummyChangeset = new ChangesetKlass(dummyModel, dummyValidator);
     dummyChangeset.set('name', 'a');
 
     assert.ok(get(dummyChangeset, 'isInvalid'), 'should be invalid');
@@ -1144,7 +1144,7 @@ module('Unit | Utility | changeset', function(hooks) {
   });
 
   test('#rollback twice works', async function(assert) {
-    let dummyChangeset = new Changeset(dummyModel);
+    let dummyChangeset = new ChangesetKlass(dummyModel);
     dummyChangeset.set('name', 'abcde');
 
     let expectedChanges = [
@@ -1167,7 +1167,7 @@ module('Unit | Utility | changeset', function(hooks) {
     set(dummyModel, 'org', {
       asia: { sg: null },
     });
-    let dummyChangeset = new Changeset(dummyModel);
+    let dummyChangeset = new ChangesetKlass(dummyModel);
     dummyChangeset.set('org.asia.sg', 'sg');
 
     let expectedChanges = [
@@ -1187,7 +1187,7 @@ module('Unit | Utility | changeset', function(hooks) {
   });
 
   test('#rollbackInvalid clears errors and keeps valid values', async function(assert) {
-    let dummyChangeset = new Changeset(dummyModel, dummyValidator);
+    let dummyChangeset = new ChangesetKlass(dummyModel, dummyValidator);
     let expectedChanges = [
       { key: 'firstName', value: 'foo' },
       { key: 'lastName', value: 'bar' },
@@ -1210,7 +1210,7 @@ module('Unit | Utility | changeset', function(hooks) {
   });
 
   test('#rollbackInvalid a specific key clears key error and keeps valid values', async function(assert) {
-    let dummyChangeset = new Changeset(dummyModel, dummyValidator);
+    let dummyChangeset = new ChangesetKlass(dummyModel, dummyValidator);
     let expectedChanges = [
       { key: 'firstName', value: 'foo' },
       { key: 'lastName', value: 'bar' },
@@ -1242,7 +1242,7 @@ module('Unit | Utility | changeset', function(hooks) {
   });
 
   test('#rollbackInvalid resets valid state', async function(assert) {
-    let dummyChangeset = new Changeset(dummyModel, dummyValidator);
+    let dummyChangeset = new ChangesetKlass(dummyModel, dummyValidator);
     dummyChangeset.set('name', 'a');
 
     assert.ok(get(dummyChangeset, 'isInvalid'), 'should be invalid');
@@ -1251,7 +1251,7 @@ module('Unit | Utility | changeset', function(hooks) {
   });
 
   test('#rollbackInvalid will not remove changes that are valid', async function(assert) {
-    let dummyChangeset = new Changeset(dummyModel, dummyValidator);
+    let dummyChangeset = new ChangesetKlass(dummyModel, dummyValidator);
     dummyChangeset.set('name', 'abcd');
 
     let expectedChanges = [
@@ -1266,7 +1266,7 @@ module('Unit | Utility | changeset', function(hooks) {
 
 
   test('#rollbackInvalid works for keys not on changeset', async function(assert) {
-    let dummyChangeset = new Changeset(dummyModel, dummyValidator);
+    let dummyChangeset = new ChangesetKlass(dummyModel, dummyValidator);
     let expectedChanges = [
       { key: 'firstName', value: 'foo' },
       { key: 'lastName', value: 'bar' },
@@ -1287,7 +1287,7 @@ module('Unit | Utility | changeset', function(hooks) {
   test('#rollbackProperty restores old value for specified property only', async function(assert) {
     set(dummyModel, 'firstName', 'Jim');
     set(dummyModel, 'lastName', 'Bob');
-    let dummyChangeset = new Changeset(dummyModel, dummyValidator);
+    let dummyChangeset = new ChangesetKlass(dummyModel, dummyValidator);
     let expectedChanges = [
       { key: 'lastName', value: 'bar' }
     ];
@@ -1299,7 +1299,7 @@ module('Unit | Utility | changeset', function(hooks) {
   });
 
   test('#rollbackProperty clears errors for specified property', async function(assert) {
-    let dummyChangeset = new Changeset(dummyModel, dummyValidator);
+    let dummyChangeset = new ChangesetKlass(dummyModel, dummyValidator);
     let expectedChanges = [
       { key: 'firstName', value: 'foo' },
       { key: 'lastName', value: 'bar' },
@@ -1322,7 +1322,7 @@ module('Unit | Utility | changeset', function(hooks) {
   });
 
   test('#rollbackProperty resets valid state', async function(assert) {
-    let dummyChangeset = new Changeset(dummyModel, dummyValidator);
+    let dummyChangeset = new ChangesetKlass(dummyModel, dummyValidator);
     dummyChangeset.set('name', 'a');
 
     assert.ok(get(dummyChangeset, 'isInvalid'), 'should be invalid');
@@ -1332,7 +1332,7 @@ module('Unit | Utility | changeset', function(hooks) {
 
   test('observing #rollback values', async function(assert) {
     let res;
-    let changeset = new Changeset(dummyModel, dummyValidator);
+    let changeset = new ChangesetKlass(dummyModel, dummyValidator);
     changeset.addObserver('name', function() { res = this.get('name') });
     assert.equal(undefined, changeset.get('name'), 'initial value');
     changeset.set('name', 'Jack');
@@ -1359,7 +1359,7 @@ module('Unit | Utility | changeset', function(hooks) {
       }
     });
 
-    let dummyChangeset = new Changeset(dummyModel, dummyValidator);
+    let dummyChangeset = new ChangesetKlass(dummyModel, dummyValidator);
     dummyChangeset.set('org.asia.sg', 'sg');
     dummyChangeset.set('org.usa.ny', 'ny');
     dummyChangeset.set('org.usa.ma', { name: 'Massachusetts' });
@@ -1379,7 +1379,7 @@ module('Unit | Utility | changeset', function(hooks) {
 
   test('#validate/0 validates all fields immediately', async function(assert) {
     dummyModel.setProperties({ name: 'J', password: false, options: null });
-    let dummyChangeset = new Changeset(dummyModel, dummyValidator, dummyValidations);
+    let dummyChangeset = new ChangesetKlass(dummyModel, dummyValidator, dummyValidations);
 
     await dummyChangeset.validate();
     assert.deepEqual(
@@ -1393,7 +1393,7 @@ module('Unit | Utility | changeset', function(hooks) {
 
   test('#validate/1 validates a single field immediately', async function(assert) {
     dummyModel.setProperties({ name: 'J', password: '123' });
-    let dummyChangeset = new Changeset(dummyModel, dummyValidator, dummyValidations);
+    let dummyChangeset = new ChangesetKlass(dummyModel, dummyValidator, dummyValidations);
 
     await dummyChangeset.validate('name');
     assert.deepEqual(get(dummyChangeset, 'error.name'), { validation: 'too short', value: 'J' }, 'should validate immediately');
@@ -1403,7 +1403,7 @@ module('Unit | Utility | changeset', function(hooks) {
 
   test('#validate validates a multiple field immediately', async function(assert) {
     dummyModel.setProperties({ name: 'J', password: false });
-    let dummyChangeset = new Changeset(dummyModel, dummyValidator, dummyValidations);
+    let dummyChangeset = new ChangesetKlass(dummyModel, dummyValidator, dummyValidations);
 
     await dummyChangeset.validate('name', 'password');
     assert.deepEqual(get(dummyChangeset, 'error.name'), { validation: 'too short', value: 'J' }, 'should validate immediately');
@@ -1414,7 +1414,7 @@ module('Unit | Utility | changeset', function(hooks) {
 
   test('#validate works correctly with changeset values', async function(assert) {
     dummyModel.setProperties({ name: undefined, password: false, async: true, passwordConfirmation: false, options: {}});
-    let dummyChangeset = new Changeset(dummyModel, dummyValidator, dummyValidations);
+    let dummyChangeset = new ChangesetKlass(dummyModel, dummyValidator, dummyValidations);
 
     dummyChangeset.set('name', 'Jim Bob');
     await dummyChangeset.validate();
@@ -1438,7 +1438,7 @@ module('Unit | Utility | changeset', function(hooks) {
 
   test('#validate works correctly with complex values', async function(assert) {
     dummyModel.setProperties({});
-    let dummyChangeset = new Changeset(dummyModel, dummyValidator, dummyValidations);
+    let dummyChangeset = new ChangesetKlass(dummyModel, dummyValidator, dummyValidations);
 
     dummyChangeset.set('options', { persist: true });
     dummyChangeset.validate();
@@ -1447,7 +1447,7 @@ module('Unit | Utility | changeset', function(hooks) {
 
   test('#validate marks actual valid changes', async function(assert) {
     dummyModel.setProperties({ name: 'Jim Bob', password: true, passwordConfirmation: true, async: true });
-    let dummyChangeset = new Changeset(dummyModel, dummyValidator, dummyValidations);
+    let dummyChangeset = new ChangesetKlass(dummyModel, dummyValidator, dummyValidations);
 
     dummyChangeset.set('name', 'foo bar');
     dummyChangeset.set('password', false);
@@ -1465,7 +1465,7 @@ module('Unit | Utility | changeset', function(hooks) {
       }
     };
     dummyModel.setProperties({ name: 'Jim Bob', password: true, passwordConfirmation: true, async: true, options});
-    let dummyChangeset = new Changeset(dummyModel, dummyValidator, dummyValidations);
+    let dummyChangeset = new ChangesetKlass(dummyModel, dummyValidator, dummyValidations);
 
     dummyChangeset.set('options', options);
 
@@ -1481,7 +1481,7 @@ module('Unit | Utility | changeset', function(hooks) {
       }
     });
 
-    let dummyChangeset = new Changeset(dummyModel, dummyValidator, dummyValidations);
+    let dummyChangeset = new ChangesetKlass(dummyModel, dummyValidator, dummyValidations);
     await dummyChangeset.validate('org.usa.ny');
     assert.deepEqual(get(dummyChangeset, 'error.org.usa.ny'), { validation: 'must be present', value: null }, 'should validate immediately');
     assert.deepEqual(dummyChangeset.changes, [], 'should not set changes');
@@ -1490,7 +1490,7 @@ module('Unit | Utility | changeset', function(hooks) {
 
   test('#validate marks actual valid changes', async function(assert) {
     dummyModel.setProperties({ name: 'Jim Bob', password: true, passwordConfirmation: true });
-    let dummyChangeset = new Changeset(dummyModel, dummyValidator, dummyValidations);
+    let dummyChangeset = new ChangesetKlass(dummyModel, dummyValidator, dummyValidations);
 
     dummyChangeset.set('name', 'foo bar');
     dummyChangeset.set('password', false);
@@ -1509,7 +1509,7 @@ module('Unit | Utility | changeset', function(hooks) {
    */
 
   test('#addError adds an error to the changeset', async function(assert) {
-    let dummyChangeset = new Changeset(dummyModel);
+    let dummyChangeset = new ChangesetKlass(dummyModel);
     dummyChangeset.addError('email', {
       value: 'jim@bob.com',
       validation: 'Email already taken'
@@ -1522,7 +1522,7 @@ module('Unit | Utility | changeset', function(hooks) {
   });
 
   test('#addError adds an error to the changeset using the shortcut', function (assert) {
-    let dummyChangeset = new Changeset(dummyModel);
+    let dummyChangeset = new ChangesetKlass(dummyModel);
     dummyChangeset.set('email', 'jim@bob.com');
     dummyChangeset.addError('email', 'Email already taken');
 
@@ -1536,7 +1536,7 @@ module('Unit | Utility | changeset', function(hooks) {
   });
 
   test('#addError adds an error to the changeset on a nested property', async function(assert) {
-    let dummyChangeset = new Changeset(dummyModel);
+    let dummyChangeset = new ChangesetKlass(dummyModel);
     dummyChangeset.addError('email.localPart', 'Cannot contain +');
 
 
@@ -1547,7 +1547,7 @@ module('Unit | Utility | changeset', function(hooks) {
   });
 
   test('#addError adds an array of errors to the changeset', async function(assert) {
-    let dummyChangeset = new Changeset(dummyModel);
+    let dummyChangeset = new ChangesetKlass(dummyModel);
     dummyChangeset.addError('email', ['jim@bob.com', 'Email already taken'])
 
     assert.ok(get(dummyChangeset, 'isInvalid'), 'should be invalid');
@@ -1561,7 +1561,7 @@ module('Unit | Utility | changeset', function(hooks) {
    */
 
   test('#pushErrors pushes an error into an array of existing validations', function (assert) {
-    let dummyChangeset = new Changeset(dummyModel);
+    let dummyChangeset = new ChangesetKlass(dummyModel);
     dummyChangeset.set('email', 'jim@bob.com');
     dummyChangeset.addError('email', 'Email already taken');
     dummyChangeset.pushErrors('email', 'Invalid email format');
@@ -1576,7 +1576,7 @@ module('Unit | Utility | changeset', function(hooks) {
   });
 
   test('#pushErrors pushes an error if no existing validations are present', function (assert) {
-    let dummyChangeset = new Changeset(dummyModel, dummyValidator);
+    let dummyChangeset = new ChangesetKlass(dummyModel, dummyValidator);
     dummyChangeset.set('name', 'J');
     dummyChangeset.pushErrors('name', 'cannot be J');
 
@@ -1588,7 +1588,7 @@ module('Unit | Utility | changeset', function(hooks) {
   });
 
   test('#pushErrors updates error object in a KVO compatible way', function (assert) {
-    let dummyChangeset = new Changeset(dummyModel);
+    let dummyChangeset = new ChangesetKlass(dummyModel);
 
     let aComponentOrSomething = EmberObject.extend({
       errorsOnName: reads('changeset.error.name.validation')
@@ -1611,7 +1611,7 @@ module('Unit | Utility | changeset', function(hooks) {
 
 
   test('#pushErrors adds an error to the changeset on a nested property', async function(assert) {
-    let dummyChangeset = new Changeset(dummyModel);
+    let dummyChangeset = new ChangesetKlass(dummyModel);
     dummyChangeset.pushErrors('email.localPart', 'Cannot contain +');
     dummyChangeset.pushErrors('email.localPart', 'is too short');
 
@@ -1627,7 +1627,7 @@ module('Unit | Utility | changeset', function(hooks) {
    */
 
   test('#snapshot creates a snapshot of the changeset', async function(assert) {
-    let dummyChangeset = new Changeset(dummyModel, dummyValidator);
+    let dummyChangeset = new ChangesetKlass(dummyModel, dummyValidator);
     dummyChangeset.set('name', 'Pokemon Go');
     dummyChangeset.set('password', false);
     let snapshot = dummyChangeset.snapshot();
@@ -1646,8 +1646,8 @@ module('Unit | Utility | changeset', function(hooks) {
    */
 
   test('#restore restores a snapshot of the changeset', async function(assert) {
-    let dummyChangesetA = new Changeset(dummyModel, dummyValidator);
-    let dummyChangesetB = new Changeset(dummyModel, dummyValidator);
+    let dummyChangesetA = new ChangesetKlass(dummyModel, dummyValidator);
+    let dummyChangesetB = new ChangesetKlass(dummyModel, dummyValidator);
     dummyChangesetA.set('name', 'Pokemon Go');
     dummyChangesetA.set('password', false);
     let snapshot = dummyChangesetA.snapshot();
@@ -1664,7 +1664,7 @@ module('Unit | Utility | changeset', function(hooks) {
    */
 
   test('#cast allows only specified keys to exist on the changeset', async function(assert) {
-    let dummyChangeset = new Changeset(dummyModel, dummyValidator);
+    let dummyChangeset = new ChangesetKlass(dummyModel, dummyValidator);
     let expectedResult = [
       { 'key': 'name', 'value': 'Pokemon Go' },
       { 'key': 'password', 'value': true }
@@ -1680,7 +1680,7 @@ module('Unit | Utility | changeset', function(hooks) {
   });
 
   test('#cast noops if no keys are passed', async function(assert) {
-    let dummyChangeset = new Changeset(dummyModel, dummyValidator);
+    let dummyChangeset = new ChangesetKlass(dummyModel, dummyValidator);
     let expectedResult = [
       { 'key': 'name', 'value': 'Pokemon Go' },
       { 'key': 'password', 'value': true },
@@ -1708,7 +1708,7 @@ module('Unit | Utility | changeset', function(hooks) {
     };
 
     set(dummyModel, 'reservations', 'ABC12345');
-    dummyChangeset = new Changeset(dummyModel, _validator, _validations);
+    dummyChangeset = new ChangesetKlass(dummyModel, _validator, _validations);
     set(dummyChangeset, 'reservations', 'DCE12345');
 
     dummyChangeset.validate();
@@ -1730,7 +1730,7 @@ module('Unit | Utility | changeset', function(hooks) {
     };
 
     set(dummyModel, 'reservations', 'ABC12345');
-    dummyChangeset = new Changeset(dummyModel, _validator, _validations);
+    dummyChangeset = new ChangesetKlass(dummyModel, _validator, _validations);
 
     dummyChangeset.validate();
     assert.ok(dummyChangeset.isValidating(),
@@ -1754,7 +1754,7 @@ module('Unit | Utility | changeset', function(hooks) {
     let hasFired = false;
 
     set(dummyModel, 'reservations', 'ABC12345');
-    dummyChangeset = new Changeset(dummyModel, _validator, _validations);
+    dummyChangeset = new ChangesetKlass(dummyModel, _validator, _validations);
     dummyChangeset.on('beforeValidation', () => { hasFired = true; });
 
     dummyChangeset.validate();
@@ -1772,7 +1772,7 @@ module('Unit | Utility | changeset', function(hooks) {
     let hasFired = false;
 
     set(dummyModel, 'reservations', 'ABC12345');
-    dummyChangeset = new Changeset(dummyModel, _validator, _validations);
+    dummyChangeset = new ChangesetKlass(dummyModel, _validator, _validations);
     dummyChangeset.on('beforeValidation', key => {
       if(key === 'reservations') {
         hasFired = true;
@@ -1798,7 +1798,7 @@ module('Unit | Utility | changeset', function(hooks) {
     let hasFired = false;
 
     set(dummyModel, 'reservations', 'ABC12345');
-    dummyChangeset = new Changeset(dummyModel, _validator, _validations);
+    dummyChangeset = new ChangesetKlass(dummyModel, _validator, _validations);
     dummyChangeset.on('afterValidation', () => { hasFired = true; });
 
     await dummyChangeset.validate();
@@ -1816,7 +1816,7 @@ module('Unit | Utility | changeset', function(hooks) {
     let hasFired = false;
 
     set(dummyModel, 'reservations', 'ABC12345');
-    dummyChangeset = new Changeset(dummyModel, _validator, _validations);
+    dummyChangeset = new ChangesetKlass(dummyModel, _validator, _validations);
     dummyChangeset.on('afterValidation', key => {
       if(key === 'reservations') {
         hasFired = true;
@@ -1842,7 +1842,7 @@ module('Unit | Utility | changeset', function(hooks) {
     let hasFired = false;
 
     set(dummyModel, 'reservations', 'ABC12345');
-    dummyChangeset = new Changeset(dummyModel, _validator, _validations);
+    dummyChangeset = new ChangesetKlass(dummyModel, _validator, _validations);
     dummyChangeset.on('afterRollback', () => { hasFired = true; });
 
     await dummyChangeset.rollback();
@@ -1861,7 +1861,7 @@ module('Unit | Utility | changeset', function(hooks) {
       usa: { ny: null }
     });
 
-    let c = new Changeset(dummyModel, dummyValidator, dummyValidations);
+    let c = new ChangesetKlass(dummyModel, dummyValidator, dummyValidations);
     c.validate('org.usa.ny')
       .then(() => c.set('org.usa.ny', 'should not fail'))
       .finally(done);
