@@ -28,6 +28,7 @@
     "lint:tsc": "tsc --noEmit",
     "start": "ember serve",
     "test": "ember try:each",
+    "test:one": "ember test",
     "contributors": "npx contributor-faces -e \"(*-bot|*\\[bot\\]|*-tomster|homu|bors)\"",
     "release": "release-it"
   },

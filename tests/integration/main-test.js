@@ -1,7 +1,7 @@
 import { module, test } from 'qunit';
 import { setupTest } from 'ember-qunit';
 import { set } from '@ember/object';
-import Changeset from 'ember-changeset';
+import { Changeset } from 'ember-changeset';
 
 module('Integration | main', function(hooks) {
   setupTest(hooks);
@@ -24,7 +24,7 @@ module('Integration | main', function(hooks) {
 
   async function testBasicBelongsTo(assert, userType) {
     let user = this.createUser(userType, false);
-    let changeset = new Changeset(user);
+    let changeset = Changeset(user);
 
     assert.equal(changeset.get('profile'), user.get('profile'));
     assert.equal(changeset.get('profile.firstName'), user.get('profile.firstName'));
@@ -88,7 +88,7 @@ module('Integration | main', function(hooks) {
     }
 
     let user = this.store.createRecord(userType, { profile, save });
-    let changeset = new Changeset(user);
+    let changeset = Changeset(user);
 
     changeset.set('profile.firstName', 'Grace');
     changeset.save();
@@ -110,7 +110,7 @@ module('Integration | main', function(hooks) {
     };
     let profile = this.store.createRecord('profile', { save });
     let pet = this.store.createRecord('dog')
-    let changeset = new Changeset(profile);
+    let changeset = Changeset(profile);
 
     changeset.set('firstName', 'bo');
     changeset.set('lastName', 'jackson');
@@ -123,11 +123,11 @@ module('Integration | main', function(hooks) {
     let profile = this.store.createRecord('profile');
     let user = this.store.createRecord(userType, { profile });
 
-    let changeset = new Changeset(user);
+    let changeset = Changeset(user);
 
     changeset.set('profile.firstName', 'Grace');
     profile = changeset.get('profile');
-    let profileChangeset = new Changeset(profile);
+    let profileChangeset = Changeset(profile);
 
     assert.equal(profileChangeset.get('firstName'), 'Grace', 'profileChangeset profile firstName is set');
     assert.equal(changeset.get('profile.firstName'), 'Grace', 'changeset profile firstName is set');
@@ -153,7 +153,7 @@ module('Integration | main', function(hooks) {
 
   async function testHasMany(assert, userType) {
     let user = this.createUser(userType, true);
-    let changeset = new Changeset(user);
+    let changeset = Changeset(user);
     let newDog = this.store.createRecord('dog', { breed: 'Münsterländer' });
     let dogs = changeset.get('dogs');
     dogs.pushObjects([newDog]);
@@ -189,7 +189,7 @@ module('Integration | main', function(hooks) {
   async function testRollbackHasMany(assert, userType) {
     let user = this.createUser(userType, true);
 
-    let changeset = new Changeset(user);
+    let changeset = Changeset(user);
     let newDog = this.store.createRecord('dog', { breed: 'Münsterländer' });
     changeset.set('dogs', [...changeset.get('dogs').toArray(), newDog]);
 
@@ -214,7 +214,7 @@ module('Integration | main', function(hooks) {
     let profile = this.store.createRecord('profile');
     let user =  this.store.createRecord(userType);
 
-    let changeset = new Changeset(user);
+    let changeset = Changeset(user);
 
     changeset.set('profile', profile);
     const dogs = [
