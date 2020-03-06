@@ -1,5 +1,5 @@
 import { helper } from '@ember/component/helper';
-import { Changeset } from 'ember-changeset';
+import Changeset from 'ember-changeset';
 import { lookupValidator, isChangeset, isPromise, isObject } from 'validated-changeset';
 
 export function changeset(
@@ -13,18 +13,18 @@ export function changeset(
   if (isObject(validations)) {
     if (isPromise(obj)) {
       return obj.then((resolved) =>
-        Changeset(resolved, lookupValidator(validations), validations, options)
+        new Changeset(resolved, lookupValidator(validations), validations, options)
       );
     }
 
-    return Changeset(obj, lookupValidator(validations), validations, options);
+    return new Changeset(obj, lookupValidator(validations), validations, options);
   }
 
   if (isPromise(obj)) {
     return Promise.resolve(obj).then((resolved) => new Changeset(resolved, validations, {}, options));
   }
 
-  return Changeset(obj, validations, {}, options);
+  return new Changeset(obj, validations, {}, options);
 }
 
 export default helper(changeset);

@@ -80,7 +80,7 @@ module('Unit | Utility | changeset', function(hooks) {
    */
 
   test('#error returns the error object and keeps changes', async function(assert) {
-    let dummyChangeset = new Changeset(dummyModel, dummyValidator);
+    let dummyChangeset = Changeset(dummyModel, dummyValidator);
     let expectedResult = { name: { validation: 'too short', value: 'a' } };
     dummyChangeset.set('name', 'a');
 
