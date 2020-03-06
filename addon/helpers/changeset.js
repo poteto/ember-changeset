@@ -1,5 +1,5 @@
 import { helper } from '@ember/component/helper';
-import Changeset from 'ember-changeset';
+import { Changeset } from 'ember-changeset';
 import { lookupValidator, isChangeset, isPromise, isObject } from 'validated-changeset';
 
 export function changeset(
