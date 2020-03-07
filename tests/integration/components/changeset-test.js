@@ -1,7 +1,7 @@
 import { module, test } from 'qunit';
 import { setupRenderingTest } from 'ember-qunit';
 import { typeOf, isPresent } from '@ember/utils';
-import Changeset from 'ember-changeset';
+import { Changeset } from 'ember-changeset';
 import hbs from 'htmlbars-inline-precompile';
 import {
  render,
@@ -247,7 +247,7 @@ module('Integration | Helper | changeset', function(hooks) {
 
   test('a passed down nested object updates when set without a validator', async function(assert) {
     let data = { person: { firstName: 'Jim', lastName: 'Bob' } };
-    let changeset = new Changeset(data);
+    let changeset = Changeset(data);
     this.set('changeset', changeset);
     await render(hbs`
       <h1>{{changeset.person.firstName}} {{changeset.person.lastName}}</h1>
@@ -277,7 +277,7 @@ module('Integration | Helper | changeset', function(hooks) {
 
   test('nested object updates when set without a validator', async function(assert) {
     let data = { person: { firstName: 'Jim', lastName: 'Bob' } };
-    let changeset = new Changeset(data);
+    let changeset = Changeset(data);
     this.set('changeset', changeset);
     await render(hbs`
       <h1>{{changeset.person.firstName}} {{changeset.person.lastName}}</h1>
@@ -300,7 +300,7 @@ module('Integration | Helper | changeset', function(hooks) {
   test('nested key error clears after entering valid input', async function(assert) {
     let data = { person: { firstName: 'Jim' } };
     let validator = ({ newValue }) => isPresent(newValue) || 'need a first name';
-    let c = new Changeset(data, validator);
+    let c = Changeset(data, validator);
     this.set('c', c);
 
     await render(hbs`
@@ -331,7 +331,7 @@ module('Integration | Helper | changeset', function(hooks) {
   test('nested object updates when set with async validator', async function(assert) {
     let data = { person: { firstName: 'Jim' } };
     let validator = () => Promise.resolve(true);
-    let c = new Changeset(data, validator);
+    let c = Changeset(data, validator);
     this.set('c', c);
      await render(hbs`
       <h1>{{c.person.firstName}}</h1>
@@ -350,7 +350,7 @@ module('Integration | Helper | changeset', function(hooks) {
   test('deeply nested key error clears after entering valid input', async function(assert) {
     let data = { person: { name: { parts: { first: 'Jim' } } } };
     let validator = ({ newValue }) => isPresent(newValue) || 'need a first name';
-    let c = new Changeset(data, validator);
+    let c = Changeset(data, validator);
     this.set('c', c);
 
     await render(hbs`
@@ -383,7 +383,7 @@ module('Integration | Helper | changeset', function(hooks) {
 
   test('a rollback propagates binding to deeply nested changesets', async function(assert) {
     let data = { person: { firstName: 'Jim', lastName: 'Bob' } };
-    let changeset = new Changeset(data);
+    let changeset = Changeset(data);
     this.set('changeset', changeset);
     this.set('reset', () => changeset.rollback());
     await render(hbs`
@@ -415,7 +415,7 @@ module('Integration | Helper | changeset', function(hooks) {
     let lookupValidator = (validationMap) => {
       return ({ key, newValue }) => [validationMap[key](newValue)];
     };
-    let changeset = new Changeset({ even: 4, odd: 4 }, lookupValidator(dummyValidations), dummyValidations);
+    let changeset = Changeset({ even: 4, odd: 4 }, lookupValidator(dummyValidations), dummyValidations);
     this.set('changeset', changeset);
     this.set('validateProperty', (changeset, property) => changeset.validate(property));
     await render(hbs`

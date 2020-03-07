@@ -172,7 +172,7 @@ export default class Foo extends Component<Args> {
 
   constructor(owner, args) {
     super(owner, args);
-    this.changeset = new Changeset(args.user);
+    this.changeset = Changeset(args.user);
   }
 }
 ```

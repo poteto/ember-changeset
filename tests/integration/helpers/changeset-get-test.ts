@@ -3,7 +3,7 @@ import { setupRenderingTest } from 'ember-qunit';
 import { TestContext } from 'ember-test-helpers';
 import hbs from 'htmlbars-inline-precompile';
 import { module, test } from 'qunit';
-import Changeset from 'ember-changeset';
+import { Changeset } from 'ember-changeset';
 
 interface ModelType {
   name: { first: string; last: string };
@@ -26,7 +26,7 @@ module('Integration | Helper | changeset-get', function(hooks) {
       url: 'http://bobloblawslawblog.com'
     };
 
-    this.set('changeset', new Changeset(model));
+    this.set('changeset', Changeset(model));
     this.set('fieldName', 'name.first');
   });
 
