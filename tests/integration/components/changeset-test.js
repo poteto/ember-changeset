@@ -1,7 +1,7 @@
 import { module, test } from 'qunit';
 import { setupRenderingTest } from 'ember-qunit';
 import { typeOf, isPresent } from '@ember/utils';
-import Changeset from 'ember-changeset';
+import { Changeset } from 'ember-changeset';
 import hbs from 'htmlbars-inline-precompile';
 import {
  render,
@@ -228,7 +228,7 @@ module('Integration | Helper | changeset', function(hooks) {
     this.set('dummyModel', { firstName: 'Jim', lastName: 'Bob' });
     this.set('validate', () => true);
     await render(hbs`
-      {{#with (changeset dummyModel (action validate)) as |changesetObj|}}
+      {{#with (changeset this.dummyModel (action this.validate)) as |changesetObj|}}
         <h1>{{changesetObj.firstName}} {{changesetObj.lastName}}</h1>
         <input
           id="first-name"
@@ -247,18 +247,18 @@ module('Integration | Helper | changeset', function(hooks) {
 
   test('a passed down nested object updates when set without a validator', async function(assert) {
     let data = { person: { firstName: 'Jim', lastName: 'Bob' } };
-    let changeset = new Changeset(data);
+    let changeset = Changeset(data);
     this.set('changeset', changeset);
     await render(hbs`
-      <h1>{{changeset.person.firstName}} {{changeset.person.lastName}}</h1>
+      <h1>{{this.changeset.person.firstName}} {{this.changeset.person.lastName}}</h1>
       <input
         id="first-name"
-        value={{changeset.person.firstName}}
-        onchange={{action (changeset-set changeset "person.firstName") value="target.value"}}>
+        value={{this.changeset.person.firstName}}
+        onchange={{action (changeset-set this.changeset "person.firstName") value="target.value"}}>
       >
       <input id="last-name"
-        value={{changeset.person.lastName}}
-        onchange={{action (changeset-set changeset "person.lastName") value="target.value"}}>
+        value={{this.changeset.person.lastName}}
+        onchange={{action (changeset-set this.changeset "person.lastName") value="target.value"}}>
     `);
 
     assert.equal(find('h1').textContent.trim(), 'Jim Bob', 'precondition');
@@ -277,18 +277,18 @@ module('Integration | Helper | changeset', function(hooks) {
 
   test('nested object updates when set without a validator', async function(assert) {
     let data = { person: { firstName: 'Jim', lastName: 'Bob' } };
-    let changeset = new Changeset(data);
+    let changeset = Changeset(data);
     this.set('changeset', changeset);
     await render(hbs`
-      <h1>{{changeset.person.firstName}} {{changeset.person.lastName}}</h1>
+      <h1>{{this.changeset.person.firstName}} {{this.changeset.person.lastName}}</h1>
       <input
         id="first-name"
-        value={{changeset.person.firstName}}
-        onchange={{action (changeset-set changeset "person.firstName") value="target.value"}}>
+        value={{this.changeset.person.firstName}}
+        onchange={{action (changeset-set this.changeset "person.firstName") value="target.value"}}>
       <input
         id="last-name"
-        value={{changeset.person.lastName}}
-        onchange={{action (changeset-set changeset "person.lastName") value="target.value"}}>
+        value={{this.changeset.person.lastName}}
+        onchange={{action (changeset-set this.changeset "person.lastName") value="target.value"}}>
     `);
 
     assert.equal(find('h1').textContent.trim(), 'Jim Bob', 'precondition');
@@ -300,7 +300,7 @@ module('Integration | Helper | changeset', function(hooks) {
   test('nested key error clears after entering valid input', async function(assert) {
     let data = { person: { firstName: 'Jim' } };
     let validator = ({ newValue }) => isPresent(newValue) || 'need a first name';
-    let c = new Changeset(data, validator);
+    let c = Changeset(data, validator);
     this.set('c', c);
 
     await render(hbs`
@@ -331,7 +331,7 @@ module('Integration | Helper | changeset', function(hooks) {
   test('nested object updates when set with async validator', async function(assert) {
     let data = { person: { firstName: 'Jim' } };
     let validator = () => Promise.resolve(true);
-    let c = new Changeset(data, validator);
+    let c = Changeset(data, validator);
     this.set('c', c);
      await render(hbs`
       <h1>{{c.person.firstName}}</h1>
@@ -350,7 +350,7 @@ module('Integration | Helper | changeset', function(hooks) {
   test('deeply nested key error clears after entering valid input', async function(assert) {
     let data = { person: { name: { parts: { first: 'Jim' } } } };
     let validator = ({ newValue }) => isPresent(newValue) || 'need a first name';
-    let c = new Changeset(data, validator);
+    let c = Changeset(data, validator);
     this.set('c', c);
 
     await render(hbs`
@@ -383,20 +383,20 @@ module('Integration | Helper | changeset', function(hooks) {
 
   test('a rollback propagates binding to deeply nested changesets', async function(assert) {
     let data = { person: { firstName: 'Jim', lastName: 'Bob' } };
-    let changeset = new Changeset(data);
+    let changeset = Changeset(data);
     this.set('changeset', changeset);
     this.set('reset', () => changeset.rollback());
     await render(hbs`
-      <h1>{{changeset.person.firstName}} {{changeset.person.lastName}}</h1>
+      <h1>{{this.changeset.person.firstName}} {{this.changeset.person.lastName}}</h1>
       <input
         id="first-name"
-        value={{changeset.person.firstName}}
-        onchange={{action (changeset-set changeset "person.firstName") value="target.value"}}>
+        value={{this.changeset.person.firstName}}
+        onchange={{action (changeset-set this.changeset "person.firstName") value="target.value"}}>
       <input
         id="last-name"
-        value={{changeset.person.lastName}}
-        onchange={{action (changeset-set changeset "person.lastName") value="target.value"}}>
-      <button id="reset-btn" {{action reset}}>Reset</button>
+        value={{this.changeset.person.lastName}}
+        onchange={{action (changeset-set this.changeset "person.lastName") value="target.value"}}>
+      <button id="reset-btn" {{action this.reset}}>Reset</button>
     `);
 
     assert.equal(find('h1').textContent.trim(), 'Jim Bob', 'precondition');
@@ -415,7 +415,7 @@ module('Integration | Helper | changeset', function(hooks) {
     let lookupValidator = (validationMap) => {
       return ({ key, newValue }) => [validationMap[key](newValue)];
     };
-    let changeset = new Changeset({ even: 4, odd: 4 }, lookupValidator(dummyValidations), dummyValidations);
+    let changeset = Changeset({ even: 4, odd: 4 }, lookupValidator(dummyValidations), dummyValidations);
     this.set('changeset', changeset);
     this.set('validateProperty', (changeset, property) => changeset.validate(property));
     await render(hbs`
@@ -424,13 +424,13 @@ module('Integration | Helper | changeset', function(hooks) {
         <input
           id="even"
           type="text"
-          value={{changeset.even}}
-          oninput={{action (mut changeset.even) value="target.value"}}
-          onblur={{action validateProperty changeset "even"}}>
-        {{#if changeset.error.even}}
-          <small class="even">{{changeset.error.even.validation}}</small>
+          value={{this.changeset.even}}
+          oninput={{action (mut this.changeset.even) value="target.value"}}
+          onblur={{action this.validateProperty this.changeset "even"}}>
+        {{#if this.changeset.error.even}}
+          <small class="even">{{this.changeset.error.even.validation}}</small>
         {{/if}}
-        <code class="even">{{changeset.even}}</code>
+        <code class="even">{{this.changeset.even}}</code>
       </fieldset>
 
       <fieldset class="odd">
@@ -438,13 +438,13 @@ module('Integration | Helper | changeset', function(hooks) {
         <input
           id="odd"
           type="text"
-          value={{changeset.odd}}
-          oninput={{action (mut changeset.odd) value="target.value"}}
-          onblur={{action validateProperty changeset "odd"}}>
-        {{#if changeset.error.odd}}
-          <small class="odd">{{changeset.error.odd.validation}}</small>
+          value={{this.changeset.odd}}
+          oninput={{action (mut this.changeset.odd) value="target.value"}}
+          onblur={{action this.validateProperty this.changeset "odd"}}>
+        {{#if this.changeset.error.odd}}
+          <small class="odd">{{this.changeset.error.odd.validation}}</small>
         {{/if}}
-        <code class="odd">{{changeset.odd}}</code>
+        <code class="odd">{{this.changeset.odd}}</code>
       </fieldset>
     `);
 
@@ -476,7 +476,7 @@ module('Integration | Helper | changeset', function(hooks) {
     let momentInstance = new Moment(d);
     this.set('dummyModel', { startDate: momentInstance });
     await render(hbs`
-      {{#with (changeset dummyModel) as |changesetObj|}}
+      {{#with (changeset this.dummyModel) as |changesetObj|}}
         <h1>{{changesetObj.startDate.date}}</h1>
       {{/with}}
     `);
@@ -488,7 +488,7 @@ module('Integration | Helper | changeset', function(hooks) {
     let d = new Date('2015');
     this.set('d', d);
     await render(hbs`
-      {{#with (changeset (hash date=d)) as |changesetObj|}}
+      {{#with (changeset (hash date=this.d)) as |changesetObj|}}
         <h1>{{changesetObj.date}}</h1>
       {{/with}}
     `);
@@ -499,7 +499,7 @@ module('Integration | Helper | changeset', function(hooks) {
   test('it handles models that are promises', async function(assert) {
     this.set('dummyModel', Promise.resolve({ firstName: 'Jim', lastName: 'Bob' }));
     await render(hbs`
-      {{#with (changeset dummyModel) as |changesetObj|}}
+      {{#with (changeset this.dummyModel) as |changesetObj|}}
         <h1>{{changesetObj.firstName}} {{changesetObj.lastName}}</h1>
         <input
           id="first-name"
@@ -521,7 +521,7 @@ module('Integration | Helper | changeset', function(hooks) {
     this.set('dummyModel', { firstName: 'Jim', lastName: 'Bob' });
     this.set('validate', () => false);
     await render(hbs`
-      {{#with (changeset dummyModel (action validate) skipValidate=true) as |changesetObj|}}
+      {{#with (changeset this.dummyModel (action this.validate) skipValidate=true) as |changesetObj|}}
         <h1>{{changesetObj.firstName}} {{changesetObj.lastName}}</h1>
         {{input id="first-name" value=changesetObj.firstName}}
         {{input id="last-name" value=changesetObj.lastName}}

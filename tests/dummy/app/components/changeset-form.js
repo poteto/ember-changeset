@@ -17,7 +17,11 @@ export default class ChangesetForm extends Component {
     }
   }
 
-  changeset = Changeset(this.model)
+  init() {
+    super.init(...arguments);
+
+    this.changeset = Changeset(this.model)
+  }
 
   @action
   submitForm(changeset, event) {
