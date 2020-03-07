@@ -228,7 +228,7 @@ module('Integration | Helper | changeset', function(hooks) {
     this.set('dummyModel', { firstName: 'Jim', lastName: 'Bob' });
     this.set('validate', () => true);
     await render(hbs`
-      {{#with (changeset dummyModel (action validate)) as |changesetObj|}}
+      {{#with (changeset this.dummyModel (action this.validate)) as |changesetObj|}}
         <h1>{{changesetObj.firstName}} {{changesetObj.lastName}}</h1>
         <input
           id="first-name"
@@ -250,15 +250,15 @@ module('Integration | Helper | changeset', function(hooks) {
     let changeset = Changeset(data);
     this.set('changeset', changeset);
     await render(hbs`
-      <h1>{{changeset.person.firstName}} {{changeset.person.lastName}}</h1>
+      <h1>{{this.changeset.person.firstName}} {{this.changeset.person.lastName}}</h1>
       <input
         id="first-name"
-        value={{changeset.person.firstName}}
-        onchange={{action (changeset-set changeset "person.firstName") value="target.value"}}>
+        value={{this.changeset.person.firstName}}
+        onchange={{action (changeset-set this.changeset "person.firstName") value="target.value"}}>
       >
       <input id="last-name"
-        value={{changeset.person.lastName}}
-        onchange={{action (changeset-set changeset "person.lastName") value="target.value"}}>
+        value={{this.changeset.person.lastName}}
+        onchange={{action (changeset-set this.changeset "person.lastName") value="target.value"}}>
     `);
 
     assert.equal(find('h1').textContent.trim(), 'Jim Bob', 'precondition');
@@ -280,15 +280,15 @@ module('Integration | Helper | changeset', function(hooks) {
     let changeset = Changeset(data);
     this.set('changeset', changeset);
     await render(hbs`
-      <h1>{{changeset.person.firstName}} {{changeset.person.lastName}}</h1>
+      <h1>{{this.changeset.person.firstName}} {{this.changeset.person.lastName}}</h1>
       <input
         id="first-name"
-        value={{changeset.person.firstName}}
-        onchange={{action (changeset-set changeset "person.firstName") value="target.value"}}>
+        value={{this.changeset.person.firstName}}
+        onchange={{action (changeset-set this.changeset "person.firstName") value="target.value"}}>
       <input
         id="last-name"
-        value={{changeset.person.lastName}}
-        onchange={{action (changeset-set changeset "person.lastName") value="target.value"}}>
+        value={{this.changeset.person.lastName}}
+        onchange={{action (changeset-set this.changeset "person.lastName") value="target.value"}}>
     `);
 
     assert.equal(find('h1').textContent.trim(), 'Jim Bob', 'precondition');
