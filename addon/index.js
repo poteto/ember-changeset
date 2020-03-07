@@ -187,7 +187,7 @@ export class EmberChangeset extends BufferedChangeset {
 
 
     // return getters/setters/methods on BufferedProxy instance
-    if (this[key]) {
+    if (typeof this[key] !== 'undefined') {
       return this[key];
     } else if (this[baseKey]) {
       const v = this[baseKey];
