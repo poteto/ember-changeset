@@ -1504,6 +1504,16 @@ module('Unit | Utility | changeset', function(hooks) {
     ]);
   });
 
+
+  test('#changeset properties do not proxy', async function(assert) {
+    dummyModel.setProperties({ name: undefined, password: false, async: true, isValid: 'not proxied'});
+    let dummyChangeset = Changeset(dummyModel, dummyValidator, dummyValidations);
+
+    dummyChangeset.set('name', 'Jim Bob');
+    await dummyChangeset.validate();
+    assert.equal(get(dummyChangeset, 'isValid'), false, 'should have 1 error');
+  });
+
   /**
    * #addError
    */
