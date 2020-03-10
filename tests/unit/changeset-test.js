@@ -109,14 +109,11 @@ module('Unit | Utility | changeset', function(hooks) {
       name() {}
     };
     let validatorFn = function() {
-      return [
-        'foo',
-        'bar',
-      ];
+      return 'foo';
     };
     let dummyChangeset = new Changeset({ name: null }, validatorFn, Validations);
     let emberObject = EmberObject.extend({
-      errors: computed('changeset.error.name.validation.[]', function() {
+      errors: computed('changeset.error.name.validation', function() {
         return this.get('changeset.error.name.validation');
       }),
     }).create({
@@ -126,8 +123,8 @@ module('Unit | Utility | changeset', function(hooks) {
     emberObject.errors;
 
     await dummyChangeset.validate();
-    assert.deepEqual(dummyChangeset.error.name.validation, ['foo', 'bar'], 'on changeset');
-    assert.deepEqual(emberObject.errors, ['foo', 'bar'], 'through computed property');
+    assert.deepEqual(dummyChangeset.error.name.validation, 'foo', 'on changeset');
+    assert.deepEqual(emberObject.errors, 'foo', 'through computed property');
   });
 
   /**
