@@ -3,6 +3,7 @@ import { settled } from '@ember/test-helpers';
 import { module, test } from 'qunit';
 
 import EmberObject, {
+  computed,
   get,
   set,
   setProperties,
@@ -100,18 +101,33 @@ module('Unit | Utility | changeset', function(hooks) {
     assert.deepEqual(dummyChangeset.get('error.name'), expectedResult, 'should return error object for `name` key');
   });
 
-  test('can observe validation result of one property in error object', function(assert) {
-    let dummyChangeset = new Changeset(dummyModel, dummyValidator);
+  test('can observe validation result of one property in error object', async function(assert) {
+    // must pass in a validations maps cause if it does not exist or does
+    // not contain the key which should be validated, the validator function
+    // is not executed
+    let Validations = {
+      name() {}
+    };
+    let validatorFn = function() {
+      return [
+        'foo',
+        'bar',
+      ];
+    };
+    let dummyChangeset = new Changeset({ name: null }, validatorFn, Validations);
     let emberObject = EmberObject.extend({
-      errorForName: reads('changeset.error.name.validation'),
+      errors: computed('changeset.error.name.validation.[]', function() {
+        return this.get('changeset.error.name.validation');
+      }),
     }).create({
       changeset: dummyChangeset
     });
 
-    assert.equal(emberObject.errorForName, undefined);
+    emberObject.errors;
 
-    dummyChangeset.set('name', 'a');
-    assert.equal(emberObject.errorForName, 'too short');
+    await dummyChangeset.validate();
+    assert.deepEqual(dummyChangeset.error.name.validation, ['foo', 'bar'], 'on changeset');
+    assert.deepEqual(emberObject.errors, ['foo', 'bar'], 'through computed property');
   });
 
   /**
