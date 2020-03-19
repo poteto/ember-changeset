@@ -486,7 +486,7 @@ module('Unit | Utility | changeset', function(hooks) {
     dummyChangeset.set('dateOfBirth', d);
     let changes = get(dummyChangeset, 'changes');
 
-    assert.ok(model.dateOfBirth, 'should keep change');
+    assert.ok(model.dateOfBirth, 'model has original date');
     assert.equal(dummyChangeset.get('dateOfBirth'), d, 'should have new change');
 
     assert.deepEqual(changes, expectedChanges, 'should add change');
