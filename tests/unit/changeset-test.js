@@ -465,6 +465,33 @@ module('Unit | Utility | changeset', function(hooks) {
     assert.deepEqual(changes, expectedChanges, 'should add change');
   });
 
+  test('#set adds a change for a Date', async function(assert) {
+    const d = new Date();
+    let expectedChanges = [{ key: 'dateOfBirth', value: d }];
+    let dummyChangeset = Changeset(dummyModel);
+    dummyChangeset.set('dateOfBirth', d);
+    let changes = get(dummyChangeset, 'changes');
+
+    assert.equal(dummyModel.dateOfBirth, undefined, 'should not have value');
+    assert.equal(dummyChangeset.get('dateOfBirth'), d, 'should have new change');
+
+    assert.deepEqual(changes, expectedChanges, 'should add change');
+  });
+
+  test('#set adds a change for a Date if it already exists on object', async function(assert) {
+    const model = { dateOfBirth: new Date() };
+    const d = new Date('March 25, 1990');
+    let expectedChanges = [{ key: 'dateOfBirth', value: d }];
+    let dummyChangeset = Changeset(model);
+    dummyChangeset.set('dateOfBirth', d);
+    let changes = get(dummyChangeset, 'changes');
+
+    assert.ok(model.dateOfBirth, 'model has original date');
+    assert.equal(dummyChangeset.get('dateOfBirth'), d, 'should have new change');
+
+    assert.deepEqual(changes, expectedChanges, 'should add change');
+  });
+
   test('#set use native setters with nested doesnt work', async function(assert) {
     set(dummyModel, 'org', {
       usa: {

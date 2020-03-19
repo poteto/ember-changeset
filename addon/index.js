@@ -169,7 +169,11 @@ export class EmberChangeset extends BufferedChangeset {
         // requested key is the top most nested property and we have changes in of the properties, we need to
         // merge the original model data with the changes to have the complete object.
         // eg. model = { user: { name: 'not changed', email: 'changed@prop.com'} }
-        if (!Array.isArray(result) && isObject(content[baseKey]) && !isBelongsToRelationship(content[baseKey])) {
+        if (
+          !Array.isArray(result) &&
+          isObject(content[baseKey]) &&
+          !isBelongsToRelationship(content[baseKey])
+        ) {
           let data = {};
           Object.keys(content[baseKey]).forEach(k => {
             data[k] = this.getDeep(content, `${baseKey}.${k}`)
