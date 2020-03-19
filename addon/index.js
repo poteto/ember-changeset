@@ -170,7 +170,6 @@ export class EmberChangeset extends BufferedChangeset {
         // merge the original model data with the changes to have the complete object.
         // eg. model = { user: { name: 'not changed', email: 'changed@prop.com'} }
         if (
-          remaining.length > 0 &&
           !Array.isArray(result) &&
           isObject(content[baseKey]) &&
           !isBelongsToRelationship(content[baseKey])
