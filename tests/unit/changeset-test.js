@@ -472,7 +472,7 @@ module('Unit | Utility | changeset', function(hooks) {
     dummyChangeset.set('dateOfBirth', d);
     let changes = get(dummyChangeset, 'changes');
 
-    assert.equal(dummyModel.dateOfBirth, undefined, 'should keep change');
+    assert.equal(dummyModel.dateOfBirth, undefined, 'should not have value');
     assert.equal(dummyChangeset.get('dateOfBirth'), d, 'should have new change');
 
     assert.deepEqual(changes, expectedChanges, 'should add change');
@@ -486,7 +486,7 @@ module('Unit | Utility | changeset', function(hooks) {
     dummyChangeset.set('dateOfBirth', d);
     let changes = get(dummyChangeset, 'changes');
 
-    assert.equal(dummyModel.dateOfBirth, undefined, 'should keep change');
+    assert.equal(model.dateOfBirth, undefined, 'should keep change');
     assert.equal(dummyChangeset.get('dateOfBirth'), d, 'should have new change');
 
     assert.deepEqual(changes, expectedChanges, 'should add change');
