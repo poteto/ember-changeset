@@ -14,6 +14,10 @@ import { dasherize } from '@ember/string';
 import { isPresent, typeOf } from '@ember/utils';
 import { next } from '@ember/runloop';
 
+function classToObj(klass) {
+  return JSON.parse(JSON.stringify(klass));
+}
+
 let dummyModel;
 let exampleArray = [];
 let dummyValidations = {
@@ -84,9 +88,9 @@ module('Unit | Utility | changeset', function(hooks) {
     let expectedResult = { name: { validation: 'too short', value: 'a' } };
     dummyChangeset.set('name', 'a');
 
-    assert.deepEqual(dummyChangeset.error, expectedResult, 'should return error object');
-    assert.deepEqual(dummyChangeset.get('error').name, expectedResult.name, 'should return nested error');
-    assert.deepEqual(dummyChangeset.get('error.name'), expectedResult.name, 'should return nested error');
+    assert.deepEqual(classToObj(dummyChangeset.error), expectedResult, 'should return error object');
+    assert.deepEqual(classToObj(dummyChangeset.get('error').name), expectedResult.name, 'should return nested error');
+    assert.deepEqual(classToObj(dummyChangeset.get('error.name')), expectedResult.name, 'should return nested error');
     assert.deepEqual(dummyChangeset.change, { name: 'a' }, 'should return change object');
     assert.deepEqual(dummyChangeset.get('change.name'), 'a', 'should return nested change');
     assert.deepEqual(dummyChangeset.get('change').name, 'a', 'should return nested change');
@@ -97,7 +101,7 @@ module('Unit | Utility | changeset', function(hooks) {
     let expectedResult = { validation: 'too short', value: 'a' };
     dummyChangeset.set('name', 'a');
 
-    assert.deepEqual(dummyChangeset.get('error.name'), expectedResult, 'should return error object for `name` key');
+    assert.deepEqual(classToObj(dummyChangeset.get('error.name')), expectedResult, 'should return error object for `name` key');
   });
 
   /**
@@ -698,7 +702,7 @@ module('Unit | Utility | changeset', function(hooks) {
 
     dummyChangeset.set('async', 'is invalid');
     await settled();
-    assert.deepEqual(get(dummyChangeset, 'error'), expectedError, 'should set error');
+    assert.deepEqual(classToObj(get(dummyChangeset, 'error')), expectedError, 'should set error');
   });
 
   test('it clears errors when setting to original value', async function(assert) {
@@ -1410,7 +1414,7 @@ module('Unit | Utility | changeset', function(hooks) {
 
     await dummyChangeset.validate();
     assert.deepEqual(
-      get(dummyChangeset, 'error.password'),
+      classToObj(get(dummyChangeset, 'error.password')),
       { validation: ['foo', 'bar'], value: false },
       'should validate immediately'
     );
@@ -1423,7 +1427,7 @@ module('Unit | Utility | changeset', function(hooks) {
     let dummyChangeset = Changeset(dummyModel, dummyValidator, dummyValidations);
 
     await dummyChangeset.validate('name');
-    assert.deepEqual(get(dummyChangeset, 'error.name'), { validation: 'too short', value: 'J' }, 'should validate immediately');
+    assert.deepEqual(classToObj(get(dummyChangeset, 'error.name')), { validation: 'too short', value: 'J' }, 'should validate immediately');
     assert.deepEqual(get(dummyChangeset, 'changes'), [], 'should not set changes');
     assert.equal(get(dummyChangeset, 'errors.length'), 1, 'should only have 1 error');
   });
@@ -1433,8 +1437,8 @@ module('Unit | Utility | changeset', function(hooks) {
     let dummyChangeset = Changeset(dummyModel, dummyValidator, dummyValidations);
 
     await dummyChangeset.validate('name', 'password');
-    assert.deepEqual(get(dummyChangeset, 'error.name'), { validation: 'too short', value: 'J' }, 'should validate immediately');
-    assert.deepEqual(get(dummyChangeset, 'error.password'), { validation: ['foo', 'bar'], value: false }, 'should validate immediately');
+    assert.deepEqual(classToObj(get(dummyChangeset, 'error.name')), { validation: 'too short', value: 'J' }, 'should validate immediately');
+    assert.deepEqual(classToObj(get(dummyChangeset, 'error.password')), { validation: ['foo', 'bar'], value: false }, 'should validate immediately');
     assert.deepEqual(get(dummyChangeset, 'changes'), [], 'should not set changes');
     assert.equal(get(dummyChangeset, 'errors.length'), 2, 'should only have 2 error');
   });
@@ -1510,7 +1514,7 @@ module('Unit | Utility | changeset', function(hooks) {
 
     let dummyChangeset = Changeset(dummyModel, dummyValidator, dummyValidations);
     await dummyChangeset.validate('org.usa.ny');
-    assert.deepEqual(get(dummyChangeset, 'error.org.usa.ny'), { validation: 'must be present', value: null }, 'should validate immediately');
+    assert.deepEqual(classToObj(get(dummyChangeset, 'error.org.usa.ny')), { validation: 'must be present', value: null }, 'should validate immediately');
     assert.deepEqual(dummyChangeset.changes, [], 'should not set changes');
     assert.equal(dummyChangeset.errors.length, 1, 'should only have 1 error');
   });
@@ -1693,7 +1697,7 @@ module('Unit | Utility | changeset', function(hooks) {
     dummyChangesetB.restore(snapshot);
     assert.ok(get(dummyChangesetB, 'isInvalid'), 'should be invalid');
     assert.equal(get(dummyChangesetB, 'change.name'), 'Pokemon Go', 'should restore changes');
-    assert.deepEqual(get(dummyChangesetB, 'error.password'), { validation: ['foo', 'bar'], value: false }, 'should restore errors');
+    assert.deepEqual(classToObj(get(dummyChangesetB, 'error.password')), { validation: ['foo', 'bar'], value: false }, 'should restore errors');
   });
 
   /**
