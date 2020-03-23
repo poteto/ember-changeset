@@ -123,6 +123,7 @@ export class EmberChangeset extends BufferedChangeset {
     // 'person.username'
     let [baseKey, ...remaining] = key.split('.');
 
+    // 1. lets first check CHANGES
     if (Object.prototype.hasOwnProperty.call(this[CHANGES], baseKey)) {
       let changes = this[CHANGES];
       let result;
@@ -168,7 +169,7 @@ export class EmberChangeset extends BufferedChangeset {
     }
 
 
-    // return getters/setters/methods on BufferedProxy instance
+    // 2. return getters/setters/methods on BufferedProxy instance
     if (typeof this[key] !== 'undefined') {
       return this[key];
     } else if (this[baseKey]) {
@@ -179,7 +180,7 @@ export class EmberChangeset extends BufferedChangeset {
       }
     }
 
-    // finally return on underlying object
+    // 3. finally return on underlying object
     const result = this.getDeep(this[CONTENT], key);
     return result;
   }
