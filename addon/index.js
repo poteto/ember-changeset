@@ -180,7 +180,7 @@ export class EmberChangeset extends BufferedChangeset {
       }
     }
 
-    // 3. finally return on underlying object
+    // 3. Lastly return on underlying object if previous cases dont apply
     const result = this.getDeep(this[CONTENT], key);
     return result;
   }
