@@ -1,26 +1,38 @@
 import Component from '@ember/component';
 import { action } from '@ember/object';
+import { tracked } from '@glimmer/tracking';
 import { Changeset } from 'ember-changeset'
 
-export default class ChangesetForm extends Component {
-  model = {
-    user: {
-      aliases: ['someone'],
-      name: 'someone',
-      email: 'something'
-    },
-    address: null,
-    cid: '1',
-    notifications: {
-      email: false,
-      sms: true
-    }
+class Foo {
+  user = {
+    aliases: ['someone'],
+    name: 'someone',
+    email: 'something'
   }
 
+  address = null
+
+  cid = '1'
+
+  @tracked
+  growth = 0
+
+  notifications = {
+    email: false,
+    sms: true
+  }
+
+  get doubleGrowth() {
+    return this.growth * 2;
+  }
+}
+
+export default class ChangesetForm extends Component {
   init() {
     super.init(...arguments);
 
-    this.changeset = Changeset(this.model)
+    this.model = new Foo();
+    this.changeset = Changeset(this.model);
   }
 
   @action

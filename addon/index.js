@@ -2,6 +2,7 @@ import { assert } from '@ember/debug';
 import { BufferedChangeset, normalizeObject, pureAssign } from 'validated-changeset';
 import mergeDeep from './utils/merge-deep';
 import isObject from './utils/is-object';
+import { isBelongsToRelationship } from './utils/is-belongs-to-relationship';
 import { notifyPropertyChange } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
 import { get as safeGet, set as safeSet } from '@ember/object';
@@ -10,30 +11,6 @@ const CHANGES = '_changes';
 const ERRORS = '_errors';
 const CONTENT = '_content';
 const defaultValidatorFn = () => true;
-
-// TODO: Get rid of this heuristic check by passing an option to the Changeset constructor
-const isBelongsToRelationship = (obj) => {
-  if (!obj) {
-    return false;
-  }
-
-  if (obj.hasOwnProperty('content') &&
-      obj.hasOwnProperty('isFulfilled') &&
-      obj.hasOwnProperty('isRejected')) {
-    // Async belongsTo()
-    return true;
-  }
-
-  if ('isLoading' in obj &&
-      'isLoaded' in obj &&
-      'isNew' in obj &&
-      'hasDirtyAttributes' in obj) {
-    // Sync belongsTo()
-    return true;
-  }
-
-  return false;
-}
 
 export class EmberChangeset extends BufferedChangeset {
   @tracked '_changes';
@@ -146,6 +123,7 @@ export class EmberChangeset extends BufferedChangeset {
     // 'person.username'
     let [baseKey, ...remaining] = key.split('.');
 
+    // 1. lets first check CHANGES
     if (Object.prototype.hasOwnProperty.call(this[CHANGES], baseKey)) {
       let changes = this[CHANGES];
       let result;
@@ -178,6 +156,7 @@ export class EmberChangeset extends BufferedChangeset {
           Object.keys(content[baseKey]).forEach(k => {
             data[k] = this.getDeep(content, `${baseKey}.${k}`)
           })
+
           return pureAssign(data, result);
         }
 
@@ -190,7 +169,7 @@ export class EmberChangeset extends BufferedChangeset {
     }
 
 
-    // return getters/setters/methods on BufferedProxy instance
+    // 2. return getters/setters/methods on BufferedProxy instance
     if (typeof this[key] !== 'undefined') {
       return this[key];
     } else if (this[baseKey]) {
@@ -201,7 +180,7 @@ export class EmberChangeset extends BufferedChangeset {
       }
     }
 
-    // finally return on underlying object
+    // 3. Lastly return on underlying object if previous cases dont apply
     const result = this.getDeep(this[CONTENT], key);
     return result;
   }
