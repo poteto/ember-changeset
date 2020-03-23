@@ -32,6 +32,8 @@ See also the [plugins](#plugins) section for addons that extend `ember-changeset
 #### tl;dr
 
 ```js
+import { Changeset } from 'ember-changeset';
+
 let changeset = Changeset(user, validatorFn);
 user.get('firstName'); // "Michael"
 user.get('lastName'); // "Bolton"

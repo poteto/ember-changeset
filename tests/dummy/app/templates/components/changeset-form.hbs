@@ -13,44 +13,62 @@
 <form
   {{on "submit" (fn this.submitForm this.changeset)}}
 >
-  <label>cid</label>
-  <input
-    data-test-cid
-    type="number"
-    value={{this.changeset.cid}}
-    oninput={{action (changeset-set this.changeset "cid") value="target.value"}}
-  >
+  <div>
+    <label>cid</label>
+    <input
+      data-test-cid
+      type="number"
+      value={{this.changeset.cid}}
+      oninput={{action (changeset-set this.changeset "cid") value="target.value"}}
+    >
+  </div>
 
-  <label>name</label>
-  <input
-    data-test-user-name
-    type="text"
-    value={{get this.changeset "user.name"}}
-    oninput={{action (changeset-set this.changeset "user.name") value="target.value"}}
-  >
+  <div>
+    <label>name</label>
+    <input
+      data-test-user-name
+      type="text"
+      value={{get this.changeset "user.name"}}
+      oninput={{action (changeset-set this.changeset "user.name") value="target.value"}}
+    >
+  </div>
 
-  <label>email</label>
-  <input
-    data-test-user-email
-    type="text"
-    value={{this.changeset.user.email}}
-    oninput={{action (changeset-set this.changeset "user.email") value="target.value"}}
-  >
+  <div>
+    <label>email</label>
+    <input
+      data-test-user-email
+      type="text"
+      value={{this.changeset.user.email}}
+      oninput={{action (changeset-set this.changeset "user.email") value="target.value"}}
+    >
+  </div>
 
-  <label>Notifications email</label>
-  <input
-    data-test-notifications-email
-    type="checkbox"
-    checked={{this.changeset.notifications.email}}
-    onchange={{action (changeset-set this.changeset "notifications.email") value="target.checked"}}
-  >
-  <label>Notifications sms</label>
-  <input
-    data-test-notifications-sms
-    type="checkbox"
-    checked={{this.changeset.notifications.sms}}
-    onchange={{action (changeset-set this.changeset "notifications.sms") value="target.checked"}}
-  >
+  <div>
+    <label>Notifications email</label>
+    <input
+      data-test-notifications-email
+      type="checkbox"
+      checked={{this.changeset.notifications.email}}
+      onchange={{action (changeset-set this.changeset "notifications.email") value="target.checked"}}
+    >
+    <label>Notifications sms</label>
+    <input
+      data-test-notifications-sms
+      type="checkbox"
+      checked={{this.changeset.notifications.sms}}
+      onchange={{action (changeset-set this.changeset "notifications.sms") value="target.checked"}}
+    >
+  </div>
+
+  <div>
+    <input
+      type="number"
+      value={{changeset-get this.changeset "growth"}}
+      {{on "input" (action (changeset-set this.changeset "growth") value="target.value")}}
+    />
+
+    <p>Doubled: {{changeset-get this.changeset "doubleGrowth"}}</p>
+  </div>
 
   <button data-test-submit type="submit">Submit form 1</button>
 
