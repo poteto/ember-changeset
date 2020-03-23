@@ -31,7 +31,8 @@ export default class ChangesetForm extends Component {
   init() {
     super.init(...arguments);
 
-    this.changeset = Changeset(new Foo())
+    this.model = new Foo();
+    this.changeset = Changeset(this.model);
   }
 
   @action
