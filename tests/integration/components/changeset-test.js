@@ -539,5 +539,31 @@ module('Integration | Helper | changeset', function(hooks) {
     assert.equal(find('h1').textContent.trim(), 'J B', 'should update observable value');
     assert.notOk(find('#error-paragraph'), 'should skip validation');
   });
+
+  test ('it handles updates to and from <input>', async function (assert) {
+    this.set('changeset', new Changeset({name: 'initial value'}));
+    this.set('fieldName', 'name');
+    this.set('handleChange', event => {
+      this.changeset.set(this.fieldName, event.target.value);
+    });
+    await render (hbs`
+        <input
+          name={{this.fieldName}}
+          value={{readonly (get this.changeset this.fieldName)}}
+          {{on 'input' (fn this.handleChange)}}
+        />
+      `);
+
+    assert.equal(find('input').value, 'initial value');
+
+    await fillIn('input', 'update from input', "initial value was set");
+    assert.equal(this.changeset.name, 'update from input', "updated changeset from input");
+
+    this.changeset.set('name', 'updated input from changeset.set');
+    assert.equal(find('input').value, 'updated input from changeset.set');
+
+    this.changeset.name = 'updated input form changeset.property='; // also fails
+    assert.equal(find('input').value, 'updated input form changeset.property=');
+  });
 });
 
