@@ -2,6 +2,7 @@ import { module, test } from 'qunit';
 import { setupRenderingTest } from 'ember-qunit';
 import { typeOf, isPresent } from '@ember/utils';
 import { Changeset } from 'ember-changeset';
+import { lookupValidator } from 'validated-changeset';
 import hbs from 'htmlbars-inline-precompile';
 import {
  render,
@@ -409,11 +410,8 @@ module('Integration | Helper | changeset', function(hooks) {
 
   test('it does not rollback when validating', async function(assert) {
     let dummyValidations = {
-      even(value) { return value % 2 === 0 || 'must be even'; },
-      odd(value) { return value % 2 !== 0 || 'must be odd'; }
-    };
-    let lookupValidator = (validationMap) => {
-      return ({ key, newValue }) => [validationMap[key](newValue)];
+      even(k, value) { return value % 2 === 0 || 'must be even'; },
+      odd(k, value) { return value % 2 !== 0 || 'must be odd'; }
     };
     let changeset = Changeset({ even: 4, odd: 4 }, lookupValidator(dummyValidations), dummyValidations);
     this.set('changeset', changeset);
