@@ -11,7 +11,7 @@ import EmberObject, {
 import { reads } from '@ember/object/computed';
 import ObjectProxy from '@ember/object/proxy';
 import { dasherize } from '@ember/string';
-import { isPresent, typeOf } from '@ember/utils';
+import { isPresent } from '@ember/utils';
 import { next } from '@ember/runloop';
 
 function classToObj(klass) {
@@ -51,7 +51,7 @@ let dummyValidations = {
 function dummyValidator({ key, newValue, oldValue, changes, content }) {
   let validatorFn = get(dummyValidations, key);
 
-  if (typeOf(validatorFn) === 'function') {
+  if (typeof validatorFn === 'function') {
     return validatorFn(newValue, oldValue, changes, content);
   }
 }
