@@ -1,5 +1,19 @@
 # Change Log
 
+## [3.3.1](https://github.com/poteto/ember-changeset/tree/v3.3.1) (2020-04-25)
+[Full Changelog](https://github.com/poteto/ember-changeset/compare/v3.2.1...v3.3.1)
+
+- validation will return primitive or array, depending on the validation map Follow up [#463](https://github.com/poteto/ember-changeset/pull/463)
+- validation will return primitive or array, depending on the validation map [#462](https://github.com/poteto/ember-changeset/pull/462)
+- no pin babel [#461](https://github.com/poteto/ember-changeset/pull/461)
+
+## [3.2.1](https://github.com/poteto/ember-changeset/tree/v3.3.1) (2020-04-11)
+[Full Changelog](https://github.com/poteto/ember-changeset/compare/v3.0.3...v3.2.1)
+
+- #set with nested Change instance overrides siblings [#454](https://github.com/poteto/ember-changeset/pull/454)
+- fix various bugs with validated-changeset [#447](https://github.com/poteto/ember-changeset/pull/447)
+- Serialize error object to handle circular objectsi [#444](https://github.com/poteto/ember-changeset/pull/444)
+
 ## [3.0.3](https://github.com/poteto/ember-changeset/tree/v3.0.3) (2020-02-11)
 [Full Changelog](https://github.com/poteto/ember-changeset/compare/v3.0.0...v3.0.3)
 
