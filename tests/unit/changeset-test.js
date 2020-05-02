@@ -532,8 +532,41 @@ module('Unit | Utility | changeset', function(hooks) {
         this.date = date;
       }
     }
+
     let c = Changeset(dummyModel);
     let d = new Date();
+    let momentInstance = new Moment(d);
+    c.set('startDate', momentInstance);
+
+    let expectedChanges = [{ key: 'startDate', value: momentInstance }];
+    let changes = get(c, 'changes');
+
+    assert.deepEqual(changes, expectedChanges, 'should add change');
+
+    let newValue = c.get('startDate');
+    assert.deepEqual(newValue, momentInstance, 'correct getter');
+    assert.ok(newValue instanceof Moment, 'correct instance');
+    assert.equal(newValue.date, d, 'correct date on moment object');
+
+    newValue = get(c, 'startDate');
+    assert.deepEqual(newValue, momentInstance, 'correct getter');
+    assert.ok(newValue instanceof Moment, 'correct instance');
+    assert.equal(newValue.date, d, 'correct date on moment object');
+  });
+
+  test('#set adds a change if value is an object with existing value', async function(assert) {
+    class Moment {
+      constructor(date) {
+        this.date = date;
+      }
+    }
+
+    let d = new Date();
+    dummyModel.set('startDate', new Moment(d));
+    dummyModel.set('name', 'Bobby');
+
+    let c = Changeset(dummyModel);
+    d = new Date();
     let momentInstance = new Moment(d);
     c.set('startDate', momentInstance);
 

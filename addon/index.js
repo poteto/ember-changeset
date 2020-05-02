@@ -139,7 +139,10 @@ export class EmberChangeset extends BufferedChangeset {
       }
 
       if ((result !== undefined && result !== null) && isObject(result)) {
+        // knock out any class Change{} instances
         result = normalizeObject(result);
+
+        // then ensure sibling keys are merged with the "result"
         let content = this[CONTENT];
 
         // Merge the content with the changes to have a complete object for a nested property.
@@ -152,8 +155,13 @@ export class EmberChangeset extends BufferedChangeset {
           isObject(content[baseKey]) &&
           !isBelongsToRelationship(content[baseKey])
         ) {
+          let netKeys = Object.keys(content[baseKey]).filter(k => !this.safeGet(result, k))
+          if (netKeys.length === 0) {
+            return result;
+          }
+
           let data = {};
-          Object.keys(content[baseKey]).forEach(k => {
+          netKeys.forEach(k => {
             data[k] = this.getDeep(content, `${baseKey}.${k}`)
           })
 
