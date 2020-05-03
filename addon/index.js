@@ -18,8 +18,10 @@ export class EmberChangeset extends BufferedChangeset {
   @tracked '_errors';
   @tracked '_content';
 
+  // override base class
   getDeep = safeGet;
 
+  // override base class
   safeGet(obj, key) {
     return safeGet(obj, key);
   }
@@ -157,7 +159,7 @@ export class EmberChangeset extends BufferedChangeset {
           !isBelongsToRelationship(content[baseKey]) &&
           !isLeafInChanges(key, changes)
         ) {
-          let netKeys = Object.keys(content[baseKey]).filter(k => !this.safeGet(result, k))
+          let netKeys = Object.keys(content[baseKey]).filter(k => !this.safeGet(result, k));
           if (netKeys.length === 0) {
             return result;
           }
