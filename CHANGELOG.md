@@ -1,5 +1,11 @@
 # Change Log
 
+## [3.3.3](https://github.com/poteto/ember-changeset/tree/v3.3.3) (2020-05-03)
+[Full Changelog](https://github.com/poteto/ember-changeset/compare/v3.3.1...v3.3.3)
+
+- Leaf detection when merging sibling keys [#466](https://github.com/poteto/ember-changeset/pull/466)
+- Ensure get doesnt take into account keys in CHANGES [#465](https://github.com/poteto/ember-changeset/pull/465)
+
 ## [3.3.1](https://github.com/poteto/ember-changeset/tree/v3.3.1) (2020-04-25)
 [Full Changelog](https://github.com/poteto/ember-changeset/compare/v3.2.1...v3.3.1)
 
