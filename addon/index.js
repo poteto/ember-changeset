@@ -159,7 +159,7 @@ export class EmberChangeset extends BufferedChangeset {
           !isBelongsToRelationship(content[baseKey]) &&
           !isLeafInChanges(key, changes)
         ) {
-          let netKeys = Object.keys(content[baseKey]).filter(k => !this.safeGet(result, k))
+          let netKeys = Object.keys(content[baseKey]).filter(k => !this.safeGet(result, k));
           if (netKeys.length === 0) {
             return result;
           }
