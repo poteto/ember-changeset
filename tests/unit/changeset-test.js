@@ -276,6 +276,69 @@ module('Unit | Utility | changeset', function(hooks) {
     assert.equal(newValue.date, d, 'correct date on moment object');
   });
 
+  test('#get returns the change when with properties added after', async function(assert) {
+    class Moment {
+      _isMomentObject = true;
+      constructor(date) {
+        this.date = date;
+      }
+    }
+
+    let d = new Date('2015');
+    let momentInstance = new Moment(d);
+    // added properties that shouldn't be returned when we replace startDate'
+    momentInstance._isUTC = true;
+    let c = Changeset({
+      startDate: momentInstance
+    });
+
+    let newValue = c.get('startDate');
+    assert.deepEqual(newValue, momentInstance, 'correct getter');
+    assert.ok(newValue instanceof Moment, 'correct instance');
+    assert.equal(newValue.date, d, 'correct date on moment object');
+
+    let newMomentInstance = new Moment(d);
+    // replace start date
+    c.set('startDate', newMomentInstance);
+
+    newValue = c.get('startDate');
+    assert.deepEqual(newValue, newMomentInstance, 'correct getter');
+    assert.ok(newValue instanceof Moment, 'correct instance');
+    assert.equal(newValue.date, d, 'correct date on moment object');
+    assert.notOk(newValue._isUTC, 'does not have changes from original instance');
+  });
+
+  test('#get merges sibling keys', async function(assert) {
+    class Moment {
+      _isMomentObject = true;
+      constructor(date) {
+        this.date = date;
+      }
+    }
+
+    let d = new Date('2015');
+    let momentInstance = new Moment(d);
+    let c = Changeset({
+      startDate: momentInstance
+    });
+
+    let newValue = c.get('startDate');
+    assert.deepEqual(newValue, momentInstance, 'correct getter');
+    assert.ok(newValue instanceof Moment, 'correct instance');
+    assert.equal(newValue.date, d, 'correct date on moment object');
+
+    let newMomentInstance = new Moment(d);
+    newMomentInstance.isMomentObject = false;
+    const newDate = new Date('2020');
+    c.set('startDate.date', newDate);
+
+    newValue = c.get('startDate');
+    assert.notDeepEqual(newValue, newMomentInstance, 'correct getter');
+    assert.ok(newValue instanceof Moment, 'correct instance');
+    assert.equal(newValue.date, newDate, 'correct date on moment object');
+    assert.equal(newValue._isMomentObject, true, 'has original content value');
+  });
+
   test('#get returns change if present', async function(assert) {
     set(dummyModel, 'name', 'Jim Bob');
     let dummyChangeset = Changeset(dummyModel);
@@ -562,6 +625,7 @@ module('Unit | Utility | changeset', function(hooks) {
     }
 
     let d = new Date();
+    // existing value
     dummyModel.set('startDate', new Moment(d));
     dummyModel.set('name', 'Bobby');
 

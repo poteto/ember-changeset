@@ -1,8 +1,9 @@
 import { assert } from '@ember/debug';
-import { BufferedChangeset, normalizeObject, pureAssign } from 'validated-changeset';
+import { BufferedChangeset, normalizeObject } from 'validated-changeset';
 import mergeDeep from './utils/merge-deep';
 import isObject from './utils/is-object';
 import { isBelongsToRelationship } from './utils/is-belongs-to-relationship';
+import { isLeafInChanges } from './utils/is-leaf';
 import { notifyPropertyChange } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
 import { get as safeGet, set as safeSet } from '@ember/object';
@@ -153,7 +154,8 @@ export class EmberChangeset extends BufferedChangeset {
         if (
           !Array.isArray(result) &&
           isObject(content[baseKey]) &&
-          !isBelongsToRelationship(content[baseKey])
+          !isBelongsToRelationship(content[baseKey]) &&
+          !isLeafInChanges(key, changes)
         ) {
           let netKeys = Object.keys(content[baseKey]).filter(k => !this.safeGet(result, k))
           if (netKeys.length === 0) {
@@ -161,12 +163,12 @@ export class EmberChangeset extends BufferedChangeset {
           }
 
           // 3. Ok merge sibling keys
-          let data = {};
+          const data = Object.assign(Object.create(Object.getPrototypeOf(content[baseKey])), result);
           netKeys.forEach(k => {
-            data[k] = this.getDeep(content, `${baseKey}.${k}`)
-          })
+            data[k] = this.getDeep(content, `${baseKey}.${k}`);
+          });
 
-          return pureAssign(data, result);
+          return data;
         }
 
         return result
