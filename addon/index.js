@@ -162,7 +162,8 @@ export class EmberChangeset extends BufferedChangeset {
             return result;
           }
 
-          // 3. Ok merge sibling keys
+          // 3. Ok merge sibling keys.  Yes, shallow clone, but users should treat `c.get` as read only.  Mods to data
+          // structures should happen through `c.set(...)` or `{{changeset-set ...}}`
           const data = Object.assign(Object.create(Object.getPrototypeOf(content[baseKey])), result);
           netKeys.forEach(k => {
             data[k] = this.getDeep(content, `${baseKey}.${k}`);
