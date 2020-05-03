@@ -18,8 +18,10 @@ export class EmberChangeset extends BufferedChangeset {
   @tracked '_errors';
   @tracked '_content';
 
+  // override base class
   getDeep = safeGet;
 
+  // override base class
   safeGet(obj, key) {
     return safeGet(obj, key);
   }
