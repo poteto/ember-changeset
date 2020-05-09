@@ -30,6 +30,36 @@ module('Integration | Helper | changeset-get', function(hooks) {
     this.set('fieldName', 'name.first');
   });
 
+  test('it retrieves the current value using {{changeset-get}}', async function(assert) {
+    await render(hbs`
+      <input
+        type="text"
+        oninput={{action (changeset-set changeset fieldName) value="target.value"}}
+        onchange={{action (changeset-set changeset fieldName) value="target.value"}}
+        value={{changeset-get changeset fieldName}}
+      />
+      <p id="test-el">{{changeset-get changeset fieldName}}</p>
+      <ul>
+        {{#each (changeset-get changeset "changes") as |change|}}
+          <li>{{change.key}}: {{change.value}}</li>
+        {{/each}}
+      </ul>
+    `);
+
+    const input = find('input') as HTMLInputElement;
+    const testEl = find('#test-el');
+
+    await fillIn(input!, 'Robert');
+
+    assert.equal(testEl!.textContent, 'Robert');
+    assert.equal(input!.value, 'Robert');
+
+    await this.get('changeset').rollback();
+
+    assert.equal(testEl!.textContent, 'Robert');
+    assert.equal(input!.value, 'Robert');
+  });
+
   test('it retrieves the current value using {{get}}', async function(assert) {
     await render(hbs`
       <input

@@ -20,10 +20,12 @@ export class EmberChangeset extends BufferedChangeset {
 
   // override base class
   getDeep = safeGet;
-
-  // override base class
+  setDeep = safeSet;
   safeGet(obj, key) {
     return safeGet(obj, key);
+  }
+  safeSet(obj, key, value) {
+    return safeSet(obj, key, value);
   }
 
   /**
