@@ -1076,11 +1076,11 @@ module('Unit | Utility | changeset', function(hooks) {
     let result;
     let options;
     let done = assert.async();
-    set(dummyModel, 'save', (dummyOptions) => {
+    dummyModel.save = (dummyOptions) => {
       result = 'ok';
       options = dummyOptions;
       return Promise.resolve('saveResult');
-    });
+    }
     let dummyChangeset = Changeset(dummyModel);
     dummyChangeset.set('name', 'foo');
 
