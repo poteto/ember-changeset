@@ -8,7 +8,7 @@ node_js:
 dist: trusty
 
 addons:
-  chrome: stable
+  chrome: beta
 
 cache:
   yarn: true
