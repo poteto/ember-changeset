@@ -28,6 +28,9 @@ export class EmberChangeset extends BufferedChangeset {
   safeGet(obj, key) {
     return safeGet(obj, key);
   }
+  safeSet(obj, key) {
+    return safeSet(obj, key);
+  }
 
   /**
    * Manually add an error to the changeset. If there is an existing
