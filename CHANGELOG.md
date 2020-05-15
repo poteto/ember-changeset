@@ -1,5 +1,10 @@
 # Change Log
 
+## [3.3.4](https://github.com/poteto/ember-changeset/tree/v3.3.3) (2020-05-03)
+[Full Changelog](https://github.com/poteto/ember-changeset/compare/v3.3.3...v3.3.4)
+
+- Use Ember.get if key is dot separated [#467](https://github.com/poteto/ember-changeset/pull/467)
+
 ## [3.3.3](https://github.com/poteto/ember-changeset/tree/v3.3.3) (2020-05-03)
 [Full Changelog](https://github.com/poteto/ember-changeset/compare/v3.3.1...v3.3.3)
 
