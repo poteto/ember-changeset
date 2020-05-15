@@ -18,6 +18,8 @@ export class EmberChangeset extends BufferedChangeset {
   @tracked '_errors';
   @tracked '_content';
 
+  // DO NOT override setDeep. Ember.set does not work wth empty hash and nested
+  // key Ember.set({}, 'user.name', 'foo');
   // override base class
   // DO NOT override setDeep. Ember.set does not work with Ember.set({}, 'user.name', 'foo');
   getDeep = safeGet;
@@ -160,7 +162,7 @@ export class EmberChangeset extends BufferedChangeset {
           !isBelongsToRelationship(content[baseKey]) &&
           !isLeafInChanges(key, changes)
         ) {
-          let netKeys = Object.keys(content[baseKey]).filter(k => !this.safeGet(result, k));
+          let netKeys = Object.keys(content[baseKey]);
           if (netKeys.length === 0) {
             return result;
           }
@@ -169,7 +171,17 @@ export class EmberChangeset extends BufferedChangeset {
           // structures should happen through `c.set(...)` or `{{changeset-set ...}}`
           const data = Object.assign(Object.create(Object.getPrototypeOf(content[baseKey])), result);
           netKeys.forEach(k => {
-            data[k] = this.getDeep(content, `${baseKey}.${k}`);
+            const inResult = this.safeGet(result, k);
+            const contentData = this.getDeep(content, `${baseKey}.${k}`);
+
+            if (
+              isObject(inResult) &&
+              isObject(contentData)
+            ) {
+              data[k] = { ...contentData, ...inResult };
+            } else if (!inResult) {
+              data[k] = contentData;
+            }
           });
 
           return data;
