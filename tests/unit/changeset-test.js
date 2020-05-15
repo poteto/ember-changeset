@@ -1089,7 +1089,6 @@ module('Unit | Utility | changeset', function(hooks) {
   test('#save proxies to content', async function(assert) {
     let result;
     let options;
-    let done = assert.async();
     set(dummyModel, 'save', (dummyOptions) => {
       result = 'ok';
       options = dummyOptions;
@@ -1104,15 +1103,13 @@ module('Unit | Utility | changeset', function(hooks) {
     assert.deepEqual(get(dummyChangeset, 'change'), { name: 'foo' }, 'should save');
     assert.equal(options, 'test options', 'should proxy options when saving');
     assert.ok(!!promise && typeof promise.then === 'function', 'save returns a promise');
-    promise.then((saveResult) => {
-      assert.equal(saveResult, 'saveResult', 'save proxies to save promise of content');
-    }).finally(() => done());
+    const saveResult = await promise;
+    assert.equal(saveResult, 'saveResult', 'save proxies to save promise of content');
   });
 
   test('#save handles non-promise proxy content', async function(assert) {
     let result;
     let options;
-    let done = assert.async();
     set(dummyModel, 'save', (dummyOptions) => {
       result = 'ok';
       options = dummyOptions;
@@ -1126,15 +1123,13 @@ module('Unit | Utility | changeset', function(hooks) {
     assert.equal(result, 'ok', 'should save');
     assert.equal(options, 'test options', 'should proxy options when saving');
     assert.ok(!!promise && typeof promise.then === 'function', 'save returns a promise');
-    promise.then((saveResult) => {
-      assert.equal(saveResult, 'saveResult', 'save proxies to save promise of content');
-    }).finally(() => done());
+    const saveResult = await promise;
+    assert.equal(saveResult, 'saveResult', 'save proxies to save promise of content');
   });
 
   test('#save handles rejected proxy content', async function(assert) {
     assert.expect(1);
 
-    let done = assert.async();
     let dummyChangeset = Changeset(dummyModel);
 
     assert.expect(1);
@@ -1145,26 +1140,21 @@ module('Unit | Utility | changeset', function(hooks) {
       });
     });
 
-    dummyChangeset.save()
-      .then(() => {
-        assert.ok(false, 'WAT?!');
-      })
-      .catch((error) => {
-        assert.equal(error.message, 'some ember data error');
-      })
-      .finally(() => done());
+    try {
+      await dummyChangeset.save()
+      assert.ok(false, 'WAT?!');
+    } catch (error) {
+      assert.equal(error.message, 'some ember data error');
+    }
   });
 
   test('#save proxies to content even if it does not implement #save', async function(assert) {
-    let done = assert.async();
     let person = { name: 'Jim' };
     let dummyChangeset = Changeset(person);
     dummyChangeset.set('name', 'foo');
 
-    return dummyChangeset.save().then(() => {
-      assert.equal(get(person, 'name'), 'foo', 'persist changes to content');
-      done();
-    });
+    await dummyChangeset.save();
+    assert.equal(get(person, 'name'), 'foo', 'persist changes to content');
   });
 
   /**
@@ -1870,7 +1860,7 @@ module('Unit | Utility | changeset', function(hooks) {
       'isValidating should be true when the key that is passed is validating');
   });
 
-  test('isValidating returns false when validations have resolved', async function(assert) {
+  test('isValidating returns false when validations have resolved', function(assert) {
     let dummyChangeset;
     let _validator = () => Promise.resolve(true);
     let _validations = {
@@ -2006,15 +1996,13 @@ module('Unit | Utility | changeset', function(hooks) {
   test('can set nested keys after validate', async function(assert) {
     assert.expect(0);
 
-    let done = assert.async();
     set(dummyModel, 'org', {
       usa: { ny: null }
     });
 
     let c = Changeset(dummyModel, dummyValidator, dummyValidations);
-    c.validate('org.usa.ny')
-      .then(() => c.set('org.usa.ny', 'should not fail'))
-      .finally(done);
+    await c.validate('org.usa.ny')
+    c.set('org.usa.ny', 'should not fail');
   });
 
   test('can call Changeset Factory function', async function(assert) {
