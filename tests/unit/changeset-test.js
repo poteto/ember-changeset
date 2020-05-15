@@ -1112,6 +1112,8 @@ module('Unit | Utility | changeset', function(hooks) {
     assert.equal(options, 'test options', 'should proxy options when saving');
     assert.ok(!!promise && typeof promise.then === 'function', 'save returns a promise');
     try {
+      const x = {};
+      alert(x);
       const saveResult = await promise;
       assert.equal(saveResult, 'saveResult', 'save proxies to save promise of content');
     } catch (e) {
@@ -1122,7 +1124,6 @@ module('Unit | Utility | changeset', function(hooks) {
   test('#save handles rejected proxy content', async function(assert) {
     assert.expect(1);
 
-    let done = assert.async();
     let dummyChangeset = Changeset(dummyModel);
 
     assert.expect(1);
@@ -1133,14 +1134,12 @@ module('Unit | Utility | changeset', function(hooks) {
       });
     });
 
-    dummyChangeset.save()
-      .then(() => {
-        assert.ok(false, 'WAT?!');
-      })
-      .catch((error) => {
-        assert.equal(error.message, 'some ember data error');
-      })
-      .finally(() => done());
+    try {
+      await dummyChangeset.save()
+      assert.ok(false, 'WAT?!');
+    } catch (error) {
+      assert.equal(error.message, 'some ember data error');
+    }
   });
 
   test('#save proxies to content even if it does not implement #save', async function(assert) {
