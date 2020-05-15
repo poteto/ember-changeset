@@ -18,6 +18,8 @@ export class EmberChangeset extends BufferedChangeset {
   @tracked '_errors';
   @tracked '_content';
 
+  // DO NOT override setDeep. Ember.set does not work wth empty hash and nested
+  // key Ember.set({}, 'user.name', 'foo');
   // override base class
   getDeep = safeGet;
 
