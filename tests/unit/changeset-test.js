@@ -1098,7 +1098,6 @@ module('Unit | Utility | changeset', function(hooks) {
   test('#save handles non-promise proxy content', async function(assert) {
     let result;
     let options;
-    let done = assert.async();
     set(dummyModel, 'save', (dummyOptions) => {
       result = 'ok';
       options = dummyOptions;
@@ -1112,9 +1111,12 @@ module('Unit | Utility | changeset', function(hooks) {
     assert.equal(result, 'ok', 'should save');
     assert.equal(options, 'test options', 'should proxy options when saving');
     assert.ok(!!promise && typeof promise.then === 'function', 'save returns a promise');
-    promise.then((saveResult) => {
+    try {
+      const saveResult = await promise;
       assert.equal(saveResult, 'saveResult', 'save proxies to save promise of content');
-    }).finally(() => done());
+    } catch (e) {
+      // noop
+    }
   });
 
   test('#save handles rejected proxy content', async function(assert) {
@@ -1856,7 +1858,7 @@ module('Unit | Utility | changeset', function(hooks) {
       'isValidating should be true when the key that is passed is validating');
   });
 
-  test('isValidating returns false when validations have resolved', async function(assert) {
+  test('isValidating returns false when validations have resolved', function(assert) {
     let dummyChangeset;
     let _validator = () => Promise.resolve(true);
     let _validations = {
