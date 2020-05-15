@@ -514,15 +514,29 @@ module('Unit | Utility | changeset', function(hooks) {
   test('#set adds a change if the key is an object', async function(assert) {
     set(dummyModel, 'org', {
       usa: {
+        mn: 'mn',
         ny: 'ny',
-      }
+        nz: 'nz'
+      },
+      landArea: 100
     });
 
     let c = Changeset(dummyModel);
     c.set('org.usa.ny', 'foo');
 
     assert.equal(dummyModel.org.usa.ny, 'ny', 'should keep change');
+    const expectedObj = {
+      usa: {
+        mn: 'mn',
+        ny: 'foo',
+        nz: 'nz'
+      },
+      landArea: 100
+    }
+    assert.deepEqual(c.org, expectedObj, 'should have object with new change');
     assert.equal(c.get('org.usa.ny'), 'foo', 'should have new change');
+    assert.equal(c.get('org.usa.mn'), 'mn', 'should have sibling keys');
+    assert.equal(c.get('org.landArea'), 100, 'should have sibling keys');
 
     let expectedChanges = [{ key: 'org.usa.ny', value: 'foo' }];
     let changes = get(c, 'changes');
