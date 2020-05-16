@@ -624,8 +624,10 @@ user.set('address.zipCode', '123');
 let validationMap = {
   lastName: validateLength({ min: 8 }),
 
-  // specify nested keys with dot delimiters
-  'address.zipCode': validateLength({ is: 5 }),
+  // specify nested keys with pojo's
+  address: {
+    zipCode: : validateLength({ is: 5 })
+  }
 };
 
 let changeset = Changeset(user, validatorFn, validationMap);
