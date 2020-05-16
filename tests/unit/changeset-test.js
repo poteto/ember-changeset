@@ -1517,8 +1517,15 @@ module('Unit | Utility | changeset', function(hooks) {
       { validation: ['foo', 'bar'], value: false },
       'should validate immediately'
     );
+    assert.deepEqual(
+      classToObj(dummyChangeset.error.password),
+      { validation: ['foo', 'bar'], value: false },
+      'should validate immediately'
+    );
     assert.deepEqual(get(dummyChangeset, 'changes'), [], 'should not set changes');
+    assert.deepEqual(dummyChangeset.changes, [], 'should not set changes');
     assert.equal(get(dummyChangeset, 'errors.length'), 5, 'should have 5 errors');
+    assert.equal(dummyChangeset.errors.length, 5, 'should have 5 errors');
   });
 
   test('#validate/1 validates a single field immediately', async function(assert) {
