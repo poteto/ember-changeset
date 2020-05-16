@@ -21,11 +21,15 @@ export class EmberChangeset extends BufferedChangeset {
   // DO NOT override setDeep. Ember.set does not work wth empty hash and nested
   // key Ember.set({}, 'user.name', 'foo');
   // override base class
+  // DO NOT override setDeep. Ember.set does not work with Ember.set({}, 'user.name', 'foo');
   getDeep = safeGet;
 
   // override base class
   safeGet(obj, key) {
     return safeGet(obj, key);
+  }
+  safeSet(obj, key, value) {
+    return safeSet(obj, key, value);
   }
 
   /**
