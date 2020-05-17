@@ -155,8 +155,13 @@ module('Integration | main', function(hooks) {
     let user = this.createUser(userType, true);
     let changeset = Changeset(user);
     let newDog = this.store.createRecord('dog', { breed: 'Münsterländer' });
+
+    assert.equal(changeset.isDirty, false);
+
     let dogs = changeset.get('dogs');
     dogs.pushObjects([newDog]);
+
+    assert.equal(changeset.isDirty, true);
 
     dogs = changeset.get('dogs').toArray();
     assert.equal(dogs[0].get('breed'), 'rough collie');
