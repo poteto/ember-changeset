@@ -38,7 +38,7 @@ let dummyValidations = {
   },
   org: {
     isCompliant(value) {
-      return !!value;
+      return !!value || 'is not set';
     },
     usa: {
       ny(value) {
@@ -1524,8 +1524,22 @@ module('Unit | Utility | changeset', function(hooks) {
     );
     assert.deepEqual(get(dummyChangeset, 'changes'), [], 'should not set changes');
     assert.deepEqual(dummyChangeset.changes, [], 'should not set changes');
-    assert.equal(get(dummyChangeset, 'errors.length'), 5, 'should have 5 errors');
-    assert.equal(dummyChangeset.errors.length, 5, 'should have 5 errors');
+    assert.equal(get(dummyChangeset, 'errors.length'), 7, 'should have 7 errors');
+    assert.equal(dummyChangeset.errors.length, 7, 'should have 7 errors');
+  });
+
+  test('#validate/0 with nested fields', async function(assert) {
+    dummyModel.setProperties({ org: { usa: { ny: null } } });
+    let dummyChangeset = Changeset(dummyModel, dummyValidator, dummyValidations);
+
+    await dummyChangeset.validate();
+    assert.deepEqual(
+      classToObj(dummyChangeset.error.org.usa.ny),
+      { validation: 'must be present', value: null },
+      'should validate immediately'
+    );
+    assert.deepEqual(dummyChangeset.changes, [], 'should not set changes');
+    assert.equal(dummyChangeset.errors.length, 7, 'should have 7 errors');
   });
 
   test('#validate/1 validates a single field immediately', async function(assert) {
@@ -1550,24 +1564,44 @@ module('Unit | Utility | changeset', function(hooks) {
   });
 
   test('#validate works correctly with changeset values', async function(assert) {
-    dummyModel.setProperties({ name: undefined, password: false, async: true, passwordConfirmation: false, options: {}});
+    dummyModel.setProperties({
+      name: undefined,
+      password: false,
+      async: true,
+      passwordConfirmation: false,
+      options: {},
+      org: {
+        isCompliant: undefined,
+        usa: {
+          ny: undefined
+        }
+      }
+    });
     let dummyChangeset = Changeset(dummyModel, dummyValidator, dummyValidations);
 
     dummyChangeset.set('name', 'Jim Bob');
     await dummyChangeset.validate();
-    assert.equal(get(dummyChangeset, 'errors.length'), 1, 'should have 1 error');
-    assert.equal(get(dummyChangeset, 'errors.0.key'), 'password');
+    assert.equal(get(dummyChangeset, 'errors.length'), 3, 'should have 3 errors');
+    assert.equal(get(dummyChangeset, 'errors.0.key'), 'password', 'has first error key');
+    assert.equal(get(dummyChangeset, 'errors.1.key'), 'org.isCompliant', 'has second error key');
+    assert.equal(get(dummyChangeset, 'errors.2.key'), 'org.usa.ny', 'has third error key');
     assert.ok(get(dummyChangeset, 'isInvalid'), 'should be invalid');
 
     dummyChangeset.set('passwordConfirmation', true);
+
     await dummyChangeset.validate();
-    assert.equal(get(dummyChangeset, 'errors.length'), 2, 'should have 2 errors');
-    assert.equal(get(dummyChangeset, 'errors.0.key'), 'password');
-    assert.equal(get(dummyChangeset, 'errors.1.key'), 'passwordConfirmation');
+
+    assert.equal(get(dummyChangeset, 'errors.length'), 4, 'should have 4 errors');
+    assert.equal(get(dummyChangeset, 'errors.0.key'), 'org.usa.ny');
+    assert.equal(get(dummyChangeset, 'errors.1.key'), 'org.isCompliant');
+    assert.equal(get(dummyChangeset, 'errors.2.key'), 'password');
+    assert.equal(get(dummyChangeset, 'errors.3.key'), 'passwordConfirmation');
     assert.ok(get(dummyChangeset, 'isInvalid'), 'should be invalid');
 
     dummyChangeset.set('password', true);
     dummyChangeset.set('passwordConfirmation', true);
+    dummyChangeset.set('org.isCompliant', true);
+    dummyChangeset.set('org.usa.ny', 'NY');
     await dummyChangeset.validate();
     assert.equal(get(dummyChangeset, 'errors.length'), 0, 'should have no errors');
     assert.ok(get(dummyChangeset, 'isValid'), 'should be valid');
@@ -1601,7 +1635,19 @@ module('Unit | Utility | changeset', function(hooks) {
         return this.persist === get(other, 'persist');
       }
     };
-    dummyModel.setProperties({ name: 'Jim Bob', password: true, passwordConfirmation: true, async: true, options});
+    dummyModel.setProperties({
+      name: 'Jim Bob',
+      password: true,
+      passwordConfirmation: true,
+      async: true,
+      options,
+      org: {
+        isCompliant: true,
+        usa: {
+          ny: 'NY'
+        }
+      }
+    });
     let dummyChangeset = Changeset(dummyModel, dummyValidator, dummyValidations);
 
     dummyChangeset.set('options', options);
