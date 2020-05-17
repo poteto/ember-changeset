@@ -1,5 +1,12 @@
 # Change Log
 
+## [3.3.8](https://github.com/poteto/ember-changeset/tree/v3.3.8) (2020-05-16)
+[Full Changelog](https://github.com/poteto/ember-changeset/compare/v3.3.4...v3.3.8)
+
+- Validate nested fields validate/0 [#479](https://github.com/poteto/ember-changeset/pull/479)
+- Safe set for setDeep [#471](https://github.com/poteto/ember-changeset/pull/471)
+- Ensure dont lose sibling keys when ask for top level object and child [#473](https://github.com/poteto/ember-changeset/pull/473)
+
 ## [3.3.4](https://github.com/poteto/ember-changeset/tree/v3.3.3) (2020-05-03)
 [Full Changelog](https://github.com/poteto/ember-changeset/compare/v3.3.3...v3.3.4)
 
