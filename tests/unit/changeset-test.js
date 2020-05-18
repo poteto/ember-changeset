@@ -1662,6 +1662,42 @@ module('Unit | Utility | changeset', function(hooks) {
     ]);
   });
 
+  test('#validate changeset getter', async function(assert) {
+    class MyModel {
+      isOptionOne = false;
+      isOptionTwo = false;
+      isOptionThree = false;
+    }
+
+    const Validations = {
+      isOptionSelected: (newValue) => {
+        return newValue === true ? true : 'No options selected';
+      }
+    }
+
+    function myValidator({ key, newValue, oldValue, changes, content }) {
+      let validatorFn = get(Validations, key);
+
+      if (typeof validatorFn === 'function') {
+        return validatorFn(newValue, oldValue, changes, content);
+      }
+    }
+
+    const myObject = new MyModel();
+    const myChangeset = Changeset(myObject, myValidator, Validations);
+
+    Object.defineProperty(myChangeset, 'isOptionSelected', {
+      get() {
+        return this.get('isOptionOne') || this.get('isOptionTwo') || this.get('isOptionThree');
+      }
+    });
+    await myChangeset.validate();
+    assert.equal(myChangeset.isInvalid, true, 'Changeset is invalid as none of the options are selected');
+
+    set(myChangeset, 'isOptionTwo', true);
+    await myChangeset.validate();
+    assert.equal(myChangeset.isInvalid, false, 'Changeset is valid as one of the options is selected');
+  });
 
   test('#changeset properties do not proxy', async function(assert) {
     dummyModel.setProperties({ name: undefined, password: false, async: true, isValid: 'not proxied'});
