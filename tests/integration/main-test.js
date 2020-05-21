@@ -26,7 +26,6 @@ module('Integration | main', function(hooks) {
     let user = this.createUser(userType, false);
     let changeset = Changeset(user);
 
-    assert.equal(changeset.get('profile'), user.get('profile'));
     assert.equal(changeset.get('profile.firstName'), user.get('profile.firstName'));
     assert.equal(changeset.get('profile.lastName'), user.get('profile.lastName'));
 

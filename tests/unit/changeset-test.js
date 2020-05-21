@@ -271,8 +271,7 @@ module('Unit | Utility | changeset', function(hooks) {
     });
 
     let newValue = c.get('startDate');
-    assert.deepEqual(newValue, momentInstance, 'correct getter');
-    assert.ok(newValue instanceof Moment, 'correct instance');
+    // newValue is a proxy
     assert.equal(newValue.date, d, 'correct date on moment object');
   });
 
@@ -293,8 +292,6 @@ module('Unit | Utility | changeset', function(hooks) {
     });
 
     let newValue = c.get('startDate');
-    assert.deepEqual(newValue, momentInstance, 'correct getter');
-    assert.ok(newValue instanceof Moment, 'correct instance');
     assert.equal(newValue.date, d, 'correct date on moment object');
 
     let newMomentInstance = new Moment(d);
@@ -302,8 +299,6 @@ module('Unit | Utility | changeset', function(hooks) {
     c.set('startDate', newMomentInstance);
 
     newValue = c.get('startDate');
-    assert.deepEqual(newValue, newMomentInstance, 'correct getter');
-    assert.ok(newValue instanceof Moment, 'correct instance');
     assert.equal(newValue.date, d, 'correct date on moment object');
     assert.notOk(newValue._isUTC, 'does not have changes from original instance');
   });
@@ -323,16 +318,14 @@ module('Unit | Utility | changeset', function(hooks) {
     });
 
     let newValue = c.get('startDate');
-    assert.deepEqual(newValue, momentInstance, 'correct getter');
-    assert.ok(newValue instanceof Moment, 'correct instance');
+    assert.ok(newValue.content instanceof Moment, 'correct instance');
     assert.equal(newValue.date, d, 'correct date on moment object');
 
     const newDate = new Date('2020');
     c.set('startDate.date', newDate);
 
     newValue = c.get('startDate');
-    assert.notDeepEqual(newValue, momentInstance, 'correct getter');
-    assert.ok(newValue instanceof Moment, 'correct instance');
+    assert.ok(newValue.content instanceof Moment, 'correct instance');
     assert.equal(newValue.date, newDate, 'correct date on moment object');
     assert.equal(newValue._isMomentObject, true, 'has original content value');
   });
@@ -619,13 +612,9 @@ module('Unit | Utility | changeset', function(hooks) {
     assert.deepEqual(changes, expectedChanges, 'should add change');
 
     let newValue = c.get('startDate');
-    assert.deepEqual(newValue, momentInstance, 'correct getter');
-    assert.ok(newValue instanceof Moment, 'correct instance');
     assert.equal(newValue.date, d, 'correct date on moment object');
 
     newValue = get(c, 'startDate');
-    assert.deepEqual(newValue, momentInstance, 'correct getter');
-    assert.ok(newValue instanceof Moment, 'correct instance');
     assert.equal(newValue.date, d, 'correct date on moment object');
   });
 
@@ -652,13 +641,9 @@ module('Unit | Utility | changeset', function(hooks) {
     assert.deepEqual(changes, expectedChanges, 'should add change');
 
     let newValue = c.get('startDate');
-    assert.deepEqual(newValue, momentInstance, 'correct getter');
-    assert.ok(newValue instanceof Moment, 'correct instance');
     assert.equal(newValue.date, d, 'correct date on moment object');
 
     newValue = get(c, 'startDate');
-    assert.deepEqual(newValue, momentInstance, 'correct getter');
-    assert.ok(newValue instanceof Moment, 'correct instance');
     assert.equal(newValue.date, d, 'correct date on moment object');
   });
 
