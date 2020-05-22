@@ -271,8 +271,7 @@ module('Unit | Utility | changeset', function(hooks) {
     });
 
     let newValue = c.get('startDate');
-    assert.deepEqual(newValue, momentInstance, 'correct getter');
-    assert.ok(newValue instanceof Moment, 'correct instance');
+    // newValue is a proxy
     assert.equal(newValue.date, d, 'correct date on moment object');
   });
 
@@ -293,8 +292,6 @@ module('Unit | Utility | changeset', function(hooks) {
     });
 
     let newValue = c.get('startDate');
-    assert.deepEqual(newValue, momentInstance, 'correct getter');
-    assert.ok(newValue instanceof Moment, 'correct instance');
     assert.equal(newValue.date, d, 'correct date on moment object');
 
     let newMomentInstance = new Moment(d);
@@ -302,8 +299,6 @@ module('Unit | Utility | changeset', function(hooks) {
     c.set('startDate', newMomentInstance);
 
     newValue = c.get('startDate');
-    assert.deepEqual(newValue, newMomentInstance, 'correct getter');
-    assert.ok(newValue instanceof Moment, 'correct instance');
     assert.equal(newValue.date, d, 'correct date on moment object');
     assert.notOk(newValue._isUTC, 'does not have changes from original instance');
   });
@@ -323,16 +318,14 @@ module('Unit | Utility | changeset', function(hooks) {
     });
 
     let newValue = c.get('startDate');
-    assert.deepEqual(newValue, momentInstance, 'correct getter');
-    assert.ok(newValue instanceof Moment, 'correct instance');
+    assert.ok(newValue.content instanceof Moment, 'correct instance');
     assert.equal(newValue.date, d, 'correct date on moment object');
 
     const newDate = new Date('2020');
     c.set('startDate.date', newDate);
 
     newValue = c.get('startDate');
-    assert.notDeepEqual(newValue, momentInstance, 'correct getter');
-    assert.ok(newValue instanceof Moment, 'correct instance');
+    assert.ok(newValue.content instanceof Moment, 'correct instance');
     assert.equal(newValue.date, newDate, 'correct date on moment object');
     assert.equal(newValue._isMomentObject, true, 'has original content value');
   });
@@ -498,17 +491,16 @@ module('Unit | Utility | changeset', function(hooks) {
   test('#set Ember.set doesnt work for nested', async function(assert) {
     set(dummyModel, 'name', {});
     let dummyChangeset = Changeset(dummyModel);
-    set(dummyChangeset, 'name.short', 'foo');
+    set(dummyChangeset, 'name.short', 'boo');
 
-    assert.equal(dummyChangeset.get('name.short'), 'foo', 'should have new change');
-    assert.deepEqual(dummyModel.name.short, 'foo', 'has property on moel already before execute');
+    assert.equal(dummyChangeset.name.short, 'boo', 'should have new change');
 
     let changes = get(dummyChangeset, 'changes');
-    assert.deepEqual(changes, [], 'no changes with nested key Ember.set');
+    assert.deepEqual(changes, [{ key: 'name.short', value: 'boo' }], 'changes with nested key Ember.set');
 
     dummyChangeset.execute();
 
-    assert.equal(dummyModel.name.short, 'foo', 'still has property');
+    assert.equal(dummyModel.name.short, 'boo', 'has new property');
   });
 
   test('#set adds a change if the key is an object', async function(assert) {
@@ -525,15 +517,6 @@ module('Unit | Utility | changeset', function(hooks) {
     c.set('org.usa.ny', 'foo');
 
     assert.equal(dummyModel.org.usa.ny, 'ny', 'should keep change');
-    const expectedObj = {
-      usa: {
-        mn: 'mn',
-        ny: 'foo',
-        nz: 'nz'
-      },
-      landArea: 100
-    }
-    assert.deepEqual(c.org, expectedObj, 'should have object with new change');
     assert.equal(c.get('org.usa.ny'), 'foo', 'should have new change');
     assert.equal(c.get('org.usa.mn'), 'mn', 'should have sibling keys');
     assert.equal(c.get('org.landArea'), 100, 'should have sibling keys');
@@ -619,13 +602,9 @@ module('Unit | Utility | changeset', function(hooks) {
     assert.deepEqual(changes, expectedChanges, 'should add change');
 
     let newValue = c.get('startDate');
-    assert.deepEqual(newValue, momentInstance, 'correct getter');
-    assert.ok(newValue instanceof Moment, 'correct instance');
     assert.equal(newValue.date, d, 'correct date on moment object');
 
     newValue = get(c, 'startDate');
-    assert.deepEqual(newValue, momentInstance, 'correct getter');
-    assert.ok(newValue instanceof Moment, 'correct instance');
     assert.equal(newValue.date, d, 'correct date on moment object');
   });
 
@@ -652,13 +631,9 @@ module('Unit | Utility | changeset', function(hooks) {
     assert.deepEqual(changes, expectedChanges, 'should add change');
 
     let newValue = c.get('startDate');
-    assert.deepEqual(newValue, momentInstance, 'correct getter');
-    assert.ok(newValue instanceof Moment, 'correct instance');
     assert.equal(newValue.date, d, 'correct date on moment object');
 
     newValue = get(c, 'startDate');
-    assert.deepEqual(newValue, momentInstance, 'correct getter');
-    assert.ok(newValue instanceof Moment, 'correct instance');
     assert.equal(newValue.date, d, 'correct date on moment object');
   });
 
@@ -868,7 +843,7 @@ module('Unit | Utility | changeset', function(hooks) {
     let model = { foo: { bar: { baz: 42 } } };
 
     let c = Changeset(model);
-    assert.deepEqual(c.get('foo'), get(model, 'foo'));
+    assert.deepEqual(c.get('foo.bar.baz'), get(model, 'foo.bar.baz'), 'model and changeset in sync');
 
     c.set('foo', 'not an object anymore');
     c.execute();
