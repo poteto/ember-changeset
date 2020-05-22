@@ -491,17 +491,16 @@ module('Unit | Utility | changeset', function(hooks) {
   test('#set Ember.set doesnt work for nested', async function(assert) {
     set(dummyModel, 'name', {});
     let dummyChangeset = Changeset(dummyModel);
-    set(dummyChangeset, 'name.short', 'foo');
+    set(dummyChangeset, 'name.short', 'boo');
 
-    assert.equal(dummyChangeset.get('name.short'), 'foo', 'should have new change');
-    assert.deepEqual(dummyModel.name.short, 'foo', 'has property on moel already before execute');
+    assert.equal(dummyChangeset.name.short, 'boo', 'should have new change');
 
     let changes = get(dummyChangeset, 'changes');
-    assert.deepEqual(changes, [], 'no changes with nested key Ember.set');
+    assert.deepEqual(changes, [{ key: 'name.short', value: 'boo' }], 'no changes with nested key Ember.set');
 
     dummyChangeset.execute();
 
-    assert.equal(dummyModel.name.short, 'foo', 'still has property');
+    assert.equal(dummyModel.name.short, 'boo', 'has new property');
   });
 
   test('#set adds a change if the key is an object', async function(assert) {
@@ -518,15 +517,6 @@ module('Unit | Utility | changeset', function(hooks) {
     c.set('org.usa.ny', 'foo');
 
     assert.equal(dummyModel.org.usa.ny, 'ny', 'should keep change');
-    const expectedObj = {
-      usa: {
-        mn: 'mn',
-        ny: 'foo',
-        nz: 'nz'
-      },
-      landArea: 100
-    }
-    assert.deepEqual(c.org, expectedObj, 'should have object with new change');
     assert.equal(c.get('org.usa.ny'), 'foo', 'should have new change');
     assert.equal(c.get('org.usa.mn'), 'mn', 'should have sibling keys');
     assert.equal(c.get('org.landArea'), 100, 'should have sibling keys');
@@ -853,7 +843,7 @@ module('Unit | Utility | changeset', function(hooks) {
     let model = { foo: { bar: { baz: 42 } } };
 
     let c = Changeset(model);
-    assert.deepEqual(c.get('foo'), get(model, 'foo'));
+    assert.deepEqual(c.get('foo.bar.baz'), get(model, 'foo.bar.baz'), 'model and changeset in sync');
 
     c.set('foo', 'not an object anymore');
     c.execute();

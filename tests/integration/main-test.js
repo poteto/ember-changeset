@@ -35,12 +35,12 @@ module('Integration | main', function(hooks) {
 
     assert.equal(changeset.get('profile.firstName'), 'Grace', 'has firstName after set');
     assert.equal(changeset.get('profile.nickname'), 'g', 'has nickname after set');
-    assert.equal(changeset.get('profile.lastName'), 'Ross', 'Ember.set does not change anything');
+    assert.equal(changeset.get('profile.lastName'), 'Hopper', 'Ember.set does work');
 
     changeset.execute();
 
     assert.equal(user.get('profile.firstName'), 'Grace', 'firstName after execute');
-    assert.equal(user.get('profile.lastName'), 'Ross', 'lastName after execute');
+    assert.equal(user.get('profile.lastName'), 'Hopper', 'lastName after execute');
     assert.equal(user.get('profile.nickname'), 'g', 'nickname after execute');
 
     let profile = this.store.createRecord('profile', { firstName: 'Terry', lastName: 'Bubblewinkles', nickname: 't' });
