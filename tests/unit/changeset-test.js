@@ -496,7 +496,7 @@ module('Unit | Utility | changeset', function(hooks) {
     assert.equal(dummyChangeset.name.short, 'boo', 'should have new change');
 
     let changes = get(dummyChangeset, 'changes');
-    assert.deepEqual(changes, [{ key: 'name.short', value: 'boo' }], 'no changes with nested key Ember.set');
+    assert.deepEqual(changes, [{ key: 'name.short', value: 'boo' }], 'changes with nested key Ember.set');
 
     dummyChangeset.execute();
 
