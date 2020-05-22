@@ -158,23 +158,23 @@ module('Integration | main', function(hooks) {
     dogs.pushObjects([newDog]);
 
     dogs = changeset.get('dogs').toArray();
-    assert.equal(dogs[0].get('breed'), 'rough collie');
-    assert.equal(dogs[1].get('breed'), 'rough collie');
-    assert.equal(dogs[2].get('breed'), 'Münsterländer');
+    assert.equal(dogs[0].get('breed'), 'rough collie', 'has first breed');
+    assert.equal(dogs[1].get('breed'), 'rough collie', 'has second breed');
+    assert.equal(dogs[2].get('breed'), 'Münsterländer', 'has third breed');
 
     changeset.execute();
 
     dogs = user.get('dogs').toArray();
-    assert.equal(dogs[0].get('breed'), 'rough collie');
-    assert.equal(dogs[1].get('breed'), 'rough collie');
-    assert.equal(dogs[2].get('breed'), 'Münsterländer');
+    assert.equal(dogs[0].get('breed'), 'rough collie', 'has first breed');
+    assert.equal(dogs[1].get('breed'), 'rough collie', 'has second breed');
+    assert.equal(dogs[2].get('breed'), 'Münsterländer', 'has third breek');
 
     changeset.set('dogs', []);
 
     changeset.execute();
 
     dogs = user.get('dogs').toArray();
-    assert.equal(dogs.length, 0, 'dogs removed');
+    assert.equal(dogs.length, 0, 'dogs removed', 'all dogs removed');
   }
 
   test('it works for hasMany / firstObject', async function(assert) {
