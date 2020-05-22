@@ -188,14 +188,14 @@ module('Integration | main', function(hooks) {
     dogs = user.get('dogs').toArray();
     assert.equal(dogs[0].get('breed'), 'rough collie', 'has first breed');
     assert.equal(dogs[1].get('breed'), 'rough collie', 'has second breed');
-    assert.equal(dogs[2].get('breed'), 'Münsterländer', 'has third breek');
+    assert.equal(dogs[2].get('breed'), 'Münsterländer', 'has third breed');
 
-    assert.equal(changeset.isDirty, false, 'is not dirty');
+    assert.equal(changeset.isDirty, true, 'is still dirty');
     assert.deepEqual(changeset.changes, [], 'has no changes');
 
     changeset.set('dogs', []);
 
-    assert.equal(changeset.isDirty, true, 'is not dirty');
+    assert.equal(changeset.isDirty, true, 'is dirty');
     assert.deepEqual(changeset.changes, [{ key: 'dogs', value: [] }], 'has changes');
 
     changeset.execute();
@@ -203,8 +203,11 @@ module('Integration | main', function(hooks) {
     dogs = user.get('dogs').toArray();
     assert.equal(dogs.length, 0, 'dogs removed', 'all dogs removed');
 
-    assert.equal(changeset.isDirty, true, 'is not dirty');
+    assert.equal(changeset.isDirty, true, 'is dirty');
     assert.deepEqual(changeset.changes, [{ key: 'dogs', value: [] }], 'has changes');
+
+    changeset.rollback();
+    assert.equal(changeset.isDirty, false, 'is not dirty');
   }
 
   test('it works for hasMany / firstObject', async function(assert) {
