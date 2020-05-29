@@ -193,7 +193,7 @@ module('Integration | main', function(hooks) {
     assert.equal(dogs.objectAt(1).get('breed'), 'rough collie', 'has second breed');
     assert.equal(dogs.objectAt(2).get('breed'), 'Münsterländer', 'has third breed');
 
-    assert.equal(changeset.isDirty, true, 'is still dirty');
+    assert.equal(changeset.isDirty, false, 'is still dirty');
     assert.deepEqual(changeset.changes, [], 'has no changes');
 
     changeset.set('dogs', []);
