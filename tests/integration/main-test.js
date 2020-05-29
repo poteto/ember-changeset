@@ -183,9 +183,8 @@ module('Integration | main', function(hooks) {
     assert.equal(dogs.objectAt(1).get('breed'), 'rough collie', 'has second breed');
     assert.equal(dogs.objectAt(2).get('breed'), 'Münsterländer', 'has third breed');
 
-    // Ember gymnastics are setting a property on the Proxy object
-    // assert.equal(changeset.isDirty, false, 'is not dirty before execute');
-    // assert.deepEqual(changeset.changes, [], 'has no changes before execute');
+    assert.equal(changeset.isDirty, false, 'is not dirty before execute');
+    assert.deepEqual(changeset.changes, [], 'has no changes before execute');
 
     changeset.execute();
 
@@ -194,8 +193,8 @@ module('Integration | main', function(hooks) {
     assert.equal(dogs.objectAt(1).get('breed'), 'rough collie', 'has second breed');
     assert.equal(dogs.objectAt(2).get('breed'), 'Münsterländer', 'has third breed');
 
-    // assert.equal(changeset.isDirty, true, 'is still dirty');
-    // assert.deepEqual(changeset.changes, [], 'has no changes');
+    assert.equal(changeset.isDirty, true, 'is still dirty');
+    assert.deepEqual(changeset.changes, [], 'has no changes');
 
     changeset.set('dogs', []);
 
