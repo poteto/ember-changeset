@@ -175,7 +175,7 @@ module('Integration | main', function(hooks) {
     let dogs = changeset.get('dogs');
     dogs.pushObjects([newDog]);
 
-    assert.equal(changeset.isDirty, false, 'is not dirty');
+    assert.equal(changeset.isDirty, false, 'is not dirty b/c no set');
     assert.deepEqual(changeset.changes, [], 'has no changes');
 
     dogs = changeset.get('dogs');
@@ -193,7 +193,7 @@ module('Integration | main', function(hooks) {
     assert.equal(dogs.objectAt(1).get('breed'), 'rough collie', 'has second breed');
     assert.equal(dogs.objectAt(2).get('breed'), 'Münsterländer', 'has third breed');
 
-    assert.equal(changeset.isDirty, false, 'is still dirty');
+    assert.equal(changeset.isDirty, false, 'is not dirty after execute');
     assert.deepEqual(changeset.changes, [], 'has no changes');
 
     changeset.set('dogs', []);
@@ -206,7 +206,7 @@ module('Integration | main', function(hooks) {
     dogs = user.get('dogs');
     assert.equal(dogs.length, 0, 'dogs removed', 'all dogs removed');
 
-    assert.equal(changeset.isDirty, true, 'is dirty');
+    assert.equal(changeset.isDirty, true, 'is still dirty');
     assert.deepEqual(changeset.changes, [{ key: 'dogs', value: [] }], 'has changes');
 
     changeset.rollback();
