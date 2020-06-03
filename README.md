@@ -17,6 +17,8 @@ ember install ember-changeset
 
 We have released `v3.0.0`.  See the CHANGELOG [here](https://github.com/poteto/ember-changeset/blob/master/CHANGELOG.md).  This requires Ember >= 3.13 as the use of `@tracked` will help us monitor and propagate changes to the UI layer.  If your app is < 3.13 or you need to support IE11, then you can install the 2.0 series `ember install ember-changeset@v2.2.4`.
 
+Support for IE11 was dropped with the `v3.0.0` release given our ubiquitous use of Proxy.
+
 ## Philosophy
 
 The idea behind a changeset is simple: it represents a set of valid changes to be applied onto any Object (`Ember.Object`, `DS.Model`, POJOs, etc). Each change is tested against an optional validation, and if valid, the change is stored and applied when executed.
