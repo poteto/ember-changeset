@@ -12980,9 +12980,10 @@ validate-npm-package-name@~2.2.2:
   dependencies:
     builtins "0.0.7"
 
-"validated-changeset@git+ssh://git@github.com:validated-changeset/validated-changeset#sn/simpler-empty":
-  version "0.6.6"
-  resolved "git+ssh://git@github.com:validated-changeset/validated-changeset#7d40bbe353529dffc3d723be926c8c5a7d1345ac"
+validated-changeset@~0.6.7:
+  version "0.6.7"
+  resolved "https://registry.yarnpkg.com/validated-changeset/-/validated-changeset-0.6.7.tgz#edf2a574d1e0d27179c5b17acfa3d89736f98250"
+  integrity sha512-PmvMuwIdUyCB4hU0W0M7jnJ66SaXUO0DU/WsqchG9AAD0XNC59f5iBa0hvWyaCIGdF9vpk/N6BjtO0ELiR1G/A==
 
 vary@~1.1.2:
   version "1.1.2"
