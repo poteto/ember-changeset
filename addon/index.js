@@ -1,6 +1,7 @@
 import { assert } from '@ember/debug';
 import { BufferedChangeset } from 'validated-changeset';
 import mergeDeep from './utils/merge-deep';
+import isObject from './utils/is-object';
 import { notifyPropertyChange } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
 import { get as safeGet, set as safeSet } from '@ember/object';
@@ -14,6 +15,8 @@ export class EmberChangeset extends BufferedChangeset {
   @tracked '_changes';
   @tracked '_errors';
   @tracked '_content';
+
+  isObject = isObject;
 
   // DO NOT override setDeep. Ember.set does not work wth empty hash and nested
   // key Ember.set({}, 'user.name', 'foo');

@@ -12777,10 +12777,9 @@ validate-npm-package-name@~2.2.2:
   dependencies:
     builtins "0.0.7"
 
-validated-changeset@~0.6.6:
+"validated-changeset@git+ssh://git@github.com:validated-changeset/validated-changeset#sn/overridable-is-object":
   version "0.6.6"
-  resolved "https://registry.yarnpkg.com/validated-changeset/-/validated-changeset-0.6.6.tgz#e6ab09874a800ab010e28c0f5b4611de9779bdcc"
-  integrity sha512-X6Wn6KrlOOx2CTkzySEOmrSFaDOsnkTPpsUwg43vSfJ+jEOUVVNh+Gn+pwgziIWaYBfuFV4mnkTdJFiEPfMhuA==
+  resolved "git+ssh://git@github.com:validated-changeset/validated-changeset#605a1a74eb2c7eee734a0d945a3c6ae353529c98"
 
 vary@~1.1.2:
   version "1.1.2"
