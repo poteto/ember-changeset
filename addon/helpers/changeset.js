@@ -6,6 +6,11 @@ export function changeset(
   [obj, validations],
   options= {}
 ) {
+  if (!obj) {
+    // route transitions may trigger this
+    return;
+  }
+
   if (isChangeset(obj)) {
     return obj;
   }
