@@ -2,28 +2,28 @@ import ObjectProxy from '@ember/object/proxy';
 import ArrayProxy from '@ember/array/proxy';
 import { typeOf } from '@ember/utils';
 
-function isBelongsToRelationship(obj) {
-  if (!obj) {
-    return false;
-  }
+// function isBelongsToRelationship(obj) {
+//   if (!obj) {
+//     return false;
+//   }
 
-  if (obj.hasOwnProperty('content') &&
-      obj.hasOwnProperty('isFulfilled') &&
-      obj.hasOwnProperty('isRejected')) {
-    // Async belongsTo()
-    return true;
-  }
+//   if (obj.hasOwnProperty('content') &&
+//       obj.hasOwnProperty('isFulfilled') &&
+//       obj.hasOwnProperty('isRejected')) {
+//     // Async belongsTo()
+//     return true;
+//   }
 
-  if ('isLoading' in obj &&
-      'isLoaded' in obj &&
-      'isNew' in obj &&
-      'hasDirtyAttributes' in obj) {
-    // Sync belongsTo()
-    return true;
-  }
+//   if ('isLoading' in obj &&
+//       'isLoaded' in obj &&
+//       'isNew' in obj &&
+//       'hasDirtyAttributes' in obj) {
+//     // Sync belongsTo()
+//     return true;
+//   }
 
-  return false;
-}
+//   return false;
+// }
 
 /**
  * This is used to indicate we dont want to break apart and iterate the object
@@ -37,7 +37,6 @@ export default function isObject(val) {
     !(val instanceof Date) &&
     !Array.isArray(val) &&
     !(val instanceof ObjectProxy) &&
-    !(val instanceof ArrayProxy) &&
-    !isBelongsToRelationship(val)
+    !(val instanceof ArrayProxy)
 }
 
