@@ -17,7 +17,7 @@ function isSpecial(value) {
 function getEnumerableOwnPropertySymbols(target) {
   return Object.getOwnPropertySymbols
     ? Object.getOwnPropertySymbols(target).filter(symbol => {
-      return target.propertyIsEnumerable(symbol)
+      return Object.prototype.propertyIsEnumerable.call(target, symbol)
     })
     : [];
 }
@@ -48,8 +48,8 @@ function propertyIsUnsafe(target, key, options) {
   }
 
   return propertyIsOnObject(target, key) // Properties are safe to merge if they don't exist in the target yet,
-    && !(Object.hasOwnProperty.call(target, key) // unsafe if they exist up the prototype chain,
-      && Object.propertyIsEnumerable.call(target, key)); // and also unsafe if they're nonenumerable.
+    && !(Object.prototype.hasOwnProperty.call(target, key) // unsafe if they exist up the prototype chain,
+      && Object.prototype.propertyIsEnumerable.call(target, key)); // and also unsafe if they're nonenumerable.
 }
 
 /**
@@ -61,7 +61,7 @@ function propertyIsUnsafe(target, key, options) {
 function buildPathToValue(source, options, kv, possibleKeys) {
   Object.keys(source).forEach(key => {
     let possible = source[key];
-    if (possible && possible.hasOwnProperty('value')) {
+    if (possible && Object.prototype.hasOwnProperty.call(possible, 'value')) {
       kv[[...possibleKeys, key].join('.')] = possible.value;
       return;
     }
@@ -100,7 +100,7 @@ function mergeTargetAndSource(target, source, options) {
     }
 
     // else safe key on object
-    if (propertyIsOnObject(target, key) && isMergeableObject(source[key]) && !source[key].hasOwnProperty('value')) {
+    if (propertyIsOnObject(target, key) && isMergeableObject(source[key]) && !Object.prototype.hasOwnProperty.call(source[key], 'value')) {
       options.safeSet(target, key, mergeDeep(options.safeGet(target, key), options.safeGet(source, key), options));
     } else {
       let next = source[key];

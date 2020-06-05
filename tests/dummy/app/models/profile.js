@@ -1,9 +1,6 @@
-import DS from 'ember-data';
-import attr from 'ember-data/attr';
-import { belongsTo } from 'ember-data/relationships';
+import Model, { attr, belongsTo } from '@ember-data/model';
 
-
-export default DS.Model.extend({
+export default Model.extend({
   firstName: attr('string', { defaultValue: 'Bob' }),
   lastName: attr('string', { defaultValue: 'Ross' }),
 

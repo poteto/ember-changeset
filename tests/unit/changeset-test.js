@@ -1438,7 +1438,7 @@ module('Unit | Utility | changeset', function(hooks) {
   test('observing #rollback values', async function(assert) {
     let res;
     let changeset = Changeset(dummyModel, dummyValidator);
-    changeset.addObserver('name', function() { res = this.get('name') });
+    changeset.addObserver('name', function() { res = this.name });
     assert.equal(undefined, changeset.get('name'), 'initial value');
     changeset.set('name', 'Jack');
     assert.equal('Jack', res, 'observer fired when setting value');
@@ -1688,6 +1688,7 @@ module('Unit | Utility | changeset', function(hooks) {
 
     Object.defineProperty(myChangeset, 'isOptionSelected', {
       get() {
+        // eslint-disable-next-line ember/no-get
         return this.get('isOptionOne') || this.get('isOptionTwo') || this.get('isOptionThree');
       }
     });
