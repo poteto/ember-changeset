@@ -4,6 +4,17 @@ Some notable changes going from 2.x to 3.x
 - error.validation is a string if one validation and array if multiple validations.
 - Defining a validation for a nested key worked before with {'something.else': ValidationFunc} and now it only works when defining as an object: { something: { else: validationFunc } }.
 
+## [3.5.5](https://github.com/poteto/ember-changeset/tree/v3.5.5) (2020-06-05)
+[Full Changelog](https://github.com/poteto/ember-changeset/compare/v3.5.0...v3.5.5)
+
+- Protect if no obj passed to template helper [#501](https://github.com/poteto/ember-changeset/pull/501)
+- Properly discern undefined key that was wiped out as a result of a change [#500](https://github.com/poteto/ember-changeset/pull/500)
+- Update ember [#496](https://github.com/poteto/ember-changeset/pull/496)
+- Allow "value" as a key in a changeset object [#497](https://github.com/poteto/ember-changeset/pull/497)
+- Remove unused util methods [#494](https://github.com/poteto/ember-changeset/pull/494)
+- Ensure Ember.get doesnt fail with undefined [#493](https://github.com/poteto/ember-changeset/pull/493)
+- Unwrap Proxy before sending into validatorFun [#490](https://github.com/poteto/ember-changeset/pull/490)
+
 ## [3.5.0](https://github.com/poteto/ember-changeset/tree/v3.5.0) (2020-05-28)
 [Full Changelog](https://github.com/poteto/ember-changeset/compare/v3.4.0...v3.5.0)
 
