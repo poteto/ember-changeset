@@ -88,3 +88,34 @@ module('Integration | Helper | changeset-get', function(hooks) {
     assert.equal(input.value, 'Bob');
   });
 });
+
+module('Integration | Helper | changeset-get relationships', function(hooks) {
+  setupRenderingTest(hooks);
+
+  hooks.beforeEach(function() {
+    this.store = this.owner.lookup('service:store');
+
+    this.createUser = (userType, withDogs) => {
+      let profile = this.store.createRecord('profile');
+      let user = this.store.createRecord(userType, { profile });
+
+      if (withDogs) {
+        for (let i = 0; i < 2; i++) {
+          user.get('dogs').addObject(this.store.createRecord('dog'))
+        }
+      }
+      return user;
+    }
+  });
+
+  test('it rendrs belognsTo name', async function(assert) {
+    let user = this.createUser('user', false);
+    this.changeset = Changeset(user);
+
+    await render(hbs`
+      <p id="test-el">{{this.changeset.profile.firstName}}</p>
+    `);
+
+    assert.equal(find('#test-el').textContent.trim(), '');
+  });
+});
