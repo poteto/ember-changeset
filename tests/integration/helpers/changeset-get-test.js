@@ -108,7 +108,7 @@ module('Integration | Helper | changeset-get relationships', function(hooks) {
     }
   });
 
-  test('it rendrs belognsTo name', async function(assert) {
+  test('it renders belongsTo property', async function(assert) {
     let user = this.createUser('user', false);
     this.changeset = Changeset(user);
 
