@@ -19,6 +19,8 @@ We have released `v3.0.0`.  See the CHANGELOG [here](https://github.com/poteto/e
 
 Support for IE11 was dropped with the `v3.0.0` release given our ubiquitous use of Proxy.
 
+The base library for this addon is [validated-changeset](https://github.com/validated-changeset/validated-changeset/).  As a result, this functionality is available outside of Ember as well!
+
 ## Philosophy
 
 The idea behind a changeset is simple: it represents a set of valid changes to be applied onto any Object (`Ember.Object`, `DS.Model`, POJOs, etc). Each change is tested against an optional validation, and if valid, the change is stored and applied when executed.
@@ -125,6 +127,21 @@ Then, in your favorite form library, simply pass in the `changeset` in place of 
 In the above example, when the input changes, only the changeset's internal values are updated. When the submit button is clicked, the changes are only executed if *all changes* are valid.
 
 On rollback, all changes are dropped and the underlying Object is left untouched.
+
+## Extending the base ember-changeset class
+
+```js
+import { BufferedChangeset, Changeset } from 'ember-changeset';
+
+const MyChangeset extends BufferedChangeset {
+  save() {
+    super.save(...arguments);
+    // my other stuff
+  }
+}
+
+let changeset = Changeset(user, validatorFn, { changeset: MyChangeset });
+```
 
 ## Changeset template helpers
 `ember-changeset` overrides `set` and `get` in order to handle deeply nested setters.  `mut` is simply an alias for `Ember.set(changeset, ...)`, thus we provide a `changeset-set` template helper if you are dealing with nested setters.
