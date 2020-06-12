@@ -113,9 +113,9 @@ module('Integration | Helper | changeset-get relationships', function(hooks) {
     this.changeset = Changeset(user);
 
     await render(hbs`
-      <p id="test-el">{{this.changeset.profile.firstName}}</p>
+      <p id="test-el">{{changeset-get this.changeset "profile.firstName"}}</p>
     `);
 
-    assert.equal(find('#test-el').textContent.trim(), '');
+    assert.equal(find('#test-el').textContent.trim(), 'Bob');
   });
 });
