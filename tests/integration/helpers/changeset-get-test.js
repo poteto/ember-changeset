@@ -106,6 +106,11 @@ module('Integration | Helper | changeset-get relationships', function(hooks) {
       }
       return user;
     }
+
+    this.createUserWithNullBelongsTo = (userType) => {
+      let user = this.store.createRecord(userType, { profile: null });
+      return user;
+    };
   });
 
   test('it renders belongsTo property', async function(assert) {
@@ -117,5 +122,16 @@ module('Integration | Helper | changeset-get relationships', function(hooks) {
     `);
 
     assert.equal(find('#test-el').textContent.trim(), 'Bob');
+  });
+
+  test('it does not fail with a null belongsTo property', async function(assert) {
+    let user = this.createUserWithNullBelongsTo('user');
+    this.changeset = Changeset(user);
+
+    await render(hbs`
+      <p id="test-el">{{changeset-get this.changeset "profile.firstName"}}</p>
+    `);
+
+    assert.equal(find('#test-el').textContent.trim(), '');
   });
 });
