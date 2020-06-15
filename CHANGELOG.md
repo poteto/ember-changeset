@@ -4,6 +4,11 @@ Some notable changes going from 2.x to 3.x
 - error.validation is a string if one validation and array if multiple validations.
 - Defining a validation for a nested key worked before with {'something.else': ValidationFunc} and now it only works when defining as an object: { something: { else: validationFunc } }.
 
+## [3.6.0](https://github.com/poteto/ember-changeset/tree/v3.6.0) (2020-06-14)
+[Full Changelog](https://github.com/poteto/ember-changeset/compare/v3.5.7...v3.6.0)
+
+- Unwrap proxy values before sending value into validation func and when passing through #get [#508](https://github.com/poteto/ember-changeset/pull/508)
+
 ## [3.5.7](https://github.com/poteto/ember-changeset/tree/v3.5.7) (2020-06-12)
 [Full Changelog](https://github.com/poteto/ember-changeset/compare/v3.5.5...v3.5.7)
 
