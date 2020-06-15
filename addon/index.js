@@ -1,6 +1,6 @@
 import { assert } from '@ember/debug';
 import { dependentKeyCompat } from '@ember/object/compat';
-import { BufferedChangeset, getKeyValues } from 'validated-changeset';
+import { BufferedChangeset } from 'validated-changeset';
 import ArrayProxy from '@ember/array/proxy';
 import ObjectProxy from '@ember/object/proxy';
 import mergeDeep from './utils/merge-deep';
