@@ -1,5 +1,7 @@
 import { assert } from '@ember/debug';
 import { BufferedChangeset } from 'validated-changeset';
+import ArrayProxy from '@ember/array/proxy';
+import ObjectProxy from '@ember/object/proxy';
 import mergeDeep from './utils/merge-deep';
 import { notifyPropertyChange } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
@@ -10,10 +12,20 @@ const ERRORS = '_errors';
 const CONTENT = '_content';
 const defaultValidatorFn = () => true;
 
+function isProxy(o) {
+  return !!(o && (o instanceof ObjectProxy || o instanceof ArrayProxy));
+}
+
+function maybeUnwrapProxy(o) {
+  return isProxy(o) ? maybeUnwrapProxy(safeGet(o, 'content')) : o;
+}
+
 export class EmberChangeset extends BufferedChangeset {
   @tracked '_changes';
   @tracked '_errors';
   @tracked '_content';
+
+  maybeUnwrapProxy = maybeUnwrapProxy;
 
   // DO NOT override setDeep. Ember.set does not work wth empty hash and nested
   // key Ember.set({}, 'user.name', 'foo');
