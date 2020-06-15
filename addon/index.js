@@ -57,7 +57,16 @@ export class EmberChangeset extends BufferedChangeset {
    */
   @dependentKeyCompat
   get isInvalid() {
-    return !this.isValid;
+    return super.isInvalid;
+  }
+
+  /**
+   * @property isPristine
+   * @type {Boolean}
+   */
+  @dependentKeyCompat
+  get isPristine() {
+    return super.isPristine;
   }
 
   /**
@@ -66,7 +75,7 @@ export class EmberChangeset extends BufferedChangeset {
    */
   @dependentKeyCompat
   get isDirty() {
-    return !this.isPristine;
+    return super.isDirty;
   }
 
   /**
