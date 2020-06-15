@@ -1,4 +1,5 @@
 import { assert } from '@ember/debug';
+import { dependentKeyCompat } from '@ember/object/compat';
 import { BufferedChangeset } from 'validated-changeset';
 import ArrayProxy from '@ember/array/proxy';
 import ObjectProxy from '@ember/object/proxy';
@@ -39,6 +40,24 @@ export class EmberChangeset extends BufferedChangeset {
   }
   safeSet(obj, key, value) {
     return safeSet(obj, key, value);
+  }
+
+    /**
+   * @property isValid
+   * @type {Array}
+   */
+  @dependentKeyCompat
+  get isValid() {
+    return super.isValid(...arguments);
+  }
+
+  /**
+   * @property isInvalid
+   * @type {Boolean}
+   */
+  @dependentKeyCompat
+  get isInvalid() {
+    return super.isInvalid(...arguments);
   }
 
   /**
