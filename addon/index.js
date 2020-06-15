@@ -1,6 +1,6 @@
 import { assert } from '@ember/debug';
 import { dependentKeyCompat } from '@ember/object/compat';
-import { BufferedChangeset } from 'validated-changeset';
+import { BufferedChangeset, getKeyValues } from 'validated-changeset';
 import ArrayProxy from '@ember/array/proxy';
 import ObjectProxy from '@ember/object/proxy';
 import mergeDeep from './utils/merge-deep';
@@ -48,7 +48,7 @@ export class EmberChangeset extends BufferedChangeset {
    */
   @dependentKeyCompat
   get isValid() {
-    return super.isValid(...arguments);
+    return super.isValid;
   }
 
   /**
@@ -57,7 +57,16 @@ export class EmberChangeset extends BufferedChangeset {
    */
   @dependentKeyCompat
   get isInvalid() {
-    return super.isInvalid(...arguments);
+    return !this.isValid;
+  }
+
+  /**
+   * @property isDirty
+   * @type {Boolean}
+   */
+  @dependentKeyCompat
+  get isDirty() {
+    return !this.isPristine;
   }
 
   /**
