@@ -2,6 +2,7 @@ import { module, test } from 'qunit';
 import { setupTest } from 'ember-qunit';
 import { set } from '@ember/object';
 import { Changeset } from 'ember-changeset';
+import { isEmpty } from '@ember/utils';
 
 module('Integration | main', function(hooks) {
   setupTest(hooks);
@@ -272,5 +273,30 @@ module('Integration | main', function(hooks) {
 
   test('it sets sync relationships which were empty initially', async function(assert) {
     await testInitiallyEmptyRelationships.call(this, assert, 'sync-user');
+  });
+
+  async function testBelongsToPresenceValidation(assert, userType) {
+    let user =  this.store.createRecord(userType);
+    function userValidator({ key, newValue }) {
+      if (key === 'profile') {
+        return isEmpty(newValue) ? 'Cannot be blank' : true;
+      }
+      return true;
+    }
+    let userChangeset = Changeset(user, userValidator);
+    // The following simulates rendering of the current value
+    // and triggers the ObjectTreeNode logic in validated-changeset.
+    userChangeset.profile;
+    await userChangeset.validate('profile');
+
+    assert.deepEqual(userChangeset.error.profile.validation, 'Cannot be blank');
+  }
+
+  test('#error for empty belongsTo', async function(assert) {
+    await testBelongsToPresenceValidation.call(this, assert, 'user');
+  });
+
+  test('#error for empty sync belongsTo', async function(assert) {
+    await testBelongsToPresenceValidation.call(this, assert, 'sync-user');
   });
 });
