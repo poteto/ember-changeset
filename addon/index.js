@@ -152,10 +152,13 @@ export class EmberChangeset extends BufferedChangeset {
   /**
    * Executes the changeset if in a valid state.
    *
+   * @param {{ force: boolean }}
    * @method execute
    */
-  execute() {
-    if (this.isValid && this.isDirty) {
+  execute({ force = false } = {}) {
+    let shouldExecute = (this.isValid || force) && this.isDirty;
+
+    if (shouldExecute) {
       let content = this[CONTENT];
       let changes = this[CHANGES];
       // we want mutation on original object

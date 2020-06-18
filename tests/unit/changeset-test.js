@@ -968,6 +968,30 @@ module('Unit | Utility | changeset', function(hooks) {
     assert.equal(get(dummyModel, 'name'), undefined, 'should not apply changes');
   });
 
+  test('#execute applies changes if forced and content is not valid', async function(assert) {
+    let dummyChangeset = Changeset(dummyModel, dummyValidator);
+    dummyChangeset.set('name', 'a');
+
+    assert.equal(get(dummyModel, 'name'), undefined, 'precondition');
+    assert.equal(get(dummyChangeset, 'isValid'), false, 'can be invalid');
+
+    dummyChangeset.execute({ force: true });
+
+    assert.equal(get(dummyModel, 'name'), 'a', 'should apply changes');
+  });
+
+  test('#execute applies changes if forced and content is valid', async function(assert) {
+    let dummyChangeset = Changeset(dummyModel);
+    dummyChangeset.set('name', 'foo');
+
+    assert.equal(get(dummyModel, 'name'), undefined, 'precondition');
+    assert.equal(get(dummyChangeset, 'isValid'), true, 'can be valid');
+
+    dummyChangeset.execute({ force: true });
+
+    assert.equal(get(dummyModel, 'name'), 'foo', 'should apply changes');
+  });
+
   test('#execute does not remove original nested objects', function(a) {
     class DogTag {}
 
