@@ -968,30 +968,6 @@ module('Unit | Utility | changeset', function(hooks) {
     assert.equal(get(dummyModel, 'name'), undefined, 'should not apply changes');
   });
 
-  test('#execute applies changes if forced and content is not valid', async function(assert) {
-    let dummyChangeset = Changeset(dummyModel, dummyValidator);
-    dummyChangeset.set('name', 'a');
-
-    assert.equal(get(dummyModel, 'name'), undefined, 'precondition');
-    assert.equal(get(dummyChangeset, 'isValid'), false, 'can be invalid');
-
-    dummyChangeset.execute({ force: true });
-
-    assert.equal(get(dummyModel, 'name'), 'a', 'should apply changes');
-  });
-
-  test('#execute applies changes if forced and content is valid', async function(assert) {
-    let dummyChangeset = Changeset(dummyModel);
-    dummyChangeset.set('name', 'foo');
-
-    assert.equal(get(dummyModel, 'name'), undefined, 'precondition');
-    assert.equal(get(dummyChangeset, 'isValid'), true, 'can be valid');
-
-    dummyChangeset.execute({ force: true });
-
-    assert.equal(get(dummyModel, 'name'), 'foo', 'should apply changes');
-  });
-
   test('#execute does not remove original nested objects', function(a) {
     class DogTag {}
 
@@ -1079,6 +1055,60 @@ module('Unit | Utility | changeset', function(hooks) {
     assert.deepEqual(dummyChangeset.change, expectedResult, 'should have correct shape');
     assert.deepEqual(dummyChangeset._content.org, expectedResult.org, 'should have correct shape');
     assert.deepEqual(get(dummyModel, 'org'), expectedResult.org, 'should set value');
+  });
+
+
+  /**
+   * #pendingChanges
+   */
+
+  test('#pendingChanges up to date if changeset is invalid', async function(assert) {
+    let dummyChangeset = Changeset(dummyModel, dummyValidator);
+    dummyChangeset.set('name', 'a');
+
+    assert.equal(get(dummyModel, 'name'), undefined, 'precondition');
+    assert.equal(get(dummyChangeset, 'isValid'), false, 'can be invalid');
+
+    let pendingChanges = dummyChangeset.pendingData;
+
+    assert.equal(get(pendingChanges, 'name'), 'a', 'should apply changes');
+  });
+
+  test('#pendingChanges up to date if changeset is valid', async function(assert) {
+    let dummyChangeset = Changeset(dummyModel);
+    dummyChangeset.set('name', 'foo');
+
+    assert.equal(get(dummyModel, 'name'), undefined, 'precondition');
+    assert.equal(get(dummyChangeset, 'isValid'), true, 'can be valid');
+
+    let pendingChanges = dummyChangeset.pendingData;
+
+    assert.equal(get(pendingChanges, 'name'), 'foo', 'should apply changes');
+  });
+
+  test('#pendingChanges up to date after saved changeset modified again', async function(assert) {
+    let dummyChangeset = Changeset(dummyModel);
+    dummyChangeset.set('name', 'foo');
+
+    assert.equal(get(dummyModel, 'name'), undefined, 'precondition');
+    assert.equal(get(dummyChangeset, 'isValid'), true, 'can be valid');
+
+    assert.equal(get(dummyChangeset.pendingData, 'name'), 'foo', 'should apply changes');
+    assert.equal(get(dummyModel, 'name'), undefined, 'original data is not applied');
+
+    dummyChangeset.save();
+
+    assert.equal(get(dummyModel, 'name'), 'foo', 'original data is updated');
+    assert.deepEqual(
+      dummyModel.getProperties('name', 'exampleArray'),
+      dummyChangeset.pendingData,
+      'pending changes equal to original data'
+    );
+
+    dummyChangeset.set('name', 'bar');
+
+    assert.equal(get(dummyChangeset.pendingData, 'name'), 'bar', 'pending data is returned in pendingChanges');
+    assert.equal(get(dummyModel, 'name'), 'foo', 'original data is not modified');
   });
 
   /**

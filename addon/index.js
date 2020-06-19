@@ -78,6 +78,15 @@ export class EmberChangeset extends BufferedChangeset {
     return super.isDirty;
   }
 
+  get pendingData() {
+    let content = this[CONTENT];
+    let changes = this[CHANGES];
+
+    let pendingChanges = mergeDeep({}, content, { safeGet, safeSet });
+
+    return mergeDeep(pendingChanges, changes, { safeGet, safeSet });
+  }
+
   /**
    * Manually add an error to the changeset. If there is an existing
    * error or change for `key`, it will be overwritten.
@@ -152,13 +161,10 @@ export class EmberChangeset extends BufferedChangeset {
   /**
    * Executes the changeset if in a valid state.
    *
-   * @param {{ force: boolean }}
    * @method execute
    */
-  execute({ force = false } = {}) {
-    let shouldExecute = (this.isValid || force) && this.isDirty;
-
-    if (shouldExecute) {
+  execute() {
+    if (this.isValid && this.isDirty) {
       let content = this[CONTENT];
       let changes = this[CHANGES];
       // we want mutation on original object
