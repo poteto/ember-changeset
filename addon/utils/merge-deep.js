@@ -137,6 +137,10 @@ export default function mergeDeep(target, source, options = {}) {
   } else if (sourceIsArray) {
     return source;
   } else {
-    return mergeTargetAndSource(target, source, options);
+    try {
+      return mergeTargetAndSource(target, source, options);
+    } catch(e) {
+      throw new Error('Unable to determine `mergeDeep` with your data');
+    }
   }
 }

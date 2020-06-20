@@ -1,9 +1,12 @@
 import mergeDeep from 'ember-changeset/utils/merge-deep';
 import { Change } from 'validated-changeset';
 import { module, test } from 'qunit';
+import { setupTest } from 'ember-qunit';
 import { get, set } from '@ember/object';
 
-module('Unit | Utility | merge deep', () => {
+module('Unit | Utility | merge deep', (hooks) => {
+  setupTest(hooks);
+
   test('it returns merged objects', async function(assert) {
     let objA = { other: 'Ivan' };
     let objB = { foo: new Change('bar'), zoo: 'doo' };
@@ -62,5 +65,29 @@ module('Unit | Utility | merge deep', () => {
     assert.equal(value.boo, 'doo', 'unsafe plain property is merged');
     assert.equal(value.other, 'Ivan', 'safe property is not touched');
     assert.deepEqual(value.foo, { baz: 'bar' }, 'unsafe object property is merged');
+  });
+
+  test('it does not work with ember-data objects', async function(assert) {
+    this.store = this.owner.lookup('service:store');
+
+    this.createUser = (userType, withDogs) => {
+      let profile = this.store.createRecord('profile');
+      let user = this.store.createRecord(userType, { profile });
+
+      if (withDogs) {
+        for (let i = 0; i < 2; i++) {
+          user.get('dogs').addObject(this.store.createRecord('dog'))
+        }
+      }
+      return user;
+    }
+
+    let user = this.createUser('user', false);
+    let user2 = this.createUser('user', true);
+    try {
+      mergeDeep(user, user2, { safeGet: get, safeSet: set });
+    } catch({ message }) {
+      assert.equal(message, 'Unable to determine `mergeDeep` with your data', ' throws message');
+    }
   });
 });
