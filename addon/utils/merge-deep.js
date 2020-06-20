@@ -140,7 +140,7 @@ export default function mergeDeep(target, source, options = {}) {
     try {
       return mergeTargetAndSource(target, source, options);
     } catch(e) {
-      throw new Error('Unable to determine `mergeDeep` with your data');
+      throw new Error('Unable to `mergeDeep` with your data');
     }
   }
 }

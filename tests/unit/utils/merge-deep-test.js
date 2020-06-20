@@ -87,7 +87,7 @@ module('Unit | Utility | merge deep', (hooks) => {
     try {
       mergeDeep(user, user2, { safeGet: get, safeSet: set });
     } catch({ message }) {
-      assert.equal(message, 'Unable to determine `mergeDeep` with your data', ' throws message');
+      assert.equal(message, 'Unable to `mergeDeep` with your data', ' throws message');
     }
   });
 });
