@@ -87,7 +87,11 @@ module('Unit | Utility | merge deep', (hooks) => {
     try {
       mergeDeep(user, user2, { safeGet: get, safeSet: set });
     } catch({ message }) {
-      assert.equal(message, 'Unable to `mergeDeep` with your data', ' throws message');
+      assert.equal(
+        message,
+        'Unable to `mergeDeep` with your data.  Are you trying to merge two embe-data objects? Please file an issue with ember-changeset.',
+        'throws message'
+      );
     }
   });
 });
