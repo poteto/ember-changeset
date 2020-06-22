@@ -82,7 +82,7 @@ export class EmberChangeset extends BufferedChangeset {
     let content = this[CONTENT];
     let changes = this[CHANGES];
 
-    let pendingChanges = mergeDeep({}, content, { safeGet, safeSet });
+    let pendingChanges = mergeDeep(Object.create(Object.getPrototypeOf(content)), content, { safeGet, safeSet });
 
     return mergeDeep(pendingChanges, changes, { safeGet, safeSet });
   }

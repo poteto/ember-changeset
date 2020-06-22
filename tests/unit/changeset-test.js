@@ -1103,7 +1103,7 @@ module('Unit | Utility | changeset', function(hooks) {
 
     assert.equal(get(dummyModel, 'name'), 'foo', 'original data is updated');
     assert.deepEqual(
-      dummyModel.getProperties('name', 'exampleArray'),
+      dummyModel,
       dummyChangeset.pendingData,
       'pending changes equal to original data'
     );
