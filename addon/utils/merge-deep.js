@@ -136,11 +136,12 @@ export default function mergeDeep(target, source, options = {}) {
     return source;
   } else if (sourceIsArray) {
     return source;
-  } else {
-    try {
-      return mergeTargetAndSource(target, source, options);
-    } catch(e) {
-      throw new Error('Unable to `mergeDeep` with your data');
-    }
+  }
+
+  try {
+    return mergeTargetAndSource(target, source, options);
+  } catch(e) {
+    // this is very unlikely to be hit but lets throw an error otherwise
+    throw new Error('Unable to `mergeDeep` with your data.  Are you trying to merge two embe-data objects? Please file an issue with ember-changeset.');
   }
 }
