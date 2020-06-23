@@ -224,7 +224,7 @@ import {
   + [`errors`](#errors)
   + [`changes`](#changes)
   + [`data`](#data)
-  + [`pendingData`](#pendingData)*
+  + [`pendingData`](#pendingData)
   + [`isValid`](#isvalid)
   + [`isInvalid`](#isinvalid)
   + [`isPristine`](#ispristine)
