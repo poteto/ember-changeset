@@ -1114,7 +1114,7 @@ module('Unit | Utility | changeset', function(hooks) {
     assert.equal(get(dummyModel, 'name'), 'foo', 'original data is not modified');
   });
 
-  todo('#pendingChanges with ember-data model', async function(assert) {
+  test('#pendingChanges with ember-data model is not possible due to circular dependency when merging ember-data models', async function(assert) {
     let store = this.owner.lookup('service:store');
 
     let mockProfileModel = store.createRecord('profile');
@@ -1133,8 +1133,14 @@ module('Unit | Utility | changeset', function(hooks) {
 
     assert.equal(get(dummyChangeset, 'isPristine'), false, 'changeset is not pristine as there is a change');
 
-    assert.equal(dummyChangeset.get('pendingData.profile.firstName'), 'Zoe', 'Model belongsTo property should be updated')
-    assert.equal(dummyChangeset.get('pendingData.profile.lastName'), 'Ross', 'Existing property should stay the same')
+    assert.throws(
+      function() {
+        assert.equal(dummyChangeset.get('pendingData.profile.firstName'), 'Zoe', 'Model belongsTo property should be updated');
+        assert.equal(dummyChangeset.get('pendingData.profile.lastName'), 'Ross', 'Existing property should stay the same');
+      },
+      /Unable to `mergeDeep` with your data. Are you trying to merge two ember-data objects\? Please file an issue with ember-changeset\./,
+      "raised error instance indicates that ember-data models can't be merged"
+    );
 
     assert.equal(dummyChangeset.get('data.profile.firstName'), 'Bob', 'Original model property should stay without changes')
     assert.equal(dummyChangeset.get('data.profile.lastName'), 'Ross', 'Original model property should stay without changes')
