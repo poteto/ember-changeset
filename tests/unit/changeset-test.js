@@ -1133,6 +1133,9 @@ module('Unit | Utility | changeset', function(hooks) {
 
     assert.equal(get(dummyChangeset, 'isPristine'), false, 'changeset is not pristine as there is a change');
 
+    assert.equal(mockUserModel.get('profile.firstName'), 'Bob', 'Original model property should stay without changes')
+    assert.equal(mockUserModel.get('profile.lastName'), 'Ross', 'Original model property should stay without changes')
+
     assert.throws(
       function() {
         assert.equal(dummyChangeset.get('pendingData.profile.firstName'), 'Zoe', 'Model belongsTo property should be updated');
