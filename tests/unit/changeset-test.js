@@ -1,6 +1,7 @@
 import { Changeset, EmberChangeset, Changeset as ChangesetFactory } from 'ember-changeset';
 import { settled } from '@ember/test-helpers';
-import { module, test } from 'qunit';
+import { module, test, todo } from 'qunit';
+import { setupTest } from 'ember-qunit';
 
 import EmberObject, {
   get,
@@ -57,6 +58,8 @@ function dummyValidator({ key, newValue, oldValue, changes, content }) {
 }
 
 module('Unit | Utility | changeset', function(hooks) {
+  setupTest(hooks);
+
   hooks.beforeEach(function() {
     let Dummy = EmberObject.extend({
       save() {
@@ -1055,6 +1058,137 @@ module('Unit | Utility | changeset', function(hooks) {
     assert.deepEqual(dummyChangeset.change, expectedResult, 'should have correct shape');
     assert.deepEqual(dummyChangeset._content.org, expectedResult.org, 'should have correct shape');
     assert.deepEqual(get(dummyModel, 'org'), expectedResult.org, 'should set value');
+  });
+
+
+  /**
+   * #pendingChanges
+   */
+
+  test('#pendingChanges up to date if changeset is invalid', async function(assert) {
+    let dummyChangeset = Changeset(dummyModel, dummyValidator);
+    dummyChangeset.set('name', 'a');
+
+    assert.equal(get(dummyModel, 'name'), undefined, 'precondition');
+    assert.equal(get(dummyChangeset, 'isValid'), false, 'can be invalid');
+
+    let pendingChanges = dummyChangeset.pendingData;
+
+    assert.equal(get(pendingChanges, 'name'), 'a', 'should apply changes');
+  });
+
+  test('#pendingChanges up to date if changeset is valid', async function(assert) {
+    let dummyChangeset = Changeset(dummyModel);
+    dummyChangeset.set('name', 'foo');
+
+    assert.equal(get(dummyModel, 'name'), undefined, 'precondition');
+    assert.equal(get(dummyChangeset, 'isValid'), true, 'can be valid');
+
+    let pendingChanges = dummyChangeset.pendingData;
+
+    assert.equal(get(pendingChanges, 'name'), 'foo', 'should apply changes');
+  });
+
+  test('#pendingChanges up to date after saved changeset modified again', async function(assert) {
+    let dummyChangeset = Changeset(dummyModel);
+    dummyChangeset.set('name', 'foo');
+
+    assert.equal(get(dummyModel, 'name'), undefined, 'precondition');
+    assert.equal(get(dummyChangeset, 'isValid'), true, 'can be valid');
+
+    assert.equal(get(dummyChangeset.pendingData, 'name'), 'foo', 'should apply changes');
+    assert.equal(get(dummyModel, 'name'), undefined, 'original data is not applied');
+
+    dummyChangeset.save();
+
+    assert.equal(get(dummyModel, 'name'), 'foo', 'original data is updated');
+    assert.deepEqual(
+      dummyModel,
+      dummyChangeset.pendingData,
+      'pending changes equal to original data'
+    );
+
+    dummyChangeset.set('name', 'bar');
+
+    assert.equal(get(dummyChangeset.pendingData, 'name'), 'bar', 'pending data is returned in pendingChanges');
+    assert.equal(get(dummyModel, 'name'), 'foo', 'original data is not modified');
+  });
+
+  test('#pendingChanges with ember-data model is not possible due to circular dependency when merging ember-data models', async function(assert) {
+    let store = this.owner.lookup('service:store');
+
+    let mockProfileModel = store.createRecord('profile');
+    let mockUserModel = store.createRecord('user', {
+      profile: mockProfileModel,
+      save: function () {
+        return Promise.resolve(this);
+      },
+    });
+
+    let dummyChangeset = Changeset(mockUserModel);
+
+    assert.equal(get(dummyChangeset, 'isPristine'), true, 'changeset is pristine');
+
+    dummyChangeset.set('profile.firstName', 'Zoe');
+
+    assert.equal(get(dummyChangeset, 'isPristine'), false, 'changeset is not pristine as there is a change');
+
+    assert.equal(mockUserModel.get('profile.firstName'), 'Bob', 'Original model property should stay without changes')
+    assert.equal(mockUserModel.get('profile.lastName'), 'Ross', 'Original model property should stay without changes')
+
+    assert.throws(
+      function() {
+        assert.equal(dummyChangeset.get('pendingData.profile.firstName'), 'Zoe', 'Model belongsTo property should be updated');
+        assert.equal(dummyChangeset.get('pendingData.profile.lastName'), 'Ross', 'Existing property should stay the same');
+      },
+      /Unable to `mergeDeep` with your data. Are you trying to merge two ember-data objects\? Please file an issue with ember-changeset\./,
+      "raised error instance indicates that ember-data models can't be merged"
+    );
+
+    assert.equal(dummyChangeset.get('data.profile.firstName'), 'Bob', 'Original model property should stay without changes')
+    assert.equal(dummyChangeset.get('data.profile.lastName'), 'Ross', 'Original model property should stay without changes')
+  });
+
+
+  todo('#pendingChanges with ember-data model with multiple change steps', async function(assert) {
+    let store = this.owner.lookup('service:store');
+
+    let mockProfileModel = store.createRecord('profile');
+    let mockUserModel = store.createRecord('user', {
+      profile: mockProfileModel,
+      save: function() {
+        return Promise.resolve(this);
+      },
+    });
+
+    let dummyChangeset = Changeset(mockUserModel);
+    assert.equal(get(dummyChangeset, 'isPristine'), true, 'changeset is pristine');
+
+    dummyChangeset.set('profile.firstName', 'Zoe');
+
+    assert.equal(get(mockUserModel, 'profile.firstName'), 'Bob', 'belongsTo property is not modified');
+    assert.equal(get(dummyChangeset, 'profile.firstName'), 'Zoe', 'belongsTo changeset is modified');
+    assert.equal(get(dummyChangeset.pendingData, 'profile.firstName'), 'Zoe', 'pending data should give updated values');
+
+    await dummyChangeset.save();
+
+    assert.equal(get(mockUserModel, 'profile.firstName'), 'Zoe', 'belongsTo property is updated after save');
+    assert.equal(get(dummyChangeset, 'profile.firstName'), 'Zoe', 'belongsTo changeset has new value');
+    assert.equal(get(dummyChangeset.pendingData, 'profile.firstName'), 'Zoe', 'pendingData should have a new value');
+
+    let updatedMockProfileModel = store.createRecord('profile');
+
+    dummyChangeset.set('profile', updatedMockProfileModel);
+
+    assert.equal(get(mockUserModel, 'profile.firstName'), 'Zoe', 'belongsTo property is model has initial value');
+    assert.equal(get(dummyChangeset, 'profile.firstName'), 'Bob', 'belongsTo changeset is updated');
+    assert.equal(get(dummyChangeset.pendingData, 'profile.firstName'), 'Bob', 'belongsTo pendingData has new value');
+
+    await dummyChangeset.save();
+
+    assert.equal(get(mockUserModel, 'profile.firstName'), 'Bob', 'belongsTo property is updated');
+    assert.equal(get(dummyChangeset, 'profile.firstName'), 'Bob', 'belongsTo changeset is updated');
+    assert.equal(get(dummyChangeset.pendingData, 'profile.firstName'), 'Bob', 'belongsTo pendingData is updated');
   });
 
   /**
