@@ -537,5 +537,69 @@ module('Integration | Helper | changeset', function(hooks) {
     assert.equal(find('h1').textContent.trim(), 'J B', 'should update observable value');
     assert.notOk(find('#error-paragraph'), 'should skip validation');
   });
+
+  test('can re-apply a "manually-reverted" change', async function(assert) {
+    /*
+     * Whether you use an inline `{{hash}}' here or a "real" Object or
+     * EmberObject or ES6 instance or whatever--doesn't matter.
+     *
+     * Whether you use `{{on "click" ..}}' or `onclick={{..}}' or a classic
+     * `{{action}}' "modifier"--doesn't matter.
+     *
+     * Whether you use `{{fn (changeset-set ..)}}' here or `{{action (mut
+     * ..)}}' or ember-set-helper's `{{set ..}}' or whatever--doesn't matter.
+     *
+     * validations with or without skipValidate--doesn't matter.
+     *
+     * Interestingly, if you perform these same "set" actions in pure
+     * JavaScript (i.e. not from within a rendered template), it works fine!
+     *
+     */
+    await render(hbs`
+      {{#with (changeset (hash aProperty='foo')) as |changesetObj|}}
+        <div id="a-value">
+          {{changeset-get changesetObj 'aProperty'}}
+        </div>
+
+        {{#each (array 'foo' 'bar' 'qux') as |value|}}
+          <a
+            href="#"
+            id="{{value}}-link"
+            {{on 'click' (fn (changeset-set changesetObj 'aProperty') value)}}
+          >
+            click here to set aProperty to {{value}}
+          </a>
+        {{/each}}
+      {{/with}}
+    `);
+
+    /*
+     * If a default value isn't given for aProperty, you can alternatively set
+     * it and then save the changeset to observe the same subsequent behavior.
+     *
+    await click('#foo-link');
+    await click('#save-button');
+     */
+
+    assert.equal(find('#a-value').textContent.trim(), 'foo', 'precondition');
+
+    await click('#bar-link');
+    assert.equal(find('#a-value').textContent.trim(), 'bar', 'changed value');
+
+    await click('#foo-link');
+    assert.equal(find('#a-value').textContent.trim(), 'foo', 'manually-reverted value');
+
+    /*
+     * Whether you try to set a previously-unseen `qux' or previously-seen
+     * `bar' value here--doesn't matter.
+     *
+     * aProperty seems to be "stuck" on `foo' after manually reverting the
+     * pristine value. The only way to un-stick it and make these links work
+     * again is to call Changeset#save, #rollback, etc.
+     *
+     */
+    await click('#qux-link');
+    assert.equal(find('#a-value').textContent.trim(), 'qux', 're-changed value');
+  });
 });
 
