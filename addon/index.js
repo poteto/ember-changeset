@@ -1,6 +1,6 @@
 import { assert } from '@ember/debug';
 import { dependentKeyCompat } from '@ember/object/compat';
-import { BufferedChangeset } from 'validated-changeset';
+import { BufferedChangeset, Change, keyInObject } from 'validated-changeset';
 import ArrayProxy from '@ember/array/proxy';
 import ObjectProxy from '@ember/object/proxy';
 import mergeDeep from './utils/merge-deep';
@@ -123,10 +123,17 @@ export class EmberChangeset extends BufferedChangeset {
    * Returns value or error
    */
   _setProperty({ key, value, oldValue }) {
-    super._setProperty({ key, value, oldValue })
+    let changes = this[CHANGES];
 
-    // Happy path: notify that `key` was added.
-    notifyPropertyChange(this, CHANGES);
+    // Happy path: update change map.
+    if (oldValue !== value) {
+      this.setDeep(changes, key, new Change(value), {
+        safeSet: this.safeSet
+      });
+    } else if (keyInObject(changes, key)) {
+      this._deleteKey(CHANGES, key);
+    }
+
     notifyPropertyChange(this, key);
   }
 
