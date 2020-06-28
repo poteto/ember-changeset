@@ -5,7 +5,7 @@ import ArrayProxy from '@ember/array/proxy';
 import ObjectProxy from '@ember/object/proxy';
 import mergeDeep from './utils/merge-deep';
 import { notifyPropertyChange } from '@ember/object';
-import { tracked } from '@glimmer/tracking';
+import { tracked } from 'tracked-built-ins';
 import { get as safeGet, set as safeSet } from '@ember/object';
 
 const CHANGES = '_changes';
@@ -169,7 +169,7 @@ export class EmberChangeset extends BufferedChangeset {
       let changes = this[CHANGES];
       // we want mutation on original object
       // @tracked
-      this[CONTENT] = mergeDeep(content, changes, { safeGet, safeSet });
+      mergeDeep(content, changes, { safeGet, safeSet });
     }
 
     return this;
