@@ -1569,6 +1569,17 @@ module('Unit | Utility | changeset', function(hooks) {
     assert.ok(get(dummyChangeset, 'isValid'), 'should be valid');
   });
 
+  test('observing #rollback values', async function(assert) {
+    let res;
+    let changeset = Changeset(dummyModel, dummyValidator);
+    changeset.addObserver('name', function() { res = this.name });
+    assert.equal(undefined, changeset.get('name'), 'initial value');
+    changeset.set('name', 'Jack');
+    assert.equal('Jack', res, 'observer fired when setting value');
+    changeset.rollback();
+    assert.equal(undefined, res, 'observer fired with the value name was rollback to');
+  });
+
   test('can update nested keys after rollback changes.', async function(assert) {
     let expectedResult = {
       org: {

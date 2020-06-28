@@ -95,6 +95,7 @@ export class EmberChangeset extends BufferedChangeset {
   addError(key, error) {
     super.addError(key, error);
 
+    notifyPropertyChange(this, key);
     // Return passed-in `error`.
     return error;
   }
@@ -107,6 +108,8 @@ export class EmberChangeset extends BufferedChangeset {
   pushErrors(key, ...newErrors) {
     const { value, validation } = super.pushErrors(key, ...newErrors);
 
+    notifyPropertyChange(this, key);
+
     return { value, validation };
   }
 
@@ -116,6 +119,8 @@ export class EmberChangeset extends BufferedChangeset {
    */
   _setProperty({ key, value, oldValue }) {
     super._setProperty({ key, value, oldValue })
+
+    notifyPropertyChange(this, key);
   }
 
   /**
@@ -139,6 +144,8 @@ export class EmberChangeset extends BufferedChangeset {
    */
   _deleteKey(objName, key = '') {
     const result = super._deleteKey(objName, key);
+
+    notifyPropertyChange(this, key);
 
     return result;
   }
