@@ -77,6 +77,15 @@ export class EmberChangeset extends BufferedChangeset {
     return super.isDirty;
   }
 
+  get pendingData() {
+    let content = this[CONTENT];
+    let changes = this[CHANGES];
+
+    let pendingChanges = mergeDeep(Object.create(Object.getPrototypeOf(content)), content, { safeGet, safeSet });
+
+    return mergeDeep(pendingChanges, changes, { safeGet, safeSet });
+  }
+
   /**
    * Manually add an error to the changeset. If there is an existing
    * error or change for `key`, it will be overwritten.

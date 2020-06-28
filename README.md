@@ -133,7 +133,7 @@ On rollback, all changes are dropped and the underlying Object is left untouched
 ```js
 import { BufferedChangeset, Changeset } from 'ember-changeset';
 
-const MyChangeset extends BufferedChangeset {
+class MyChangeset extends BufferedChangeset {
   save() {
     super.save(...arguments);
     // my other stuff
@@ -224,6 +224,7 @@ import {
   + [`errors`](#errors)
   + [`changes`](#changes)
   + [`data`](#data)
+  + [`pendingData`](#pendingData)
   + [`isValid`](#isvalid)
   + [`isInvalid`](#isinvalid)
   + [`isPristine`](#ispristine)
@@ -391,6 +392,24 @@ let user = { name: 'Bobby', age: 21, address: { zipCode: '10001' } };
 let changeset = Changeset(user);
 
 changeset.get('data'); // user
+```
+
+**[⬆️ back to top](#api)**
+
+#### `pendingData`
+
+Returns object with changes applied to original data without mutating original data object. 
+Unlike `execute()`, `pendingData` shows resulting object even if validation failed. Original data or changeset won't be modified.
+
+Note: Currently, it only works with POJOs. Refer to [`execute`](#execute) for a way to apply changes onto ember-data models. 
+
+```js
+let user = { name: 'Bobby', age: 21, address: { zipCode: '10001' } };
+let changeset = Changeset(user);
+
+changeset.set('name', 'Zoe');
+
+changeset.get('pendingData'); // { name: 'Zoe', age: 21, address: { zipCode: '10001' } }
 ```
 
 **[⬆️ back to top](#api)**
@@ -653,7 +672,7 @@ let validationMap = {
 
   // specify nested keys with pojo's
   address: {
-    zipCode: : validateLength({ is: 5 })
+    zipCode: validateLength({ is: 5 })
   }
 };
 
