@@ -3,13 +3,12 @@ import { dependentKeyCompat } from '@ember/object/compat';
 import { BufferedChangeset, Change, keyInObject } from 'validated-changeset';
 import ArrayProxy from '@ember/array/proxy';
 import ObjectProxy from '@ember/object/proxy';
-import mergeDeep from './utils/merge-deep';
 import { notifyPropertyChange } from '@ember/object';
 import { tracked } from 'tracked-built-ins';
+import mergeDeep from './utils/merge-deep';
 import { get as safeGet, set as safeSet } from '@ember/object';
 
 const CHANGES = '_changes';
-const ERRORS = '_errors';
 const CONTENT = '_content';
 const defaultValidatorFn = () => true;
 
@@ -96,10 +95,7 @@ export class EmberChangeset extends BufferedChangeset {
   addError(key, error) {
     super.addError(key, error);
 
-    notifyPropertyChange(this, ERRORS);
-    // Notify that `key` has changed.
     notifyPropertyChange(this, key);
-
     // Return passed-in `error`.
     return error;
   }
@@ -112,7 +108,6 @@ export class EmberChangeset extends BufferedChangeset {
   pushErrors(key, ...newErrors) {
     const { value, validation } = super.pushErrors(key, ...newErrors);
 
-    notifyPropertyChange(this, ERRORS);
     notifyPropertyChange(this, key);
 
     return { value, validation };
@@ -159,8 +154,7 @@ export class EmberChangeset extends BufferedChangeset {
   _deleteKey(objName, key = '') {
     const result = super._deleteKey(objName, key);
 
-    notifyPropertyChange(this, `${objName}.${key}`);
-    notifyPropertyChange(this, objName);
+    notifyPropertyChange(this, key);
 
     return result;
   }
