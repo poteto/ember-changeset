@@ -131,16 +131,16 @@ On rollback, all changes are dropped and the underlying Object is left untouched
 ## Extending the base ember-changeset class
 
 ```js
-import { BufferedChangeset, Changeset } from 'ember-changeset';
+import { EmberChangeset, Changeset } from 'ember-changeset';
 
-class MyChangeset extends BufferedChangeset {
+class MyChangeset extends EmberChangeset {
   save() {
     super.save(...arguments);
     // my other stuff
   }
 }
 
-let changeset = Changeset(user, validatorFn, { changeset: MyChangeset });
+let changeset = Changeset(user, validationMap, validatorFn, { changeset: MyChangeset });
 ```
 
 ## Changeset template helpers
@@ -398,10 +398,10 @@ changeset.get('data'); // user
 
 #### `pendingData`
 
-Returns object with changes applied to original data without mutating original data object. 
+Returns object with changes applied to original data without mutating original data object.
 Unlike `execute()`, `pendingData` shows resulting object even if validation failed. Original data or changeset won't be modified.
 
-Note: Currently, it only works with POJOs. Refer to [`execute`](#execute) for a way to apply changes onto ember-data models. 
+Note: Currently, it only works with POJOs. Refer to [`execute`](#execute) for a way to apply changes onto ember-data models.
 
 ```js
 let user = { name: 'Bobby', age: 21, address: { zipCode: '10001' } };
