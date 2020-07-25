@@ -93,6 +93,25 @@ module('Integration | main', function(hooks) {
     await testBasicBelongsTo.call(this, assert, 'sync-user');
   });
 
+  test('can call prepare with belongsTo', async function(assert) {
+    let user = this.createUser('sync-user', false);
+    let changeset = Changeset(user);
+    let profile = this.store.createRecord('profile', { firstName: 'Terry', lastName: 'Bubblewinkles', nickname: 't' });
+
+    changeset.set('profile', profile);
+    changeset.prepare((changes) => {
+      let modified = {};
+
+      for (let key in changes) {
+        modified[key] = changes[key];
+      }
+
+      return modified;
+    });
+
+    assert.equal(changeset.get('profile').get('firstName'), 'Terry', 'firstName after set');
+  });
+
   async function testSaveUser(assert, userType) {
     assert.expect(1);
 

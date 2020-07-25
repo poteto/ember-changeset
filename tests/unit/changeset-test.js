@@ -2,6 +2,7 @@ import { Changeset, EmberChangeset, Changeset as ChangesetFactory } from 'ember-
 import { settled } from '@ember/test-helpers';
 import { module, test, todo } from 'qunit';
 import { setupTest } from 'ember-qunit';
+import { lookupValidator } from 'validated-changeset';
 
 import EmberObject, {
   get,
@@ -1841,6 +1842,28 @@ module('Unit | Utility | changeset', function(hooks) {
     dummyChangeset.set('name', 'Jim Bob');
     await dummyChangeset.validate();
     assert.equal(get(dummyChangeset, 'isValid'), false, 'should have 1 error');
+  });
+
+  test('#validate works with validator class', async function(assert) {
+    class PersonalValidator {
+      _validate() {
+        return 'oh no';
+      }
+      validate() {
+        return this._validate();
+      }
+    }
+    const validatorMap = {
+      name: new PersonalValidator(),
+    };
+
+    let dummyChangeset = Changeset(dummyModel, lookupValidator(validatorMap), validatorMap);
+    dummyChangeset.name = null;
+
+    await dummyChangeset.validate();
+
+    assert.deepEqual(dummyChangeset.get('error.name.validation'), 'oh no');
+    assert.deepEqual(dummyChangeset.get('errors.length'), 1);
   });
 
   /**
