@@ -1846,11 +1846,13 @@ module('Unit | Utility | changeset', function(hooks) {
 
   test('#validate works with validator class', async function(assert) {
     class PersonalValidator {
-      _validate() {
-        return 'oh no';
+      _validate(value) {
+        if (value === null) {
+          return 'oh no';
+        }
       }
-      validate() {
-        return this._validate();
+      validate(key, newValue) {
+        return this._validate(newValue);
       }
     }
     const validatorMap = {
