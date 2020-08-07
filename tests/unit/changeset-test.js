@@ -248,6 +248,12 @@ module('Unit | Utility | changeset', function(hooks) {
   /**
    * #isDirty
    */
+  test('changeset accepts changeset keys', async function(assert) {
+    let dummyChangeset = Changeset(dummyModel, dummyValidator, null, { changesetKeys: ['name'] });
+    dummyChangeset.set('_somePrivate', 'a');
+
+    assert.equal(dummyChangeset.isDirty, false, 'changeset is not dirty');
+  });
 
   /**
    * #get
