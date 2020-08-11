@@ -537,5 +537,38 @@ module('Integration | Helper | changeset', function(hooks) {
     assert.equal(find('h1').textContent.trim(), 'J B', 'should update observable value');
     assert.notOk(find('#error-paragraph'), 'should skip validation');
   });
+
+  test('it validates changes with changesetKeys', async function(assert) {
+    let validations = {
+      firstName(value) {
+        return isPresent(value) && value.length > 3 || 'too short';
+      }
+    };
+    this.set('dummyModel', { firstName: 'Jim', lastName: 'Bob' });
+    this.set('validate', ({ key, newValue }) => {
+      let validatorFn = validations[key];
+
+      if (typeOf(validatorFn) === 'function') {
+        return validatorFn(newValue);
+      }
+    });
+    this.set('submit', (changeset) => changeset.validate());
+    this.set('reset', (changeset) => changeset.rollback());
+    this.changesetKeys = ['lastName'];
+    await render(hbs`
+      {{#with (changeset dummyModel (action validate) changesetKeys=this.changesetKeys) as |changesetObj|}}
+        {{#if changesetObj.isDirty}}
+          <p id="errors-paragraph">There were one or more errors in your form.</p>
+        {{/if}}
+        {{input id="first-name" value=changesetObj.firstName}}
+        {{input id="last-name" value=changesetObj.lastName}}
+        <button id="submit-btn" {{action submit changesetObj}}>Submit</button>
+      {{/with}}
+    `);
+
+    await fillIn('#first-name', 'A');
+    await click('#submit-btn');
+    assert.notOk(find('#errors-paragraph'), 'should not be invalid');
+  });
 });
 

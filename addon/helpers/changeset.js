@@ -4,7 +4,7 @@ import { lookupValidator, isChangeset, isPromise, isObject } from 'validated-cha
 
 export function changeset(
   [obj, validations],
-  options= {}
+  options = {}
 ) {
   if (!obj) {
     // route transitions may trigger this
