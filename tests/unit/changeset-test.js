@@ -1075,13 +1075,18 @@ module('Unit | Utility | changeset', function(hooks) {
   });
 
   test('execute returns correct object after setting value on empty initial object', async function(assert) {
-    assert.expect(2);
-
     let c = Changeset({});
+
+    c.set('country', 'usa');
+
+    assert.deepEqual(c.execute().data, {
+      country: 'usa'
+    });
 
     c.set('org.usa.ny', 'any value');
 
     assert.deepEqual(c.execute().data, {
+      country: 'usa',
       org: {
         usa: {
           ny: "any value"
@@ -1091,6 +1096,7 @@ module('Unit | Utility | changeset', function(hooks) {
     c.set('org.usa.il', '2nd value');
 
     assert.deepEqual(c.execute().data, {
+      country: 'usa',
       org: {
         usa: {
           ny: "any value",
