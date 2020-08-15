@@ -1074,6 +1074,38 @@ module('Unit | Utility | changeset', function(hooks) {
     assert.deepEqual(get(dummyModel, 'org'), expectedResult.org, 'should set value');
   });
 
+  test('execute returns correct object after setting value on empty initial object', async function(assert) {
+    let c = Changeset({});
+
+    c.set('country', 'usa');
+
+    assert.deepEqual(c.execute().data, {
+      country: 'usa'
+    });
+
+    c.set('org.usa.ny', 'any value');
+
+    assert.deepEqual(c.execute().data, {
+      country: 'usa',
+      org: {
+        usa: {
+          ny: "any value"
+        }
+      }
+    });
+    c.set('org.usa.il', '2nd value');
+
+    assert.deepEqual(c.execute().data, {
+      country: 'usa',
+      org: {
+        usa: {
+          ny: "any value",
+          il: "2nd value"
+        }
+      }
+    });
+  });
+
 
   /**
    * #pendingChanges

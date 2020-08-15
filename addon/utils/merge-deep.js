@@ -1,4 +1,5 @@
 import { Change } from 'validated-changeset';
+import { normalizeObject } from 'validated-changeset';
 
 function isMergeableObject(value) {
   return isNonNullObject(value) && !isSpecial(value);
@@ -14,16 +15,18 @@ function isSpecial(value) {
   return stringValue === '[object RegExp]' || stringValue === '[object Date]';
 }
 
-function getEnumerableOwnPropertySymbols(target) {
-  return Object.getOwnPropertySymbols
-    ? Object.getOwnPropertySymbols(target).filter(symbol => {
-      return Object.prototype.propertyIsEnumerable.call(target, symbol)
-    })
-    : [];
-}
+// Reconsider when enumerable symbols are removed - https://github.com/emberjs/ember.js/commit/ef0e277533b3eab01e58d68b79d7e37d8b11ee34
+// function getEnumerableOwnPropertySymbols(target) {
+//   return Object.getOwnPropertySymbols
+//     ? Object.getOwnPropertySymbols(target).filter(symbol => {
+//       return Object.prototype.propertyIsEnumerable.call(target, symbol)
+//     })
+//     : [];
+// }
 
 function getKeys(target) {
-  return Object.keys(target).concat(getEnumerableOwnPropertySymbols(target))
+  return Object.keys(target);
+    // .concat(getEnumerableOwnPropertySymbols(target))
 }
 
 function propertyIsOnObject(object, property) {
@@ -61,7 +64,7 @@ function propertyIsUnsafe(target, key, options) {
 function buildPathToValue(source, options, kv, possibleKeys) {
   Object.keys(source).forEach(key => {
     let possible = source[key];
-    if (possible && Object.prototype.hasOwnProperty.call(possible, 'value')) {
+    if (possible && Object.prototype.hasOwnProperty.call(possible, 'value') && possible instanceof Change) {
       kv[[...possibleKeys, key].join('.')] = possible.value;
       return;
     }
@@ -100,8 +103,17 @@ function mergeTargetAndSource(target, source, options) {
     }
 
     // else safe key on object
-    if (propertyIsOnObject(target, key) && isMergeableObject(source[key]) && !Object.prototype.hasOwnProperty.call(source[key], 'value')) {
-      options.safeSet(target, key, mergeDeep(options.safeGet(target, key), options.safeGet(source, key), options));
+    if (
+      propertyIsOnObject(target, key) &&
+      isMergeableObject(source[key]) &&
+      !(source[key] instanceof Change)
+    ) {
+      options.safeSet(
+        target,
+        key,
+        mergeDeep(options.safeGet(target, key),
+        options.safeGet(source, key), options)
+      );
     } else {
       let next = source[key];
       if (next && next instanceof Change) {
@@ -109,7 +121,7 @@ function mergeTargetAndSource(target, source, options) {
       }
 
       // if just some normal leaf value, then set
-      return options.safeSet(target, key, next);
+      return options.safeSet(target, key, normalizeObject(next));
     }
   });
 
