@@ -1,6 +1,6 @@
 {
   "name": "ember-changeset",
-  "version": "3.8.1",
+  "version": "3.8.2",
   "description": "Changesets for Ember",
   "keywords": [
     "ember-addon",
