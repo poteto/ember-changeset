@@ -15,18 +15,18 @@ function isSpecial(value) {
   return stringValue === '[object RegExp]' || stringValue === '[object Date]';
 }
 
-function getEnumerableOwnPropertySymbols(target) {
-  return Object.getOwnPropertySymbols
-    ? Object.getOwnPropertySymbols(target).filter(symbol => {
-      return Object.prototype.propertyIsEnumerable.call(target, symbol)
-    })
-    : [];
-}
+// Reconsider when enumerable symbols are removed - https://github.com/emberjs/ember.js/commit/ef0e277533b3eab01e58d68b79d7e37d8b11ee34
+// function getEnumerableOwnPropertySymbols(target) {
+//   return Object.getOwnPropertySymbols
+//     ? Object.getOwnPropertySymbols(target).filter(symbol => {
+//       return Object.prototype.propertyIsEnumerable.call(target, symbol)
+//     })
+//     : [];
+// }
 
 function getKeys(target) {
-  return Object.keys(target)
-    .concat(getEnumerableOwnPropertySymbols(target))
-    .filter(key => typeof key === 'string' || typeof key === 'number')
+  return Object.keys(target);
+    // .concat(getEnumerableOwnPropertySymbols(target))
 }
 
 function propertyIsOnObject(object, property) {
