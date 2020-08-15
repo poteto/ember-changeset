@@ -24,7 +24,9 @@ function getEnumerableOwnPropertySymbols(target) {
 }
 
 function getKeys(target) {
-  return Object.keys(target).concat(getEnumerableOwnPropertySymbols(target))
+  return Object.keys(target)
+    .concat(getEnumerableOwnPropertySymbols(target))
+    .filter(key => typeof key === 'string' || typeof key === 'number')
 }
 
 function propertyIsOnObject(object, property) {
@@ -62,7 +64,7 @@ function propertyIsUnsafe(target, key, options) {
 function buildPathToValue(source, options, kv, possibleKeys) {
   Object.keys(source).forEach(key => {
     let possible = source[key];
-    if (possible && Object.prototype.hasOwnProperty.call(possible, 'value')) {
+    if (possible && Object.prototype.hasOwnProperty.call(possible, 'value') && possible instanceof Change) {
       kv[[...possibleKeys, key].join('.')] = possible.value;
       return;
     }
@@ -101,8 +103,17 @@ function mergeTargetAndSource(target, source, options) {
     }
 
     // else safe key on object
-    if (propertyIsOnObject(target, key) && isMergeableObject(source[key]) && !Object.prototype.hasOwnProperty.call(source[key], 'value')) {
-      options.safeSet(target, key, mergeDeep(options.safeGet(target, key), options.safeGet(source, key), options));
+    if (
+      propertyIsOnObject(target, key) &&
+      isMergeableObject(source[key]) &&
+      !(source[key] instanceof Change)
+    ) {
+      options.safeSet(
+        target,
+        key,
+        mergeDeep(options.safeGet(target, key),
+        options.safeGet(source, key), options)
+      );
     } else {
       let next = source[key];
       if (next && next instanceof Change) {
