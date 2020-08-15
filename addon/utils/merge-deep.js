@@ -1,4 +1,5 @@
 import { Change } from 'validated-changeset';
+import { normalizeObject } from 'validated-changeset';
 
 function isMergeableObject(value) {
   return isNonNullObject(value) && !isSpecial(value);
@@ -109,7 +110,7 @@ function mergeTargetAndSource(target, source, options) {
       }
 
       // if just some normal leaf value, then set
-      return options.safeSet(target, key, next);
+      return options.safeSet(target, key, normalizeObject(next));
     }
   });
 
