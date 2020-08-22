@@ -11,7 +11,8 @@ module.exports = {
     }
   },
   plugins: [
-    'ember'
+    'ember',
+    'prettier'
   ],
   extends: [
     'eslint:recommended',
@@ -22,7 +23,8 @@ module.exports = {
   },
   rules: {
     'ember/no-jquery': 'error',
-    'ember/no-observers': 0
+    'ember/no-observers': 0,
+    'prettier/prettier': 'error'
   },
   overrides: [
     // node files
