@@ -2307,25 +2307,46 @@ module('Unit | Utility | changeset', function(hooks) {
 
       hasDirtyChangesets: empty('dirtyChangesets'),
 
-      dirtyChangesets: filterBy('changesets', 'isDirty', true),
+      filterDirtyChangesets: filterBy('changesets', 'isDirty', true),
+
+      dirtyChangesets: computed('changesets.@each.isDirty', function() {
+        let cs = this.get('changesets');
+        return cs.filter((c) => { return c.get('isDirty')});
+      }),
 
       changesets: computed(function() {
         return [
           Changeset(dummyModel, dummyValidator),
           Changeset(dummyModel, dummyValidator)
         ]
+      }),
+
+      changeset: computed(function() {
+        return Changeset(dummyModel, dummyValidator)
+      }),
+
+      isChangesetDirty: computed('changeset.isDirty', function() {
+        return this.get('changeset.isDirty');
       })
+
     });
 
     let model = Model.create();
 
     assert.ok(get(model, 'hasDirtyChangesets'), 'no dirty changesets');
+    assert.equal(model.dirtyChangesets.length, 0, 'has 0 dirty changesets');
+    assert.equal(get(model, 'isChangesetDirty'), false, 'changeset not dirty')
     
     let changesets = get(model, 'changesets');
 
     set(changesets[0], 'name', 'new name');
-
+    assert.equal(model.dirtyChangesets.length, 1, 'has one dirty changesets');
     assert.notOk(get(model, 'hasDirtyChangesets'), 'has dirty changesets');
 
+    let changeset = get(model, 'changeset');
+    set(changeset, 'name', 'other new name');
+    assert.equal(get(model, 'isChangesetDirty'), true, 'changeset is dirty')
   });
+
+  
 });
