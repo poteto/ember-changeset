@@ -9,9 +9,9 @@ import { isChangeset } from 'validated-changeset';
  */
 export function changesetSet([obj, path]) {
   if (isChangeset(obj)) {
-    return value => {
+    return (value) => {
       return obj.set(path, value);
-    }
+    };
   }
 }
 

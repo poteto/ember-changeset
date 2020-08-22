@@ -15,17 +15,17 @@ ember install ember-changeset
 
 ## Updates
 
-We have released `v3.0.0`.  See the CHANGELOG [here](https://github.com/poteto/ember-changeset/blob/master/CHANGELOG.md).  This requires Ember >= 3.13 as the use of `@tracked` will help us monitor and propagate changes to the UI layer.  If your app is < 3.13 or you need to support IE11, then you can install the 2.0 series `ember install ember-changeset@v2.2.4`.
+We have released `v3.0.0`. See the CHANGELOG [here](https://github.com/poteto/ember-changeset/blob/master/CHANGELOG.md). This requires Ember >= 3.13 as the use of `@tracked` will help us monitor and propagate changes to the UI layer. If your app is < 3.13 or you need to support IE11, then you can install the 2.0 series `ember install ember-changeset@v2.2.4`.
 
 Support for IE11 was dropped with the `v3.0.0` release given our ubiquitous use of Proxy.
 
-The base library for this addon is [validated-changeset](https://github.com/validated-changeset/validated-changeset/).  As a result, this functionality is available outside of Ember as well!
+The base library for this addon is [validated-changeset](https://github.com/validated-changeset/validated-changeset/). As a result, this functionality is available outside of Ember as well!
 
 ## Philosophy
 
 The idea behind a changeset is simple: it represents a set of valid changes to be applied onto any Object (`Ember.Object`, `DS.Model`, POJOs, etc). Each change is tested against an optional validation, and if valid, the change is stored and applied when executed.
 
-Assuming a Data Down, Actions Up (DDAU) approach, a changeset is more appropriate compared to implicit 2 way bindings. Other validation libraries only validate a property *after* it is set on an Object, which means that your Object can enter an invalid state.
+Assuming a Data Down, Actions Up (DDAU) approach, a changeset is more appropriate compared to implicit 2 way bindings. Other validation libraries only validate a property _after_ it is set on an Object, which means that your Object can enter an invalid state.
 
 `ember-changeset` only allows valid changes to be set, so your Objects will never become invalid (assuming you have 100% validation coverage). Additionally, this addon is designed to be un-opinionated about your choice of form and/or validation library, so you can easily integrate it into an existing solution.
 
@@ -124,7 +124,7 @@ Then, in your favorite form library, simply pass in the `changeset` in place of 
 </form>
 ```
 
-In the above example, when the input changes, only the changeset's internal values are updated. When the submit button is clicked, the changes are only executed if *all changes* are valid.
+In the above example, when the input changes, only the changeset's internal values are updated. When the submit button is clicked, the changes are only executed if _all changes_ are valid.
 
 On rollback, all changes are dropped and the underlying Object is left untouched.
 
@@ -144,9 +144,10 @@ let changeset = Changeset(user, validationMap, validatorFn, { changeset: MyChang
 ```
 
 ## Changeset template helpers
-`ember-changeset` overrides `set` and `get` in order to handle deeply nested setters.  `mut` is simply an alias for `Ember.set(changeset, ...)`, thus we provide a `changeset-set` template helper if you are dealing with nested setters.
 
-`changeset-get` is necessary for nested getters to easily retrieve leaf keys without error.  Ember's templating layer will ask us for the first key it comes across as it traverses down the object (`user.firstName`).  We keep track of the changes, but to also keep track of unchanged values and properly merge them in the changeset is difficult.  If you are only accessing keys in an object that is only one level deep, you do not need this helper.
+`ember-changeset` overrides `set` and `get` in order to handle deeply nested setters. `mut` is simply an alias for `Ember.set(changeset, ...)`, thus we provide a `changeset-set` template helper if you are dealing with nested setters.
+
+`changeset-get` is necessary for nested getters to easily retrieve leaf keys without error. Ember's templating layer will ask us for the first key it comes across as it traverses down the object (`user.firstName`). We keep track of the changes, but to also keep track of unchanged values and properly merge them in the changeset is difficult. If you are only accessing keys in an object that is only one level deep, you do not need this helper.
 
 ```hbs
 <form>
@@ -193,7 +194,7 @@ interface Args {
   user: {
     name: string;
     age: number;
-  }
+  };
 }
 
 export default class Foo extends Component<Args> {
@@ -206,50 +207,46 @@ export default class Foo extends Component<Args> {
 }
 ```
 
-Other available types include the following.  Please put in a PR if you need more types or access directly in `validated-changeset`!
+Other available types include the following. Please put in a PR if you need more types or access directly in `validated-changeset`!
 
 ```js
-import {
-  ValidationResult,
-  ValidatorMapFunc,
-  ValidatorAction
-} from 'ember-changeset/types';
+import { ValidationResult, ValidatorMapFunc, ValidatorAction } from 'ember-changeset/types';
 ```
 
 ## API
 
-* Properties
-  + [`error`](#error)
-  + [`change`](#change)
-  + [`errors`](#errors)
-  + [`changes`](#changes)
-  + [`data`](#data)
-  + [`pendingData`](#pendingData)
-  + [`isValid`](#isvalid)
-  + [`isInvalid`](#isinvalid)
-  + [`isPristine`](#ispristine)
-  + [`isDirty`](#isdirty)
-* Methods
-  + [`get`](#get)
-  + [`set`](#set)
-  + [`prepare`](#prepare)
-  + [`execute`](#execute)
-  + [`save`](#save)
-  + [`merge`](#merge)
-  + [`rollback`](#rollback)
-  + [`rollbackInvalid`](#rollbackinvalid)
-  + [`rollbackProperty`](#rollbackproperty)
-  + [`validate`](#validate)
-  + [`addError`](#adderror)
-  + [`pushErrors`](#pusherrors)
-  + [`snapshot`](#snapshot)
-  + [`restore`](#restore)
-  + [`cast`](#cast)
-  + [`isValidating`](#isvalidating)
-* Events
-  + [`beforeValidation`](#beforevalidation)
-  + [`afterValidation`](#aftervalidation)
-  + [`afterRollback`](#afterrollback)
+- Properties
+  - [`error`](#error)
+  - [`change`](#change)
+  - [`errors`](#errors)
+  - [`changes`](#changes)
+  - [`data`](#data)
+  - [`pendingData`](#pendingData)
+  - [`isValid`](#isvalid)
+  - [`isInvalid`](#isinvalid)
+  - [`isPristine`](#ispristine)
+  - [`isDirty`](#isdirty)
+- Methods
+  - [`get`](#get)
+  - [`set`](#set)
+  - [`prepare`](#prepare)
+  - [`execute`](#execute)
+  - [`save`](#save)
+  - [`merge`](#merge)
+  - [`rollback`](#rollback)
+  - [`rollbackInvalid`](#rollbackinvalid)
+  - [`rollbackProperty`](#rollbackproperty)
+  - [`validate`](#validate)
+  - [`addError`](#adderror)
+  - [`pushErrors`](#pusherrors)
+  - [`snapshot`](#snapshot)
+  - [`restore`](#restore)
+  - [`cast`](#cast)
+  - [`isValidating`](#isvalidating)
+- Events
+  - [`beforeValidation`](#beforevalidation)
+  - [`afterValidation`](#aftervalidation)
+  - [`afterRollback`](#afterrollback)
 
 #### `error`
 
@@ -297,7 +294,7 @@ Returns the change object.
 
 ```js
 {
-  firstName: 'Jim'
+  firstName: 'Jim';
 }
 ```
 
@@ -306,7 +303,7 @@ Note that keys can be arbitrarily nested:
 ```js
 {
   address: {
-    zipCode: '10001'
+    zipCode: '10001';
   }
 }
 ```
@@ -329,14 +326,14 @@ Returns an array of errors. If your `validate` function returns a non-boolean va
   {
     key: 'firstName',
     value: 'Jim',
-    validation: 'First name must be greater than 7 characters'
+    validation: 'First name must be greater than 7 characters',
   },
   {
     key: 'address.zipCode',
     value: '123',
-    validation: 'Zip code must have 5 digits'
-  }
-]
+    validation: 'Zip code must have 5 digits',
+  },
+];
 ```
 
 You can use this property to render a list of errors:
@@ -362,13 +359,13 @@ Returns an array of changes to be executed. Only valid changes will be stored on
 [
   {
     key: 'firstName',
-    value: 'Jim'
+    value: 'Jim',
   },
   {
     key: 'address.zipCode',
-    value: 10001
-  }
-]
+    value: 10001,
+  },
+];
 ```
 
 You can use this property to render a list of changes:
@@ -509,7 +506,7 @@ Note that using `Ember.get` **will not necessarily work if you're expecting an O
 
 ```js
 get(changeset, 'momentObj').format('dddd'); // will error, format is undefined
-changeset.get('momentObj').format('dddd');  // => "Friday"
+changeset.get('momentObj').format('dddd'); // => "Friday"
 ```
 
 This is because `Changeset` wraps an Object with `Ember.ObjectProxy` internally, and overrides `Ember.Object.get` to hide this implementation detail.
@@ -524,7 +521,7 @@ get(changeset, 'momentObj.content').format('dddd'); // => "Friday"
 
 #### `set`
 
-Exactly the same semantics as `Ember.set`. This stores the change on the changeset. It is recommended to use `changeset.set(...)` instead of `Ember.set(changeset, ...)`.  `Ember.set` will set the property for nested keys on the underlying model.
+Exactly the same semantics as `Ember.set`. This stores the change on the changeset. It is recommended to use `changeset.set(...)` instead of `Ember.set(changeset, ...)`. `Ember.set` will set the property for nested keys on the underlying model.
 
 ```js
 changeset.set('firstName', 'Milton'); // "Milton"
@@ -552,7 +549,7 @@ changeset.prepare((changes) => {
   let modified = {};
 
   for (let key in changes) {
-    let newKey = key.split('.').map(underscore).join('.')
+    let newKey = key.split('.').map(underscore).join('.');
     modified[newKey] = changes[key];
   }
 
@@ -672,8 +669,8 @@ let validationMap = {
 
   // specify nested keys with pojo's
   address: {
-    zipCode: validateLength({ is: 5 })
-  }
+    zipCode: validateLength({ is: 5 }),
+  },
 };
 
 let changeset = Changeset(user, validatorFn, validationMap);
@@ -704,12 +701,12 @@ Manually add an error to the changeset.
 ```js
 changeset.addError('email', {
   value: 'jim@bob.com',
-  validation: 'Email already taken'
+  validation: 'Email already taken',
 });
 
 changeset.addError('address.zip', {
   value: '123',
-  validation: 'Must be 5 digits'
+  validation: 'Must be 5 digits',
 });
 
 // shortcut
@@ -717,7 +714,7 @@ changeset.addError('email', 'Email already taken');
 changeset.addError('address.zip', 'Must be 5 digits');
 ```
 
-Adding an error manually does not require any special setup. The error will be cleared if the value for the `key` is subsequently set to a valid value.  Adding an error will overwrite any existing error or change for `key`.
+Adding an error manually does not require any special setup. The error will be cleared if the value for the `key` is subsequently set to a valid value. Adding an error will overwrite any existing error or change for `key`.
 
 If using the shortcut method, the value in the changeset will be used as the value for the error.
 
@@ -759,7 +756,7 @@ changeset.set('address.country', 'North Korea');
 let snapshot = changeset.snapshot();
 
 changeset.set('name', 'Poteto');
-changeset.set('address.country', 'Australia')
+changeset.set('address.country', 'Australia');
 
 changeset.restore(snapshot);
 changeset.get('name'); // "Jim Bob"
@@ -796,7 +793,7 @@ For example, this method can be used to only allow specified changes through pri
 // models/user.js
 export const schema = {
   name: attr('string'),
-  password: attr('string')
+  password: attr('string'),
 };
 
 export default Model.extend(schema);
@@ -812,11 +809,9 @@ export default Controller.extend({
 
   actions: {
     save(changeset) {
-      return changeset
-        .cast(keys(schema))
-        .save();
-    }
-  }
+      return changeset.cast(keys(schema)).save();
+    },
+  },
 });
 ```
 
@@ -824,7 +819,7 @@ export default Controller.extend({
 
 #### `isValidating`
 
-Checks to see if async validator for a given key has not resolved.  If no key is provided it will check to see if any async validator is running.
+Checks to see if async validator for a given key has not resolved. If no key is provided it will check to see if any async validator is running.
 
 ```js
 changeset.set('lastName', 'Appleseed');
@@ -848,7 +843,7 @@ changeset.validate().then(() => {
 This event is triggered after isValidating is set to true for a key, but before the validation is complete.
 
 ```js
-changeset.on('beforeValidation', key => {
+changeset.on('beforeValidation', (key) => {
   console.log(`${key} is validating...`);
 });
 changeset.validate();
@@ -864,7 +859,7 @@ changeset.isValidating(); // true
 This event is triggered after async validations are complete and isValidating is set to false for a key.
 
 ```js
-changeset.on('afterValidation', key => {
+changeset.on('afterValidation', (key) => {
   console.log(`${key} has completed validating`);
 });
 changeset.validate().then(() => {
@@ -884,7 +879,7 @@ where it is necessary to separately track all changes that are made to the chang
 
 ```js
 changeset.on('afterRollback', () => {
-  console.log("changeset has rolled back");
+  console.log('changeset has rolled back');
 });
 changeset.rollback();
 // console output: changeset has rolled back
@@ -924,8 +919,11 @@ When you run `changeset.save()`, under the hood this executes the changeset, and
 For example, if you are using an Ember Data model in your route, saving the changeset will save the model. If the save rejects, Ember Data will add errors to the model for you. To copy the model errors over to your changeset, add a handler like this:
 
 ```js
-changeset.save()
-  .then(() => { /* ... */ })
+changeset
+  .save()
+  .then(() => {
+    /* ... */
+  })
   .catch(() => {
     get(this, 'model.errors').forEach(({ attribute, message }) => {
       changeset.addError(attribute, message);
@@ -979,7 +977,7 @@ export default Component.extend({
   }).restartable(),
 
   actions: {
-      /**
+    /**
      * @method validateProperty
      * @param {Object} changeset
      * @param {String} valuePath
@@ -1002,8 +1000,8 @@ export default Component.extend({
      */
     checkValidity(changeset, value) {
       get(this, '_checkValidity').perform(changeset, this.valuePath, value);
-    }
-  }
+    },
+  },
 });
 ```
 
@@ -1022,6 +1020,7 @@ export default Component.extend({
 We're grateful to these wonderful contributors who've contributed to `ember-changeset`:
 
 [//]: contributor-faces
+
 <a href="https://github.com/poteto"><img src="https://avatars0.githubusercontent.com/u/1390709?v=4" title="poteto" width="80" height="80"></a>
 <a href="https://github.com/snewcomer"><img src="https://avatars0.githubusercontent.com/u/7374640?v=4" title="snewcomer" width="80" height="80"></a>
 <a href="https://github.com/nucleartide"><img src="https://avatars3.githubusercontent.com/u/914228?v=4" title="nucleartide" width="80" height="80"></a>
@@ -1056,22 +1055,22 @@ We're grateful to these wonderful contributors who've contributed to `ember-chan
 
 ## Installation
 
-* `git clone` this repository
-* `npm install`
+- `git clone` this repository
+- `npm install`
 
 ## Running
 
-* `ember serve`
-* Visit your app at http://localhost:4200.
+- `ember serve`
+- Visit your app at http://localhost:4200.
 
 ## Running Tests
 
-* `npm test` (Runs `ember try:testall` to test your addon against multiple Ember versions)
-* `ember test`
-* `ember test --serve`
+- `npm test` (Runs `ember try:testall` to test your addon against multiple Ember versions)
+- `ember test`
+- `ember test --serve`
 
 ## Building
 
-* `ember build`
+- `ember build`
 
 For more information on using ember-cli, visit [http://ember-cli.com/](http://ember-cli.com/).

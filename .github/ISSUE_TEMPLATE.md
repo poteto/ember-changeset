@@ -11,17 +11,23 @@ Remove the template from below and provide thoughtful commentary *and code sampl
 -->
 
 <!-- BUG TEMPLATE -->
+
 ## Version
+
 <!-- Put the version you want to report a bug for here -->
 
 ## Test Case
+
 <!-- Please provide a (link to) a reduced test case -->
 
 ## Steps to reproduce
+
 <!-- With the reduced test case, how do you reproduce the error condition? -->
 
 ## Expected Behavior
+
 <!-- Describe here what you expected to happen -->
 
 ## Actual Behavior
+
 <!-- Describe here what actually happened -->

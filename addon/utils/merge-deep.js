@@ -26,7 +26,7 @@ function isSpecial(value) {
 
 function getKeys(target) {
   return Object.keys(target);
-    // .concat(getEnumerableOwnPropertySymbols(target))
+  // .concat(getEnumerableOwnPropertySymbols(target))
 }
 
 function propertyIsOnObject(object, property) {
@@ -46,13 +46,16 @@ function hasEmberDataProperty(target, key, options) {
 
 // Protects from prototype poisoning and unexpected merging up the prototype chain.
 function propertyIsUnsafe(target, key, options) {
-  if(hasEmberDataProperty(target, key, options)) {
+  if (hasEmberDataProperty(target, key, options)) {
     return false;
   }
 
-  return propertyIsOnObject(target, key) // Properties are safe to merge if they don't exist in the target yet,
-    && !(Object.prototype.hasOwnProperty.call(target, key) // unsafe if they exist up the prototype chain,
-      && Object.prototype.propertyIsEnumerable.call(target, key)); // and also unsafe if they're nonenumerable.
+  return (
+    propertyIsOnObject(target, key) && // Properties are safe to merge if they don't exist in the target yet,
+    !(
+      (Object.prototype.hasOwnProperty.call(target, key) && Object.prototype.propertyIsEnumerable.call(target, key)) // unsafe if they exist up the prototype chain,
+    )
+  ); // and also unsafe if they're nonenumerable.
 }
 
 /**
@@ -62,7 +65,7 @@ function propertyIsUnsafe(target, key, options) {
  * @method buildPathToValue
  */
 function buildPathToValue(source, options, kv, possibleKeys) {
-  Object.keys(source).forEach(key => {
+  Object.keys(source).forEach((key) => {
     let possible = source[key];
     if (possible && Object.prototype.hasOwnProperty.call(possible, 'value') && possible instanceof Change) {
       kv[[...possibleKeys, key].join('.')] = possible.value;
@@ -83,7 +86,7 @@ function buildPathToValue(source, options, kv, possibleKeys) {
  * @method mergeTargetAndSource
  */
 function mergeTargetAndSource(target, source, options) {
-  getKeys(source).forEach(key => {
+  getKeys(source).forEach((key) => {
     // proto poisoning.  So can set by nested key path 'person.name'
     if (propertyIsUnsafe(target, key, options)) {
       // if safeSet, we will find keys leading up to value and set
@@ -103,17 +106,8 @@ function mergeTargetAndSource(target, source, options) {
     }
 
     // else safe key on object
-    if (
-      propertyIsOnObject(target, key) &&
-      isMergeableObject(source[key]) &&
-      !(source[key] instanceof Change)
-    ) {
-      options.safeSet(
-        target,
-        key,
-        mergeDeep(options.safeGet(target, key),
-        options.safeGet(source, key), options)
-      );
+    if (propertyIsOnObject(target, key) && isMergeableObject(source[key]) && !(source[key] instanceof Change)) {
+      options.safeSet(target, key, mergeDeep(options.safeGet(target, key), options.safeGet(source, key), options));
     } else {
       let next = source[key];
       if (next && next instanceof Change) {
@@ -138,8 +132,16 @@ function mergeTargetAndSource(target, source, options) {
  * @method mergeDeep
  */
 export default function mergeDeep(target, source, options = {}) {
-  options.safeGet = options.safeGet || function (obj, key) { return obj[key] };
-  options.safeSet = options.safeSet || function(obj, key, value) { return obj[key] = value };
+  options.safeGet =
+    options.safeGet ||
+    function (obj, key) {
+      return obj[key];
+    };
+  options.safeSet =
+    options.safeSet ||
+    function (obj, key, value) {
+      return (obj[key] = value);
+    };
   let sourceIsArray = Array.isArray(source);
   let targetIsArray = Array.isArray(target);
   let sourceAndTargetTypesMatch = sourceIsArray === targetIsArray;
@@ -152,8 +154,10 @@ export default function mergeDeep(target, source, options = {}) {
 
   try {
     return mergeTargetAndSource(target, source, options);
-  } catch(e) {
+  } catch (e) {
     // this is very unlikely to be hit but lets throw an error otherwise
-    throw new Error('Unable to `mergeDeep` with your data. Are you trying to merge two ember-data objects? Please file an issue with ember-changeset.');
+    throw new Error(
+      'Unable to `mergeDeep` with your data. Are you trying to merge two ember-data objects? Please file an issue with ember-changeset.'
+    );
   }
 }

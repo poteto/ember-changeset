@@ -4,26 +4,19 @@ import { typeOf, isPresent } from '@ember/utils';
 import { Changeset } from 'ember-changeset';
 import { lookupValidator } from 'validated-changeset';
 import hbs from 'htmlbars-inline-precompile';
-import {
- render,
-  find,
-  fillIn,
-  click,
-  blur,
-  triggerEvent
-} from '@ember/test-helpers';
+import { render, find, fillIn, click, blur, triggerEvent } from '@ember/test-helpers';
 
-module('Integration | Helper | changeset', function(hooks) {
+module('Integration | Helper | changeset', function (hooks) {
   setupRenderingTest(hooks);
 
-  test('it validates changes', async function(assert) {
+  test('it validates changes', async function (assert) {
     let validations = {
       firstName(value) {
-        return isPresent(value) && value.length > 3 || 'too short';
+        return (isPresent(value) && value.length > 3) || 'too short';
       },
       lastName(value) {
-        return isPresent(value) && value.length > 3 || 'too short';
-      }
+        return (isPresent(value) && value.length > 3) || 'too short';
+      },
     };
     this.set('dummyModel', { firstName: 'Jim', lastName: 'Bob' });
     this.set('validate', ({ key, newValue }) => {
@@ -56,14 +49,14 @@ module('Integration | Helper | changeset', function(hooks) {
     assert.notOk(find('#errors-paragraph'), 'should be valid');
   });
 
-  test('it accepts validation map', async function(assert) {
+  test('it accepts validation map', async function (assert) {
     let validations = {
       firstName(key, newValue) {
-        return isPresent(newValue) && newValue.length > 3 || 'too short';
+        return (isPresent(newValue) && newValue.length > 3) || 'too short';
       },
       lastName(key, newValue) {
-        return isPresent(newValue) && newValue.length > 3 || 'too short';
-      }
+        return (isPresent(newValue) && newValue.length > 3) || 'too short';
+      },
     };
     this.set('dummyModel', { firstName: 'Jim', lastName: 'Bobbie' });
     this.set('validations', validations);
@@ -90,58 +83,16 @@ module('Integration | Helper | changeset', function(hooks) {
     assert.notOk(find('#errors-paragraph'), 'should be valid');
   });
 
-  test('it accepts validation map with multiple validations', async function(assert) {
+  test('it accepts validation map with multiple validations', async function (assert) {
     function validateLength() {
-      return (key, newValue) => isPresent(newValue) && newValue.length > 3 || 'too short';
-    }
-    function validateStartsUppercase() {
-      return (key, newValue) => isPresent(newValue) && newValue.charCodeAt(0) > 65 && newValue.charCodeAt(0) < 90 || 'not upper case';
-    }
-    let validations = {
-      firstName: [
-        validateLength(),
-        validateStartsUppercase()
-      ]
-    };
-    this.set('dummyModel', { firstName: 'Jim', lastName: 'Bobbie' });
-    this.set('validations', validations);
-    this.set('submit', (changeset) => changeset.validate());
-    this.set('reset', (changeset) => changeset.rollback());
-    await render(hbs`
-      {{#with (changeset dummyModel validations) as |changesetObj|}}
-        {{#if changesetObj.isInvalid}}
-          <p id="errors-paragraph">There were one or more errors in your form.</p>
-        {{/if}}
-        {{input id="first-name" value=changesetObj.firstName}}
-        {{input id="last-name" value=changesetObj.lastName}}
-        <button id="submit-btn" {{action submit changesetObj}}>Submit</button>
-        <button id="reset-btn" {{action reset changesetObj}}>Reset</button>
-      {{/with}}
-    `);
-
-    await fillIn('#first-name', 'A');
-    await click('#submit-btn');
-    assert.ok(find('#errors-paragraph'), 'should be invalid');
-
-    await fillIn('#first-name', 'Billy');
-    await click('#submit-btn');
-    assert.notOk(find('#errors-paragraph'), 'should be valid');
-  });
-
-  test('it accepts validation map with multiple validations with promises', async function(assert) {
-    function validateLength() {
-      return (key, newValue) =>
-        isPresent(newValue) && Promise.resolve(newValue.length > 3) || 'too short';
+      return (key, newValue) => (isPresent(newValue) && newValue.length > 3) || 'too short';
     }
     function validateStartsUppercase() {
       return (key, newValue) =>
-        isPresent(newValue) && newValue.charCodeAt(0) > 65 && newValue.charCodeAt(0) < 90 || Promise.resolve('not upper case');
+        (isPresent(newValue) && newValue.charCodeAt(0) > 65 && newValue.charCodeAt(0) < 90) || 'not upper case';
     }
     let validations = {
-      firstName: [
-        validateLength(),
-        validateStartsUppercase()
-      ]
+      firstName: [validateLength(), validateStartsUppercase()],
     };
     this.set('dummyModel', { firstName: 'Jim', lastName: 'Bobbie' });
     this.set('validations', validations);
@@ -168,7 +119,44 @@ module('Integration | Helper | changeset', function(hooks) {
     assert.notOk(find('#errors-paragraph'), 'should be valid');
   });
 
-  test('it rollsback changes', async function(assert) {
+  test('it accepts validation map with multiple validations with promises', async function (assert) {
+    function validateLength() {
+      return (key, newValue) => (isPresent(newValue) && Promise.resolve(newValue.length > 3)) || 'too short';
+    }
+    function validateStartsUppercase() {
+      return (key, newValue) =>
+        (isPresent(newValue) && newValue.charCodeAt(0) > 65 && newValue.charCodeAt(0) < 90) ||
+        Promise.resolve('not upper case');
+    }
+    let validations = {
+      firstName: [validateLength(), validateStartsUppercase()],
+    };
+    this.set('dummyModel', { firstName: 'Jim', lastName: 'Bobbie' });
+    this.set('validations', validations);
+    this.set('submit', (changeset) => changeset.validate());
+    this.set('reset', (changeset) => changeset.rollback());
+    await render(hbs`
+      {{#with (changeset dummyModel validations) as |changesetObj|}}
+        {{#if changesetObj.isInvalid}}
+          <p id="errors-paragraph">There were one or more errors in your form.</p>
+        {{/if}}
+        {{input id="first-name" value=changesetObj.firstName}}
+        {{input id="last-name" value=changesetObj.lastName}}
+        <button id="submit-btn" {{action submit changesetObj}}>Submit</button>
+        <button id="reset-btn" {{action reset changesetObj}}>Reset</button>
+      {{/with}}
+    `);
+
+    await fillIn('#first-name', 'A');
+    await click('#submit-btn');
+    assert.ok(find('#errors-paragraph'), 'should be invalid');
+
+    await fillIn('#first-name', 'Billy');
+    await click('#submit-btn');
+    assert.notOk(find('#errors-paragraph'), 'should be valid');
+  });
+
+  test('it rollsback changes', async function (assert) {
     this.set('dummyModel', { firstName: 'Jim' });
     this.set('reset', (changeset) => changeset.rollback());
     await render(hbs`
@@ -185,7 +173,7 @@ module('Integration | Helper | changeset', function(hooks) {
     assert.equal(find('#first-name').value, 'Jim', 'should rollback');
   });
 
-  test('it can be used with 1 argument', async function(assert) {
+  test('it can be used with 1 argument', async function (assert) {
     this.set('dummyModel', { firstName: 'Jim', lastName: 'Bob' });
     this.set('submit', (changeset) => changeset.validate());
     this.set('reset', (changeset) => changeset.rollback());
@@ -205,7 +193,7 @@ module('Integration | Helper | changeset', function(hooks) {
     assert.notOk(find('#errors-paragraph'), 'should be valid');
   });
 
-  test('it updates when set without a validator', async function(assert) {
+  test('it updates when set without a validator', async function (assert) {
     this.set('dummyModel', { firstName: 'Jim', lastName: 'Bob' });
     await render(hbs`
       {{#with (changeset dummyModel) as |changesetObj|}}
@@ -225,7 +213,7 @@ module('Integration | Helper | changeset', function(hooks) {
     assert.equal(find('h1').textContent.trim(), 'foo bar', 'should update observable value');
   });
 
-  test('it updates when set with a validator', async function(assert) {
+  test('it updates when set with a validator', async function (assert) {
     this.set('dummyModel', { firstName: 'Jim', lastName: 'Bob' });
     this.set('validate', () => true);
     await render(hbs`
@@ -246,7 +234,7 @@ module('Integration | Helper | changeset', function(hooks) {
     assert.equal(find('h1').textContent.trim(), 'foo bar', 'should update observable value');
   });
 
-  test('a passed down nested object updates when set without a validator', async function(assert) {
+  test('a passed down nested object updates when set without a validator', async function (assert) {
     let data = { person: { firstName: 'Jim', lastName: 'Bob' } };
     let changeset = Changeset(data);
     this.set('changeset', changeset);
@@ -272,11 +260,15 @@ module('Integration | Helper | changeset', function(hooks) {
     assert.equal(changeset.get('person').firstName, 'foo', 'should work with top level key');
     assert.equal(changeset.get('person').lastName, 'bar', 'should work with top level key last name');
     assert.equal(changeset.person.firstName, 'foo', 'should work with top level key');
-    assert.equal(changeset.get('_content').person.firstName, 'Jim', 'keeps value on model as execute hasn\'t been called');
+    assert.equal(
+      changeset.get('_content').person.firstName,
+      'Jim',
+      "keeps value on model as execute hasn't been called"
+    );
     assert.equal(find('h1').textContent.trim(), 'foo bar', 'should update observable value');
   });
 
-  test('nested object updates when set without a validator', async function(assert) {
+  test('nested object updates when set without a validator', async function (assert) {
     let data = { person: { firstName: 'Jim', lastName: 'Bob' } };
     let changeset = Changeset(data);
     this.set('changeset', changeset);
@@ -298,7 +290,7 @@ module('Integration | Helper | changeset', function(hooks) {
     assert.equal(find('h1').textContent.trim(), 'foo bar', 'should update observable value');
   });
 
-  test('nested key error clears after entering valid input', async function(assert) {
+  test('nested key error clears after entering valid input', async function (assert) {
     let data = { person: { firstName: 'Jim' } };
     let validator = ({ newValue }) => isPresent(newValue) || 'need a first name';
     let c = Changeset(data, validator);
@@ -329,12 +321,12 @@ module('Integration | Helper | changeset', function(hooks) {
     assert.equal(actual, expectedResult, 'hides error message');
   });
 
-  test('nested object updates when set with async validator', async function(assert) {
+  test('nested object updates when set with async validator', async function (assert) {
     let data = { person: { firstName: 'Jim' } };
     let validator = () => Promise.resolve(true);
     let c = Changeset(data, validator);
     this.set('c', c);
-     await render(hbs`
+    await render(hbs`
       <h1>{{c.person.firstName}}</h1>
       <input
         id="first-name"
@@ -343,12 +335,12 @@ module('Integration | Helper | changeset', function(hooks) {
         onchange={{action (changeset-set c "person.firstName") value="target.value"}}>
       <small id="first-name-error">{{c.error.person.firstName.validation}}</small>
     `);
-     assert.equal(find('h1').textContent.trim(), 'Jim', 'precondition');
+    assert.equal(find('h1').textContent.trim(), 'Jim', 'precondition');
     await fillIn('#first-name', 'John');
-     assert.equal(find('h1').textContent.trim(), 'John', 'should update observable value');
+    assert.equal(find('h1').textContent.trim(), 'John', 'should update observable value');
   });
 
-  test('deeply nested key error clears after entering valid input', async function(assert) {
+  test('deeply nested key error clears after entering valid input', async function (assert) {
     let data = { person: { name: { parts: { first: 'Jim' } } } };
     let validator = ({ newValue }) => isPresent(newValue) || 'need a first name';
     let c = Changeset(data, validator);
@@ -382,7 +374,7 @@ module('Integration | Helper | changeset', function(hooks) {
     }
   });
 
-  test('a rollback propagates binding to deeply nested changesets', async function(assert) {
+  test('a rollback propagates binding to deeply nested changesets', async function (assert) {
     let data = { person: { firstName: 'Jim', lastName: 'Bob' } };
     let changeset = Changeset(data);
     this.set('changeset', changeset);
@@ -408,10 +400,14 @@ module('Integration | Helper | changeset', function(hooks) {
     assert.equal(find('h1').textContent.trim(), 'Jim Bob', 'should rollback values');
   });
 
-  test('it does not rollback when validating', async function(assert) {
+  test('it does not rollback when validating', async function (assert) {
     let dummyValidations = {
-      even(k, value) { return value % 2 === 0 || 'must be even'; },
-      odd(k, value) { return value % 2 !== 0 || 'must be odd'; }
+      even(k, value) {
+        return value % 2 === 0 || 'must be even';
+      },
+      odd(k, value) {
+        return value % 2 !== 0 || 'must be odd';
+      },
     };
     let changeset = Changeset({ even: 4, odd: 4 }, lookupValidator(dummyValidations), dummyValidations);
     this.set('changeset', changeset);
@@ -464,7 +460,7 @@ module('Integration | Helper | changeset', function(hooks) {
     assert.equal(find('code.odd').textContent.trim(), '10', 'should not rollback');
   });
 
-  test('it handles when changeset is already set', async function(assert) {
+  test('it handles when changeset is already set', async function (assert) {
     class Moment {
       constructor(date) {
         this.date = date;
@@ -482,7 +478,7 @@ module('Integration | Helper | changeset', function(hooks) {
     assert.equal(find('h1').textContent.trim(), d, 'should update observable value');
   });
 
-  test('it handles when is plain object passed to helper', async function(assert) {
+  test('it handles when is plain object passed to helper', async function (assert) {
     let d = new Date('2015');
     this.set('d', d);
     await render(hbs`
@@ -494,7 +490,7 @@ module('Integration | Helper | changeset', function(hooks) {
     assert.equal(find('h1').textContent.trim(), d, 'should update observable value');
   });
 
-  test('it handles models that are promises', async function(assert) {
+  test('it handles models that are promises', async function (assert) {
     this.set('dummyModel', Promise.resolve({ firstName: 'Jim', lastName: 'Bob' }));
     await render(hbs`
       {{#with (changeset this.dummyModel) as |changesetObj|}}
@@ -515,7 +511,7 @@ module('Integration | Helper | changeset', function(hooks) {
     assert.equal(find('h1').textContent.trim(), 'foo bar', 'should update observable value');
   });
 
-  test('it skips validation when skipValidate is passed as an option', async function(assert) {
+  test('it skips validation when skipValidate is passed as an option', async function (assert) {
     this.set('dummyModel', { firstName: 'Jim', lastName: 'Bob' });
     this.set('validate', () => false);
     await render(hbs`
@@ -531,18 +527,18 @@ module('Integration | Helper | changeset', function(hooks) {
 
     assert.equal(find('h1').textContent.trim(), 'Jim Bob', 'precondition');
     await fillIn('#first-name', 'J');
-    await blur('#first-name')
+    await blur('#first-name');
     await fillIn('#last-name', 'B');
-    await blur('#last-name')
+    await blur('#last-name');
     assert.equal(find('h1').textContent.trim(), 'J B', 'should update observable value');
     assert.notOk(find('#error-paragraph'), 'should skip validation');
   });
 
-  test('it validates changes with changesetKeys', async function(assert) {
+  test('it validates changes with changesetKeys', async function (assert) {
     let validations = {
       firstName(value) {
-        return isPresent(value) && value.length > 3 || 'too short';
-      }
+        return (isPresent(value) && value.length > 3) || 'too short';
+      },
     };
     this.set('dummyModel', { firstName: 'Jim', lastName: 'Bob' });
     this.set('validate', ({ key, newValue }) => {
@@ -571,4 +567,3 @@ module('Integration | Helper | changeset', function(hooks) {
     assert.notOk(find('#errors-paragraph'), 'should not be invalid');
   });
 });
-
