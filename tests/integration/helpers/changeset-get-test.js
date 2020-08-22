@@ -4,26 +4,26 @@ import hbs from 'htmlbars-inline-precompile';
 import { module, test } from 'qunit';
 import { Changeset } from 'ember-changeset';
 
-module('Integration | Helper | changeset-get', function(hooks) {
+module('Integration | Helper | changeset-get', function (hooks) {
   setupRenderingTest(hooks);
 
   let model;
 
-  hooks.beforeEach(function() {
+  hooks.beforeEach(function () {
     model = {
       name: {
         first: 'Bob',
-        last: 'Loblaw'
+        last: 'Loblaw',
       },
       email: 'bob@lob.law',
-      url: 'http://bobloblawslawblog.com'
+      url: 'http://bobloblawslawblog.com',
     };
 
     this.set('changeset', Changeset(model));
     this.set('fieldName', 'name.first');
   });
 
-  test('it retrieves the current value using {{get}}', async function(assert) {
+  test('it retrieves the current value using {{get}}', async function (assert) {
     await render(hbs`
       <input
         type="text"
@@ -53,7 +53,7 @@ module('Integration | Helper | changeset-get', function(hooks) {
     assert.equal(input.value, 'Robert');
   });
 
-  test('it succeeds in retrieving the current value using {{get}}', async function(assert) {
+  test('it succeeds in retrieving the current value using {{get}}', async function (assert) {
     await render(hbs`
       <input
         type="text"
@@ -89,10 +89,10 @@ module('Integration | Helper | changeset-get', function(hooks) {
   });
 });
 
-module('Integration | Helper | changeset-get relationships', function(hooks) {
+module('Integration | Helper | changeset-get relationships', function (hooks) {
   setupRenderingTest(hooks);
 
-  hooks.beforeEach(function() {
+  hooks.beforeEach(function () {
     this.store = this.owner.lookup('service:store');
 
     this.createUser = (userType, withDogs) => {
@@ -101,11 +101,11 @@ module('Integration | Helper | changeset-get relationships', function(hooks) {
 
       if (withDogs) {
         for (let i = 0; i < 2; i++) {
-          user.get('dogs').addObject(this.store.createRecord('dog'))
+          user.get('dogs').addObject(this.store.createRecord('dog'));
         }
       }
       return user;
-    }
+    };
 
     this.createUserWithNullBelongsTo = (userType) => {
       let user = this.store.createRecord(userType, { profile: null });
@@ -113,7 +113,7 @@ module('Integration | Helper | changeset-get relationships', function(hooks) {
     };
   });
 
-  test('it renders belongsTo property', async function(assert) {
+  test('it renders belongsTo property', async function (assert) {
     let user = this.createUser('user', false);
     this.changeset = Changeset(user);
 
@@ -124,7 +124,7 @@ module('Integration | Helper | changeset-get relationships', function(hooks) {
     assert.equal(find('#test-el').textContent.trim(), 'Bob');
   });
 
-  test('it does not fail with a null belongsTo property', async function(assert) {
+  test('it does not fail with a null belongsTo property', async function (assert) {
     let user = this.createUserWithNullBelongsTo('user');
     this.changeset = Changeset(user);
 

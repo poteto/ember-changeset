@@ -4,10 +4,10 @@ import { set } from '@ember/object';
 import { Changeset } from 'ember-changeset';
 import { isEmpty } from '@ember/utils';
 
-module('Integration | main', function(hooks) {
+module('Integration | main', function (hooks) {
   setupTest(hooks);
 
-  hooks.beforeEach(function() {
+  hooks.beforeEach(function () {
     this.store = this.owner.lookup('service:store');
 
     this.createUser = (userType, withDogs) => {
@@ -16,11 +16,11 @@ module('Integration | main', function(hooks) {
 
       if (withDogs) {
         for (let i = 0; i < 2; i++) {
-          user.get('dogs').addObject(this.store.createRecord('dog'))
+          user.get('dogs').addObject(this.store.createRecord('dog'));
         }
       }
       return user;
-    }
+    };
   });
 
   async function testBasicBelongsTo(assert, userType) {
@@ -85,15 +85,15 @@ module('Integration | main', function(hooks) {
     assert.equal(changeset.isDirty, true, 'is dirty');
   }
 
-  test('it works for belongsTo', async function(assert) {
+  test('it works for belongsTo', async function (assert) {
     await testBasicBelongsTo.call(this, assert, 'user');
   });
 
-  test('it works for sync belongsTo', async function(assert) {
+  test('it works for sync belongsTo', async function (assert) {
     await testBasicBelongsTo.call(this, assert, 'sync-user');
   });
 
-  test('can call prepare with belongsTo', async function(assert) {
+  test('can call prepare with belongsTo', async function (assert) {
     let user = this.createUser('sync-user', false);
     let changeset = Changeset(user);
     let profile = this.store.createRecord('profile', { firstName: 'Terry', lastName: 'Bubblewinkles', nickname: 't' });
@@ -117,8 +117,8 @@ module('Integration | main', function(hooks) {
 
     let profile = this.store.createRecord('profile');
     let save = () => {
-      assert.ok(true, 'user save was called')
-    }
+      assert.ok(true, 'user save was called');
+    };
 
     let user = this.store.createRecord(userType, { profile, save });
     let changeset = Changeset(user);
@@ -127,11 +127,11 @@ module('Integration | main', function(hooks) {
     changeset.save();
   }
 
-  test('can save user', async function(assert) {
+  test('can save user', async function (assert) {
     await testSaveUser.call(this, assert, 'user');
   });
 
-  test('can save sync user', async function(assert) {
+  test('can save sync user', async function (assert) {
     await testSaveUser.call(this, assert, 'sync-user');
   });
 
@@ -142,12 +142,12 @@ module('Integration | main', function(hooks) {
       assert.ok(true, 'profile save was called');
     };
     let profile = this.store.createRecord('profile', { save });
-    let pet = this.store.createRecord('dog')
+    let pet = this.store.createRecord('dog');
     let changeset = Changeset(profile);
 
     changeset.set('firstName', 'bo');
     changeset.set('lastName', 'jackson');
-    changeset.set('pet', pet)
+    changeset.set('pet', pet);
 
     changeset.save();
   });
@@ -176,11 +176,11 @@ module('Integration | main', function(hooks) {
     assert.equal(user.get('profile.firstName'), 'Grace', 'user now has profile has first name');
   }
 
-  test('can work with belongsTo via changeset', async function(assert) {
+  test('can work with belongsTo via changeset', async function (assert) {
     await testBelongsToViaChangeset.call(this, assert, 'user');
   });
 
-  test('can work with sync belongsTo via changeset', async function(assert) {
+  test('can work with sync belongsTo via changeset', async function (assert) {
     await testBelongsToViaChangeset.call(this, assert, 'sync-user');
   });
 
@@ -233,11 +233,11 @@ module('Integration | main', function(hooks) {
     assert.equal(changeset.isDirty, false, 'is not dirty');
   }
 
-  test('it works for hasMany / firstObject', async function(assert) {
+  test('it works for hasMany / firstObject', async function (assert) {
     await testHasMany.call(this, assert, 'user');
   });
 
-  test('it works for sync hasMany / firstObject', async function(assert) {
+  test('it works for sync hasMany / firstObject', async function (assert) {
     await testHasMany.call(this, assert, 'sync-user');
   });
 
@@ -257,25 +257,22 @@ module('Integration | main', function(hooks) {
     assert.equal(dogs.length, 2, 'changeset has 2 dogs');
   }
 
-  test('it can rollback hasMany', async function(assert) {
+  test('it can rollback hasMany', async function (assert) {
     await testRollbackHasMany.call(this, assert, 'user');
   });
 
-  test('it can rollback sync hasMany', async function(assert) {
+  test('it can rollback sync hasMany', async function (assert) {
     await testRollbackHasMany.call(this, assert, 'sync-user');
   });
 
   async function testInitiallyEmptyRelationships(assert, userType) {
     let profile = this.store.createRecord('profile');
-    let user =  this.store.createRecord(userType);
+    let user = this.store.createRecord(userType);
 
     let changeset = Changeset(user);
 
     changeset.set('profile', profile);
-    const dogs = [
-      this.store.createRecord('dog'),
-      this.store.createRecord('dog', { breed: 'Münsterländer' })
-    ];
+    const dogs = [this.store.createRecord('dog'), this.store.createRecord('dog', { breed: 'Münsterländer' })];
 
     changeset.set('dogs', dogs);
 
@@ -286,16 +283,16 @@ module('Integration | main', function(hooks) {
     assert.equal(user.get('dogs.lastObject.breed'), 'Münsterländer');
   }
 
-  test('it sets relationships which were empty initially', async function(assert) {
+  test('it sets relationships which were empty initially', async function (assert) {
     await testInitiallyEmptyRelationships.call(this, assert, 'user');
   });
 
-  test('it sets sync relationships which were empty initially', async function(assert) {
+  test('it sets sync relationships which were empty initially', async function (assert) {
     await testInitiallyEmptyRelationships.call(this, assert, 'sync-user');
   });
 
   async function testBelongsToPresenceValidation(assert, userType) {
-    let user =  this.store.createRecord(userType);
+    let user = this.store.createRecord(userType);
     function userValidator({ key, newValue }) {
       if (key === 'profile') {
         return isEmpty(newValue) ? 'Cannot be blank' : true;
@@ -311,11 +308,11 @@ module('Integration | main', function(hooks) {
     assert.deepEqual(userChangeset.error.profile.validation, 'Cannot be blank');
   }
 
-  test('#error for empty belongsTo', async function(assert) {
+  test('#error for empty belongsTo', async function (assert) {
     await testBelongsToPresenceValidation.call(this, assert, 'user');
   });
 
-  test('#error for empty sync belongsTo', async function(assert) {
+  test('#error for empty sync belongsTo', async function (assert) {
     await testBelongsToPresenceValidation.call(this, assert, 'sync-user');
   });
 });

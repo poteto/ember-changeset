@@ -5,6 +5,6 @@ module.exports = {
 
   rules: {
     // TODO: consider enabling this rule
-    'no-action': false
-  }
+    'no-action': false,
+  },
 };

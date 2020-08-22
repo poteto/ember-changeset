@@ -21,9 +21,9 @@ function maybeUnwrapProxy(o) {
 }
 
 export class EmberChangeset extends BufferedChangeset {
-  @tracked '_changes';
-  @tracked '_errors';
-  @tracked '_content';
+  @tracked _changes;
+  @tracked _errors;
+  @tracked _content;
 
   maybeUnwrapProxy = maybeUnwrapProxy;
 
@@ -41,7 +41,7 @@ export class EmberChangeset extends BufferedChangeset {
     return safeSet(obj, key, value);
   }
 
-    /**
+  /**
    * @property isValid
    * @type {Array}
    */
@@ -118,7 +118,7 @@ export class EmberChangeset extends BufferedChangeset {
    * Returns value or error
    */
   _setProperty({ key, value, oldValue }) {
-    super._setProperty({ key, value, oldValue })
+    super._setProperty({ key, value, oldValue });
 
     notifyPropertyChange(this, key);
   }
@@ -134,7 +134,7 @@ export class EmberChangeset extends BufferedChangeset {
   _notifyVirtualProperties(keys) {
     keys = super._notifyVirtualProperties(keys);
 
-    (keys || []).forEach(key => notifyPropertyChange(this, key));
+    (keys || []).forEach((key) => notifyPropertyChange(this, key));
 
     return;
   }
@@ -171,12 +171,7 @@ export class EmberChangeset extends BufferedChangeset {
 /**
  * Creates new changesets.
  */
-export function changeset(
-  obj,
-  validateFn = defaultValidatorFn,
-  validationMap = {},
-  options = {}
-) {
+export function changeset(obj, validateFn = defaultValidatorFn, validationMap = {}, options = {}) {
   assert('Underlying object for changeset is missing', Boolean(obj));
   assert('Array is not a valid type to pass as the first argument to `changeset`', !Array.isArray(obj));
 
@@ -192,24 +187,19 @@ export function changeset(
  * Creates new changesets.
  * @function Changeset
  */
-export function Changeset(
-  obj,
-  validateFn = defaultValidatorFn,
-  validationMap = {},
-  options = {}
-) {
+export function Changeset(obj, validateFn = defaultValidatorFn, validationMap = {}, options = {}) {
   const c = changeset(obj, validateFn, validationMap, options);
 
   return new Proxy(c, {
-    get(targetBuffer, key/*, receiver*/) {
+    get(targetBuffer, key /*, receiver*/) {
       const res = targetBuffer.get(key.toString());
       return res;
     },
 
-    set(targetBuffer, key, value/*, receiver*/) {
+    set(targetBuffer, key, value /*, receiver*/) {
       targetBuffer.set(key.toString(), value);
       return true;
-    }
+    },
   });
 }
 
@@ -221,24 +211,19 @@ export default class ChangesetKlass {
    * @class ChangesetKlass
    * @constructor
    */
-  constructor(
-    obj,
-    validateFn = defaultValidatorFn,
-    validationMap = {},
-    options = {}
-  ) {
+  constructor(obj, validateFn = defaultValidatorFn, validationMap = {}, options = {}) {
     const c = changeset(obj, validateFn, validationMap, options);
 
     return new Proxy(c, {
-      get(targetBuffer, key/*, receiver*/) {
+      get(targetBuffer, key /*, receiver*/) {
         const res = targetBuffer.get(key.toString());
         return res;
       },
 
-      set(targetBuffer, key, value/*, receiver*/) {
+      set(targetBuffer, key, value /*, receiver*/) {
         targetBuffer.set(key.toString(), value);
         return true;
-      }
+      },
     });
   }
 }

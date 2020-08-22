@@ -1,15 +1,6 @@
-import {
-  BufferedChangeset,
-  Changeset,
-  ValidatedChangeset
-} from 'validated-changeset/dist';
+import { BufferedChangeset, Changeset, ValidatedChangeset } from 'validated-changeset/dist';
 
-import {
-  ValidationResult,
-  ValidatorMapFunc,
-  ValidatorMap,
-  ValidatorAction
-} from 'validated-changeset/dist/types';
+import { ValidationResult, ValidatorMapFunc, ValidatorMap, ValidatorAction } from 'validated-changeset/dist/types';
 
 export {
   BufferedChangeset,
@@ -18,5 +9,5 @@ export {
   ValidationResult,
   ValidatorMap,
   ValidatorMapFunc,
-  ValidatorAction
+  ValidatorAction,
 };
