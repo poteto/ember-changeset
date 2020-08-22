@@ -8,9 +8,10 @@ import EmberObject, {
   get,
   set,
   setProperties,
+  computed
 } from '@ember/object';
 
-import { reads } from '@ember/object/computed';
+import { reads, empty, filterBy } from '@ember/object/computed';
 import ObjectProxy from '@ember/object/proxy';
 import { dasherize } from '@ember/string';
 import { isPresent } from '@ember/utils';
@@ -2299,5 +2300,32 @@ module('Unit | Utility | changeset', function(hooks) {
     dummyChangeset.set('org.usa.ny', 'vaca');
     assert.ok(get(dummyChangeset, 'isValid'), 'should be valid');
     assert.notOk(get(dummyChangeset, 'isInvalid'), 'should be valid');
+  });
+
+  test('changeset isDirty property notifies dependent computed properties', async function(assert) {
+    const Model = EmberObject.extend({
+
+      hasDirtyChangesets: empty('dirtyChangesets'),
+
+      dirtyChangesets: filterBy('changesets', 'isDirty', true),
+
+      changesets: computed(function() {
+        return [
+          Changeset(dummyModel, dummyValidator),
+          Changeset(dummyModel, dummyValidator)
+        ]
+      })
+    });
+
+    let model = Model.create();
+
+    assert.ok(get(model, 'hasDirtyChangesets'), 'no dirty changesets');
+    
+    let changesets = get(model, 'changesets');
+
+    set(changesets[0], 'name', 'new name');
+
+    assert.notOk(get(model, 'hasDirtyChangesets'), 'has dirty changesets');
+
   });
 });
