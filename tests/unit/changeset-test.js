@@ -2348,5 +2348,30 @@ module('Unit | Utility | changeset', function(hooks) {
     assert.equal(get(model, 'isChangesetDirty'), true, 'changeset is dirty')
   });
 
+
+  test('changeset tracked properties should work with es6 class getters', async function(assert) {
+    class Model {
+      get changeset() {
+        this.__changeset__ = this.__changeset__ || Changeset(dummyModel, dummyValidator);
+        
+        return this.__changeset__;
+      }
+
+      get isChangesetDirty() {
+        return this.changeset.isDirty;
+      }
+    }
+
+    let model = new Model;
+    
+    assert.equal(model.isChangesetDirty, false, 'changeset is not dirty');
+    
+    model.changeset.set('name', 'other new name')
+    
+    assert.equal(model.isChangesetDirty, true, 'changeset is dirty')
+  
+  });
+
+
   
 });
