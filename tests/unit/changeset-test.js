@@ -1298,11 +1298,9 @@ module('Unit | Utility | changeset', function (hooks) {
   });
 
   test('#save handles rejected proxy content', async function (assert) {
-    assert.expect(1);
+    assert.expect(2);
 
     let dummyChangeset = Changeset(dummyModel);
-
-    assert.expect(1);
 
     set(dummyModel, 'save', () => {
       return new Promise((_, reject) => {
@@ -1311,10 +1309,36 @@ module('Unit | Utility | changeset', function (hooks) {
     });
 
     try {
+      dummyChangeset.name = 'new';
       await dummyChangeset.save();
       assert.ok(false, 'WAT?!');
     } catch (error) {
-      assert.equal(error.message, 'some ember data error');
+      assert.equal(error.message, 'Error: some ember data error');
+    } finally {
+      assert.equal(dummyModel.name, undefined, 'old name');
+    }
+  });
+
+  test('#save handles rejected proxy content with content', async function (assert) {
+    assert.expect(2);
+
+    dummyModel.name = 'original';
+    let dummyChangeset = Changeset(dummyModel);
+
+    set(dummyModel, 'save', () => {
+      return new Promise((_, reject) => {
+        next(null, reject, new Error('some ember data error'));
+      });
+    });
+
+    try {
+      dummyChangeset.name = 'new';
+      await dummyChangeset.save();
+      assert.ok(false, 'WAT?!');
+    } catch (error) {
+      assert.equal(error.message, 'Error: some ember data error');
+    } finally {
+      assert.equal(dummyModel.name, 'original', 'old name');
     }
   });
 
