@@ -9,8 +9,19 @@ import { tracked } from '@glimmer/tracking';
 import { get as safeGet, set as safeSet } from '@ember/object';
 
 const CHANGES = '_changes';
+const PREVIOUS_CONTENT = '_previousContent';
 const CONTENT = '_content';
 const defaultValidatorFn = () => true;
+
+export function buildOldValues(content, changes, getDeep) {
+  const obj = Object.create(null);
+
+  for (let change of changes) {
+    obj[change.key] = getDeep(content, change.key);
+  }
+
+  return obj;
+}
 
 function isProxy(o) {
   return !!(o && (o instanceof ObjectProxy || o instanceof ArrayProxy));
@@ -156,13 +167,20 @@ export class EmberChangeset extends BufferedChangeset {
    * @method execute
    */
   execute() {
+    let oldContent;
     if (this.isValid && this.isDirty) {
       let content = this[CONTENT];
       let changes = this[CHANGES];
+
+      // keep old values in case of error and we want to rollback
+      oldContent = buildOldValues(content, this.changes, this.getDeep);
+
       // we want mutation on original object
       // @tracked
       this[CONTENT] = mergeDeep(content, changes, { safeGet, safeSet });
     }
+
+    this[PREVIOUS_CONTENT] = oldContent;
 
     return this;
   }
