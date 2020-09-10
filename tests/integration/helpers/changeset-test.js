@@ -35,8 +35,8 @@ module('Integration | Helper | changeset', function (hooks) {
         {{/if}}
         {{input id="first-name" value=changesetObj.firstName}}
         {{input id="last-name" value=changesetObj.lastName}}
-        <button id="submit-btn" {{action submit changesetObj}}>Submit</button>
-        <button id="reset-btn" {{action reset changesetObj}}>Reset</button>
+        <button id="submit-btn" {{on "click" (fn this.submit changesetObj)}}>Submit</button>
+        <button id="reset-btn" {{on "click" (fn this.reset changesetObj)}}>Reset</button>
       {{/with}}
     `);
 
@@ -69,8 +69,8 @@ module('Integration | Helper | changeset', function (hooks) {
         {{/if}}
         {{input id="first-name" value=changesetObj.firstName}}
         {{input id="last-name" value=changesetObj.lastName}}
-        <button id="submit-btn" {{action submit changesetObj}}>Submit</button>
-        <button id="reset-btn" {{action reset changesetObj}}>Reset</button>
+        <button id="submit-btn" {{on "click" (fn this.submit changesetObj)}}>Submit</button>
+        <button id="reset-btn" {{on "click" (fn this.reset changesetObj)}}>Reset</button>
       {{/with}}
     `);
 
@@ -105,8 +105,8 @@ module('Integration | Helper | changeset', function (hooks) {
         {{/if}}
         {{input id="first-name" value=changesetObj.firstName}}
         {{input id="last-name" value=changesetObj.lastName}}
-        <button id="submit-btn" {{action submit changesetObj}}>Submit</button>
-        <button id="reset-btn" {{action reset changesetObj}}>Reset</button>
+        <button id="submit-btn" {{on "click" (fn this.submit changesetObj)}}>Submit</button>
+        <button id="reset-btn" {{on "click" (fn this.reset changesetObj)}}>Reset</button>
       {{/with}}
     `);
 
@@ -142,8 +142,8 @@ module('Integration | Helper | changeset', function (hooks) {
         {{/if}}
         {{input id="first-name" value=changesetObj.firstName}}
         {{input id="last-name" value=changesetObj.lastName}}
-        <button id="submit-btn" {{action submit changesetObj}}>Submit</button>
-        <button id="reset-btn" {{action reset changesetObj}}>Reset</button>
+        <button id="submit-btn" {{on "click" (fn this.submit changesetObj)}}>Submit</button>
+        <button id="reset-btn" {{on "click" (fn this.reset changesetObj)}}>Reset</button>
       {{/with}}
     `);
 
@@ -162,7 +162,7 @@ module('Integration | Helper | changeset', function (hooks) {
     await render(hbs`
       {{#with (changeset dummyModel) as |changesetObj|}}
         {{input id="first-name" value=changesetObj.firstName}}
-        <button id="reset-btn" {{action reset changesetObj}}>Reset</button>
+        <button id="reset-btn" {{on "click" (fn this.reset changesetObj)}}>Reset</button>
       {{/with}}
     `);
 
@@ -184,8 +184,8 @@ module('Integration | Helper | changeset', function (hooks) {
         {{/if}}
         {{input value=changesetObj.firstName}}
         {{input value=changesetObj.lastName}}
-        <button id="submit-btn" {{action "submit" changesetObj}}>Submit</button>
-        <button id="reset-btn" {{action reset changesetObj}}>Reset</button>
+        <button id="submit-btn" {{on "click" (fn this.submit changesetObj)}}>Submit</button>
+        <button id="reset-btn" {{on "click" (fn this.reset changesetObj)}}>Reset</button>
       {{/with}}
     `);
 

@@ -63,7 +63,7 @@ First, create a new `Changeset` using the `changeset` helper or through JavaScri
 
 ```hbs
 {{! application/template.hbs}}
-{{#with (changeset model (action "validate")) as |changesetObj|}}
+{{#with (changeset model this.validate) as |changesetObj|}}
   <DummyForm
       @changeset={{changesetObj}}
       @submit={{this.submit}}
@@ -996,10 +996,10 @@ export default Component.extend({
     /**
      * @method checkValidity
      * @param {Object} changeset
-     * @param {String|Integer} value
+     * @param {Event} e
      */
-    checkValidity(changeset, value) {
-      get(this, '_checkValidity').perform(changeset, this.valuePath, value);
+    checkValidity(changeset, e) {
+      get(this, '_checkValidity').perform(changeset, this.valuePath, e.target.value);
     },
   },
 });
@@ -1009,8 +1009,8 @@ export default Component.extend({
 <input
   type={{type}}
   value={{get model valuePath}}
-  oninput={{action (action "checkValidity" changeset) value="target.value"}}
-  onblur={{action "validateProperty" changeset valuePath}}
+  {{on "input" (fn this.checkValidity changeset)}}
+  {{on "blur" (fn this.validateProperty changeset valuePath)}}
   disabled={{disabled}}
   placeholder={{placeholder}}>
 ```
