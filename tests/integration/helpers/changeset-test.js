@@ -29,7 +29,7 @@ module('Integration | Helper | changeset', function (hooks) {
     this.set('submit', (changeset) => changeset.validate());
     this.set('reset', (changeset) => changeset.rollback());
     await render(hbs`
-      {{#with (changeset dummyModel (action validate)) as |changesetObj|}}
+      {{#with (changeset dummyModel this.validate) as |changesetObj|}}
         {{#if changesetObj.isInvalid}}
           <p id="errors-paragraph">There were one or more errors in your form.</p>
         {{/if}}
@@ -194,7 +194,10 @@ module('Integration | Helper | changeset', function (hooks) {
   });
 
   test('it updates when set without a validator', async function (assert) {
-    this.set('dummyModel', { firstName: 'Jim', lastName: 'Bob' });
+    this.dummyModel = { firstName: 'Jim', lastName: 'Bob' };
+    this.updateFirstName = (changeset, evt) => {
+      changeset.firstName = evt.target.value;
+    };
     await render(hbs`
       {{#with (changeset dummyModel) as |changesetObj|}}
         <h1>{{changesetObj.firstName}} {{changesetObj.lastName}}</h1>
@@ -202,7 +205,7 @@ module('Integration | Helper | changeset', function (hooks) {
           id="first-name"
           type="text"
           value={{changesetObj.firstName}}
-          onchange={{action (mut changesetObj.firstName) value="target.value"}}>
+          {{on "change" (fn this.updateFirstName changesetObj)}}>
         {{input id="last-name" value=changesetObj.lastName}}
       {{/with}}
     `);
@@ -216,14 +219,17 @@ module('Integration | Helper | changeset', function (hooks) {
   test('it updates when set with a validator', async function (assert) {
     this.set('dummyModel', { firstName: 'Jim', lastName: 'Bob' });
     this.set('validate', () => true);
+    this.updateFirstName = (changeset, evt) => {
+      changeset.firstName = evt.target.value;
+    };
     await render(hbs`
-      {{#with (changeset this.dummyModel (action this.validate)) as |changesetObj|}}
+      {{#with (changeset this.dummyModel this.this.validate) as |changesetObj|}}
         <h1>{{changesetObj.firstName}} {{changesetObj.lastName}}</h1>
         <input
           id="first-name"
           type="text"
           value={{changesetObj.firstName}}
-          onchange={{action (mut changesetObj.firstName) value="target.value"}}>
+          {{on "change" (fn this.updateFirstName changesetObj)}}>
         {{input id="last-name" value=changesetObj.lastName}}
       {{/with}}
     `);
@@ -505,7 +511,7 @@ module('Integration | Helper | changeset', function (hooks) {
   });
 
   test('it handles models that are promises', async function (assert) {
-    this.set('dummyModel', Promise.resolve({ firstName: 'Jim', lastName: 'Bob' }));
+    this.dummyModel = Promise.resolve({ firstName: 'Jim', lastName: 'Bob' });
     await render(hbs`
       {{#with (changeset this.dummyModel) as |changesetObj|}}
         <h1>{{changesetObj.firstName}} {{changesetObj.lastName}}</h1>
@@ -514,6 +520,7 @@ module('Integration | Helper | changeset', function (hooks) {
           type="text"
           value={{changesetObj.firstName}}
           onchange={{action (mut changesetObj.firstName) value="target.value"}}>
+
         {{input id="last-name" value=changesetObj.lastName}}
       {{/with}}
     `);
@@ -529,7 +536,7 @@ module('Integration | Helper | changeset', function (hooks) {
     this.set('dummyModel', { firstName: 'Jim', lastName: 'Bob' });
     this.set('validate', () => false);
     await render(hbs`
-      {{#with (changeset this.dummyModel (action this.validate) skipValidate=true) as |changesetObj|}}
+      {{#with (changeset this.dummyModel this.validate skipValidate=true) as |changesetObj|}}
         <h1>{{changesetObj.firstName}} {{changesetObj.lastName}}</h1>
         {{input id="first-name" value=changesetObj.firstName}}
         {{input id="last-name" value=changesetObj.lastName}}
@@ -566,13 +573,13 @@ module('Integration | Helper | changeset', function (hooks) {
     this.set('reset', (changeset) => changeset.rollback());
     this.changesetKeys = ['lastName'];
     await render(hbs`
-      {{#with (changeset dummyModel (action validate) changesetKeys=this.changesetKeys) as |changesetObj|}}
+      {{#with (changeset dummyModel this.validate changesetKeys=this.changesetKeys) as |changesetObj|}}
         {{#if changesetObj.isDirty}}
           <p id="errors-paragraph">There were one or more errors in your form.</p>
         {{/if}}
         {{input id="first-name" value=changesetObj.firstName}}
         {{input id="last-name" value=changesetObj.lastName}}
-        <button id="submit-btn" {{action submit changesetObj}}>Submit</button>
+        <button id="submit-btn" {{on "click" (fn this.submit changesetObj)}}>Submit</button>
       {{/with}}
     `);
 
