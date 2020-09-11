@@ -237,17 +237,18 @@ module('Integration | Helper | changeset', function (hooks) {
   test('a passed down nested object updates when set without a validator', async function (assert) {
     let data = { person: { firstName: 'Jim', lastName: 'Bob' } };
     let changeset = Changeset(data);
-    this.set('changeset', changeset);
+    this.changeset = changeset;
+    this.mutValue = (path, evt) => (this.changeset[path] = evt.target.value);
+
     await render(hbs`
       <h1>{{this.changeset.person.firstName}} {{this.changeset.person.lastName}}</h1>
       <input
         id="first-name"
         value={{this.changeset.person.firstName}}
-        onchange={{action (changeset-set this.changeset "person.firstName") value="target.value"}}>
-      >
+        {{on "change" (fn this.mutValue "person.firstName")}}>
       <input id="last-name"
         value={{this.changeset.person.lastName}}
-        onchange={{action (changeset-set this.changeset "person.lastName") value="target.value"}}>
+        {{on "change" (fn this.mutValue "person.lastName")}}>
     `);
 
     assert.equal(find('h1').textContent.trim(), 'Jim Bob', 'precondition');
@@ -271,17 +272,19 @@ module('Integration | Helper | changeset', function (hooks) {
   test('nested object updates when set without a validator', async function (assert) {
     let data = { person: { firstName: 'Jim', lastName: 'Bob' } };
     let changeset = Changeset(data);
-    this.set('changeset', changeset);
+    this.changeset = changeset;
+    this.mutValue = (path, evt) => (this.changeset[path] = evt.target.value);
+
     await render(hbs`
       <h1>{{this.changeset.person.firstName}} {{this.changeset.person.lastName}}</h1>
       <input
         id="first-name"
         value={{this.changeset.person.firstName}}
-        onchange={{action (changeset-set this.changeset "person.firstName") value="target.value"}}>
+        {{on "change" (fn this.mutValue "person.firstName")}}>
       <input
         id="last-name"
         value={{this.changeset.person.lastName}}
-        onchange={{action (changeset-set this.changeset "person.lastName") value="target.value"}}>
+        {{on "change" (fn this.mutValue "person.lastName")}}>
     `);
 
     assert.equal(find('h1').textContent.trim(), 'Jim Bob', 'precondition');
@@ -294,7 +297,8 @@ module('Integration | Helper | changeset', function (hooks) {
     let data = { person: { firstName: 'Jim' } };
     let validator = ({ newValue }) => isPresent(newValue) || 'need a first name';
     let c = Changeset(data, validator);
-    this.set('c', c);
+    this.c = c;
+    this.mutValue = (path, evt) => (this.c[path] = evt.target.value);
 
     await render(hbs`
       <h1>{{c.person.firstName}}</h1>
@@ -302,7 +306,7 @@ module('Integration | Helper | changeset', function (hooks) {
         id="first-name"
         type="text"
         value={{c.person.firstName}}
-        onchange={{action (changeset-set c "person.firstName") value="target.value"}}>
+        {{on "change" (fn this.mutValue "person.firstName")}}>
       <small id="first-name-error">{{c.error.person.firstName.validation}}</small>
     `);
 
@@ -325,14 +329,16 @@ module('Integration | Helper | changeset', function (hooks) {
     let data = { person: { firstName: 'Jim' } };
     let validator = () => Promise.resolve(true);
     let c = Changeset(data, validator);
-    this.set('c', c);
+    this.c = c;
+    this.mutValue = (path, evt) => (this.c[path] = evt.target.value);
+
     await render(hbs`
       <h1>{{c.person.firstName}}</h1>
       <input
         id="first-name"
         type="text"
         value={{c.person.firstName}}
-        onchange={{action (changeset-set c "person.firstName") value="target.value"}}>
+        {{on "change" (fn this.mutValue "person.firstName")}}>
       <small id="first-name-error">{{c.error.person.firstName.validation}}</small>
     `);
     assert.equal(find('h1').textContent.trim(), 'Jim', 'precondition');
@@ -344,7 +350,8 @@ module('Integration | Helper | changeset', function (hooks) {
     let data = { person: { name: { parts: { first: 'Jim' } } } };
     let validator = ({ newValue }) => isPresent(newValue) || 'need a first name';
     let c = Changeset(data, validator);
-    this.set('c', c);
+    this.c = c;
+    this.mutValue = (path, evt) => (this.c[path] = evt.target.value);
 
     await render(hbs`
       <h1>{{c.person.name.parts.first}}</h1>
@@ -352,7 +359,7 @@ module('Integration | Helper | changeset', function (hooks) {
         id="first-name"
         type="text"
         value={{c.person.name.parts.first}}
-        onchange={{action (changeset-set c "person.name.parts.first") value="target.value"}}>
+        {{on "change" (fn this.mutValue "person.name.parts.first")}}>
       <small id="first-name-error">{{c.error.person.name.parts.first.validation}}</small>
     `);
 
@@ -377,19 +384,20 @@ module('Integration | Helper | changeset', function (hooks) {
   test('a rollback propagates binding to deeply nested changesets', async function (assert) {
     let data = { person: { firstName: 'Jim', lastName: 'Bob' } };
     let changeset = Changeset(data);
-    this.set('changeset', changeset);
-    this.set('reset', () => changeset.rollback());
+    this.changeset = changeset;
+    this.reset = () => changeset.rollback();
+    this.mutValue = (path, evt) => (this.changeset[path] = evt.target.value);
     await render(hbs`
       <h1>{{this.changeset.person.firstName}} {{this.changeset.person.lastName}}</h1>
       <input
         id="first-name"
         value={{this.changeset.person.firstName}}
-        onchange={{action (changeset-set this.changeset "person.firstName") value="target.value"}}>
+        {{on "change" (fn this.mutValue "person.firstName")}}>
       <input
         id="last-name"
         value={{this.changeset.person.lastName}}
-        onchange={{action (changeset-set this.changeset "person.lastName") value="target.value"}}>
-      <button id="reset-btn" {{action this.reset}}>Reset</button>
+        {{on "change" (fn this.mutValue "person.lastName")}}>
+      <button id="reset-btn" {{on "click" this.reset}}>Reset</button>
     `);
 
     assert.equal(find('h1').textContent.trim(), 'Jim Bob', 'precondition');
@@ -410,8 +418,14 @@ module('Integration | Helper | changeset', function (hooks) {
       },
     };
     let changeset = Changeset({ even: 4, odd: 4 }, lookupValidator(dummyValidations), dummyValidations);
-    this.set('changeset', changeset);
-    this.set('validateProperty', (changeset, property) => changeset.validate(property));
+    this.addEven = (changeset, evt) => {
+      changeset.even = evt.target.value;
+    };
+    this.addOdd = (changeset, evt) => {
+      changeset.odd = evt.target.value;
+    };
+    this.changeset = changeset;
+    this.validateProperty = (changeset, property) => changeset.validate(property);
     await render(hbs`
       <fieldset class="even">
         <label for="even">Even Number</label>
@@ -419,8 +433,8 @@ module('Integration | Helper | changeset', function (hooks) {
           id="even"
           type="text"
           value={{this.changeset.even}}
-          oninput={{action (mut this.changeset.even) value="target.value"}}
-          onblur={{action this.validateProperty this.changeset "even"}}>
+          {{on "input" (fn this.addEven this.changeset)}}
+          {{on "blur" (fn this.validateProperty this.changeset "even")}}>
         {{#if this.changeset.error.even}}
           <small class="even">{{this.changeset.error.even.validation}}</small>
         {{/if}}
@@ -433,8 +447,8 @@ module('Integration | Helper | changeset', function (hooks) {
           id="odd"
           type="text"
           value={{this.changeset.odd}}
-          oninput={{action (mut this.changeset.odd) value="target.value"}}
-          onblur={{action this.validateProperty this.changeset "odd"}}>
+          {{on "input" (fn this.addOdd this.changeset)}}
+          {{on "blur" (fn this.validateProperty this.changeset "odd")}}>
         {{#if this.changeset.error.odd}}
           <small class="odd">{{this.changeset.error.odd.validation}}</small>
         {{/if}}
