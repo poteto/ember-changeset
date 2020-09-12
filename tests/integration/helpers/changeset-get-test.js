@@ -19,48 +19,49 @@ module('Integration | Helper | changeset-get', function (hooks) {
       url: 'http://bobloblawslawblog.com',
     };
 
-    this.set('changeset', Changeset(model));
-    this.set('fieldName', 'name.first');
+    this.changeset = Changeset(model);
+    this.fieldName = 'name.first';
   });
 
   test('it retrieves the current value using {{get}}', async function (assert) {
+    this.updateName = (changeset, evt) => {
+      changeset.set('name.first', evt.target.value);
+    };
     await render(hbs`
       <input
         type="text"
-        oninput={{action (changeset-set this.changeset this.fieldName) value="target.value"}}
-        onchange={{action (changeset-set this.changeset this.fieldName) value="target.value"}}
-        value={{get this.changeset this.fieldName}}
-      />
-      <p id="test-el">{{get this.changeset this.fieldName}}</p>
+        {{on "input" (fn this.updateName this.changeset)}}
+        {{on "change" (fn this.updateName this.changeset)}}
+        value={{get this.changeset this.fieldName}}/>
+      <p id="test-el">{{this.changeset.name.first}}</p>
       <ul>
-        {{#each (get this.changeset "changes") as |change|}}
+        {{#each this.changeset.changes as |change|}}
           <li>{{change.key}}: {{change.value}}</li>
         {{/each}}
       </ul>
     `);
 
-    const input = find('input');
-    const testEl = find('#test-el');
+    await fillIn(find('input'), 'Robert');
 
-    await fillIn(input, 'Robert');
-
-    assert.equal(testEl.textContent, 'Robert');
-    assert.equal(input.value, 'Robert');
+    assert.equal(find('#test-el').textContent, 'Robert');
+    assert.equal(find('input').value, 'Robert');
 
     await this.changeset.rollback();
 
-    assert.equal(testEl.textContent, 'Robert');
-    assert.equal(input.value, 'Robert');
+    assert.equal(find('#test-el').textContent, 'Robert');
+    assert.equal(find('input').value, 'Robert');
   });
 
   test('it succeeds in retrieving the current value using {{get}}', async function (assert) {
+    this.updateName = (changeset, evt) => {
+      changeset.set('name.first', evt.target.value);
+    };
     await render(hbs`
       <input
         type="text"
-        oninput={{action (changeset-set this.changeset this.fieldName) value="target.value"}}
-        onchange={{action (changeset-set this.changeset this.fieldName) value="target.value"}}
-        value={{get this.changeset this.fieldName}}
-      />
+        {{on "input" (fn this.updateName this.changeset)}}
+        {{on "change" (fn this.updateName this.changeset)}}
+        value={{get this.changeset this.fieldName}} />
       <p id="test-el">{{get this.changeset this.fieldName}}</p>
       <ul>
         {{#each (get this.changeset "changes") as |change index|}}
