@@ -155,7 +155,7 @@ let changeset = Changeset(user, validationMap, validatorFn, { changeset: MyChang
     id="first-name"
     type="text"
     value={{changeset-get changeset "person.firstName"}}
-    onchange={{action (changeset-set changeset "person.firstName") value="target.value"}}>
+    {{on "change" (fn this.updateFirstName changeset)}}>
 </form>
 ```
 
@@ -176,7 +176,7 @@ let changeset = Changeset(model, validatorFn, validationMap, { skipValidate: tru
 ```
 
 ```hbs
-{{#with (changeset model (action "validate") skipValidate=true) as |changesetObj|}}
+{{#with (changeset model this.validate skipValidate=true) as |changesetObj|}}
   ...
 {{/with}}
 ```
@@ -801,18 +801,18 @@ export default Model.extend(schema);
 
 ```js
 // controllers/foo.js
+import { action } from '@ember/object';
 import { schema } from '../models/user';
 const { keys } = Object;
 
-export default Controller.extend({
+export default FooController extends Controller {
   // ...
 
-  actions: {
-    save(changeset) {
-      return changeset.cast(keys(schema)).save();
-    },
-  },
-});
+  @action
+  save(changeset) {
+    return changeset.cast(keys(schema)).save();
+  }
+}
 ```
 
 **[⬆️ back to top](#api)**
@@ -907,7 +907,7 @@ export default class FormController extends Controller {
 
 ```hbs
 {{! application/template.hbs}}
-<DummyForm @changeset={{changeset model (action "validate")}} />
+<DummyForm @changeset={{changeset model this.validate}} />
 ```
 
 Your action will receive a single POJO containing the `key`, `newValue`, `oldValue`, a one way reference to `changes`, and the original object `content`.
