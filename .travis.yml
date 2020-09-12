@@ -29,6 +29,7 @@ jobs:
   allow_failures:
     - env: EMBER_TRY_SCENARIO=ember-beta
     - env: EMBER_TRY_SCENARIO=ember-canary
+    - env: EMBER_TRY_SCENARIO=embroider-tests
 
   include:
     # runs linting and tests with current locked deps
@@ -54,6 +55,7 @@ jobs:
     - env: EMBER_TRY_SCENARIO=ember-canary
     - env: EMBER_TRY_SCENARIO=ember-default-with-jquery
     - env: EMBER_TRY_SCENARIO=ember-classic
+    - env: EMBER_TRY_SCENARIO=embroider-tests
 
 before_install:
   - curl -o- -L https://yarnpkg.com/install.sh | bash
