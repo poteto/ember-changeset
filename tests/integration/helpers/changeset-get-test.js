@@ -19,18 +19,19 @@ module('Integration | Helper | changeset-get', function (hooks) {
       url: 'http://bobloblawslawblog.com',
     };
 
-    this.set('changeset', Changeset(model));
-    this.set('fieldName', 'name.first');
+    this.changeset = Changeset(model);
+    this.fieldName = 'name.first';
   });
 
   test('it retrieves the current value using {{get}}', async function (assert) {
+    this.updateName = (changeset, evt) => {
+      changeset.name.first = evt.target.value;
+    };
     await render(hbs`
       <input
         type="text"
-        oninput={{action (changeset-set this.changeset this.fieldName) value="target.value"}}
-        onchange={{action (changeset-set this.changeset this.fieldName) value="target.value"}}
-        value={{get this.changeset this.fieldName}}
-      />
+        {{on "input" (fn this.updateName changeset)}}
+        value={{get this.changeset this.fieldName}}/>
       <p id="test-el">{{get this.changeset this.fieldName}}</p>
       <ul>
         {{#each (get this.changeset "changes") as |change|}}
@@ -54,13 +55,14 @@ module('Integration | Helper | changeset-get', function (hooks) {
   });
 
   test('it succeeds in retrieving the current value using {{get}}', async function (assert) {
+    this.updateName = (changeset, evt) => {
+      changeset.name.first = evt.target.value;
+    };
     await render(hbs`
       <input
         type="text"
-        oninput={{action (changeset-set this.changeset this.fieldName) value="target.value"}}
-        onchange={{action (changeset-set this.changeset this.fieldName) value="target.value"}}
-        value={{get this.changeset this.fieldName}}
-      />
+        {{on "input" (fn this.updateName changeset)}}
+        value={{get this.changeset this.fieldName}} />
       <p id="test-el">{{get this.changeset this.fieldName}}</p>
       <ul>
         {{#each (get this.changeset "changes") as |change index|}}
