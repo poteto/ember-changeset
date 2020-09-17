@@ -1313,7 +1313,7 @@ module('Unit | Utility | changeset', function (hooks) {
       await dummyChangeset.save();
       assert.ok(false, 'WAT?!');
     } catch (error) {
-      assert.equal(error.message, 'Error: some ember data error');
+      assert.equal(error.message, 'some ember data error');
     } finally {
       assert.equal(dummyModel.name, undefined, 'old name');
     }
@@ -1336,7 +1336,7 @@ module('Unit | Utility | changeset', function (hooks) {
       await dummyChangeset.save();
       assert.ok(false, 'WAT?!');
     } catch (error) {
-      assert.equal(error.message, 'Error: some ember data error');
+      assert.equal(error.message, 'some ember data error');
     } finally {
       assert.equal(dummyModel.name, 'original', 'old name');
     }
