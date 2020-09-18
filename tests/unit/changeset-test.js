@@ -1,6 +1,6 @@
 import { Changeset, EmberChangeset, Changeset as ChangesetFactory } from 'ember-changeset';
 import { settled } from '@ember/test-helpers';
-import { module, test, todo } from 'qunit';
+import { module, test } from 'qunit';
 import { setupTest } from 'ember-qunit';
 import { lookupValidator } from 'validated-changeset';
 
@@ -1190,7 +1190,7 @@ module('Unit | Utility | changeset', function (hooks) {
     );
   });
 
-  todo('#pendingChanges with ember-data model with multiple change steps', async function (assert) {
+  test('#pendingChanges with ember-data model with multiple change steps', async function (assert) {
     let store = this.owner.lookup('service:store');
 
     let mockProfileModel = store.createRecord('profile');
