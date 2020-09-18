@@ -1156,40 +1156,6 @@ module('Unit | Utility | changeset', function (hooks) {
     assert.equal(get(dummyModel, 'name'), 'foo', 'original data is not modified');
   });
 
-  test('#pendingChanges with ember-data model is not possible due to circular dependency when merging ember-data models', async function (assert) {
-    let store = this.owner.lookup('service:store');
-
-    let mockProfileModel = store.createRecord('profile');
-    let mockUserModel = store.createRecord('user', {
-      profile: mockProfileModel,
-      save: function () {
-        return Promise.resolve(this);
-      },
-    });
-
-    let dummyChangeset = Changeset(mockUserModel);
-
-    assert.equal(get(dummyChangeset, 'isPristine'), true, 'changeset is pristine');
-
-    dummyChangeset.set('profile.firstName', 'Zoe');
-
-    assert.equal(get(dummyChangeset, 'isPristine'), false, 'changeset is not pristine as there is a change');
-
-    assert.equal(mockUserModel.get('profile.firstName'), 'Bob', 'Original model property should stay without changes');
-    assert.equal(mockUserModel.get('profile.lastName'), 'Ross', 'Original model property should stay without changes');
-
-    assert.equal(
-      dummyChangeset.get('data.profile.firstName'),
-      'Bob',
-      'Original model property should stay without changes'
-    );
-    assert.equal(
-      dummyChangeset.get('data.profile.lastName'),
-      'Ross',
-      'Original model property should stay without changes'
-    );
-  });
-
   test('#pendingChanges with ember-data model with multiple change steps', async function (assert) {
     let store = this.owner.lookup('service:store');
 
