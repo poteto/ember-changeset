@@ -1178,23 +1178,6 @@ module('Unit | Utility | changeset', function (hooks) {
     assert.equal(mockUserModel.get('profile.firstName'), 'Bob', 'Original model property should stay without changes');
     assert.equal(mockUserModel.get('profile.lastName'), 'Ross', 'Original model property should stay without changes');
 
-    assert.throws(
-      function () {
-        assert.equal(
-          dummyChangeset.get('pendingData.profile.firstName'),
-          'Zoe',
-          'Model belongsTo property should be updated'
-        );
-        assert.equal(
-          dummyChangeset.get('pendingData.profile.lastName'),
-          'Ross',
-          'Existing property should stay the same'
-        );
-      },
-      /Unable to `mergeDeep` with your data. Are you trying to merge two ember-data objects\? Please file an issue with ember-changeset\./,
-      "raised error instance indicates that ember-data models can't be merged"
-    );
-
     assert.equal(
       dummyChangeset.get('data.profile.firstName'),
       'Bob',

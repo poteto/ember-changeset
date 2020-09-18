@@ -106,14 +106,7 @@ module('Unit | Utility | merge deep', (hooks) => {
 
     let user = this.createUser('user', false);
     let user2 = this.createUser('user', true);
-    try {
-      mergeDeep(user, user2, { safeGet: get, safeSet: set });
-    } catch ({ message }) {
-      assert.equal(
-        message,
-        'Unable to `mergeDeep` with your data. Are you trying to merge two ember-data objects? Please file an issue with ember-changeset.',
-        'throws message'
-      );
-    }
+    let result = mergeDeep(user, user2, { safeGet: get, safeSet: set });
+    assert.equal(result.id, user2.id, 'source is returned');
   });
 });

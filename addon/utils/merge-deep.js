@@ -155,9 +155,6 @@ export default function mergeDeep(target, source, options = {}) {
   try {
     return mergeTargetAndSource(target, source, options);
   } catch (e) {
-    // this is very unlikely to be hit but lets throw an error otherwise
-    throw new Error(
-      'Unable to `mergeDeep` with your data. Are you trying to merge two ember-data objects? Please file an issue with ember-changeset.'
-    );
+    return source;
   }
 }
