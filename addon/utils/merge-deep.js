@@ -154,7 +154,7 @@ export default function mergeDeep(target, source, options = {}) {
 
   try {
     return mergeTargetAndSource(target, source, options);
-  } catch (e) {
+  } catch (_) {
     return source;
   }
 }
