@@ -89,7 +89,7 @@ module('Unit | Utility | merge deep', (hooks) => {
     assert.equal(user.get('profile.firstName'), 'Joejoe', 'has first name');
   });
 
-  test('it does not work with ember-data objects', async function (assert) {
+  test('it returns source if error on merging objects', async function (assert) {
     this.store = this.owner.lookup('service:store');
 
     this.createUser = (userType, withDogs) => {
