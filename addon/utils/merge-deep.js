@@ -72,7 +72,7 @@ function buildPathToValue(source, options, kv, possibleKeys) {
       return;
     }
 
-    if (typeof possible === 'object') {
+    if (possible && typeof possible === 'object') {
       buildPathToValue(possible, options, kv, [...possibleKeys, key]);
     }
   });
@@ -126,7 +126,7 @@ function mergeTargetAndSource(target, source, options) {
  * goal is to mutate target with source's properties, ensuring we dont encounter
  * pitfalls of { ..., ... } spread syntax overwriting keys on objects that we merged
  *
- * This is also adjusted for Ember peculiarities.  Specifically `options.setPath` will allows us
+ * This is also adjusted for Ember peculiarities.  Specifically `options.safeSet` will allows us
  * to handle properties on Proxy objects (that aren't the target's own property)
  *
  * @method mergeDeep

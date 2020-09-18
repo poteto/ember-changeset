@@ -67,6 +67,28 @@ module('Unit | Utility | merge deep', (hooks) => {
     assert.deepEqual(value.foo, { baz: 'bar' }, 'unsafe object property is merged');
   });
 
+  test('it merges with content as ember data object', async function (assert) {
+    this.store = this.owner.lookup('service:store');
+
+    this.createUser = (userType, withDogs) => {
+      let profile = this.store.createRecord('profile');
+      let user = this.store.createRecord(userType, { profile });
+
+      if (withDogs) {
+        for (let i = 0; i < 2; i++) {
+          user.get('dogs').addObject(this.store.createRecord('dog'));
+        }
+      }
+      return user;
+    };
+
+    let user = this.createUser('user', false);
+    let user2 = { profile: { firstName: new Change('Joejoe') } };
+    mergeDeep(user, user2, { safeGet: get, safeSet: set });
+
+    assert.equal(user.get('profile.firstName'), 'Joejoe', 'has first name');
+  });
+
   test('it does not work with ember-data objects', async function (assert) {
     this.store = this.owner.lookup('service:store');
 
