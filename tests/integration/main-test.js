@@ -23,6 +23,23 @@ module('Integration | main', function (hooks) {
     };
   });
 
+  test('works for top level properties', async function (assert) {
+    let profile = this.store.createRecord('profile', { firstName: 'Terry', lastName: 'Bubblewinkles', nickname: 't' });
+    let changeset = Changeset(profile);
+
+    assert.equal(changeset.isDirty, false, 'isDirty false');
+    changeset.firstName = 'RGB';
+    assert.equal(changeset.isDirty, true, 'isDirty true');
+    assert.equal(changeset.firstName, 'RGB', 'firstName after set');
+    assert.equal(profile.firstName, 'Terry', 'modal has original firstName');
+
+    changeset.execute();
+
+    assert.equal(changeset.isDirty, true, 'isDirty true');
+    assert.equal(changeset.firstName, 'RGB', 'firstName after set');
+    assert.equal(profile.firstName, 'RGB', 'original modal has new firstName');
+  });
+
   async function testBasicBelongsTo(assert, userType) {
     let user = this.createUser(userType, false);
     let changeset = Changeset(user);
@@ -158,22 +175,30 @@ module('Integration | main', function (hooks) {
 
     let changeset = Changeset(user);
 
+    assert.equal(changeset.isDirty, false, 'changeset is not dirty');
+
     changeset.set('profile.firstName', 'Grace');
     profile = changeset.get('profile');
     let profileChangeset = Changeset(profile);
 
     assert.equal(profileChangeset.get('firstName'), 'Grace', 'profileChangeset profile firstName is set');
+    assert.equal(profileChangeset.isDirty, false, 'profile changeset is not dirty');
     assert.equal(changeset.get('profile.firstName'), 'Grace', 'changeset profile firstName is set');
+    assert.equal(changeset.isDirty, true, 'changeset is dirty');
 
     profileChangeset.execute();
 
-    assert.equal(profile.firstName, 'Grace', 'profile has first name');
+    assert.equal(profile.firstName, 'Grace', 'profile still has first name');
+    assert.equal(profileChangeset.isDirty, false, 'profile changeset is not dirty');
     assert.equal(user.get('profile.firstName'), 'Bob', 'user still has profile has first name');
+    assert.equal(changeset.isDirty, true, 'changeset is dirty');
 
     changeset.execute();
 
     assert.equal(profile.firstName, 'Grace', 'profile has first name');
+    assert.equal(profileChangeset.isDirty, false, 'profile changeset is not dirty');
     assert.equal(user.get('profile.firstName'), 'Grace', 'user now has profile has first name');
+    assert.equal(changeset.isDirty, true, 'changeset is dirty');
   }
 
   test('can work with belongsTo via changeset', async function (assert) {
