@@ -11,7 +11,7 @@ import EmberObject, {
   computed
 } from '@ember/object';
 
-import { reads, empty, filterBy } from '@ember/object/computed';
+import { reads } from '@ember/object/computed';
 import ObjectProxy from '@ember/object/proxy';
 import { dasherize } from '@ember/string';
 import { isPresent } from '@ember/utils';
@@ -2303,33 +2303,32 @@ module('Unit | Utility | changeset', function(hooks) {
   });
 
   test('changeset isDirty property notifies dependent computed properties', async function(assert) {
-    const Model = EmberObject.extend({
+  
+    class Model extends EmberObject {
+      // single
+      @computed
+      get changeset() {
+        return Changeset(dummyModel, dummyValidator);
+      }
 
-      hasDirtyChangesets: empty('dirtyChangesets'),
+      get isChangesetDirty() {
+        return this.changeset.isDirty;
+      }
 
-      filterDirtyChangesets: filterBy('changesets', 'isDirty', true),
+      // double
+      @computed
+      get changesets() {
+        return [Changeset(dummyModel, dummyValidator), Changeset(dummyModel, dummyValidator)];
+      }
 
-      dirtyChangesets: computed('changesets.@each.isDirty', function() {
-        let cs = this.get('changesets');
-        return cs.filter((c) => { return c.get('isDirty')});
-      }),
+      get hasDirtyChangesets() {
+        return this.dirtyChangesets.length > 0;
+      }
 
-      changesets: computed(function() {
-        return [
-          Changeset(dummyModel, dummyValidator),
-          Changeset(dummyModel, dummyValidator)
-        ]
-      }),
-
-      changeset: computed(function() {
-        return Changeset(dummyModel, dummyValidator)
-      }),
-
-      isChangesetDirty: computed('changeset.isDirty', function() {
-        return this.get('changeset.isDirty');
-      })
-
-    });
+      get dirtyChangesets() {
+        return this.changesets.filter((c) => c.isDirty);
+      }
+    }
 
     let model = Model.create();
 
