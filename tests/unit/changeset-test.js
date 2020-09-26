@@ -2409,4 +2409,23 @@ module('Unit | Utility | changeset', function (hooks) {
     assert.ok(get(dummyChangeset, 'isValid'), 'should be valid');
     assert.notOk(get(dummyChangeset, 'isInvalid'), 'should be valid');
   });
+
+  test('calling save then setting a date from null to something and rejecting does return the right error', async function (assert) {
+    const dummyModel = this.owner.lookup('service:store').createRecord('profile', { startDate: null });
+
+    dummyModel.save = () => {
+      return Promise.reject({ errors: [{ detail: 'bad backend error' }] });
+    };
+
+    let dummyChangeset = Changeset(dummyModel, () => {});
+    dummyChangeset.startDate = new Date();
+
+    try {
+      await dummyChangeset.save();
+      assert.ok(false, 'save should fail if the underlaying save fails');
+    } catch (err) {
+      console.log('err', err);
+      assert.equal(err?.errors?.[0]?.detail, 'bad backend error', 'Wrong error: ' + err.message);
+    }
+  });
 });
