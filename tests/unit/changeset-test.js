@@ -2464,6 +2464,9 @@ module('Unit | Utility | changeset', function (hooks) {
     let changeset = ChangesetFactory(user);
 
     let hasManyDogs = changeset.get('dogs');
-    assert.ok(hasManyDogs.hasOwnProperty('recordData'), 'Get returns the related record(s) and not a proxy.');
+    assert.ok(
+      Object.prototype.hasOwnProperty.call(hasManyDogs, 'recordData'),
+      'Get returns the related record(s) and not a proxy.'
+    );
   });
 });
