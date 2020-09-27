@@ -6,6 +6,7 @@ import { lookupValidator } from 'validated-changeset';
 
 import EmberObject, { get, set, setProperties } from '@ember/object';
 
+import { computed } from '@ember/object';
 import { reads } from '@ember/object/computed';
 import ObjectProxy from '@ember/object/proxy';
 import { dasherize } from '@ember/string';
@@ -260,6 +261,51 @@ module('Unit | Utility | changeset', function (hooks) {
     dummyChangeset.set('_somePrivate', 'a');
 
     assert.equal(dummyChangeset.isDirty, false, 'changeset is not dirty');
+  });
+
+  test('changeset isDirty property notifies dependent computed properties', async function (assert) {
+    class Model extends EmberObject {
+      // single
+      @computed
+      get changeset() {
+        return Changeset(dummyModel, dummyValidator);
+      }
+
+      get isChangesetDirty() {
+        return this.changeset.isDirty;
+      }
+
+      // double
+      @computed
+      get changesets() {
+        let arr = [Changeset(dummyModel, dummyValidator), Changeset(dummyModel, dummyValidator)];
+        return arr;
+      }
+
+      get hasDirtyChangesets() {
+        return this.dirtyChangesets.length > 0;
+      }
+
+      get dirtyChangesets() {
+        return this.changesets.filter((c) => c.isDirty);
+      }
+    }
+
+    let model = Model.create();
+
+    assert.notOk(get(model, 'hasDirtyChangesets'), 'no dirty changesets');
+    assert.equal(model.dirtyChangesets.length, 0, 'has 0 dirty changesets');
+    assert.equal(get(model, 'isChangesetDirty'), false, 'changeset not dirty');
+
+    let changesets = get(model, 'changesets');
+
+    changesets[0].set('name', 'new name');
+    assert.equal(model.dirtyChangesets.length, 1, 'has one dirty changesets');
+    assert.ok(get(model, 'hasDirtyChangesets'), 'has dirty changesets');
+
+    let changeset = get(model, 'changeset');
+    set(changeset, 'name', 'other new name');
+    assert.equal(get(model, 'isChangesetDirty'), true, 'changeset is dirty');
   });
 
   /**
@@ -2408,5 +2454,16 @@ module('Unit | Utility | changeset', function (hooks) {
     dummyChangeset.set('org.usa.ny', 'vaca');
     assert.ok(get(dummyChangeset, 'isValid'), 'should be valid');
     assert.notOk(get(dummyChangeset, 'isInvalid'), 'should be valid');
+  });
+
+  test('using changset.get on a hasMany relationship returns the related record(s) and not a proxy', async function (assert) {
+    let store = this.owner.lookup('service:store');
+    let dogs = [store.createRecord('dog')];
+    let user = store.createRecord('user', { dogs });
+
+    let changeset = ChangesetFactory(user);
+
+    let hasManyDogs = changeset.get('dogs');
+    assert.ok(hasManyDogs.hasOwnProperty('recordData'), 'Get returns the related record(s) and not a proxy.');
   });
 });

@@ -5,6 +5,7 @@ import ArrayProxy from '@ember/array/proxy';
 import ObjectProxy from '@ember/object/proxy';
 import { notifyPropertyChange } from '@ember/object';
 import mergeDeep from './utils/merge-deep';
+import isObject from './utils/is-object';
 import { tracked } from '@glimmer/tracking';
 import { get as safeGet, set as safeSet } from '@ember/object';
 
@@ -35,6 +36,8 @@ export class EmberChangeset extends BufferedChangeset {
   @tracked _changes;
   @tracked _errors;
   @tracked _content;
+
+  isObject = isObject;
 
   maybeUnwrapProxy = maybeUnwrapProxy;
 
