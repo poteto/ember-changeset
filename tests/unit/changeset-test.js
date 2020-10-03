@@ -1412,7 +1412,7 @@ module('Unit | Utility | changeset', function (hooks) {
       assert.ok(false, 'save should fail if the underlaying save fails');
     } catch (err) {
       console.log('err', err);
-      assert.equal(err.errors.[0].detail, 'bad backend error', 'Wrong error: ' + err.message);
+      assert.equal(err.errors[0].detail, 'bad backend error', 'Wrong error: ' + err.message);
     }
   });
 
