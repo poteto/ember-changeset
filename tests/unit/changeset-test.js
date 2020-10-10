@@ -119,6 +119,8 @@ module('Unit | Utility | changeset', function (hooks) {
     dummyChangeset.set('name', 'a');
 
     assert.deepEqual(get(dummyChangeset, 'change'), expectedResult, 'should return changes object');
+    assert.deepEqual(dummyChangeset.name, 'a', 'should return new value');
+    assert.deepEqual(dummyModel.name, undefined, 'should return original value');
   });
 
   test('#change supports `undefined`', async function (assert) {
@@ -137,10 +139,16 @@ module('Unit | Utility | changeset', function (hooks) {
   test('#change works with arrays', async function (assert) {
     let dummyChangeset = Changeset(dummyModel);
     const newArray = [...exampleArray, 'new'];
-    let expectedResult = { exampleArray: newArray };
+    let expectedResult = { exampleArray: newArray, name: 'a' };
+
+    dummyChangeset.set('name', 'a');
     dummyChangeset.set('exampleArray', newArray);
 
-    assert.deepEqual(get(dummyChangeset, 'change'), expectedResult, 'should return changes object');
+    assert.deepEqual(get(dummyChangeset, 'change'), expectedResult, 'should return new changes');
+    assert.deepEqual(dummyChangeset.exampleArray, expectedResult.exampleArray, 'should return changes object');
+    assert.deepEqual(dummyChangeset.name, 'a', 'should return new value');
+    assert.deepEqual(dummyModel.exampleArray, [], 'should keep original array');
+    assert.deepEqual(dummyModel.name, undefined, 'should keep original array');
   });
 
   /**
@@ -824,6 +832,25 @@ module('Unit | Utility | changeset', function (hooks) {
     let actual = get(c, 'changes');
     let expectedResult = [{ key: 'org', value: 'no usa for you' }];
     assert.deepEqual(actual, expectedResult, 'removes nested changes');
+  });
+
+  test('#set operating on complex properties should be functional', async function (assert) {
+    const model = {
+      id: 1,
+      label: 'Reason',
+      options: ['test1', 'test2', 'test3'],
+    };
+    let dummyChangeset = Changeset(model);
+
+    let options = dummyChangeset.options;
+    options = options.filter((o, i) => (i === options.indexOf('test2') ? false : true));
+    dummyChangeset.set('options', [...options]);
+
+    assert.deepEqual(model.options, ['test1', 'test2', 'test3'], 'should keep original');
+    let expectedChanges = [{ key: 'options', value: ['test1', 'test3'] }];
+    let changes = get(dummyChangeset, 'changes');
+    assert.deepEqual(changes, expectedChanges, 'should add change');
+    assert.deepEqual(dummyChangeset.options, expectedChanges[0].value, 'should have new values');
   });
 
   test('it works with setProperties', async function (assert) {
