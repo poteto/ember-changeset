@@ -11,9 +11,11 @@
 <h2>Model notifications sms: <span data-test-model-notifications-sms>{{this.model.notifications.sms}}</span></h2>
 <h2>Doubled: {{this.model.doubleGrowth}}</h2>
 
-<form
-  {{on "submit" (fn this.submitForm this.changeset)}}
->
+{{#each this.model.addresses as |address idx|}}
+  <h2 data-test-address={{idx}}>{{address.street}} {{address.city}}</h2>
+{{/each}}
+
+<form {{on "submit" (fn this.submitForm this.changeset)}}>
   <div>
     <label>cid</label>
     <input
@@ -59,6 +61,14 @@
       checked={{this.changeset.notifications.sms}}
       onchange={{action (changeset-set this.changeset "notifications.sms") value="target.checked"}}
     >
+  </div>
+
+  <div>
+    <h3>Addresses</h3>
+    {{#each this.changeset.addresses as |address index|}}
+      <input type="text" value={{address.street}} data-test-address-street={{index}}>
+      <input type="text" value={{address.city}} data-test-address-city={{index}}>
+    {{/each}}
   </div>
 
   <div>
