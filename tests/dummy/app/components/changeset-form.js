@@ -22,6 +22,14 @@ function dummyValidator({ key, newValue, oldValue, changes, content }) {
   }
 }
 
+class Address {
+  constructor(args) {
+    Object.assign(this, args);
+  }
+  street = '123';
+  city = 'Yurtville';
+}
+
 class Foo {
   user = {
     aliases: ['someone'],
@@ -29,7 +37,7 @@ class Foo {
     email: 'something',
   };
 
-  address = null;
+  addresses = [new Address(), new Address({ city: 'Woods' })];
 
   cid = '1';
 

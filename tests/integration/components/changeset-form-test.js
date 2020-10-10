@@ -112,4 +112,26 @@ module('Integration | Component | changeset-form', function (hooks) {
       'has original value again'
     );
   });
+
+  test('it handles array of addresses', async function (assert) {
+    await render(hbs`<ChangesetForm />`);
+
+    assert.equal(find('[data-test-address="0"]').textContent.trim(), '123 Yurtville', 'address 1 model value');
+    assert.equal(find('[data-test-address="1"]').textContent.trim(), '123 Woods', 'address 2 model value');
+
+    assert.equal(find('[data-test-address-street="0"]').value, '123', 'street 1 initial value');
+    assert.equal(find('[data-test-address-city="0"]').value, 'Yurtville', 'city 1 initial value');
+    assert.equal(find('[data-test-address-street="1"]').value, '123', 'street 2 initial value');
+    assert.equal(find('[data-test-address-city="1"]').value, 'Woods', 'city 2 initial value');
+
+    await fillIn('[data-test-address-street="0"]', '456');
+
+    assert.equal(find('[data-test-address="0"]').textContent.trim(), '123 Yurtville', 'address 1 model keeps value');
+    assert.equal(find('[data-test-address="1"]').textContent.trim(), '123 Woods', 'address 2 model keeps value');
+
+    assert.equal(find('[data-test-address-street="0"]').value, '456', 'street 1 new value');
+    assert.equal(find('[data-test-address-city="0"]').value, 'Yurtville', 'city 1 initial value');
+    assert.equal(find('[data-test-address-street="1"]').value, '123', 'street 2 initial value');
+    assert.equal(find('[data-test-address-city="1"]').value, 'Woods', 'city 2 initial value');
+  });
 });
