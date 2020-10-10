@@ -1401,7 +1401,14 @@ module('Unit | Utility | changeset', function (hooks) {
     const dummyModel = this.owner.lookup('service:store').createRecord('profile', { startDate: null });
 
     dummyModel.save = () => {
-      return Promise.reject({ errors: [{ detail: 'bad backend error' }] });
+      return Promise.reject({
+        errors: [
+          {
+            title: 'Excuse me, Im talking',
+            detail: 'bad backend error',
+          },
+        ],
+      });
     };
 
     let dummyChangeset = Changeset(dummyModel, () => {});
