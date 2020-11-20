@@ -136,7 +136,7 @@ import { EmberChangeset, Changeset } from 'ember-changeset';
 class MyChangeset extends EmberChangeset {
   save() {
     super.save(...arguments);
-    // do other stuff
+    // do stuff
   }
 }
 
