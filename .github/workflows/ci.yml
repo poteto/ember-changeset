@@ -1,6 +1,8 @@
 name: CI
 
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
 
 jobs:
 
@@ -44,7 +46,7 @@ jobs:
         try-scenario: [
           ember-lts-3.13,
           ember-lts-3.16,
-          ember-release,
+          ember-lts-3.20,
           ember-beta,
           ember-canary
         ]
