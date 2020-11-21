@@ -1,11 +1,11 @@
-name: Node CI
+name: CI
 
 on: [push, pull_request]
 
 jobs:
 
-  library:
-    name: "ember-changeset"
+  lint:
+    name: "lint"
     env:
       CI: true
     runs-on: ubuntu-latest
@@ -32,11 +32,9 @@ jobs:
       run: yarn lint:js
     - name: lint hbs
       run: yarn lint:hbs
-    - name: tests
-      run: yarn test
 
-  compat:
-    name: "Compat"
+  floating:
+    name: "Floating dependencies"
     env:
       CI: true
     runs-on: ubuntu-latest
