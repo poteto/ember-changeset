@@ -561,7 +561,7 @@ module('Integration | Helper | changeset', function (hooks) {
         return (isPresent(value) && value.length > 3) || 'too short';
       },
     };
-    this.set('dummyModel', { firstName: 'Jim', lastName: 'Bob' });
+    this.set('dummyModel', { firstName: 'Jimm', lastName: 'Bob' });
     this.set('validate', ({ key, newValue }) => {
       let validatorFn = validations[key];
 
