@@ -38,13 +38,13 @@
     "@glimmer/tracking": "^1.0.1",
     "ember-auto-import": "^1.5.2",
     "ember-cli-babel": "^7.19.0",
-    "validated-changeset": "~0.10.0"
+    "validated-changeset": "~0.10.2"
   },
   "devDependencies": {
     "@ember/optional-features": "^1.0.0",
     "babel-eslint": "^10.1.0",
     "broccoli-asset-rev": "^3.0.0",
-    "ember-cli": "~3.21.0",
+    "ember-cli": "~3.22.0",
     "ember-cli-dependency-checker": "^3.1.0",
     "ember-cli-htmlbars": "^5.1.2",
     "ember-cli-inject-live-reload": "^2.0.1",

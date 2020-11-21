@@ -46,6 +46,7 @@ export class EmberChangeset extends BufferedChangeset {
   // override base class
   // DO NOT override setDeep. Ember.set does not work with Ember.set({}, 'user.name', 'foo');
   getDeep = safeGet;
+  mergeDeep = mergeDeep;
 
   // override base class
   safeGet(obj, key) {
@@ -95,9 +96,9 @@ export class EmberChangeset extends BufferedChangeset {
     let content = this[CONTENT];
     let changes = this[CHANGES];
 
-    let pendingChanges = mergeDeep(Object.create(Object.getPrototypeOf(content)), content, { safeGet, safeSet });
+    let pendingChanges = this.mergeDeep(Object.create(Object.getPrototypeOf(content)), content, { safeGet, safeSet });
 
-    return mergeDeep(pendingChanges, changes, { safeGet, safeSet });
+    return this.mergeDeep(pendingChanges, changes, { safeGet, safeSet });
   }
 
   /**
@@ -180,7 +181,7 @@ export class EmberChangeset extends BufferedChangeset {
 
       // we want mutation on original object
       // @tracked
-      this[CONTENT] = mergeDeep(content, changes, { safeGet, safeSet });
+      this[CONTENT] = this.mergeDeep(content, changes, { safeGet, safeSet });
     }
 
     this[PREVIOUS_CONTENT] = oldContent;
