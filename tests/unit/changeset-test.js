@@ -6,6 +6,7 @@ import { lookupValidator } from 'validated-changeset';
 
 import EmberObject, { get, set, setProperties } from '@ember/object';
 
+import { computed } from '@ember/object';
 import { reads } from '@ember/object/computed';
 import ObjectProxy from '@ember/object/proxy';
 import { dasherize } from '@ember/string';
@@ -118,6 +119,8 @@ module('Unit | Utility | changeset', function (hooks) {
     dummyChangeset.set('name', 'a');
 
     assert.deepEqual(get(dummyChangeset, 'change'), expectedResult, 'should return changes object');
+    assert.deepEqual(dummyChangeset.name, 'a', 'should return new value');
+    assert.deepEqual(dummyModel.name, undefined, 'should return original value');
   });
 
   test('#change supports `undefined`', async function (assert) {
@@ -136,10 +139,16 @@ module('Unit | Utility | changeset', function (hooks) {
   test('#change works with arrays', async function (assert) {
     let dummyChangeset = Changeset(dummyModel);
     const newArray = [...exampleArray, 'new'];
-    let expectedResult = { exampleArray: newArray };
+    let expectedResult = { exampleArray: newArray, name: 'a' };
+
+    dummyChangeset.set('name', 'a');
     dummyChangeset.set('exampleArray', newArray);
 
-    assert.deepEqual(get(dummyChangeset, 'change'), expectedResult, 'should return changes object');
+    assert.deepEqual(get(dummyChangeset, 'change'), expectedResult, 'should return new changes');
+    assert.deepEqual(dummyChangeset.exampleArray, expectedResult.exampleArray, 'should return changes object');
+    assert.deepEqual(dummyChangeset.name, 'a', 'should return new value');
+    assert.deepEqual(dummyModel.exampleArray, [], 'should keep original array');
+    assert.deepEqual(dummyModel.name, undefined, 'should keep original array');
   });
 
   /**
@@ -260,6 +269,51 @@ module('Unit | Utility | changeset', function (hooks) {
     dummyChangeset.set('_somePrivate', 'a');
 
     assert.equal(dummyChangeset.isDirty, false, 'changeset is not dirty');
+  });
+
+  test('changeset isDirty property notifies dependent computed properties', async function (assert) {
+    class Model extends EmberObject {
+      // single
+      @computed
+      get changeset() {
+        return Changeset(dummyModel, dummyValidator);
+      }
+
+      get isChangesetDirty() {
+        return this.changeset.isDirty;
+      }
+
+      // double
+      @computed
+      get changesets() {
+        let arr = [Changeset(dummyModel, dummyValidator), Changeset(dummyModel, dummyValidator)];
+        return arr;
+      }
+
+      get hasDirtyChangesets() {
+        return this.dirtyChangesets.length > 0;
+      }
+
+      get dirtyChangesets() {
+        return this.changesets.filter((c) => c.isDirty);
+      }
+    }
+
+    let model = Model.create();
+
+    assert.notOk(get(model, 'hasDirtyChangesets'), 'no dirty changesets');
+    assert.equal(model.dirtyChangesets.length, 0, 'has 0 dirty changesets');
+    assert.equal(get(model, 'isChangesetDirty'), false, 'changeset not dirty');
+
+    let changesets = get(model, 'changesets');
+
+    changesets[0].set('name', 'new name');
+    assert.equal(model.dirtyChangesets.length, 1, 'has one dirty changesets');
+    assert.ok(get(model, 'hasDirtyChangesets'), 'has dirty changesets');
+
+    let changeset = get(model, 'changeset');
+    set(changeset, 'name', 'other new name');
+    assert.equal(get(model, 'isChangesetDirty'), true, 'changeset is dirty');
   });
 
   /**
@@ -778,6 +832,25 @@ module('Unit | Utility | changeset', function (hooks) {
     let actual = get(c, 'changes');
     let expectedResult = [{ key: 'org', value: 'no usa for you' }];
     assert.deepEqual(actual, expectedResult, 'removes nested changes');
+  });
+
+  test('#set operating on complex properties should be functional', async function (assert) {
+    const model = {
+      id: 1,
+      label: 'Reason',
+      options: ['test1', 'test2', 'test3'],
+    };
+    let dummyChangeset = Changeset(model);
+
+    let options = dummyChangeset.options;
+    options = options.filter((o, i) => (i === options.indexOf('test2') ? false : true));
+    dummyChangeset.set('options', [...options]);
+
+    assert.deepEqual(model.options, ['test1', 'test2', 'test3'], 'should keep original');
+    let expectedChanges = [{ key: 'options', value: ['test1', 'test3'] }];
+    let changes = get(dummyChangeset, 'changes');
+    assert.deepEqual(changes, expectedChanges, 'should add change');
+    assert.deepEqual(dummyChangeset.options, expectedChanges[0].value, 'should have new values');
   });
 
   test('it works with setProperties', async function (assert) {
@@ -1313,7 +1386,7 @@ module('Unit | Utility | changeset', function (hooks) {
       await dummyChangeset.save();
       assert.ok(false, 'WAT?!');
     } catch (error) {
-      assert.equal(error.message, 'Error: some ember data error');
+      assert.equal(error.message, 'some ember data error');
     } finally {
       assert.equal(dummyModel.name, undefined, 'old name');
     }
@@ -1336,7 +1409,7 @@ module('Unit | Utility | changeset', function (hooks) {
       await dummyChangeset.save();
       assert.ok(false, 'WAT?!');
     } catch (error) {
-      assert.equal(error.message, 'Error: some ember data error');
+      assert.equal(error.message, 'some ember data error');
     } finally {
       assert.equal(dummyModel.name, 'original', 'old name');
     }
@@ -1349,6 +1422,32 @@ module('Unit | Utility | changeset', function (hooks) {
 
     await dummyChangeset.save();
     assert.equal(get(person, 'name'), 'foo', 'persist changes to content');
+  });
+
+  test('calling save then setting a date from null to something and rejecting does return the right error', async function (assert) {
+    const dummyModel = this.owner.lookup('service:store').createRecord('profile', { startDate: null });
+
+    dummyModel.save = () => {
+      return Promise.reject({
+        errors: [
+          {
+            title: 'Excuse me, Im talking',
+            detail: 'bad backend error',
+          },
+        ],
+      });
+    };
+
+    let dummyChangeset = Changeset(dummyModel, () => {});
+    dummyChangeset.startDate = new Date();
+
+    try {
+      await dummyChangeset.save();
+      assert.ok(false, 'save should fail if the underlaying save fails');
+    } catch (err) {
+      console.log('err', err);
+      assert.equal(err.errors[0].detail, 'bad backend error', 'Wrong error: ' + err.message);
+    }
   });
 
   /**
@@ -2408,5 +2507,19 @@ module('Unit | Utility | changeset', function (hooks) {
     dummyChangeset.set('org.usa.ny', 'vaca');
     assert.ok(get(dummyChangeset, 'isValid'), 'should be valid');
     assert.notOk(get(dummyChangeset, 'isInvalid'), 'should be valid');
+  });
+
+  test('using changset.get on a hasMany relationship returns the related record(s) and not a proxy', async function (assert) {
+    let store = this.owner.lookup('service:store');
+    let dogs = [store.createRecord('dog')];
+    let user = store.createRecord('user', { dogs });
+
+    let changeset = ChangesetFactory(user);
+
+    let hasManyDogs = changeset.get('dogs');
+    assert.ok(
+      Object.prototype.hasOwnProperty.call(hasManyDogs, 'recordData'),
+      'Get returns the related record(s) and not a proxy.'
+    );
   });
 });
