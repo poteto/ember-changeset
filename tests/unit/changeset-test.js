@@ -2071,6 +2071,30 @@ module('Unit | Utility | changeset', function (hooks) {
     assert.deepEqual(dummyChangeset.get('errors.length'), 1);
   });
 
+  test('#validate works with validator class in array', async function (assert) {
+    class PersonalValidator {
+      _validate(value) {
+        if (value === null) {
+          return 'oh no';
+        }
+      }
+      validate(key, newValue) {
+        return this._validate(newValue);
+      }
+    }
+    const validatorMap = {
+      name: [new PersonalValidator()],
+    };
+
+    let dummyChangeset = Changeset(dummyModel, lookupValidator(validatorMap), validatorMap);
+    dummyChangeset.name = null;
+
+    await dummyChangeset.validate();
+
+    assert.deepEqual(dummyChangeset.get('error.name.validation'), 'oh no');
+    assert.deepEqual(dummyChangeset.get('errors.length'), 1);
+  });
+
   /**
    * #addError
    */
