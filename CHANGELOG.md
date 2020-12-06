@@ -5,9 +5,20 @@ Some notable changes going from 2.x to 3.x
 - error.validation is a string if one validation and array if multiple validations.
 - Defining a validation for a nested key worked before with {'something.else': ValidationFunc} and now it only works when defining as an object: { something: { else: validationFunc } }.
 
+## [3.10.3](https://github.com/poteto/ember-changeset/tree/v3.10.3) (2020-12-05)
+
+Support multiple validators with class validators
+Fix `prepare` with initial non primitive property
+Overridable mergeDeep so to fix typeof null check
+isArray for better Ember Array detection
+`set` nested objects at various level of tree will return correct values
+treat hasMany relationships as an array
+
+[Full Changelog](https://github.com/poteto/ember-changeset/compare/v3.9...v3.10.3)
+
 ## [3.9.0](https://github.com/poteto/ember-changeset/tree/v3.9.0) (2020-09-04)
 
-[Full Changelog](https://github.com/poteto/ember-changeset/compare/v3.821...v3.9.0)
+[Full Changelog](https://github.com/poteto/ember-changeset/compare/v3.82...v3.9.0)
 
 - Rollback changes to model on save error [#536](https://github.com/poteto/ember-changeset/pull/536)
 
