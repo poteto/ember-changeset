@@ -7,12 +7,12 @@ Some notable changes going from 2.x to 3.x
 
 ## [3.10.3](https://github.com/poteto/ember-changeset/tree/v3.10.3) (2020-12-05)
 
-Support multiple validators with class validators
-Fix `prepare` with initial non primitive property
-Overridable mergeDeep so to fix typeof null check
-isArray for better Ember Array detection
-`set` nested objects at various level of tree will return correct values
-treat hasMany relationships as an array
+- Support multiple validators with class validators
+- Fix `prepare` with initial non primitive property
+- Overridable mergeDeep so to fix typeof null check
+- isArray for better Ember Array detection
+- `set` nested objects at various level of tree will return correct values
+- treat hasMany relationships as an array
 
 [Full Changelog](https://github.com/poteto/ember-changeset/compare/v3.9...v3.10.3)
 
