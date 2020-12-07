@@ -231,6 +231,7 @@ import { ValidationResult, ValidatorMapFunc, ValidatorAction } from 'ember-chang
   - [`set`](#set)
   - [`prepare`](#prepare)
   - [`execute`](#execute)
+  - [`unexecute`](#unexecute)
   - [`save`](#save)
   - [`merge`](#merge)
   - [`rollback`](#rollback)
@@ -574,6 +575,21 @@ changeset.execute(); // returns changeset
 ```
 
 Note that executing the changeset will not remove the internal list of changes - instead, you should do so explicitly with `rollback` or `save` if that is desired.
+
+**[⬆️ back to top](#api)**
+
+#### `unexecute`
+
+Undo changes made to underlying Object for changeset. This is often useful if you want to remove changes from underlying Object if `save` fails.
+
+```js
+changeset
+  .save()
+  .catch(() => {
+    // save applies changes to the underlying Object via this.execute(). This may be undesired for your use case.
+    dummyChangeset.unexecute();
+  })
+```
 
 **[⬆️ back to top](#api)**
 
