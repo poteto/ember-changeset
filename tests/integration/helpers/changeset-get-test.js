@@ -15,12 +15,50 @@ module('Integration | Helper | changeset-get', function (hooks) {
         first: 'Bob',
         last: 'Loblaw',
       },
+      value: {
+        first: '<value>'
+      },
       email: 'bob@lob.law',
       url: 'http://bobloblawslawblog.com',
     };
 
     this.changeset = Changeset(model);
     this.fieldName = 'name.first';
+  });
+
+  test('it allows keys named value', async function (assert) {
+    this.fieldName = 'value.first';
+    this.updateName = (changeset, evt) => {
+      changeset.set('value.first', evt.target.value);
+    };
+    await render(hbs`
+      <input
+        type="text"
+        {{on "input" (fn this.updateName this.changeset)}}
+        {{on "change" (fn this.updateName this.changeset)}}
+        value={{get this.changeset this.fieldName}}/>
+      <p id="test-el">{{this.changeset.value.first}}</p>
+      <ul>
+        {{#each this.changeset.changes as |change|}}
+          <li>{{change.key}}: {{change.value}}</li>
+        {{/each}}
+      </ul>
+    `);
+
+    assert.equal(find('#test-el').textContent, '<value>');
+    assert.equal(find('input').value, '<value>');
+
+    await fillIn(find('input'), 'Robert');
+
+    assert.equal(find('#test-el').textContent, 'Robert');
+    assert.equal(find('input').value, 'Robert');
+
+    assert.equal(this.changeset.changes.length, 1);
+
+    await this.changeset.rollback();
+
+    assert.equal(find('#test-el').textContent, 'Robert');
+    assert.equal(find('input').value, 'Robert');
   });
 
   test('it retrieves the current value using {{get}}', async function (assert) {
@@ -45,6 +83,8 @@ module('Integration | Helper | changeset-get', function (hooks) {
 
     assert.equal(find('#test-el').textContent, 'Robert');
     assert.equal(find('input').value, 'Robert');
+
+    assert.equal(this.changeset.changes.length, 1);
 
     await this.changeset.rollback();
 
