@@ -16,7 +16,7 @@ module('Integration | Helper | changeset-get', function (hooks) {
         last: 'Loblaw',
       },
       value: {
-        first: '<value>'
+        first: '<value>',
       },
       email: 'bob@lob.law',
       url: 'http://bobloblawslawblog.com',
