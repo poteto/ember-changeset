@@ -629,8 +629,6 @@ user.get('lastName'); // "Fallon"
 user.get('address.zipCode'); // "10112"
 ```
 
-Note that both changesets `A` and `B` are not destroyed by the merge, so you might want to call `destroy()` on them to avoid memory leaks.
-
 **[⬆️ back to top](#api)**
 
 #### `rollback`
