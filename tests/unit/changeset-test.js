@@ -1399,6 +1399,16 @@ module('Unit | Utility | changeset', function (hooks) {
     }
   });
 
+  test('#unexecute after #save on new ember-data model', async function (assert) {
+    let store = this.owner.lookup('service:store');
+
+    let mockProfileModel = store.createRecord('profile');
+
+    const changeset = new Changeset(mockProfileModel);
+    changeset.unexecute();
+    assert.ok(true); // we just want no error until here
+  });
+
   test('#save handles rejected proxy content with content', async function (assert) {
     assert.expect(2);
 
