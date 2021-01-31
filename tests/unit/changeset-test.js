@@ -47,6 +47,8 @@ let dummyValidations = {
   },
 };
 
+let resetDummyValidations;
+
 function dummyValidator({ key, newValue, oldValue, changes, content }) {
   let validatorFn = get(dummyValidations, key);
 
@@ -65,8 +67,12 @@ module('Unit | Utility | changeset', function (hooks) {
       },
     });
     dummyModel = Dummy.create({ exampleArray });
+    resetDummyValidations = { ...dummyValidations };
   });
 
+  hooks.afterEach(function () {
+    dummyValidations = resetDummyValidations;
+  });
   /**
    * #toString
    */
@@ -2523,5 +2529,27 @@ module('Unit | Utility | changeset', function (hooks) {
       Object.prototype.hasOwnProperty.call(hasManyDogs, 'recordData'),
       'Get returns the related record(s) and not a proxy.'
     );
+  });
+
+  test('cyclical bug with ember data models', async function (assert) {
+    let store = this.owner.lookup('service:store');
+    let dog = store.createRecord('dog', {
+      breed: 'silver pup',
+    });
+
+    const validations = {
+      litter: {
+        dog: () => true,
+      },
+    };
+
+    const obj = {
+      litter: {},
+    };
+
+    const changeset = new Changeset(obj, lookupValidator(validations), validations);
+    changeset.litter.dog = dog;
+    changeset.validate();
+    assert.ok(true);
   });
 });
