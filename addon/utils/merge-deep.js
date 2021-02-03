@@ -1,4 +1,3 @@
-import { Change } from 'validated-changeset';
 import { isChange, getChangeValue, normalizeObject } from 'validated-changeset';
 
 function isMergeableObject(value) {
@@ -106,7 +105,7 @@ function mergeTargetAndSource(target, source, options) {
     }
 
     // else safe key on object
-    if (propertyIsOnObject(target, key) && isMergeableObject(source[key]) && !(source[key] instanceof Change)) {
+    if (propertyIsOnObject(target, key) && isMergeableObject(source[key]) && !isChange(source[key])) {
       options.safeSet(target, key, mergeDeep(options.safeGet(target, key), options.safeGet(source, key), options));
     } else {
       let next = source[key];
