@@ -9,7 +9,7 @@ let dummyValidations = {
       return !!value;
     },
     email(value) {
-      return value && value.includes('@');
+      return new Promise((resolve) => setTimeout(resolve, 400, value && value.includes('@')));
     },
   },
 };
