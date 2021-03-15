@@ -945,6 +945,23 @@ module('Unit | Utility | changeset', function (hooks) {
     assert.equal(c.get('foo'), get(model, 'foo'));
   });
 
+  test('#set works when setting property multiple times', async function (assert) {
+    const expectedChanges = [{ key: 'age', value: '90' }];
+    let dummyChangeset = Changeset({ age: '10' });
+    dummyChangeset.set('age', '80');
+    dummyChangeset.set('age', '10');
+    dummyChangeset.set('age', '90');
+
+    const changes = dummyChangeset.changes;
+
+    assert.equal(dummyModel.age, undefined);
+    assert.equal(dummyChangeset.get('age'), '90');
+
+    assert.deepEqual(changes, expectedChanges);
+    assert.ok(dummyChangeset.isDirty);
+    assert.deepEqual(dummyChangeset.change, { age: '90' });
+  });
+
   test('#set works after save', async function (assert) {
     dummyModel['org'] = {
       usa: {
@@ -2551,5 +2568,15 @@ module('Unit | Utility | changeset', function (hooks) {
     changeset.litter.dog = dog;
     changeset.validate();
     assert.ok(true);
+  });
+
+  test('#unexecute after #save on new ember-data model', async function (assert) {
+    let store = this.owner.lookup('service:store');
+
+    let mockProfileModel = store.createRecord('profile');
+
+    const changeset = new Changeset(mockProfileModel);
+    changeset.unexecute();
+    assert.ok(true); // we just want no error until here
   });
 });
