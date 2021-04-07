@@ -1,12 +1,12 @@
 import { assert } from '@ember/debug';
 import { dependentKeyCompat } from '@ember/object/compat';
-import { BufferedChangeset } from 'validated-changeset';
+import { BufferedChangeset, Change, keyInObject } from 'validated-changeset';
 import ArrayProxy from '@ember/array/proxy';
 import ObjectProxy from '@ember/object/proxy';
 import { notifyPropertyChange } from '@ember/object';
+import { tracked } from 'tracked-built-ins';
 import mergeDeep from './utils/merge-deep';
 import isObject from './utils/is-object';
-import { tracked } from '@glimmer/tracking';
 import { get as safeGet, set as safeSet } from '@ember/object';
 
 const CHANGES = '_changes';
@@ -133,6 +133,17 @@ export class EmberChangeset extends BufferedChangeset {
    * Returns value or error
    */
   _setProperty({ key, value, oldValue }) {
+    let changes = this[CHANGES];
+
+    // Happy path: update change map.
+    if (oldValue !== value) {
+      this.setDeep(changes, key, new Change(value), {
+        safeSet: this.safeSet,
+      });
+    } else if (keyInObject(changes, key)) {
+      this._deleteKey(CHANGES, key);
+    }
+
     super._setProperty({ key, value, oldValue });
 
     notifyPropertyChange(this, key);
@@ -181,7 +192,7 @@ export class EmberChangeset extends BufferedChangeset {
 
       // we want mutation on original object
       // @tracked
-      this[CONTENT] = this.mergeDeep(content, changes, { safeGet, safeSet });
+      this.mergeDeep(content, changes, { safeGet, safeSet });
     }
 
     this[PREVIOUS_CONTENT] = oldContent;
