@@ -1,4 +1,4 @@
-import { Change } from 'validated-changeset';
+import { isChange, getChangeValue, normalizeObject } from 'validated-changeset';
 
 function isMergeableObject(value) {
   return isNonNullObject(value) && !isSpecial(value);
@@ -14,16 +14,18 @@ function isSpecial(value) {
   return stringValue === '[object RegExp]' || stringValue === '[object Date]';
 }
 
-function getEnumerableOwnPropertySymbols(target) {
-  return Object.getOwnPropertySymbols
-    ? Object.getOwnPropertySymbols(target).filter(symbol => {
-      return Object.prototype.propertyIsEnumerable.call(target, symbol)
-    })
-    : [];
-}
+// Reconsider when enumerable symbols are removed - https://github.com/emberjs/ember.js/commit/ef0e277533b3eab01e58d68b79d7e37d8b11ee34
+// function getEnumerableOwnPropertySymbols(target) {
+//   return Object.getOwnPropertySymbols
+//     ? Object.getOwnPropertySymbols(target).filter(symbol => {
+//       return Object.prototype.propertyIsEnumerable.call(target, symbol)
+//     })
+//     : [];
+// }
 
 function getKeys(target) {
-  return Object.keys(target).concat(getEnumerableOwnPropertySymbols(target))
+  return Object.keys(target);
+  // .concat(getEnumerableOwnPropertySymbols(target))
 }
 
 function propertyIsOnObject(object, property) {
@@ -43,13 +45,16 @@ function hasEmberDataProperty(target, key, options) {
 
 // Protects from prototype poisoning and unexpected merging up the prototype chain.
 function propertyIsUnsafe(target, key, options) {
-  if(hasEmberDataProperty(target, key, options)) {
+  if (hasEmberDataProperty(target, key, options)) {
     return false;
   }
 
-  return propertyIsOnObject(target, key) // Properties are safe to merge if they don't exist in the target yet,
-    && !(Object.prototype.hasOwnProperty.call(target, key) // unsafe if they exist up the prototype chain,
-      && Object.prototype.propertyIsEnumerable.call(target, key)); // and also unsafe if they're nonenumerable.
+  return (
+    propertyIsOnObject(target, key) && // Properties are safe to merge if they don't exist in the target yet,
+    !(
+      (Object.prototype.hasOwnProperty.call(target, key) && Object.prototype.propertyIsEnumerable.call(target, key)) // unsafe if they exist up the prototype chain,
+    )
+  ); // and also unsafe if they're nonenumerable.
 }
 
 /**
@@ -59,14 +64,14 @@ function propertyIsUnsafe(target, key, options) {
  * @method buildPathToValue
  */
 function buildPathToValue(source, options, kv, possibleKeys) {
-  Object.keys(source).forEach(key => {
+  Object.keys(source).forEach((key) => {
     let possible = source[key];
-    if (possible && Object.prototype.hasOwnProperty.call(possible, 'value')) {
-      kv[[...possibleKeys, key].join('.')] = possible.value;
+    if (possible && isChange(possible)) {
+      kv[[...possibleKeys, key].join('.')] = getChangeValue(possible);
       return;
     }
 
-    if (typeof possible === 'object') {
+    if (possible && typeof possible === 'object') {
       buildPathToValue(possible, options, kv, [...possibleKeys, key]);
     }
   });
@@ -80,7 +85,7 @@ function buildPathToValue(source, options, kv, possibleKeys) {
  * @method mergeTargetAndSource
  */
 function mergeTargetAndSource(target, source, options) {
-  getKeys(source).forEach(key => {
+  getKeys(source).forEach((key) => {
     // proto poisoning.  So can set by nested key path 'person.name'
     if (propertyIsUnsafe(target, key, options)) {
       // if safeSet, we will find keys leading up to value and set
@@ -100,16 +105,16 @@ function mergeTargetAndSource(target, source, options) {
     }
 
     // else safe key on object
-    if (propertyIsOnObject(target, key) && isMergeableObject(source[key]) && !Object.prototype.hasOwnProperty.call(source[key], 'value')) {
+    if (propertyIsOnObject(target, key) && isMergeableObject(source[key]) && !isChange(source[key])) {
       options.safeSet(target, key, mergeDeep(options.safeGet(target, key), options.safeGet(source, key), options));
     } else {
       let next = source[key];
-      if (next && next instanceof Change) {
-        return options.safeSet(target, key, next.value);
+      if (isChange(next)) {
+        return options.safeSet(target, key, getChangeValue(next));
       }
 
       // if just some normal leaf value, then set
-      return options.safeSet(target, key, next);
+      return options.safeSet(target, key, normalizeObject(next));
     }
   });
 
@@ -120,14 +125,22 @@ function mergeTargetAndSource(target, source, options) {
  * goal is to mutate target with source's properties, ensuring we dont encounter
  * pitfalls of { ..., ... } spread syntax overwriting keys on objects that we merged
  *
- * This is also adjusted for Ember peculiarities.  Specifically `options.setPath` will allows us
+ * This is also adjusted for Ember peculiarities.  Specifically `options.safeSet` will allows us
  * to handle properties on Proxy objects (that aren't the target's own property)
  *
  * @method mergeDeep
  */
 export default function mergeDeep(target, source, options = {}) {
-  options.safeGet = options.safeGet || function (obj, key) { return obj[key] };
-  options.safeSet = options.safeSet || function(obj, key, value) { return obj[key] = value };
+  options.safeGet =
+    options.safeGet ||
+    function (obj, key) {
+      return obj[key];
+    };
+  options.safeSet =
+    options.safeSet ||
+    function (obj, key, value) {
+      return (obj[key] = value);
+    };
   let sourceIsArray = Array.isArray(source);
   let targetIsArray = Array.isArray(target);
   let sourceAndTargetTypesMatch = sourceIsArray === targetIsArray;
@@ -140,8 +153,10 @@ export default function mergeDeep(target, source, options = {}) {
 
   try {
     return mergeTargetAndSource(target, source, options);
-  } catch(e) {
+  } catch (e) {
     // this is very unlikely to be hit but lets throw an error otherwise
-    throw new Error('Unable to `mergeDeep` with your data. Are you trying to merge two ember-data objects? Please file an issue with ember-changeset.');
+    throw new Error(
+      'Unable to `mergeDeep` with your data. Are you trying to merge two ember-data objects? Please file an issue with ember-changeset.'
+    );
   }
 }

@@ -7,7 +7,9 @@ Here are a few things that will increase the chance that your pull request will 
 -->
 
 <!-- If this pull request addresses an issue please provide the issue number here -->
+
 Closes # .
 
 ## Changes proposed in this pull request
+
 <!-- Please describe here what this pull request changes -->

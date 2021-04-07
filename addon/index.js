@@ -6,11 +6,23 @@ import ObjectProxy from '@ember/object/proxy';
 import { notifyPropertyChange } from '@ember/object';
 import { tracked } from 'tracked-built-ins';
 import mergeDeep from './utils/merge-deep';
+import isObject from './utils/is-object';
 import { get as safeGet, set as safeSet } from '@ember/object';
 
 const CHANGES = '_changes';
+const PREVIOUS_CONTENT = '_previousContent';
 const CONTENT = '_content';
 const defaultValidatorFn = () => true;
+
+export function buildOldValues(content, changes, getDeep) {
+  const obj = Object.create(null);
+
+  for (let change of changes) {
+    obj[change.key] = getDeep(content, change.key);
+  }
+
+  return obj;
+}
 
 function isProxy(o) {
   return !!(o && (o instanceof ObjectProxy || o instanceof ArrayProxy));
@@ -21,9 +33,11 @@ function maybeUnwrapProxy(o) {
 }
 
 export class EmberChangeset extends BufferedChangeset {
-  @tracked '_changes';
-  @tracked '_errors';
-  @tracked '_content';
+  @tracked _changes;
+  @tracked _errors;
+  @tracked _content;
+
+  isObject = isObject;
 
   maybeUnwrapProxy = maybeUnwrapProxy;
 
@@ -32,6 +46,7 @@ export class EmberChangeset extends BufferedChangeset {
   // override base class
   // DO NOT override setDeep. Ember.set does not work with Ember.set({}, 'user.name', 'foo');
   getDeep = safeGet;
+  mergeDeep = mergeDeep;
 
   // override base class
   safeGet(obj, key) {
@@ -41,7 +56,7 @@ export class EmberChangeset extends BufferedChangeset {
     return safeSet(obj, key, value);
   }
 
-    /**
+  /**
    * @property isValid
    * @type {Array}
    */
@@ -81,9 +96,9 @@ export class EmberChangeset extends BufferedChangeset {
     let content = this[CONTENT];
     let changes = this[CHANGES];
 
-    let pendingChanges = mergeDeep(Object.create(Object.getPrototypeOf(content)), content, { safeGet, safeSet });
+    let pendingChanges = this.mergeDeep(Object.create(Object.getPrototypeOf(content)), content, { safeGet, safeSet });
 
-    return mergeDeep(pendingChanges, changes, { safeGet, safeSet });
+    return this.mergeDeep(pendingChanges, changes, { safeGet, safeSet });
   }
 
   /**
@@ -129,6 +144,8 @@ export class EmberChangeset extends BufferedChangeset {
       this._deleteKey(CHANGES, key);
     }
 
+    super._setProperty({ key, value, oldValue });
+
     notifyPropertyChange(this, key);
   }
 
@@ -143,7 +160,7 @@ export class EmberChangeset extends BufferedChangeset {
   _notifyVirtualProperties(keys) {
     keys = super._notifyVirtualProperties(keys);
 
-    (keys || []).forEach(key => notifyPropertyChange(this, key));
+    (keys || []).forEach((key) => notifyPropertyChange(this, key));
 
     return;
   }
@@ -165,13 +182,20 @@ export class EmberChangeset extends BufferedChangeset {
    * @method execute
    */
   execute() {
+    let oldContent;
     if (this.isValid && this.isDirty) {
       let content = this[CONTENT];
       let changes = this[CHANGES];
+
+      // keep old values in case of error and we want to rollback
+      oldContent = buildOldValues(content, this.changes, this.getDeep);
+
       // we want mutation on original object
       // @tracked
-      mergeDeep(content, changes, { safeGet, safeSet });
+      this.mergeDeep(content, changes, { safeGet, safeSet });
     }
+
+    this[PREVIOUS_CONTENT] = oldContent;
 
     return this;
   }
@@ -180,12 +204,7 @@ export class EmberChangeset extends BufferedChangeset {
 /**
  * Creates new changesets.
  */
-export function changeset(
-  obj,
-  validateFn = defaultValidatorFn,
-  validationMap = {},
-  options = {}
-) {
+export function changeset(obj, validateFn = defaultValidatorFn, validationMap = {}, options = {}) {
   assert('Underlying object for changeset is missing', Boolean(obj));
   assert('Array is not a valid type to pass as the first argument to `changeset`', !Array.isArray(obj));
 
@@ -201,24 +220,19 @@ export function changeset(
  * Creates new changesets.
  * @function Changeset
  */
-export function Changeset(
-  obj,
-  validateFn = defaultValidatorFn,
-  validationMap = {},
-  options = {}
-) {
+export function Changeset(obj, validateFn = defaultValidatorFn, validationMap = {}, options = {}) {
   const c = changeset(obj, validateFn, validationMap, options);
 
   return new Proxy(c, {
-    get(targetBuffer, key/*, receiver*/) {
+    get(targetBuffer, key /*, receiver*/) {
       const res = targetBuffer.get(key.toString());
       return res;
     },
 
-    set(targetBuffer, key, value/*, receiver*/) {
+    set(targetBuffer, key, value /*, receiver*/) {
       targetBuffer.set(key.toString(), value);
       return true;
-    }
+    },
   });
 }
 
@@ -230,24 +244,19 @@ export default class ChangesetKlass {
    * @class ChangesetKlass
    * @constructor
    */
-  constructor(
-    obj,
-    validateFn = defaultValidatorFn,
-    validationMap = {},
-    options = {}
-  ) {
+  constructor(obj, validateFn = defaultValidatorFn, validationMap = {}, options = {}) {
     const c = changeset(obj, validateFn, validationMap, options);
 
     return new Proxy(c, {
-      get(targetBuffer, key/*, receiver*/) {
+      get(targetBuffer, key /*, receiver*/) {
         const res = targetBuffer.get(key.toString());
         return res;
       },
 
-      set(targetBuffer, key, value/*, receiver*/) {
+      set(targetBuffer, key, value /*, receiver*/) {
         targetBuffer.set(key.toString(), value);
         return true;
-      }
+      },
     });
   }
 }

@@ -2,10 +2,7 @@ import { helper } from '@ember/component/helper';
 import { Changeset } from 'ember-changeset';
 import { lookupValidator, isChangeset, isPromise, isObject } from 'validated-changeset';
 
-export function changeset(
-  [obj, validations],
-  options= {}
-) {
+export function changeset([obj, validations], options = {}) {
   if (!obj) {
     // route transitions may trigger this
     return;
@@ -17,9 +14,7 @@ export function changeset(
 
   if (isObject(validations)) {
     if (isPromise(obj)) {
-      return obj.then((resolved) =>
-        Changeset(resolved, lookupValidator(validations), validations, options)
-      );
+      return obj.then((resolved) => Changeset(resolved, lookupValidator(validations), validations, options));
     }
 
     return Changeset(obj, lookupValidator(validations), validations, options);

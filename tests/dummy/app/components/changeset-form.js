@@ -1,7 +1,8 @@
 import Component from '@ember/component';
+import { later } from '@ember/runloop';
 import { action, get } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
-import { Changeset } from 'ember-changeset'
+import { Changeset } from 'ember-changeset';
 
 let dummyValidations = {
   user: {
@@ -9,9 +10,18 @@ let dummyValidations = {
       return !!value;
     },
     email(value) {
-      return value && value.includes('@');
-    }
-  }
+      let ok = value && value.includes('@');
+      return new Promise((resolve) =>
+        later(
+          this,
+          () => {
+            resolve(ok);
+          },
+          400
+        )
+      );
+    },
+  },
 };
 
 function dummyValidator({ key, newValue, oldValue, changes, content }) {
@@ -22,24 +32,32 @@ function dummyValidator({ key, newValue, oldValue, changes, content }) {
   }
 }
 
+class Address {
+  constructor(args) {
+    Object.assign(this, args);
+  }
+  street = '123';
+  city = 'Yurtville';
+}
+
 class Foo {
   user = {
     aliases: ['someone'],
     name: 'someone',
-    email: 'something'
-  }
+    email: 'something',
+  };
 
-  address = null
+  addresses = [new Address(), new Address({ city: 'Woods' })];
 
-  cid = '1'
+  cid = '1';
 
   @tracked
-  growth = 0
+  growth = 0;
 
   notifications = {
     email: false,
-    sms: true
-  }
+    sms: true,
+  };
 
   get doubleGrowth() {
     return this.growth * 2;
@@ -56,10 +74,10 @@ export default class ChangesetForm extends Component {
 
   @action
   async submitForm(changeset, event) {
-    event.preventDefault()
+    event.preventDefault();
 
-    await changeset.validate()
+    await changeset.validate();
 
-    changeset.save()
+    changeset.save();
   }
 }
