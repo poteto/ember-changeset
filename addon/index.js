@@ -36,15 +36,14 @@ function tryContent(ctx) {
   return ctx._content ? ctx._content : ctx.content ? ctx.content : ctx;
 }
 
-function deepNotifyPropertyChange(obj, path, deep = false) {
+function deepNotifyPropertyChange(obj, path) {
   var paths = path.split('.');
   var lastPath = paths.pop(),
     current = obj,
     i;
 
   for (i = 0; i < paths.length; ++i) {
-    if (current[paths[i]] == undefined) {
-    } else {
+    if (current[paths[i]] != undefined) {
       current = current[paths[i]];
     }
     notifyPropertyChange(tryContent(current), paths[i]);
