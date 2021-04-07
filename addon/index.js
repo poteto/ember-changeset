@@ -138,7 +138,7 @@ export class EmberChangeset extends BufferedChangeset {
     // Happy path: update change map.
     if (oldValue !== value) {
       this.setDeep(changes, key, new Change(value), {
-        safeSet: this.safeSet
+        safeSet: this.safeSet,
       });
     } else if (keyInObject(changes, key)) {
       this._deleteKey(CHANGES, key);
