@@ -53,7 +53,7 @@ function deepNotifyPropertyChange(obj, path, deep = false) {
 }
 
 export class EmberChangeset extends BufferedChangeset {
-  @tracked _changed;
+  @tracked _changes;
   @tracked _errors;
   @tracked _content;
 
