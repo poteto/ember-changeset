@@ -45,8 +45,9 @@ function deepNotifyPropertyChange(obj, path) {
   for (i = 0; i < paths.length; ++i) {
     if (current[paths[i]] != undefined) {
       current = current[paths[i]];
+    } else {
+      notifyPropertyChange(tryContent(current), paths[i]);
     }
-    notifyPropertyChange(tryContent(current), paths[i]);
   }
   notifyPropertyChange(tryContent(current), lastPath);
 }
