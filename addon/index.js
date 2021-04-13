@@ -167,7 +167,7 @@ export class EmberChangeset extends BufferedChangeset {
 
     //Notitify deep
     deepNotifyPropertyChange(this, key);
-    deepNotifyPropertyChange(this[CHANGES], key);
+    notifyPropertyChange(this, 'changes');
   }
 
   /**
