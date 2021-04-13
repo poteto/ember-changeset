@@ -1780,14 +1780,31 @@ module('Unit | Utility | changeset', function (hooks) {
   test('observing #rollback values', async function (assert) {
     let res;
     let changeset = Changeset(dummyModel, dummyValidator);
-    changeset.addObserver('name', function () {
-      res = this.name;
+    //To consistently observe for changes (even for deep keys),
+    //we must adhere to a never changing value
+    //so the changeset.data (_content) is the silver bullet for now
+    //ember-changeset will keep notifying on it
+    //one downside is that you won't get the changeset as `this` inside the callback.
+    changeset.data.addObserver('name', function () {
+      res = changeset.get('name');
     });
     assert.equal(undefined, changeset.get('name'), 'initial value');
     changeset.set('name', 'Jack');
     assert.equal('Jack', res, 'observer fired when setting value');
     changeset.rollback();
     assert.equal(undefined, res, 'observer fired with the value name was rollback to');
+  });
+  test('observing deep keys on .data works', async function (assert) {
+    let res;
+    let changeset = Changeset(dummyModel, dummyValidator);
+    changeset.data.addObserver('some.really.nested.path', function () {
+      res = changeset.get('some.really.nested.path');
+    });
+    assert.equal(undefined, changeset.get('some.really.nested.path'), 'initial value');
+    changeset.set('some.really.nested.path', 'Jack');
+    assert.equal('Jack', res, 'observer fired when setting value some.really.nested.path');
+    changeset.rollback();
+    assert.equal(undefined, res, 'observer fired with the value some.really.nested.path was rollback to');
   });
 
   test('can update nested keys after rollback changes.', async function (assert) {
