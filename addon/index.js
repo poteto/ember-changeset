@@ -37,19 +37,25 @@ function tryContent(ctx) {
 }
 
 function deepNotifyPropertyChange(obj, path) {
-  var paths = path.split('.');
-  var lastPath = paths.pop(),
+  let paths = path.split('.');
+  let maybeDynamicPathToNotify = null,
+    lastPath = paths.pop(),
     current = obj,
     i;
 
+  let exists = safeGet(obj._content, path) !== undefined;
+
   for (i = 0; i < paths.length; ++i) {
-    if (current[paths[i]] != undefined) {
+    const curr = current[paths[i]];
+    if (exists && curr.content === curr.content) {
       current = current[paths[i]];
     } else {
-      notifyPropertyChange(tryContent(current), paths[i]);
+      maybeDynamicPathToNotify = paths[i];
+      break;
     }
   }
-  notifyPropertyChange(tryContent(current), lastPath);
+  const pathToNotify = maybeDynamicPathToNotify ? maybeDynamicPathToNotify : lastPath;
+  notifyPropertyChange(tryContent(current), pathToNotify);
 }
 
 export class EmberChangeset extends BufferedChangeset {
