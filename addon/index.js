@@ -36,18 +36,19 @@ function tryContent(ctx) {
   return ctx._content ? ctx._content : ctx.content ? ctx.content : ctx;
 }
 
-function deepNotifyPropertyChange(obj, path) {
+function deepNotifyPropertyChange(changeset, path) {
   let paths = path.split('.');
   let maybeDynamicPathToNotify = null,
     lastPath = paths.pop(),
-    current = obj,
+    current = changeset,
     i;
 
-  let exists = safeGet(obj._content, path) !== undefined;
+  //If the path doesn't exists previously exist inside the CONTENT, this is a dynamic set.
+  let existsInContent = safeGet(changeset[CONTENT], path) !== undefined;
 
   for (i = 0; i < paths.length; ++i) {
     const curr = current[paths[i]];
-    if (exists && curr.content === curr.content) {
+    if (existsInContent && curr && curr.content === curr.content) {
       current = current[paths[i]];
     } else {
       maybeDynamicPathToNotify = paths[i];
