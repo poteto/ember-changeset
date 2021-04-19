@@ -1,4 +1,5 @@
 import Component from '@ember/component';
+import { later } from '@ember/runloop';
 import { action, get } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
 import { Changeset } from 'ember-changeset';
@@ -9,7 +10,16 @@ let dummyValidations = {
       return !!value;
     },
     email(value) {
-      return value && value.includes('@');
+      let ok = value && value.includes('@');
+      return new Promise((resolve) =>
+        later(
+          this,
+          () => {
+            resolve(ok);
+          },
+          400
+        )
+      );
     },
   },
 };

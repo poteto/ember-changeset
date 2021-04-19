@@ -1,5 +1,4 @@
-import { Change } from 'validated-changeset';
-import { normalizeObject } from 'validated-changeset';
+import { isChange, getChangeValue, normalizeObject } from 'validated-changeset';
 
 function isMergeableObject(value) {
   return isNonNullObject(value) && !isSpecial(value);
@@ -67,8 +66,8 @@ function propertyIsUnsafe(target, key, options) {
 function buildPathToValue(source, options, kv, possibleKeys) {
   Object.keys(source).forEach((key) => {
     let possible = source[key];
-    if (possible && Object.prototype.hasOwnProperty.call(possible, 'value') && possible instanceof Change) {
-      kv[[...possibleKeys, key].join('.')] = possible.value;
+    if (possible && isChange(possible)) {
+      kv[[...possibleKeys, key].join('.')] = getChangeValue(possible);
       return;
     }
 
@@ -106,12 +105,12 @@ function mergeTargetAndSource(target, source, options) {
     }
 
     // else safe key on object
-    if (propertyIsOnObject(target, key) && isMergeableObject(source[key]) && !(source[key] instanceof Change)) {
+    if (propertyIsOnObject(target, key) && isMergeableObject(source[key]) && !isChange(source[key])) {
       options.safeSet(target, key, mergeDeep(options.safeGet(target, key), options.safeGet(source, key), options));
     } else {
       let next = source[key];
-      if (next && next instanceof Change) {
-        return options.safeSet(target, key, next.value);
+      if (isChange(next)) {
+        return options.safeSet(target, key, getChangeValue(next));
       }
 
       // if just some normal leaf value, then set

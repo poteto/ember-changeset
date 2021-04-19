@@ -231,6 +231,7 @@ import { ValidationResult, ValidatorMapFunc, ValidatorAction } from 'ember-chang
   - [`set`](#set)
   - [`prepare`](#prepare)
   - [`execute`](#execute)
+  - [`unexecute`](#unexecute)
   - [`save`](#save)
   - [`merge`](#merge)
   - [`rollback`](#rollback)
@@ -577,6 +578,21 @@ Note that executing the changeset will not remove the internal list of changes -
 
 **[⬆️ back to top](#api)**
 
+#### `unexecute`
+
+Undo changes made to underlying Object for changeset. This is often useful if you want to remove changes from underlying Object if `save` fails.
+
+```js
+changeset
+  .save()
+  .catch(() => {
+    // save applies changes to the underlying Object via this.execute(). This may be undesired for your use case.
+    dummyChangeset.unexecute();
+  })
+```
+
+**[⬆️ back to top](#api)**
+
 #### `save`
 
 Executes changes, then proxies to the underlying Object's `save` method, if one exists. If it does, the method can either return a `Promise` or a non-`Promise` value. Either way, the changeset's `save` method will return
@@ -612,8 +628,6 @@ user.get('firstName'); // "Jimmy"
 user.get('lastName'); // "Fallon"
 user.get('address.zipCode'); // "10112"
 ```
-
-Note that both changesets `A` and `B` are not destroyed by the merge, so you might want to call `destroy()` on them to avoid memory leaks.
 
 **[⬆️ back to top](#api)**
 

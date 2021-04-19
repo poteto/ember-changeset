@@ -47,6 +47,8 @@ let dummyValidations = {
   },
 };
 
+let resetDummyValidations;
+
 function dummyValidator({ key, newValue, oldValue, changes, content }) {
   let validatorFn = get(dummyValidations, key);
 
@@ -65,8 +67,12 @@ module('Unit | Utility | changeset', function (hooks) {
       },
     });
     dummyModel = Dummy.create({ exampleArray });
+    resetDummyValidations = { ...dummyValidations };
   });
 
+  hooks.afterEach(function () {
+    dummyValidations = resetDummyValidations;
+  });
   /**
    * #toString
    */
@@ -939,6 +945,23 @@ module('Unit | Utility | changeset', function (hooks) {
     assert.equal(c.get('foo'), get(model, 'foo'));
   });
 
+  test('#set works when setting property multiple times', async function (assert) {
+    const expectedChanges = [{ key: 'age', value: '90' }];
+    let dummyChangeset = Changeset({ age: '10' });
+    dummyChangeset.set('age', '80');
+    dummyChangeset.set('age', '10');
+    dummyChangeset.set('age', '90');
+
+    const changes = dummyChangeset.changes;
+
+    assert.equal(dummyModel.age, undefined);
+    assert.equal(dummyChangeset.get('age'), '90');
+
+    assert.deepEqual(changes, expectedChanges);
+    assert.ok(dummyChangeset.isDirty);
+    assert.deepEqual(dummyChangeset.change, { age: '90' });
+  });
+
   test('#set works after save', async function (assert) {
     dummyModel['org'] = {
       usa: {
@@ -1386,6 +1409,7 @@ module('Unit | Utility | changeset', function (hooks) {
       await dummyChangeset.save();
       assert.ok(false, 'WAT?!');
     } catch (error) {
+      dummyChangeset.unexecute();
       assert.equal(error.message, 'some ember data error');
     } finally {
       assert.equal(dummyModel.name, undefined, 'old name');
@@ -1409,6 +1433,7 @@ module('Unit | Utility | changeset', function (hooks) {
       await dummyChangeset.save();
       assert.ok(false, 'WAT?!');
     } catch (error) {
+      dummyChangeset.unexecute();
       assert.equal(error.message, 'some ember data error');
     } finally {
       assert.equal(dummyModel.name, 'original', 'old name');
@@ -2521,5 +2546,37 @@ module('Unit | Utility | changeset', function (hooks) {
       Object.prototype.hasOwnProperty.call(hasManyDogs, 'recordData'),
       'Get returns the related record(s) and not a proxy.'
     );
+  });
+
+  test('cyclical bug with ember data models', async function (assert) {
+    let store = this.owner.lookup('service:store');
+    let dog = store.createRecord('dog', {
+      breed: 'silver pup',
+    });
+
+    const validations = {
+      litter: {
+        dog: () => true,
+      },
+    };
+
+    const obj = {
+      litter: {},
+    };
+
+    const changeset = new Changeset(obj, lookupValidator(validations), validations);
+    changeset.litter.dog = dog;
+    changeset.validate();
+    assert.ok(true);
+  });
+
+  test('#unexecute after #save on new ember-data model', async function (assert) {
+    let store = this.owner.lookup('service:store');
+
+    let mockProfileModel = store.createRecord('profile');
+
+    const changeset = new Changeset(mockProfileModel);
+    changeset.unexecute();
+    assert.ok(true); // we just want no error until here
   });
 });
