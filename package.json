@@ -42,6 +42,7 @@
   },
   "devDependencies": {
     "@ember/optional-features": "^1.0.0",
+    "@embroider/test-setup": "^0.39.1",
     "babel-eslint": "^10.1.0",
     "broccoli-asset-rev": "^3.0.0",
     "ember-cli": "~3.22.0",
@@ -78,5 +79,8 @@
   },
   "ember-addon": {
     "configPath": "tests/dummy/config"
+  },
+  "volta": {
+    "node": "10.22.0"
   }
 }
