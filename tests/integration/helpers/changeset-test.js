@@ -307,13 +307,13 @@ module('Integration | Helper | changeset', function (hooks) {
     this.mutValue = (path, evt) => (this.c[path] = evt.target.value);
 
     await render(hbs`
-      <h1>{{c.person.firstName}}</h1>
+      <h1>{{this.c.person.firstName}}</h1>
       <input
         id="first-name"
         type="text"
-        value={{c.person.firstName}}
+        value={{this.c.person.firstName}}
         {{on "change" (fn this.mutValue "person.firstName")}}>
-      <small id="first-name-error">{{c.error.person.firstName.validation}}</small>
+      <small id="first-name-error">{{.person.firstName.validation}}</small>
     `);
 
     assert.equal(find('h1').textContent.trim(), 'Jim', 'precondition');
@@ -339,13 +339,13 @@ module('Integration | Helper | changeset', function (hooks) {
     this.mutValue = (path, evt) => (this.c[path] = evt.target.value);
 
     await render(hbs`
-      <h1>{{c.person.firstName}}</h1>
+      <h1>{{this.c.person.firstName}}</h1>
       <input
         id="first-name"
         type="text"
-        value={{c.person.firstName}}
+        value={{this.c.person.firstName}}
         {{on "change" (fn this.mutValue "person.firstName")}}>
-      <small id="first-name-error">{{c.error.person.firstName.validation}}</small>
+      <small id="first-name-error">{{.person.firstName.validation}}</small>
     `);
     assert.equal(find('h1').textContent.trim(), 'Jim', 'precondition');
     await fillIn('#first-name', 'John');
@@ -360,13 +360,13 @@ module('Integration | Helper | changeset', function (hooks) {
     this.mutValue = (path, evt) => (this.c[path] = evt.target.value);
 
     await render(hbs`
-      <h1>{{c.person.name.parts.first}}</h1>
+      <h1>{{this.c.person.name.parts.first}}</h1>
       <input
         id="first-name"
         type="text"
-        value={{c.person.name.parts.first}}
+        value={{this.c.person.name.parts.first}}
         {{on "change" (fn this.mutValue "person.name.parts.first")}}>
-      <small id="first-name-error">{{c.error.person.name.parts.first.validation}}</small>
+      <small id="first-name-error">{{this..person.name.parts.first.validation}}</small>
     `);
 
     assert.equal(find('h1').textContent.trim(), 'Jim', 'precondition');
@@ -573,7 +573,7 @@ module('Integration | Helper | changeset', function (hooks) {
     this.set('reset', (changeset) => changeset.rollback());
     this.changesetKeys = ['lastName'];
     await render(hbs`
-      {{#with (changeset dummyModel this.validate changesetKeys=this.changesetKeys) as |changesetObj|}}
+      {{#with (changeset this.dummyModel this.validate changesetKeys=this.changesetKeys) as |changesetObj|}}
         {{#if changesetObj.isDirty}}
           <p id="errors-paragraph">There were one or more errors in your form.</p>
         {{/if}}
