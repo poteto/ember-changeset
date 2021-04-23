@@ -1804,6 +1804,7 @@ module('Unit | Utility | changeset', function (hooks) {
     changeset.set('some.really.nested.path', 'Jack');
     assert.equal('Jack', res, 'observer fired when setting value some.really.nested.path');
     changeset.rollback();
+    assert.equal(undefined, changeset.get('some.really.nested.path'), 'initial value is back to undefined');
     assert.equal(undefined, res, 'observer fired with the value some.really.nested.path was rollback to');
   });
 
