@@ -140,7 +140,7 @@ class MyChangeset extends EmberChangeset {
   }
 }
 
-let changeset = Changeset(user, validationMap, validatorFn, { changeset: MyChangeset });
+let changeset = Changeset(user, validatorFn, validationMap, { changeset: MyChangeset });
 ```
 
 ## Changeset template helpers
