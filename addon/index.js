@@ -32,7 +32,7 @@ function maybeUnwrapProxy(o) {
   return isProxy(o) ? maybeUnwrapProxy(safeGet(o, 'content')) : o;
 }
 
-function tryContent(ctx) {
+function getContent(ctx) {
   return ctx._content ? ctx._content : ctx.content ? ctx.content : ctx;
 }
 
@@ -40,23 +40,23 @@ function deepNotifyPropertyChange(changeset, path) {
   let paths = path.split('.');
   let maybeDynamicPathToNotify = null,
     lastPath = paths.pop(),
-    current = changeset,
+    current = getContent(changeset),
     i;
 
   //If the path doesn't exists previously exist inside the CONTENT, this is a dynamic set.
   let existsInContent = safeGet(changeset[CONTENT], path) !== undefined;
 
   for (i = 0; i < paths.length; ++i) {
-    const curr = current[paths[i]];
-    if (existsInContent && curr && curr.content === curr.content) {
-      current = current[paths[i]];
+    const curr = safeGet(getContent(current), paths[i]);
+    if (existsInContent && curr) {
+      current = curr;
     } else {
       maybeDynamicPathToNotify = paths[i];
       break;
     }
   }
   const pathToNotify = maybeDynamicPathToNotify ? maybeDynamicPathToNotify : lastPath;
-  notifyPropertyChange(tryContent(current), pathToNotify);
+  notifyPropertyChange(current, pathToNotify);
 }
 
 export class EmberChangeset extends BufferedChangeset {
