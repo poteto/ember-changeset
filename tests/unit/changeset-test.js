@@ -552,6 +552,17 @@ module('Unit | Utility | changeset', function (hooks) {
     }
   });
 
+  test('#get works if content is undefined for nested key', async function (assert) {
+    const model = {};
+
+    const c = Changeset(model);
+    c.set('foo.bar.cat', {
+      color: 'red',
+    });
+    const cat = c.get('foo.bar.cat');
+    assert.equal(cat.color, 'red');
+  });
+
   /**
    * #set
    */
