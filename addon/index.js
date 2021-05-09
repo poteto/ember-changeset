@@ -6,12 +6,13 @@ import ObjectProxy from '@ember/object/proxy';
 import { notifyPropertyChange } from '@ember/object';
 import mergeDeep from './utils/merge-deep';
 import isObject from './utils/is-object';
-import { tracked } from '@glimmer/tracking';
+import { tracked } from 'tracked-built-ins';
 import { get as safeGet, set as safeSet } from '@ember/object';
 
 const CHANGES = '_changes';
 const PREVIOUS_CONTENT = '_previousContent';
 const CONTENT = '_content';
+const MIRROR = '_mirror';
 const defaultValidatorFn = () => true;
 
 export function buildOldValues(content, changes, getDeep) {
@@ -63,6 +64,7 @@ export class EmberChangeset extends BufferedChangeset {
   @tracked _changes;
   @tracked _errors;
   @tracked _content;
+  @tracked _mirror;
 
   isObject = isObject;
 
@@ -81,6 +83,11 @@ export class EmberChangeset extends BufferedChangeset {
   }
   safeSet(obj, key, value) {
     return safeSet(obj, key, value);
+  }
+
+  @dependentKeyCompat
+  get mirror() {
+    return this[MIRROR];
   }
 
   /**
@@ -251,11 +258,19 @@ export function Changeset(obj, validateFn = defaultValidatorFn, validationMap = 
 
   return new Proxy(c, {
     get(targetBuffer, key /*, receiver*/) {
+      const mirror = targetBuffer.mirror;
+      targetBuffer.setDeep(mirror, key, true, {
+        safeSet,
+      });
       const res = targetBuffer.get(key.toString());
       return res;
     },
 
     set(targetBuffer, key, value /*, receiver*/) {
+      const mirror = targetBuffer.mirror;
+      targetBuffer.setDeep(mirror, key, true, {
+        safeSet,
+      });
       targetBuffer.set(key.toString(), value);
       return true;
     },
