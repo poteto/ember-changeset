@@ -1,17 +1,19 @@
 import { assert } from '@ember/debug';
 import { dependentKeyCompat } from '@ember/object/compat';
-import { BufferedChangeset } from 'validated-changeset';
+import { BufferedChangeset, Change, keyInObject } from 'validated-changeset';
 import ArrayProxy from '@ember/array/proxy';
 import ObjectProxy from '@ember/object/proxy';
 import { notifyPropertyChange } from '@ember/object';
 import mergeDeep from './utils/merge-deep';
 import isObject from './utils/is-object';
-import { tracked } from '@glimmer/tracking';
+import { tracked } from 'tracked-built-ins';
 import { get as safeGet, set as safeSet } from '@ember/object';
+import { addObserver, removeObserver } from '@ember/object/observers';
 
 const CHANGES = '_changes';
 const PREVIOUS_CONTENT = '_previousContent';
 const CONTENT = '_content';
+const VIRTUAL_MIRROR = '_virtualMirror';
 const defaultValidatorFn = () => true;
 
 export function buildOldValues(content, changes, getDeep) {
@@ -32,10 +34,80 @@ function maybeUnwrapProxy(o) {
   return isProxy(o) ? maybeUnwrapProxy(safeGet(o, 'content')) : o;
 }
 
+function deepNotifyPropertyChange(changeset, path) {
+  let paths = path.split('.');
+  let maybeDynamicPathToNotify = null,
+    lastPath = paths.pop(),
+    current = changeset,
+    i;
+
+  for (i = 0; i < paths.length; ++i) {
+    if (Object.prototype.hasOwnProperty.call(current, paths[i])) {
+      current = safeGet(current, paths[i]);
+    } else {
+      maybeDynamicPathToNotify = paths[i];
+      break;
+    }
+  }
+  const pathToNotify = maybeDynamicPathToNotify ? maybeDynamicPathToNotify : lastPath;
+  notifyPropertyChange(current, pathToNotify);
+}
+
+function deepHasOwnProperty(obj, path) {
+  if (!path) {
+    return false;
+  }
+
+  let paths = path.split('.'),
+    current = obj,
+    i;
+
+  for (i = 0; i < paths.length; ++i) {
+    if (!current || !Object.prototype.hasOwnProperty.call(current, paths[i])) {
+      return false;
+    } else {
+      current = current[paths[i]];
+    }
+  }
+
+  return true;
+}
+
+function deepAddObserver(obj, path, callback) {
+  let paths = path.split('.');
+  let lastPath = paths.pop(),
+    current = obj,
+    i;
+  for (i = 0; i < paths.length; ++i) {
+    if (Object.prototype.hasOwnProperty.call(current, paths[i])) {
+      current = safeGet(current, paths[i]);
+    } else {
+      throw new Error('You cant add an observer to an undefined obj');
+    }
+  }
+  addObserver(current, lastPath, callback);
+}
+
+function deepRemoveObserver(obj, path, callback) {
+  let paths = path.split('.');
+  let lastPath = paths.pop(),
+    current = obj,
+    i;
+  for (i = 0; i < paths.length; ++i) {
+    if (Object.prototype.hasOwnProperty.call(current, paths[i])) {
+      current = safeGet(current, paths[i]);
+    } else {
+      throw new Error('You cant add an observer to an undefined obj');
+    }
+  }
+  removeObserver(current, lastPath, callback);
+}
+
 export class EmberChangeset extends BufferedChangeset {
   @tracked _changes;
   @tracked _errors;
   @tracked _content;
+  @tracked _virtualMirror = {};
 
   isObject = isObject;
 
@@ -54,6 +126,11 @@ export class EmberChangeset extends BufferedChangeset {
   }
   safeSet(obj, key, value) {
     return safeSet(obj, key, value);
+  }
+
+  @dependentKeyCompat
+  get mirror() {
+    return this[VIRTUAL_MIRROR];
   }
 
   /**
@@ -110,7 +187,7 @@ export class EmberChangeset extends BufferedChangeset {
   addError(key, error) {
     super.addError(key, error);
 
-    notifyPropertyChange(this, key);
+    deepNotifyPropertyChange(this, key);
     // Return passed-in `error`.
     return error;
   }
@@ -123,7 +200,7 @@ export class EmberChangeset extends BufferedChangeset {
   pushErrors(key, ...newErrors) {
     const { value, validation } = super.pushErrors(key, ...newErrors);
 
-    notifyPropertyChange(this, key);
+    deepNotifyPropertyChange(this, key);
 
     return { value, validation };
   }
@@ -133,9 +210,26 @@ export class EmberChangeset extends BufferedChangeset {
    * Returns value or error
    */
   _setProperty({ key, value, oldValue }) {
-    super._setProperty({ key, value, oldValue });
+    let changes = this[CHANGES];
+    let mirror = this[VIRTUAL_MIRROR];
 
-    notifyPropertyChange(this, key);
+    this.setDeep(mirror, key, true, {
+      safeSet: this.safeSet,
+    });
+
+    //We always set
+    this.setDeep(changes, key, new Change(value), {
+      safeSet: this.safeSet,
+    });
+
+    //If the newValue is equals to the wrapped value, delete key from changes
+    if (oldValue === value && keyInObject(changes, key)) {
+      this._deleteKey(CHANGES, key);
+    }
+
+    //Notitify deep
+    deepNotifyPropertyChange(this[VIRTUAL_MIRROR], key);
+    notifyPropertyChange(this, 'changes');
   }
 
   /**
@@ -149,7 +243,7 @@ export class EmberChangeset extends BufferedChangeset {
   _notifyVirtualProperties(keys) {
     keys = super._notifyVirtualProperties(keys);
 
-    (keys || []).forEach((key) => notifyPropertyChange(this, key));
+    (keys || []).forEach((key) => deepNotifyPropertyChange(this[VIRTUAL_MIRROR], key));
 
     return;
   }
@@ -159,9 +253,7 @@ export class EmberChangeset extends BufferedChangeset {
    */
   _deleteKey(objName, key = '') {
     const result = super._deleteKey(objName, key);
-
-    notifyPropertyChange(this, key);
-
+    deepNotifyPropertyChange(this[VIRTUAL_MIRROR], key);
     return result;
   }
 
@@ -187,6 +279,26 @@ export class EmberChangeset extends BufferedChangeset {
     this[PREVIOUS_CONTENT] = oldContent;
 
     return this;
+  }
+
+  get(key) {
+    safeGet(this[VIRTUAL_MIRROR], key); //consume tag for native tracked dependencies
+    return super.get(...arguments);
+  }
+
+  addObserver(key, callback) {
+    if (!deepHasOwnProperty(this[VIRTUAL_MIRROR], key)) {
+      this.setDeep(this[VIRTUAL_MIRROR], key);
+    }
+
+    deepAddObserver(this[VIRTUAL_MIRROR], key, callback);
+  }
+
+  removeObserver(key, callback) {
+    if (!deepHasOwnProperty(this[VIRTUAL_MIRROR], key)) {
+      this.setDeep(this[VIRTUAL_MIRROR], key);
+    }
+    deepRemoveObserver(this[VIRTUAL_MIRROR], key, callback);
   }
 }
 
