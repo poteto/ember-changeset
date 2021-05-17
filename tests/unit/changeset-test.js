@@ -870,6 +870,62 @@ module('Unit | Utility | changeset', function (hooks) {
     assert.deepEqual(dummyChangeset.options, expectedChanges[0].value, 'should have new values');
   });
 
+  test('#set Ember.set with Object actually does work TWICE for nested', async function (assert) {
+    set(dummyModel, 'name', {});
+    let title1 = { id: 'Mr', description: 'Mister' };
+    let title2 = { id: 'Mrs', description: 'Missus' };
+    let dummyChangeset = Changeset(dummyModel);
+    set(dummyChangeset, 'name.title', title1);
+
+    assert.equal(get(dummyModel, 'name.title.id'), undefined, 'should not have new change');
+    assert.equal(dummyChangeset.name.title.id, 'Mr', 'should have new change');
+    assert.equal(dummyChangeset.get('name.title.id'), 'Mr', 'should have new change using get');
+
+    let changes = get(dummyChangeset, 'changes');
+    assert.deepEqual(changes, [{ key: 'name.title', value: title1 }], 'changes with nested key Ember.set');
+
+    set(dummyChangeset, 'name.title', title2);
+
+    assert.equal(get(dummyModel, 'name.title.id'), undefined, 'should not have new change');
+    assert.equal(dummyChangeset.name.title.id, 'Mrs', 'should have new change');
+    assert.equal(dummyChangeset.get('name.title.id'), 'Mrs', 'should have new change using get');
+
+    changes = get(dummyChangeset, 'changes');
+    assert.deepEqual(changes, [{ key: 'name.title', value: title2 }], 'changes with nested key Ember.set');
+
+    dummyChangeset.execute();
+
+    assert.equal(dummyModel.name.title.id, 'Mrs', 'has new property');
+  });
+
+  test('#set with Object should work TWICE for nested', async function (assert) {
+    set(dummyModel, 'name', {});
+    let title1 = { id: 'Mr', description: 'Mister' };
+    let title2 = { id: 'Mrs', description: 'Missus' };
+    let dummyChangeset = Changeset(dummyModel);
+    dummyChangeset.set('name.title', title1);
+
+    assert.equal(get(dummyModel, 'name.title.id'), undefined, 'should not have new change');
+    assert.equal(dummyChangeset.name.title.id, 'Mr', 'should have new change');
+    assert.equal(dummyChangeset.get('name.title.id'), 'Mr', 'should have new change using get');
+
+    let changes = get(dummyChangeset, 'changes');
+    assert.deepEqual(changes, [{ key: 'name.title', value: title1 }], 'changes with nested key Ember.set');
+
+    dummyChangeset.set('name.title', title2);
+
+    assert.equal(get(dummyModel, 'name.title.id'), undefined, 'should not have new change');
+    assert.equal(dummyChangeset.name.title.id, 'Mrs', 'should have new change');
+    assert.equal(dummyChangeset.get('name.title.id'), 'Mrs', 'should have new change using get');
+
+    changes = get(dummyChangeset, 'changes');
+    assert.deepEqual(changes, [{ key: 'name.title', value: title2 }], 'changes with nested key Ember.set');
+
+    dummyChangeset.execute();
+
+    assert.equal(dummyModel.name.title.id, 'Mrs', 'has new property');
+  });
+
   test('it works with setProperties', async function (assert) {
     let dummyChangeset = Changeset(dummyModel);
     let expectedResult = [
