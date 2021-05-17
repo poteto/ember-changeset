@@ -881,7 +881,7 @@ module('Unit | Utility | changeset', function (hooks) {
     assert.equal(dummyChangeset.name.title.id, 'Mr', 'should have new change');
     assert.equal(dummyChangeset.get('name.title.id'), 'Mr', 'should have new change using get');
 
-    let changes = get(dummyChangeset, 'changes');
+    let changes = dummyChangeset.changes;
     assert.deepEqual(changes, [{ key: 'name.title', value: title1 }], 'changes with nested key Ember.set');
 
     set(dummyChangeset, 'name.title', title2);
@@ -890,12 +890,48 @@ module('Unit | Utility | changeset', function (hooks) {
     assert.equal(dummyChangeset.name.title.id, 'Mrs', 'should have new change');
     assert.equal(dummyChangeset.get('name.title.id'), 'Mrs', 'should have new change using get');
 
-    changes = get(dummyChangeset, 'changes');
+    changes = dummyChangeset.changes;
     assert.deepEqual(changes, [{ key: 'name.title', value: title2 }], 'changes with nested key Ember.set');
 
     dummyChangeset.execute();
 
     assert.equal(dummyModel.name.title.id, 'Mrs', 'has new property');
+  });
+
+  test('#set Ember.set with Ember Data Object actually does work TWICE for nested', async function (assert) {
+    let store = this.owner.lookup('service:store');
+
+    let mockProfileModel = store.createRecord('profile');
+    let mockUserModel = store.createRecord('user', {
+      profile: mockProfileModel,
+      save: function () {
+        return Promise.resolve(this);
+      },
+    });
+
+    let dummyChangeset = Changeset(mockUserModel);
+    let pet1 = store.createRecord('dog', { breed: 'jazzy' });
+    let pet2 = store.createRecord('dog', { breed: 'hands' });
+
+    set(dummyChangeset, 'profile.pet', pet1);
+
+    assert.equal(dummyChangeset.profile.pet.breed, 'jazzy', 'should have new change');
+    assert.equal(dummyChangeset.get('profile.pet.breed'), 'jazzy', 'should have new change using get');
+
+    let changes = dummyChangeset.changes;
+    assert.equal(changes[0].value.breed, 'jazzy', 'changes with nested key Ember.set');
+
+    set(dummyChangeset, 'profile.pet', pet2);
+
+    assert.equal(dummyChangeset.profile.pet.breed, 'hands', 'should have new change');
+    assert.equal(dummyChangeset.get('profile.pet.breed'), 'hands', 'should have new change using get');
+
+    changes = dummyChangeset.changes;
+    assert.equal(changes[0].value.breed, 'hands', 'changes with nested key Ember.set');
+
+    dummyChangeset.execute();
+
+    assert.equal(get(mockUserModel, 'profile.pet.breed'), 'hands', 'has new property');
   });
 
   test('#set with Object should work TWICE for nested', async function (assert) {
@@ -909,7 +945,7 @@ module('Unit | Utility | changeset', function (hooks) {
     assert.equal(dummyChangeset.name.title.id, 'Mr', 'should have new change');
     assert.equal(dummyChangeset.get('name.title.id'), 'Mr', 'should have new change using get');
 
-    let changes = get(dummyChangeset, 'changes');
+    let changes = dummyChangeset.changes;
     assert.deepEqual(changes, [{ key: 'name.title', value: title1 }], 'changes with nested key Ember.set');
 
     dummyChangeset.set('name.title', title2);
@@ -918,7 +954,7 @@ module('Unit | Utility | changeset', function (hooks) {
     assert.equal(dummyChangeset.name.title.id, 'Mrs', 'should have new change');
     assert.equal(dummyChangeset.get('name.title.id'), 'Mrs', 'should have new change using get');
 
-    changes = get(dummyChangeset, 'changes');
+    changes = dummyChangeset.changes;
     assert.deepEqual(changes, [{ key: 'name.title', value: title2 }], 'changes with nested key Ember.set');
 
     dummyChangeset.execute();
