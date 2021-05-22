@@ -13517,10 +13517,10 @@ validate-npm-package-name@~2.2.2:
   dependencies:
     builtins "0.0.7"
 
-validated-changeset@~0.14.5:
-  version "0.14.5"
-  resolved "https://registry.yarnpkg.com/validated-changeset/-/validated-changeset-0.14.5.tgz#377feade30993b9eb7d0a87986483c36c8c71ad6"
-  integrity sha512-QKox80QIjm6I0jO13iVGb9KYpE2XmysaI+zv0wlBJvupUdKnzbtuDQIYm1W893ubl05oKi7TZLB2TNzvBXd1Jg==
+validated-changeset@~0.14.6:
+  version "0.14.6"
+  resolved "https://registry.yarnpkg.com/validated-changeset/-/validated-changeset-0.14.6.tgz#811dd3174637cba0b0ba3f5d3ff25b43d045ef83"
+  integrity sha512-v89Lr0GN60gOwCxqZK/ReYHDrdiN3JcNyqQsOmxgBCwQlfbGs8fTwKUJDMTqDuWXS/HPsASDsBmQNkLOaolzIA==
 
 vary@~1.1.2:
   version "1.1.2"
