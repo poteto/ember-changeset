@@ -1,6 +1,6 @@
 {
   "name": "ember-changeset",
-  "version": "3.13.3",
+  "version": "3.13.6",
   "description": "Changesets for Ember",
   "keywords": [
     "ember-addon",
@@ -38,10 +38,11 @@
     "@glimmer/tracking": "^1.0.1",
     "ember-auto-import": "^1.5.2",
     "ember-cli-babel": "^7.19.0",
-    "validated-changeset": "~0.14.3"
+    "validated-changeset": "~0.14.6"
   },
   "devDependencies": {
     "@ember/optional-features": "^1.0.0",
+    "@embroider/test-setup": "^0.39.1",
     "babel-eslint": "^10.1.0",
     "broccoli-asset-rev": "^3.0.0",
     "ember-cli": "~3.22.0",
@@ -78,5 +79,8 @@
   },
   "ember-addon": {
     "configPath": "tests/dummy/config"
+  },
+  "volta": {
+    "node": "10.22.0"
   }
 }
