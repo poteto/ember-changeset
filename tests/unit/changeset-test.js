@@ -915,8 +915,10 @@ module('Unit | Utility | changeset', function (hooks) {
 
     set(dummyChangeset, 'profile.pet', pet1);
 
-    assert.equal(dummyChangeset.profile.pet.breed, 'jazzy', 'should have new change');
-    assert.equal(dummyChangeset.get('profile.pet.breed'), 'jazzy', 'should have new change using get');
+    assert.equal(dummyChangeset.profile.pet.breed, 'jazzy', 'should have change');
+    assert.equal(dummyChangeset.get('profile.pet.breed'), 'jazzy', 'should have change using get');
+    assert.equal(dummyChangeset.get('profile.pet').breed, 'jazzy', 'should have change using get');
+    assert.equal(dummyChangeset.get('profile').pet.breed, 'jazzy', 'should have change using get');
 
     let changes = dummyChangeset.changes;
     assert.equal(changes[0].value.breed, 'jazzy', 'changes with nested key Ember.set');
@@ -925,6 +927,8 @@ module('Unit | Utility | changeset', function (hooks) {
 
     assert.equal(dummyChangeset.profile.pet.breed, 'hands', 'should have new change');
     assert.equal(dummyChangeset.get('profile.pet.breed'), 'hands', 'should have new change using get');
+    assert.equal(dummyChangeset.get('profile.pet').breed, 'hands', 'should have new change using get');
+    assert.equal(dummyChangeset.get('profile').pet.breed, 'hands', 'should have new change using get');
 
     changes = dummyChangeset.changes;
     assert.equal(changes[0].value.breed, 'hands', 'changes with nested key Ember.set');
