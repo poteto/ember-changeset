@@ -1,6 +1,6 @@
 import { assert } from '@ember/debug';
 import { dependentKeyCompat } from '@ember/object/compat';
-import { BufferedChangeset } from 'validated-changeset';
+import { BufferedChangeset, Change, keyInObject } from 'validated-changeset';
 import ArrayProxy from '@ember/array/proxy';
 import ObjectProxy from '@ember/object/proxy';
 import { notifyPropertyChange } from '@ember/object';
@@ -30,6 +30,33 @@ function isProxy(o) {
 
 function maybeUnwrapProxy(o) {
   return isProxy(o) ? maybeUnwrapProxy(safeGet(o, 'content')) : o;
+}
+
+function getContent(ctx) {
+  return ctx._content ? ctx._content : ctx.content ? ctx.content : ctx;
+}
+
+function deepNotifyPropertyChange(changeset, path) {
+  let paths = path.split('.');
+  let maybeDynamicPathToNotify = null,
+    lastPath = paths.pop(),
+    current = getContent(changeset),
+    i;
+
+  //If the path doesn't exists previously exist inside the CONTENT, this is a dynamic set.
+  let existsInContent = safeGet(changeset[CONTENT], path) !== undefined;
+
+  for (i = 0; i < paths.length; ++i) {
+    const curr = safeGet(getContent(current), paths[i]);
+    if (existsInContent && curr) {
+      current = curr;
+    } else {
+      maybeDynamicPathToNotify = paths[i];
+      break;
+    }
+  }
+  const pathToNotify = maybeDynamicPathToNotify ? maybeDynamicPathToNotify : lastPath;
+  notifyPropertyChange(current, pathToNotify);
 }
 
 export class EmberChangeset extends BufferedChangeset {
@@ -110,7 +137,7 @@ export class EmberChangeset extends BufferedChangeset {
   addError(key, error) {
     super.addError(key, error);
 
-    notifyPropertyChange(this, key);
+    deepNotifyPropertyChange(this, key);
     // Return passed-in `error`.
     return error;
   }
@@ -123,7 +150,7 @@ export class EmberChangeset extends BufferedChangeset {
   pushErrors(key, ...newErrors) {
     const { value, validation } = super.pushErrors(key, ...newErrors);
 
-    notifyPropertyChange(this, key);
+    deepNotifyPropertyChange(this, key);
 
     return { value, validation };
   }
@@ -133,9 +160,21 @@ export class EmberChangeset extends BufferedChangeset {
    * Returns value or error
    */
   _setProperty({ key, value, oldValue }) {
-    super._setProperty({ key, value, oldValue });
+    let changes = this[CHANGES];
 
-    notifyPropertyChange(this, key);
+    //We always set
+    this.setDeep(changes, key, new Change(value), {
+      safeSet: this.safeSet,
+    });
+
+    //If the newValue is equals to the wrapped value, delete key from changes
+    if (oldValue === value && keyInObject(changes, key)) {
+      this._deleteKey(CHANGES, key);
+    }
+
+    //Notitify deep
+    deepNotifyPropertyChange(this, key);
+    notifyPropertyChange(this, 'changes');
   }
 
   /**
@@ -149,7 +188,7 @@ export class EmberChangeset extends BufferedChangeset {
   _notifyVirtualProperties(keys) {
     keys = super._notifyVirtualProperties(keys);
 
-    (keys || []).forEach((key) => notifyPropertyChange(this, key));
+    (keys || []).forEach((key) => deepNotifyPropertyChange(this, key));
 
     return;
   }
@@ -159,9 +198,7 @@ export class EmberChangeset extends BufferedChangeset {
    */
   _deleteKey(objName, key = '') {
     const result = super._deleteKey(objName, key);
-
-    notifyPropertyChange(this, key);
-
+    deepNotifyPropertyChange(this, key);
     return result;
   }
 
