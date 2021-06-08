@@ -322,6 +322,14 @@ module('Unit | Utility | changeset', function (hooks) {
     assert.equal(get(model, 'isChangesetDirty'), true, 'changeset is dirty');
   });
 
+  test('#set does not dirty changeset with same date', async function (assert) {
+    dummyModel.createTime = new Date('2013-05-01');
+    const dummyChangeset = Changeset(dummyModel);
+    dummyChangeset.set('createTime', new Date('2013-05-01'));
+
+    assert.notOk(dummyChangeset.isDirty);
+  });
+
   /**
    * #get
    */
