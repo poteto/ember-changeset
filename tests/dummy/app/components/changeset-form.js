@@ -32,6 +32,10 @@ function dummyValidator({ key, newValue, oldValue, changes, content }) {
   }
 }
 
+function validate() {
+  return 'not good';
+}
+
 class Address {
   constructor(args) {
     Object.assign(this, args);
@@ -70,6 +74,12 @@ export default class ChangesetForm extends Component {
 
     this.model = new Foo();
     this.changeset = Changeset(this.model, dummyValidator);
+  }
+
+  get validateOnRender() {
+    let cs = Changeset({}, null, { title: validate });
+    cs.validate();
+    return cs;
   }
 
   @action
