@@ -9,7 +9,6 @@ import isObject from './utils/is-object';
 import { tracked } from '@glimmer/tracking';
 import { get as safeGet, set as safeSet } from '@ember/object';
 
-const CHANGES = '_changes';
 const CHANGES_CACHE = '_changesCache';
 const PREVIOUS_CONTENT = '_previousContent';
 const CONTENT = '_content';
