@@ -10,6 +10,7 @@ import { tracked } from '@glimmer/tracking';
 import { get as safeGet, set as safeSet } from '@ember/object';
 
 const CHANGES = '_changes';
+const CHANGES_CACHE = '_changesCache';
 const PREVIOUS_CONTENT = '_previousContent';
 const CONTENT = '_content';
 const defaultValidatorFn = () => true;
@@ -94,7 +95,7 @@ export class EmberChangeset extends BufferedChangeset {
 
   get pendingData() {
     let content = this[CONTENT];
-    let changes = this[CHANGES];
+    let changes = this[CHANGES_CACHE];
 
     let pendingChanges = this.mergeDeep(Object.create(Object.getPrototypeOf(content)), content, { safeGet, safeSet });
 
@@ -174,7 +175,7 @@ export class EmberChangeset extends BufferedChangeset {
     let oldContent;
     if (this.isValid && this.isDirty) {
       let content = this[CONTENT];
-      let changes = this[CHANGES];
+      let changes = this[CHANGES_CACHE];
 
       // keep old values in case of error and we want to rollback
       oldContent = buildOldValues(content, this.changes, this.getDeep);
