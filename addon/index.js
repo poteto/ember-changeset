@@ -117,6 +117,7 @@ export class EmberChangeset extends BufferedChangeset {
 
   /**
    * Manually push multiple errors to the changeset as an array.
+   * testing
    *
    * @method pushErrors
    */
