@@ -577,8 +577,7 @@ module('Integration | Helper | changeset', function (hooks) {
         {{#if changesetObj.isDirty}}
           <p id="errors-paragraph">There were one or more errors in your form.</p>
         {{/if}}
-        {{input id="first-name" value=changesetObj.firstName}}
-        {{input id="last-name" value=changesetObj.lastName}}
+        <Input @id="first-name" @value={{changesetObj.firstName}} />
         <button id="submit-btn" {{on "click" (fn this.submit changesetObj)}}>Submit</button>
       {{/with}}
     `);

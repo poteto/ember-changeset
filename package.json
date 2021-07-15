@@ -38,7 +38,7 @@
     "@glimmer/tracking": "^1.0.1",
     "ember-auto-import": "^1.5.2",
     "ember-cli-babel": "^7.19.0",
-    "validated-changeset": "0.14.12"
+    "validated-changeset": "0.14.13"
   },
   "devDependencies": {
     "@ember/optional-features": "^1.0.0",
