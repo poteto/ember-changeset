@@ -1,6 +1,6 @@
 {
   "name": "ember-changeset",
-  "version": "3.13.9",
+  "version": "3.14.0",
   "description": "Changesets for Ember",
   "keywords": [
     "ember-addon",
@@ -38,7 +38,7 @@
     "@glimmer/tracking": "^1.0.1",
     "ember-auto-import": "^1.5.2",
     "ember-cli-babel": "^7.19.0",
-    "validated-changeset": "0.14.13"
+    "validated-changeset": "0.14.14"
   },
   "devDependencies": {
     "@ember/optional-features": "^1.0.0",
@@ -59,7 +59,7 @@
     "ember-maybe-import-regenerator": "^0.1.6",
     "ember-qunit": "^4.6.0",
     "ember-resolver": "^8.0.0",
-    "ember-source": "~3.22.0",
+    "ember-source": "~3.24.0",
     "ember-source-channel-url": "^2.0.1",
     "ember-template-lint": "^2.6.0",
     "ember-try": "^1.2.1",
