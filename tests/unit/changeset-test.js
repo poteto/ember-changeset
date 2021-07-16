@@ -604,7 +604,7 @@ module('Unit | Utility | changeset', function (hooks) {
     assert.equal(dummyChangeset.get('name'), 'foo', 'should have new change');
   });
 
-  test('#set Ember.set doesnt work for nested', async function (assert) {
+  test('#set Ember.set works for nested', async function (assert) {
     set(dummyModel, 'name', {});
     let dummyChangeset = Changeset(dummyModel);
     set(dummyChangeset, 'name.short', 'boo');
