@@ -24,6 +24,7 @@
     "build": "ember build",
     "lint:hbs": "ember-template-lint .",
     "lint:js": "eslint .",
+    "lint:js:fix": "eslint . --fix",
     "lint": "npm-run-all --aggregate-output --continue-on-error --parallel lint:*",
     "start": "ember serve",
     "test": "npm-run-all lint:* test:*",
@@ -38,7 +39,7 @@
     "@embroider/macros": "^0.42.3",
     "@glimmer/tracking": "^1.0.1",
     "ember-auto-import": "^1.11.3",
-    "ember-cli-babel": "^7.19.0",
+    "ember-cli-babel": "^7.26.6",
     "validated-changeset": "1.0.0"
   },
   "devDependencies": {
