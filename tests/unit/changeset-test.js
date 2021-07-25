@@ -977,7 +977,7 @@ module('Unit | Utility | changeset', function (hooks) {
   test('#set reports correct isDirty for async belongsTo relationship', async function (assert) {
     let store = this.owner.lookup('service:store');
     let profileModel = store.createRecord('profile');
-    let mockUserModel = store.createRecord('user', { 
+    let mockUserModel = store.createRecord('user', {
       profile: profileModel,
     });
     let dummyChangeset = Changeset(mockUserModel);
