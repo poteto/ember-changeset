@@ -974,6 +974,26 @@ module('Unit | Utility | changeset', function (hooks) {
     assert.equal(dummyModel.name.title.id, 'Mrs', 'has new property');
   });
 
+  test('#set reports correct isDirty for async belongsTo relationship', async function (assert) {
+    let store = this.owner.lookup('service:store');
+    let profileModel = store.createRecord('profile');
+    let mockUserModel = store.createRecord('user', { 
+      profile: profileModel,
+    });
+    let dummyChangeset = Changeset(mockUserModel);
+
+    assert.equal(dummyChangeset.isDirty, false, 'is not dirty initially');
+
+    let updatedProfileModel = store.createRecord('profile');
+    dummyChangeset.set('profile', updatedProfileModel);
+
+    assert.equal(dummyChangeset.isDirty, true, 'is now dirty');
+
+    dummyChangeset.set('profile', profileModel);
+
+    assert.equal(dummyChangeset.isDirty, false, 'is not dirty after reset');
+  });
+
   test('it works with setProperties', async function (assert) {
     let dummyChangeset = Changeset(dummyModel);
     let expectedResult = [
