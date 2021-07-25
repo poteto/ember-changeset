@@ -35,8 +35,9 @@
   "bugs": "https://github.com/poteto/ember-changeset/issues",
   "homepage": "https://github.com/poteto/ember-changeset",
   "dependencies": {
+    "@embroider/macros": "^0.42.3",
     "@glimmer/tracking": "^1.0.1",
-    "ember-auto-import": "^1.5.2",
+    "ember-auto-import": "^1.11.3",
     "ember-cli-babel": "^7.19.0",
     "validated-changeset": "1.0.0"
   },
@@ -47,7 +48,7 @@
     "broccoli-asset-rev": "^3.0.0",
     "ember-cli": "~3.22.0",
     "ember-cli-dependency-checker": "^3.1.0",
-    "ember-cli-htmlbars": "^5.1.2",
+    "ember-cli-htmlbars": "^5.7.1",
     "ember-cli-inject-live-reload": "^2.0.1",
     "ember-cli-release": "^1.0.0-beta.2",
     "ember-cli-sri": "^2.1.1",
