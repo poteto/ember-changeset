@@ -18,18 +18,18 @@ module('Integration | Helper | changeset', function (hooks) {
         return (isPresent(value) && value.length > 3) || 'too short';
       },
     };
-    this.set('dummyModel', { firstName: 'Jim', lastName: 'Bob' });
-    this.set('validate', ({ key, newValue }) => {
+    this.dummyModel = { firstName: 'Jim', lastName: 'Bob' };
+    this.validate = ({ key, newValue }) => {
       let validatorFn = validations[key];
 
       if (typeOf(validatorFn) === 'function') {
         return validatorFn(newValue);
       }
-    });
-    this.set('submit', (changeset) => changeset.validate());
-    this.set('reset', (changeset) => changeset.rollback());
+    };
+    this.submit = (changeset) => changeset.validate();
+    this.reset = (changeset) => changeset.rollback();
     await render(hbs`
-      {{#with (changeset dummyModel this.validate) as |changesetObj|}}
+      {{#with (changeset this.dummyModel this.validate) as |changesetObj|}}
         {{#if changesetObj.isInvalid}}
           <p id="errors-paragraph">There were one or more errors in your form.</p>
         {{/if}}
@@ -58,12 +58,12 @@ module('Integration | Helper | changeset', function (hooks) {
         return (isPresent(newValue) && newValue.length > 3) || 'too short';
       },
     };
-    this.set('dummyModel', { firstName: 'Jim', lastName: 'Bobbie' });
-    this.set('validations', validations);
-    this.set('submit', (changeset) => changeset.validate());
-    this.set('reset', (changeset) => changeset.rollback());
+    this.dummyModel = { firstName: 'Jim', lastName: 'Bobbie' };
+    this.validations = validations;
+    this.submit = (changeset) => changeset.validate();
+    this.reset = (changeset) => changeset.rollback();
     await render(hbs`
-      {{#with (changeset dummyModel validations) as |changesetObj|}}
+      {{#with (changeset this.dummyModel validations) as |changesetObj|}}
         {{#if changesetObj.isInvalid}}
           <p id="errors-paragraph">There were one or more errors in your form.</p>
         {{/if}}
@@ -94,10 +94,10 @@ module('Integration | Helper | changeset', function (hooks) {
     let validations = {
       firstName: [validateLength(), validateStartsUppercase()],
     };
-    this.set('dummyModel', { firstName: 'Jim', lastName: 'Bobbie' });
-    this.set('validations', validations);
-    this.set('submit', (changeset) => changeset.validate());
-    this.set('reset', (changeset) => changeset.rollback());
+    this.dummyModel = { firstName: 'Jim', lastName: 'Bobbie' };
+    this.validations = validations;
+    this.submit = (changeset) => changeset.validate();
+    this.reset = (changeset) => changeset.rollback();
     await render(hbs`
       {{#with (changeset dummyModel validations) as |changesetObj|}}
         {{#if changesetObj.isInvalid}}
@@ -131,10 +131,10 @@ module('Integration | Helper | changeset', function (hooks) {
     let validations = {
       firstName: [validateLength(), validateStartsUppercase()],
     };
-    this.set('dummyModel', { firstName: 'Jim', lastName: 'Bobbie' });
-    this.set('validations', validations);
-    this.set('submit', (changeset) => changeset.validate());
-    this.set('reset', (changeset) => changeset.rollback());
+    this.dummyModel = { firstName: 'Jim', lastName: 'Bobbie' };
+    this.validations = validations;
+    this.submit = (changeset) => changeset.validate();
+    this.reset = (changeset) => changeset.rollback();
     await render(hbs`
       {{#with (changeset dummyModel validations) as |changesetObj|}}
         {{#if changesetObj.isInvalid}}
@@ -157,8 +157,8 @@ module('Integration | Helper | changeset', function (hooks) {
   });
 
   test('it rollsback changes', async function (assert) {
-    this.set('dummyModel', { firstName: 'Jim' });
-    this.set('reset', (changeset) => changeset.rollback());
+    this.dummyModel = { firstName: 'Jim' };
+    this.reset = (changeset) => changeset.rollback();
     await render(hbs`
       {{#with (changeset dummyModel) as |changesetObj|}}
         {{input id="first-name" value=changesetObj.firstName}}
@@ -174,9 +174,9 @@ module('Integration | Helper | changeset', function (hooks) {
   });
 
   test('it can be used with 1 argument', async function (assert) {
-    this.set('dummyModel', { firstName: 'Jim', lastName: 'Bob' });
-    this.set('submit', (changeset) => changeset.validate());
-    this.set('reset', (changeset) => changeset.rollback());
+    this.dummyModel = { firstName: 'Jim', lastName: 'Bob' };
+    this.submit = (changeset) => changeset.validate();
+    this.reset = (changeset) => changeset.rollback();
     await render(hbs`
       {{#with (changeset dummyModel) as |changesetObj|}}
         {{#if changesetObj.isInvalid}}
@@ -217,8 +217,8 @@ module('Integration | Helper | changeset', function (hooks) {
   });
 
   test('it updates when set with a validator', async function (assert) {
-    this.set('dummyModel', { firstName: 'Jim', lastName: 'Bob' });
-    this.set('validate', () => true);
+    this.dummyModel = { firstName: 'Jim', lastName: 'Bob' };
+    this.validate = () => true;
     this.updateFirstName = (changeset, evt) => {
       changeset.firstName = evt.target.value;
     };
@@ -307,13 +307,13 @@ module('Integration | Helper | changeset', function (hooks) {
     this.mutValue = (path, evt) => (this.c[path] = evt.target.value);
 
     await render(hbs`
-      <h1>{{c.person.firstName}}</h1>
+      <h1>{{this.c.person.firstName}}</h1>
       <input
         id="first-name"
         type="text"
-        value={{c.person.firstName}}
+        value={{this.c.person.firstName}}
         {{on "change" (fn this.mutValue "person.firstName")}}>
-      <small id="first-name-error">{{c.error.person.firstName.validation}}</small>
+      <small id="first-name-error">{{this.c.error.person.firstName.validation}}</small>
     `);
 
     assert.equal(find('h1').textContent.trim(), 'Jim', 'precondition');
@@ -339,13 +339,13 @@ module('Integration | Helper | changeset', function (hooks) {
     this.mutValue = (path, evt) => (this.c[path] = evt.target.value);
 
     await render(hbs`
-      <h1>{{c.person.firstName}}</h1>
+      <h1>{{this.c.person.firstName}}</h1>
       <input
         id="first-name"
         type="text"
-        value={{c.person.firstName}}
+        value={{this.c.person.firstName}}
         {{on "change" (fn this.mutValue "person.firstName")}}>
-      <small id="first-name-error">{{c.error.person.firstName.validation}}</small>
+      <small id="first-name-error">{{this.c.error.person.firstName.validation}}</small>
     `);
     assert.equal(find('h1').textContent.trim(), 'Jim', 'precondition');
     await fillIn('#first-name', 'John');
@@ -360,13 +360,13 @@ module('Integration | Helper | changeset', function (hooks) {
     this.mutValue = (path, evt) => (this.c[path] = evt.target.value);
 
     await render(hbs`
-      <h1>{{c.person.name.parts.first}}</h1>
+      <h1>{{this.c.person.name.parts.first}}</h1>
       <input
         id="first-name"
         type="text"
-        value={{c.person.name.parts.first}}
+        value={{this.c.person.name.parts.first}}
         {{on "change" (fn this.mutValue "person.name.parts.first")}}>
-      <small id="first-name-error">{{c.error.person.name.parts.first.validation}}</small>
+      <small id="first-name-error">{{this.c.error.person.name.parts.first.validation}}</small>
     `);
 
     assert.equal(find('h1').textContent.trim(), 'Jim', 'precondition');
@@ -488,7 +488,7 @@ module('Integration | Helper | changeset', function (hooks) {
     }
     let d = new Date('2015');
     let momentInstance = new Moment(d);
-    this.set('dummyModel', { startDate: momentInstance });
+    this.dummyModel = { startDate: momentInstance };
     await render(hbs`
       {{#with (changeset this.dummyModel) as |changesetObj|}}
         <h1>{{changesetObj.startDate.date}}</h1>
@@ -500,7 +500,7 @@ module('Integration | Helper | changeset', function (hooks) {
 
   test('it handles when is plain object passed to helper', async function (assert) {
     let d = new Date('2015');
-    this.set('d', d);
+    this.d = d;
     await render(hbs`
       {{#with (changeset (hash date=this.d)) as |changesetObj|}}
         <h1>{{changesetObj.date}}</h1>
@@ -533,8 +533,8 @@ module('Integration | Helper | changeset', function (hooks) {
   });
 
   test('it skips validation when skipValidate is passed as an option', async function (assert) {
-    this.set('dummyModel', { firstName: 'Jim', lastName: 'Bob' });
-    this.set('validate', () => false);
+    this.dummyModel = { firstName: 'Jim', lastName: 'Bob' };
+    this.validate = () => false;
     await render(hbs`
       {{#with (changeset this.dummyModel this.validate skipValidate=true) as |changesetObj|}}
         <h1>{{changesetObj.firstName}} {{changesetObj.lastName}}</h1>
@@ -561,19 +561,19 @@ module('Integration | Helper | changeset', function (hooks) {
         return (isPresent(value) && value.length > 3) || 'too short';
       },
     };
-    this.set('dummyModel', { firstName: 'Jimm', lastName: 'Bob' });
-    this.set('validate', ({ key, newValue }) => {
+    this.dummyModel = { firstName: 'Jimm', lastName: 'Bob' };
+    this.validate = ({ key, newValue }) => {
       let validatorFn = validations[key];
 
       if (typeOf(validatorFn) === 'function') {
         return validatorFn(newValue);
       }
-    });
-    this.set('submit', (changeset) => changeset.validate());
-    this.set('reset', (changeset) => changeset.rollback());
+    };
+    this.submit = (changeset) => changeset.validate();
+    this.reset = (changeset) => changeset.rollback();
     this.changesetKeys = ['lastName'];
     await render(hbs`
-      {{#with (changeset dummyModel this.validate changesetKeys=this.changesetKeys) as |changesetObj|}}
+      {{#with (changeset this.dummyModel this.validate changesetKeys=this.changesetKeys) as |changesetObj|}}
         {{#if changesetObj.isDirty}}
           <p id="errors-paragraph">There were one or more errors in your form.</p>
         {{/if}}
