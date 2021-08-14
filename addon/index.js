@@ -8,6 +8,7 @@ import mergeDeep from './utils/merge-deep';
 import isObject from './utils/is-object';
 import { tracked } from '@glimmer/tracking';
 import { get as safeGet, set as safeSet } from '@ember/object';
+import { macroCondition, dependencySatisfies, importSync } from '@embroider/macros';
 
 const CHANGES = '_changes';
 const PREVIOUS_CONTENT = '_previousContent';
@@ -32,6 +33,11 @@ function maybeUnwrapProxy(o) {
   return isProxy(o) ? maybeUnwrapProxy(safeGet(o, 'content')) : o;
 }
 
+let Model;
+if (macroCondition(dependencySatisfies('ember-data', '*'))) {
+  Model = importSync('@ember-data/model').default;
+}
+
 export class EmberChangeset extends BufferedChangeset {
   @tracked _changes;
   @tracked _errors;
@@ -48,8 +54,10 @@ export class EmberChangeset extends BufferedChangeset {
   getDeep = safeGet;
   mergeDeep = mergeDeep;
 
-  // override base class
   safeGet(obj, key) {
+    if (Model && obj.relationshipFor?.(key)?.meta?.kind == 'belongsTo') {
+      return obj.belongsTo(key).value();
+    }
     return safeGet(obj, key);
   }
   safeSet(obj, key, value) {

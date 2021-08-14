@@ -1,3 +1,4 @@
+<h2>Changeset isPristine · {{this.changeset.isPristine}}</h2>
 <h2>Changeset cid: <span data-test-changeset-cid>{{this.changeset.cid}}</span></h2>
 <h2>Changeset Email: <span data-test-changeset-user-email>{{changeset-get this.changeset "user.email"}}</span></h2>
 <h2>Changeset Name: <span data-test-changeset-user-name>{{changeset-get this.changeset "user.name"}}</span></h2>
@@ -10,6 +11,10 @@
 <h2>Model notifications email: <span data-test-model-notifications-email>{{this.model.notifications.email}}</span></h2>
 <h2>Model notifications sms: <span data-test-model-notifications-sms>{{this.model.notifications.sms}}</span></h2>
 <h2>Doubled: {{this.model.doubleGrowth}}</h2>
+
+{{#each this.validateOnRender.errors as |e|}}
+  <h2>Validate On Render for {{e.key}}: {{e.value}}</h2>
+{{/each}}
 
 {{#each this.model.addresses as |address idx|}}
   <h2 data-test-address={{idx}}>{{address.street}} {{address.city}}</h2>

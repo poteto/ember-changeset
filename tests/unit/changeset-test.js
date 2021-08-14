@@ -322,6 +322,14 @@ module('Unit | Utility | changeset', function (hooks) {
     assert.equal(get(model, 'isChangesetDirty'), true, 'changeset is dirty');
   });
 
+  test('#set does not dirty changeset with same date', async function (assert) {
+    dummyModel.createTime = new Date('2013-05-01');
+    const dummyChangeset = Changeset(dummyModel);
+    dummyChangeset.set('createTime', new Date('2013-05-01'));
+
+    assert.notOk(dummyChangeset.isDirty);
+  });
+
   /**
    * #get
    */
@@ -596,7 +604,7 @@ module('Unit | Utility | changeset', function (hooks) {
     assert.equal(dummyChangeset.get('name'), 'foo', 'should have new change');
   });
 
-  test('#set Ember.set doesnt work for nested', async function (assert) {
+  test('#set Ember.set works for nested', async function (assert) {
     set(dummyModel, 'name', {});
     let dummyChangeset = Changeset(dummyModel);
     set(dummyChangeset, 'name.short', 'boo');
@@ -964,6 +972,26 @@ module('Unit | Utility | changeset', function (hooks) {
     dummyChangeset.execute();
 
     assert.equal(dummyModel.name.title.id, 'Mrs', 'has new property');
+  });
+
+  test('#set reports correct isDirty for async belongsTo relationship', async function (assert) {
+    let store = this.owner.lookup('service:store');
+    let profileModel = store.createRecord('profile');
+    let mockUserModel = store.createRecord('user', {
+      profile: profileModel,
+    });
+    let dummyChangeset = Changeset(mockUserModel);
+
+    assert.equal(dummyChangeset.isDirty, false, 'is not dirty initially');
+
+    let updatedProfileModel = store.createRecord('profile');
+    dummyChangeset.set('profile', updatedProfileModel);
+
+    assert.equal(dummyChangeset.isDirty, true, 'is now dirty');
+
+    dummyChangeset.set('profile', profileModel);
+
+    assert.equal(dummyChangeset.isDirty, false, 'is not dirty after reset');
   });
 
   test('it works with setProperties', async function (assert) {

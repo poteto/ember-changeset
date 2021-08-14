@@ -4,6 +4,10 @@ import { action, get } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
 import { Changeset } from 'ember-changeset';
 
+function validate() {
+  return 'not good';
+}
+
 let dummyValidations = {
   user: {
     name(value) {
@@ -70,6 +74,12 @@ export default class ChangesetForm extends Component {
 
     this.model = new Foo();
     this.changeset = Changeset(this.model, dummyValidator);
+  }
+
+  get validateOnRender() {
+    let cs = Changeset({}, null, { title: validate });
+    cs.validate();
+    return cs;
   }
 
   @action
