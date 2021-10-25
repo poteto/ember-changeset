@@ -3,77 +3,71 @@ name: CI
 on:
   push:
     branches:
+      - main
       - master
   pull_request: {}
 
 jobs:
-
-  lint:
-    name: "lint"
-    env:
-      CI: true
+  test:
+    name: "Tests"
     runs-on: ubuntu-latest
+
     steps:
-    - uses: actions/checkout@v2
-    - name: Install node
-      uses: actions/setup-node@v2-beta
-      with:
-        node-version: 12.x
-
-    - name: Get yarn cache
-      id: yarn-cache
-      run: echo "::set-output name=dir::$(yarn cache dir)"
-
-    - uses: actions/cache@v2
-      with:
-        path: ${{ steps.yarn-cache.outputs.dir }}
-        key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-        restore-keys: |
-         ${{ runner.os }}-yarn-
-    - name: yarn install
-      run: yarn
-    - name: lint js
-      run: yarn lint:js
-    - name: lint hbs
-      run: yarn lint:hbs
+      - uses: actions/checkout@v2
+      - name: Install Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: 12.x
+          cache: npm
+      - name: Install Dependencies
+        run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Run Tests
+        run: npm run test:ember
 
   floating:
-    name: "Floating dependencies"
-    env:
-      CI: true
+    name: "Floating Dependencies"
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: true
-      matrix:
-        try-scenario: [
-          ember-lts-3.20,
-          ember-lts-3.24,
-          ember-release
-          ember-beta,
-          ember-canary,
-          embroider-safe,
-          embroider-optimized,
-        ]
+
     steps:
-    - uses: actions/checkout@v2
-    - name: Install node
-      uses: actions/setup-node@v2-beta
-      with:
-        node-version: 12.x
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 12.x
+          cache: npm
+      - name: Install Dependencies
+        run: npm install --no-shrinkwrap
+      - name: Run Tests
+        run: npm run test:ember
 
-    - name: Get yarn cache
-      id: yarn-cache
-      run: echo "::set-output name=dir::$(yarn cache dir)"
+  try-scenarios:
+    name: ${{ matrix.try-scenario }}
+    runs-on: ubuntu-latest
+    needs: 'test'
 
-    - uses: actions/cache@v2
-      with:
-        path: ${{ steps.yarn-cache.outputs.dir }}
-        key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-        restore-keys: |
-         ${{ runner.os }}-yarn-
-    - name: yarn install
-      run: yarn
+    strategy:
+      fail-fast: false
+      matrix:
+        try-scenario:
+          - ember-lts-3.20
+          - ember-lts-3.24
+          - ember-release
+          #- ember-beta
+          #- ember-canary
+          - ember-classic
+          - ember-default-with-jquery
+          - embroider-safe
+          - embroider-optimized
 
-    - name: test
-      run: ./node_modules/.bin/ember try:one ${{ matrix.try-scenario }}
-
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: 12.x
+          cache: npm
+      - name: Install Dependencies
+        run: npm ci
+      - name: Run Tests
+        run: ./node_modules/.bin/ember try:one ${{ matrix.try-scenario }}

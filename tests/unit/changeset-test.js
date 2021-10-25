@@ -12,6 +12,7 @@ import ObjectProxy from '@ember/object/proxy';
 import { dasherize } from '@ember/string';
 import { isPresent } from '@ember/utils';
 import { next } from '@ember/runloop';
+import { macroCondition, dependencySatisfies } from '@embroider/macros';
 
 function classToObj(klass) {
   return JSON.parse(JSON.stringify(klass));
@@ -2669,19 +2670,23 @@ module('Unit | Utility | changeset', function (hooks) {
     assert.notOk(get(dummyChangeset, 'isInvalid'), 'should be valid');
   });
 
-  test('using changset.get on a hasMany relationship returns the related record(s) and not a proxy', async function (assert) {
-    let store = this.owner.lookup('service:store');
-    let dogs = [store.createRecord('dog')];
-    let user = store.createRecord('user', { dogs });
+  if (macroCondition(dependencySatisfies('ember-data', '<3.28'))) {
+    // PromiseManyArray was refactored away from using PromiseProxy.
+    // See https://github.com/emberjs/data/pull/7505
+    test('using changset.get on a hasMany relationship returns the related record(s) and not a proxy', async function (assert) {
+      let store = this.owner.lookup('service:store');
+      let dogs = [store.createRecord('dog')];
+      let user = store.createRecord('user', { dogs });
 
-    let changeset = ChangesetFactory(user);
+      let changeset = ChangesetFactory(user);
 
-    let hasManyDogs = changeset.get('dogs');
-    assert.ok(
-      Object.prototype.hasOwnProperty.call(hasManyDogs, 'recordData'),
-      'Get returns the related record(s) and not a proxy.'
-    );
-  });
+      let hasManyDogs = changeset.get('dogs');
+      assert.ok(
+        Object.prototype.hasOwnProperty.call(hasManyDogs, 'recordData'),
+        'Get returns the related record(s) and not a proxy.'
+      );
+    });
+  }
 
   test('cyclical bug with ember data models', async function (assert) {
     let store = this.owner.lookup('service:store');

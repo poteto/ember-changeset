@@ -5,13 +5,14 @@ const { embroiderSafe, embroiderOptimized } = require('@embroider/test-setup');
 
 module.exports = async function () {
   return {
-    useYarn: true,
+    useYarn: false,
     scenarios: [
       {
         name: 'ember-lts-3.20',
         npm: {
           devDependencies: {
             'ember-source': '~3.20.0',
+            'ember-data': '~3.20.0',
           },
         },
       },
@@ -20,6 +21,7 @@ module.exports = async function () {
         npm: {
           devDependencies: {
             'ember-source': '~3.24.0',
+            'ember-data': '~3.24.0',
           },
         },
       },
@@ -82,6 +84,10 @@ module.exports = async function () {
           }),
         },
         npm: {
+          devDependencies: {
+            'ember-source': '~3.28.4',
+            'ember-data': '~3.28.0',
+          },
           ember: {
             edition: 'classic',
           },
