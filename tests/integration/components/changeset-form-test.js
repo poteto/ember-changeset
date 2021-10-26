@@ -19,10 +19,6 @@ module('Integration | Component | changeset-form', function (hooks) {
 
     assert.true(find('[data-test-submit]').disabled, 'button disabled due to invalid email');
 
-    // submit - disabled until fill in proper email
-    await click('[data-test-submit]');
-
-    assert.true(find('[data-test-submit]').disabled, 'button still disabled after email');
     assert.strictEqual(
       find('[data-test-model-user-email]').textContent.trim(),
       'something',
