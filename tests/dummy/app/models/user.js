@@ -1,6 +1,6 @@
 import Model, { belongsTo, hasMany } from '@ember-data/model';
 
-export default Model.extend({
-  profile: belongsTo('profile'),
-  dogs: hasMany('dog'),
-});
+export default class User extends Model {
+  @belongsTo('profile') profile;
+  @hasMany('dog') dogs;
+}

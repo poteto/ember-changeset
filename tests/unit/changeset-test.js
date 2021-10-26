@@ -1,3 +1,4 @@
+/* eslint-disable ember/no-computed-properties-in-native-classes */
 import { Changeset, EmberChangeset, Changeset as ChangesetFactory } from 'ember-changeset';
 import { settled } from '@ember/test-helpers';
 import { module, test, todo } from 'qunit';
@@ -62,11 +63,11 @@ module('Unit | Utility | changeset', function (hooks) {
   setupTest(hooks);
 
   hooks.beforeEach(function () {
-    let Dummy = EmberObject.extend({
+    let Dummy = class extends EmberObject {
       save() {
         return Promise.resolve(this);
-      },
-    });
+      }
+    };
     dummyModel = Dummy.create({ exampleArray });
     resetDummyValidations = { ...dummyValidations };
   });
@@ -1938,6 +1939,7 @@ module('Unit | Utility | changeset', function (hooks) {
   test('observing #rollback values', async function (assert) {
     let res;
     let changeset = Changeset(dummyModel, dummyValidator);
+    // eslint-disable-next-line ember/no-observers
     changeset.addObserver('name', function () {
       res = this.name;
     });
@@ -2375,6 +2377,7 @@ module('Unit | Utility | changeset', function (hooks) {
   test('#pushErrors updates error object in a KVO compatible way', function (assert) {
     let dummyChangeset = Changeset(dummyModel);
 
+    // eslint-disable-next-line ember/no-classic-classes
     let aComponentOrSomething = EmberObject.extend({
       errorsOnName: reads('changeset.error.name.validation'),
     }).create({ changeset: dummyChangeset });
