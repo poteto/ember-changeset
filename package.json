@@ -38,7 +38,7 @@
   "dependencies": {
     "@embroider/macros": "^0.42.3",
     "@glimmer/tracking": "^1.0.1",
-    "ember-auto-import": "^1.11.3",
+    "ember-auto-import": "^2.2.3",
     "ember-cli-babel": "^7.26.6",
     "validated-changeset": "1.0.0"
   },
@@ -78,7 +78,8 @@
     "qunit": "^2.17.2",
     "qunit-dom": "^2.0.0",
     "release-it": "^12.4.3",
-    "release-it-lerna-changelog": "^1.0.3"
+    "release-it-lerna-changelog": "^1.0.3",
+    "webpack": "^5.60.0"
   },
   "engines": {
     "node": "12.* || 14.* || >= 16*"
