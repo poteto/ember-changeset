@@ -47,5 +47,10 @@ module.exports = {
         // add your custom rules and overrides for node files here
       }),
     },
+    {
+      // Test files:
+      files: ['tests/**/*-test.{js,ts}'],
+      extends: ['plugin:qunit/recommended'],
+    },
   ],
 };

@@ -43,13 +43,13 @@ module('Integration | Helper | changeset-get', function (hooks) {
 
     await fillIn(find('input'), 'Robert');
 
-    assert.equal(find('#test-el').textContent, 'Robert');
-    assert.equal(find('input').value, 'Robert');
+    assert.strictEqual(find('#test-el').textContent, 'Robert');
+    assert.strictEqual(find('input').value, 'Robert');
 
     await this.changeset.rollback();
 
-    assert.equal(find('#test-el').textContent, 'Robert');
-    assert.equal(find('input').value, 'Robert');
+    assert.strictEqual(find('#test-el').textContent, 'Robert');
+    assert.strictEqual(find('input').value, 'Robert');
   });
 
   test('it succeeds in retrieving the current value using {{get}}', async function (assert) {
@@ -75,18 +75,18 @@ module('Integration | Helper | changeset-get', function (hooks) {
 
     await fillIn(input, 'Robert');
 
-    assert.equal(testEl.textContent, 'Robert');
+    assert.strictEqual(testEl.textContent, 'Robert');
     let list = find('#change-0');
-    assert.equal(list.textContent, 'name.first: Robert');
-    assert.equal(input.value, 'Robert');
+    assert.strictEqual(list.textContent, 'name.first: Robert');
+    assert.strictEqual(input.value, 'Robert');
 
     this.changeset.rollback();
 
     await settled();
-    assert.equal(testEl.textContent, 'Bob');
+    assert.strictEqual(testEl.textContent, 'Bob');
     list = find('#change-0');
     assert.notOk(list, 'no changes');
-    assert.equal(input.value, 'Bob');
+    assert.strictEqual(input.value, 'Bob');
   });
 });
 
@@ -122,7 +122,7 @@ module('Integration | Helper | changeset-get relationships', function (hooks) {
       <p id="test-el">{{changeset-get this.changeset "profile.firstName"}}</p>
     `);
 
-    assert.equal(find('#test-el').textContent.trim(), 'Bob');
+    assert.strictEqual(find('#test-el').textContent.trim(), 'Bob');
   });
 
   test('it does not fail with a null belongsTo property', async function (assert) {
@@ -133,6 +133,6 @@ module('Integration | Helper | changeset-get relationships', function (hooks) {
       <p id="test-el">{{changeset-get this.changeset "profile.firstName"}}</p>
     `);
 
-    assert.equal(find('#test-el').textContent.trim(), '');
+    assert.strictEqual(find('#test-el').textContent.trim(), '');
   });
 });
