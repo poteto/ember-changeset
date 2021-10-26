@@ -76,12 +76,12 @@
     "release-it-lerna-changelog": "^1.0.3"
   },
   "engines": {
-    "node": "10.* || >= 12.*"
+    "node": "12.* || 14.* || >= 16*"
   },
   "ember-addon": {
     "configPath": "tests/dummy/config"
   },
   "volta": {
-    "node": "10.22.0"
+    "node": "12.22.1"
   }
 }
