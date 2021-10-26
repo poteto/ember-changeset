@@ -1945,8 +1945,10 @@ module('Unit | Utility | changeset', function (hooks) {
     });
     assert.strictEqual(changeset.get('name'), undefined, 'initial value');
     changeset.set('name', 'Jack');
+    await settled(); // observer is now async, await to fire
     assert.strictEqual(res, 'Jack', 'observer fired when setting value');
     changeset.rollback();
+    await settled(); // observer is now async, await to fire
     assert.strictEqual(res, undefined, 'observer fired with the value name was rollback to');
   });
 
