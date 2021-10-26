@@ -62,8 +62,8 @@ module('Unit | Utility | merge deep', (hooks) => {
 
     const value = mergeDeep(objA, objB, { safeGet: get, safeSet: set });
 
-    assert.equal(value.boo, 'doo', 'unsafe plain property is merged');
-    assert.equal(value.other, 'Ivan', 'safe property is not touched');
+    assert.strictEqual(value.boo, 'doo', 'unsafe plain property is merged');
+    assert.strictEqual(value.other, 'Ivan', 'safe property is not touched');
     assert.deepEqual(value.foo, { baz: 'bar' }, 'unsafe object property is merged');
   });
 
@@ -86,10 +86,12 @@ module('Unit | Utility | merge deep', (hooks) => {
     let user2 = { profile: { firstName: new Change('Joejoe') } };
     mergeDeep(user, user2, { safeGet: get, safeSet: set });
 
-    assert.equal(user.get('profile.firstName'), 'Joejoe', 'has first name');
+    assert.strictEqual(user.get('profile.firstName'), 'Joejoe', 'has first name');
   });
 
   test('it does not work with ember-data objects', async function (assert) {
+    assert.expect(1);
+
     this.store = this.owner.lookup('service:store');
 
     this.createUser = (userType, withDogs) => {
@@ -109,7 +111,7 @@ module('Unit | Utility | merge deep', (hooks) => {
     try {
       mergeDeep(user, user2, { safeGet: get, safeSet: set });
     } catch ({ message }) {
-      assert.equal(
+      assert.strictEqual(
         message,
         'Unable to `mergeDeep` with your data. Are you trying to merge two ember-data objects? Please file an issue with ember-changeset.',
         'throws message'

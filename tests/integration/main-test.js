@@ -27,17 +27,17 @@ module('Integration | main', function (hooks) {
     let profile = this.store.createRecord('profile', { firstName: 'Terry', lastName: 'Bubblewinkles', nickname: 't' });
     let changeset = Changeset(profile);
 
-    assert.equal(changeset.isDirty, false, 'isDirty false');
+    assert.false(changeset.isDirty, 'isDirty false');
     changeset.firstName = 'RGB';
-    assert.equal(changeset.isDirty, true, 'isDirty true');
-    assert.equal(changeset.firstName, 'RGB', 'firstName after set');
-    assert.equal(profile.firstName, 'Terry', 'modal has original firstName');
+    assert.true(changeset.isDirty, 'isDirty true');
+    assert.strictEqual(changeset.firstName, 'RGB', 'firstName after set');
+    assert.strictEqual(profile.firstName, 'Terry', 'modal has original firstName');
 
     changeset.execute();
 
-    assert.equal(changeset.isDirty, true, 'isDirty true');
-    assert.equal(changeset.firstName, 'RGB', 'firstName after set');
-    assert.equal(profile.firstName, 'RGB', 'original modal has new firstName');
+    assert.true(changeset.isDirty, 'isDirty true');
+    assert.strictEqual(changeset.firstName, 'RGB', 'firstName after set');
+    assert.strictEqual(profile.firstName, 'RGB', 'original modal has new firstName');
   });
 
   async function testBasicBelongsTo(assert, userType) {
@@ -103,10 +103,14 @@ module('Integration | main', function (hooks) {
   }
 
   test('it works for belongsTo', async function (assert) {
+    assert.expect(28);
+
     await testBasicBelongsTo.call(this, assert, 'user');
   });
 
   test('it works for sync belongsTo', async function (assert) {
+    assert.expect(28);
+
     await testBasicBelongsTo.call(this, assert, 'sync-user');
   });
 
@@ -126,7 +130,7 @@ module('Integration | main', function (hooks) {
       return modified;
     });
 
-    assert.equal(changeset.get('profile').get('firstName'), 'Terry', 'firstName after set');
+    assert.strictEqual(changeset.get('profile').get('firstName'), 'Terry', 'firstName after set');
   });
 
   async function testSaveUser(assert, userType) {
@@ -145,10 +149,14 @@ module('Integration | main', function (hooks) {
   }
 
   test('can save user', async function (assert) {
+    assert.expect(2);
+
     await testSaveUser.call(this, assert, 'user');
   });
 
   test('can save sync user', async function (assert) {
+    assert.expect(2);
+
     await testSaveUser.call(this, assert, 'sync-user');
   });
 
@@ -202,10 +210,14 @@ module('Integration | main', function (hooks) {
   }
 
   test('can work with belongsTo via changeset', async function (assert) {
+    assert.expect(13);
+
     await testBelongsToViaChangeset.call(this, assert, 'user');
   });
 
   test('can work with sync belongsTo via changeset', async function (assert) {
+    assert.expect(13);
+
     await testBelongsToViaChangeset.call(this, assert, 'sync-user');
   });
 
@@ -264,10 +276,14 @@ module('Integration | main', function (hooks) {
   }
 
   test('it works for hasMany / firstObject', async function (assert) {
+    assert.expect(22);
+
     await testHasMany.call(this, assert, 'user');
   });
 
   test('it works for sync hasMany / firstObject', async function (assert) {
+    assert.expect(22);
+
     await testHasMany.call(this, assert, 'sync-user');
   });
 
@@ -288,10 +304,14 @@ module('Integration | main', function (hooks) {
   }
 
   test('it can rollback hasMany', async function (assert) {
+    assert.expect(2);
+
     await testRollbackHasMany.call(this, assert, 'user');
   });
 
   test('it can rollback sync hasMany', async function (assert) {
+    assert.expect(2);
+
     await testRollbackHasMany.call(this, assert, 'sync-user');
   });
 
@@ -314,10 +334,14 @@ module('Integration | main', function (hooks) {
   }
 
   test('it sets relationships which were empty initially', async function (assert) {
+    assert.expect(3);
+
     await testInitiallyEmptyRelationships.call(this, assert, 'user');
   });
 
   test('it sets sync relationships which were empty initially', async function (assert) {
+    assert.expect(3);
+
     await testInitiallyEmptyRelationships.call(this, assert, 'sync-user');
   });
 
@@ -339,10 +363,14 @@ module('Integration | main', function (hooks) {
   }
 
   test('#error for empty belongsTo', async function (assert) {
+    assert.expect(1);
+
     await testBelongsToPresenceValidation.call(this, assert, 'user');
   });
 
   test('#error for empty sync belongsTo', async function (assert) {
+    assert.expect(1);
+
     await testBelongsToPresenceValidation.call(this, assert, 'sync-user');
   });
 });
