@@ -1,4 +1,4 @@
-import Component from '@ember/component';
+import Component from '@glimmer/component';
 import { later } from '@ember/runloop';
 import { action, get } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
@@ -69,8 +69,8 @@ class Foo {
 }
 
 export default class ChangesetForm extends Component {
-  init() {
-    super.init(...arguments);
+  constructor() {
+    super(...arguments);
 
     this.model = new Foo();
     this.changeset = Changeset(this.model, dummyValidator);

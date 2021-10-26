@@ -16,8 +16,7 @@ module.exports = {
     browser: true,
   },
   rules: {
-    'ember/no-jquery': 'error',
-    'ember/no-observers': 0,
+    'ember/no-get': 'off',
     'prettier/prettier': 'error',
   },
   overrides: [

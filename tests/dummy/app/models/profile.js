@@ -1,8 +1,8 @@
 import Model, { attr, belongsTo } from '@ember-data/model';
 
-export default Model.extend({
-  firstName: attr('string', { defaultValue: 'Bob' }),
-  lastName: attr('string', { defaultValue: 'Ross' }),
+export default class Profile extends Model {
+  @attr('string', { defaultValue: 'Bob' }) firstName;
+  @attr('string', { defaultValue: 'Ross' }) lastName;
 
-  pet: belongsTo('dog'),
-});
+  @belongsTo('dog') pet;
+}
