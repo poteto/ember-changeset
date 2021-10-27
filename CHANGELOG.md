@@ -5,6 +5,29 @@ Some notable changes going from 2.x to 3.x
 - error.validation is a string if one validation and array if multiple validations.
 - Defining a validation for a nested key worked before with {'something.else': ValidationFunc} and now it only works when defining as an object: { something: { else: validationFunc } }.
 
+
+## v4.0.0-beta.0 (2021-10-27)
+
+#### :boom: Breaking Change
+* [#614](https://github.com/poteto/ember-changeset/pull/614) Breaking: Upgrade ember-auto-import to v2 ([@SergeAstapov](https://github.com/SergeAstapov))
+* [#611](https://github.com/poteto/ember-changeset/pull/611) Breaking: Drop Node.js v10 support ([@SergeAstapov](https://github.com/SergeAstapov))
+
+#### :rocket: Enhancement
+* [#617](https://github.com/poteto/ember-changeset/pull/617) Run ember-cli-update to v3.28.3 and enable Ember v4 scenarios ([@SergeAstapov](https://github.com/SergeAstapov))
+* [#619](https://github.com/poteto/ember-changeset/pull/619) Fix deprecations: missing `this` and `id` argument for <Input /> component ([@SergeAstapov](https://github.com/SergeAstapov))
+* [#620](https://github.com/poteto/ember-changeset/pull/620) Add eslint-config-prettier per latest addon blueprint ([@SergeAstapov](https://github.com/SergeAstapov))
+* [#618](https://github.com/poteto/ember-changeset/pull/618) nternal: Fix build for Ember v4 ([@SergeAstapov](https://github.com/SergeAstapov))
+* [#616](https://github.com/poteto/ember-changeset/pull/616) [Internal] Update changelog via lerna-changelog ([@SergeAstapov](https://github.com/SergeAstapov))
+* [#612](https://github.com/poteto/ember-changeset/pull/612)  Internal: Upgrade ember-template-lint to v3.10.0 ([@SergeAstapov](https://github.com/SergeAstapov))
+* [#613](https://github.com/poteto/ember-changeset/pull/613) Internal: Upgrade eslint-plugin-ember to v10.5.7 ([@SergeAstapov](https://github.com/SergeAstapov))
+* [#615](https://github.com/poteto/ember-changeset/pull/615) Internal: Upgrade ember-qunit to v5 ([@SergeAstapov](https://github.com/SergeAstapov))
+* [#610](https://github.com/poteto/ember-changeset/pull/610) Internal: Add eslint-plugin-qunit per latest addon blueprint ([@SergeAstapov](https://github.com/SergeAstapov))
+* [#609](https://github.com/poteto/ember-changeset/pull/609) CI: Disable Ember.js v4 scenarios, use npm in GH actions and make CI pass ([@SergeAstapov](https://github.com/SergeAstapov))
+
+#### Committers: 1
+- Sergey Astapov ([@SergeAstapov](https://github.com/SergeAstapov))
+
+
 ## v3.15.0 (2021-08-13)
 
 #### :rocket: Enhancement
