@@ -43,13 +43,13 @@ module('Integration | Helper | changeset-get', function (hooks) {
 
     await fillIn(find('input'), 'Robert');
 
-    assert.strictEqual(find('#test-el').textContent, 'Robert');
-    assert.strictEqual(find('input').value, 'Robert');
+    assert.dom('#test-el').hasText('Robert');
+    assert.dom('input').hasValue('Robert');
 
     await this.changeset.rollback();
 
-    assert.strictEqual(find('#test-el').textContent, 'Robert');
-    assert.strictEqual(find('input').value, 'Robert');
+    assert.dom('#test-el').hasText('Robert');
+    assert.dom('input').hasValue('Robert');
   });
 
   test('it succeeds in retrieving the current value using {{get}}', async function (assert) {
@@ -75,15 +75,15 @@ module('Integration | Helper | changeset-get', function (hooks) {
 
     await fillIn(input, 'Robert');
 
-    assert.strictEqual(testEl.textContent, 'Robert');
+    assert.dom(testEl).hasText('Robert');
     let list = find('#change-0');
-    assert.strictEqual(list.textContent, 'name.first: Robert');
+    assert.dom(list).hasText('name.first: Robert');
     assert.strictEqual(input.value, 'Robert');
 
     this.changeset.rollback();
 
     await settled();
-    assert.strictEqual(testEl.textContent, 'Bob');
+    assert.dom(testEl).hasText('Bob');
     list = find('#change-0');
     assert.notOk(list, 'no changes');
     assert.strictEqual(input.value, 'Bob');
@@ -122,7 +122,7 @@ module('Integration | Helper | changeset-get relationships', function (hooks) {
       <p id="test-el">{{changeset-get this.changeset "profile.firstName"}}</p>
     `);
 
-    assert.strictEqual(find('#test-el').textContent.trim(), 'Bob');
+    assert.dom('#test-el').hasText('Bob');
   });
 
   test('it does not fail with a null belongsTo property', async function (assert) {
@@ -133,6 +133,6 @@ module('Integration | Helper | changeset-get relationships', function (hooks) {
       <p id="test-el">{{changeset-get this.changeset "profile.firstName"}}</p>
     `);
 
-    assert.strictEqual(find('#test-el').textContent.trim(), '');
+    assert.dom('#test-el').hasText('');
   });
 });
