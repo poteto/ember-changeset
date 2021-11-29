@@ -42,11 +42,11 @@ module('Integration | Helper | changeset', function (hooks) {
 
     await fillIn('#first-name', 'A');
     await click('#submit-btn');
-    assert.ok(find('#errors-paragraph'), 'should be invalid');
+    assert.dom('#errors-paragraph').exists('should be invalid');
 
     await fillIn('#first-name', 'Billy');
     await click('#submit-btn');
-    assert.notOk(find('#errors-paragraph'), 'should be valid');
+    assert.dom('#errors-paragraph').doesNotExist('should be valid');
   });
 
   test('it accepts validation map', async function (assert) {
@@ -76,11 +76,11 @@ module('Integration | Helper | changeset', function (hooks) {
 
     await fillIn('#first-name', 'A');
     await click('#submit-btn');
-    assert.ok(find('#errors-paragraph'), 'should be invalid');
+    assert.dom('#errors-paragraph').exists('should be invalid');
 
     await fillIn('#first-name', 'Billy');
     await click('#submit-btn');
-    assert.notOk(find('#errors-paragraph'), 'should be valid');
+    assert.dom('#errors-paragraph').doesNotExist('should be valid');
   });
 
   test('it accepts validation map with multiple validations', async function (assert) {
@@ -112,11 +112,11 @@ module('Integration | Helper | changeset', function (hooks) {
 
     await fillIn('#first-name', 'A');
     await click('#submit-btn');
-    assert.ok(find('#errors-paragraph'), 'should be invalid');
+    assert.dom('#errors-paragraph').exists('should be invalid');
 
     await fillIn('#first-name', 'Billy');
     await click('#submit-btn');
-    assert.notOk(find('#errors-paragraph'), 'should be valid');
+    assert.dom('#errors-paragraph').doesNotExist('should be valid');
   });
 
   test('it accepts validation map with multiple validations with promises', async function (assert) {
@@ -149,11 +149,11 @@ module('Integration | Helper | changeset', function (hooks) {
 
     await fillIn('#first-name', 'A');
     await click('#submit-btn');
-    assert.ok(find('#errors-paragraph'), 'should be invalid');
+    assert.dom('#errors-paragraph').exists('should be invalid');
 
     await fillIn('#first-name', 'Billy');
     await click('#submit-btn');
-    assert.notOk(find('#errors-paragraph'), 'should be valid');
+    assert.dom('#errors-paragraph').doesNotExist('should be valid');
   });
 
   test('it rollsback changes', async function (assert) {
@@ -166,11 +166,11 @@ module('Integration | Helper | changeset', function (hooks) {
       {{/with}}
     `);
 
-    assert.strictEqual(find('#first-name').value, 'Jim', 'precondition');
+    assert.dom('#first-name').hasValue('Jim', 'precondition');
     await fillIn('#first-name', 'foo');
-    assert.strictEqual(find('#first-name').value, 'foo', 'should update input');
+    assert.dom('#first-name').hasValue('foo', 'should update input');
     await click('#reset-btn');
-    assert.strictEqual(find('#first-name').value, 'Jim', 'should rollback');
+    assert.dom('#first-name').hasValue('Jim', 'should rollback');
   });
 
   test('it can be used with 1 argument', async function (assert) {
@@ -190,7 +190,7 @@ module('Integration | Helper | changeset', function (hooks) {
     `);
 
     await click('#submit-btn');
-    assert.notOk(find('#errors-paragraph'), 'should be valid');
+    assert.dom('#errors-paragraph').doesNotExist('should be valid');
   });
 
   test('it updates when set without a validator', async function (assert) {
@@ -210,10 +210,10 @@ module('Integration | Helper | changeset', function (hooks) {
       {{/with}}
     `);
 
-    assert.strictEqual(find('h1').textContent.trim(), 'Jim Bob', 'precondition');
+    assert.dom('h1').hasText('Jim Bob', 'precondition');
     await fillIn('#first-name', 'foo');
     await fillIn('#last-name', 'bar');
-    assert.strictEqual(find('h1').textContent.trim(), 'foo bar', 'should update observable value');
+    assert.dom('h1').hasText('foo bar', 'should update observable value');
   });
 
   test('it updates when set with a validator', async function (assert) {
@@ -234,10 +234,10 @@ module('Integration | Helper | changeset', function (hooks) {
       {{/with}}
     `);
 
-    assert.strictEqual(find('h1').textContent.trim(), 'Jim Bob', 'precondition');
+    assert.dom('h1').hasText('Jim Bob', 'precondition');
     await fillIn('#first-name', 'foo');
     await fillIn('#last-name', 'bar');
-    assert.strictEqual(find('h1').textContent.trim(), 'foo bar', 'should update observable value');
+    assert.dom('h1').hasText('foo bar', 'should update observable value');
   });
 
   test('a passed down nested object updates when set without a validator', async function (assert) {
@@ -257,7 +257,7 @@ module('Integration | Helper | changeset', function (hooks) {
         {{on "change" (fn this.mutValue "person.lastName")}}>
     `);
 
-    assert.strictEqual(find('h1').textContent.trim(), 'Jim Bob', 'precondition');
+    assert.dom('h1').hasText('Jim Bob', 'precondition');
     assert.strictEqual(changeset.get('person.firstName'), 'Jim', 'precondition firstName');
     assert.strictEqual(changeset.get('person.lastName'), 'Bob', 'precondition lastName');
     await fillIn('#first-name', 'foo');
@@ -272,7 +272,7 @@ module('Integration | Helper | changeset', function (hooks) {
       'Jim',
       "keeps value on model as execute hasn't been called"
     );
-    assert.strictEqual(find('h1').textContent.trim(), 'foo bar', 'should update observable value');
+    assert.dom('h1').hasText('foo bar', 'should update observable value');
   });
 
   test('nested object updates when set without a validator', async function (assert) {
@@ -293,10 +293,10 @@ module('Integration | Helper | changeset', function (hooks) {
         {{on "change" (fn this.mutValue "person.lastName")}}>
     `);
 
-    assert.strictEqual(find('h1').textContent.trim(), 'Jim Bob', 'precondition');
+    assert.dom('h1').hasText('Jim Bob', 'precondition');
     await fillIn('#first-name', 'foo');
     await fillIn('#last-name', 'bar');
-    assert.strictEqual(find('h1').textContent.trim(), 'foo bar', 'should update observable value');
+    assert.dom('h1').hasText('foo bar', 'should update observable value');
   });
 
   test('nested key error clears after entering valid input', async function (assert) {
@@ -316,7 +316,7 @@ module('Integration | Helper | changeset', function (hooks) {
       <small id="first-name-error">{{this.c.error.person.firstName.validation}}</small>
     `);
 
-    assert.strictEqual(find('h1').textContent.trim(), 'Jim', 'precondition');
+    assert.dom('h1').hasText('Jim', 'precondition');
     await fillIn('#first-name', 'foo');
     await fillIn('#first-name', '');
 
@@ -347,9 +347,9 @@ module('Integration | Helper | changeset', function (hooks) {
         {{on "change" (fn this.mutValue "person.firstName")}}>
       <small id="first-name-error">{{this.c.error.person.firstName.validation}}</small>
     `);
-    assert.strictEqual(find('h1').textContent.trim(), 'Jim', 'precondition');
+    assert.dom('h1').hasText('Jim', 'precondition');
     await fillIn('#first-name', 'John');
-    assert.strictEqual(find('h1').textContent.trim(), 'John', 'should update observable value');
+    assert.dom('h1').hasText('John', 'should update observable value');
   });
 
   test('deeply nested key error clears after entering valid input', async function (assert) {
@@ -371,7 +371,7 @@ module('Integration | Helper | changeset', function (hooks) {
       <small id="first-name-error">{{this.c.error.person.name.parts.first.validation}}</small>
     `);
 
-    assert.strictEqual(find('h1').textContent.trim(), 'Jim', 'precondition');
+    assert.dom('h1').hasText('Jim', 'precondition');
     await fillIn('#first-name', '');
 
     {
@@ -408,12 +408,12 @@ module('Integration | Helper | changeset', function (hooks) {
       <button id="reset-btn" {{on "click" this.reset}}>Reset</button>
     `);
 
-    assert.strictEqual(find('h1').textContent.trim(), 'Jim Bob', 'precondition');
+    assert.dom('h1').hasText('Jim Bob', 'precondition');
     await fillIn('#first-name', 'foo');
     await fillIn('#last-name', 'bar');
-    assert.strictEqual(find('h1').textContent.trim(), 'foo bar', 'should update observable value');
+    assert.dom('h1').hasText('foo bar', 'should update observable value');
     await click('#reset-btn');
-    assert.strictEqual(find('h1').textContent.trim(), 'Jim Bob', 'should rollback values');
+    assert.dom('h1').hasText('Jim Bob', 'should rollback values');
   });
 
   test('it does not rollback when validating', async function (assert) {
@@ -466,20 +466,20 @@ module('Integration | Helper | changeset', function (hooks) {
 
     await fillIn('#even', '9');
     await triggerEvent('#odd', 'blur');
-    assert.strictEqual(find('small.even').textContent.trim(), 'must be even', 'should display error message');
-    assert.strictEqual(find('small.odd').textContent.trim(), 'must be odd', 'should display error message');
-    assert.strictEqual(find('#even').value, '9', 'should not rollback');
-    assert.strictEqual(find('code.even').textContent.trim(), '9', 'should not rollback');
-    assert.strictEqual(find('#odd').value, '4', 'should not rollback');
+    assert.dom('small.even').hasText('must be even', 'should display error message');
+    assert.dom('small.odd').hasText('must be odd', 'should display error message');
+    assert.dom('#even').hasValue('9', 'should not rollback');
+    assert.dom('code.even').hasText('9', 'should not rollback');
+    assert.dom('#odd').hasValue('4', 'should not rollback');
     await blur('#even');
     // there is a scenario where going from valid to invalid would cause values to
     // go out of sync
     await fillIn('#odd', '10');
     await blur('#odd');
-    assert.strictEqual(find('small.even').textContent.trim(), 'must be even', 'should display error message');
-    assert.strictEqual(find('small.odd').textContent.trim(), 'must be odd', 'should display error message');
-    assert.strictEqual(find('#odd').value, '10', 'should not rollback');
-    assert.strictEqual(find('code.odd').textContent.trim(), '10', 'should not rollback');
+    assert.dom('small.even').hasText('must be even', 'should display error message');
+    assert.dom('small.odd').hasText('must be odd', 'should display error message');
+    assert.dom('#odd').hasValue('10', 'should not rollback');
+    assert.dom('code.odd').hasText('10', 'should not rollback');
   });
 
   test('it handles when changeset is already set', async function (assert) {
@@ -497,7 +497,7 @@ module('Integration | Helper | changeset', function (hooks) {
       {{/with}}
     `);
 
-    assert.strictEqual(find('h1').textContent.trim(), d.toString(), 'should update observable value');
+    assert.dom('h1').hasText(d.toString(), 'should update observable value');
   });
 
   test('it handles when is plain object passed to helper', async function (assert) {
@@ -509,7 +509,7 @@ module('Integration | Helper | changeset', function (hooks) {
       {{/with}}
     `);
 
-    assert.strictEqual(find('h1').textContent.trim(), d.toString(), 'should update observable value');
+    assert.dom('h1').hasText(d.toString(), 'should update observable value');
   });
 
   test('it handles models that are promises', async function (assert) {
@@ -531,7 +531,7 @@ module('Integration | Helper | changeset', function (hooks) {
     await blur('#first-name');
     await fillIn('#last-name', 'bar');
     await blur('#last-name');
-    assert.strictEqual(find('h1').textContent.trim(), 'foo bar', 'should update observable value');
+    assert.dom('h1').hasText('foo bar', 'should update observable value');
   });
 
   test('it skips validation when skipValidate is passed as an option', async function (assert) {
@@ -548,13 +548,13 @@ module('Integration | Helper | changeset', function (hooks) {
       {{/with}}
     `);
 
-    assert.strictEqual(find('h1').textContent.trim(), 'Jim Bob', 'precondition');
+    assert.dom('h1').hasText('Jim Bob', 'precondition');
     await fillIn('#first-name', 'J');
     await blur('#first-name');
     await fillIn('#last-name', 'B');
     await blur('#last-name');
-    assert.strictEqual(find('h1').textContent.trim(), 'J B', 'should update observable value');
-    assert.notOk(find('#error-paragraph'), 'should skip validation');
+    assert.dom('h1').hasText('J B', 'should update observable value');
+    assert.dom('#error-paragraph').doesNotExist('should skip validation');
   });
 
   test('it validates changes with changesetKeys', async function (assert) {
@@ -586,6 +586,6 @@ module('Integration | Helper | changeset', function (hooks) {
 
     await fillIn('#first-name', 'A');
     await click('#submit-btn');
-    assert.notOk(find('#errors-paragraph'), 'should not be invalid');
+    assert.dom('#errors-paragraph').doesNotExist('should not be invalid');
   });
 });
