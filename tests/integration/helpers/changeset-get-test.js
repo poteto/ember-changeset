@@ -3,6 +3,16 @@ import { setupRenderingTest } from 'ember-qunit';
 import hbs from 'htmlbars-inline-precompile';
 import { module, test } from 'qunit';
 import { Changeset } from 'ember-changeset';
+import { tracked } from '@glimmer/tracking';
+
+class DummyModel {
+  @tracked name = {
+    first: 'Bob',
+    last: 'Loblaw',
+  };
+  @tracked email = 'bob@lob.law';
+  @tracked url = 'http://bobloblawslawblog.com';
+}
 
 module('Integration | Helper | changeset-get', function (hooks) {
   setupRenderingTest(hooks);
@@ -10,29 +20,19 @@ module('Integration | Helper | changeset-get', function (hooks) {
   let model;
 
   hooks.beforeEach(function () {
-    model = {
-      name: {
-        first: 'Bob',
-        last: 'Loblaw',
-      },
-      email: 'bob@lob.law',
-      url: 'http://bobloblawslawblog.com',
-    };
+    model = new DummyModel();
 
     this.changeset = Changeset(model);
     this.fieldName = 'name.first';
   });
 
-  test('it retrieves the current value using {{get}}', async function (assert) {
+  test('it retrieves a nested current value using {{get}}', async function (assert) {
     this.updateName = (changeset, evt) => {
       changeset.set('name.first', evt.target.value);
     };
     await render(hbs`
-      <input
-        type="text"
-        {{on "input" (fn this.updateName this.changeset)}}
-        {{on "change" (fn this.updateName this.changeset)}}
-        value={{get this.changeset this.fieldName}}/>
+      <input type="text" {{on "input" (fn this.updateName this.changeset)}} {{on "change" (fn this.updateName
+        this.changeset)}} value={{get this.changeset this.fieldName}} />
       <p id="test-el">{{this.changeset.name.first}}</p>
       <ul>
         {{#each this.changeset.changes as |change|}}
@@ -52,16 +52,43 @@ module('Integration | Helper | changeset-get', function (hooks) {
     assert.dom('input').hasValue('Robert');
   });
 
+  test('it retrieves a top level current value using {{get}}', async function (assert) {
+    this.fieldName = 'email';
+    this.updateName = (changeset, evt) => {
+      changeset.set('email', evt.target.value);
+    };
+    await render(hbs`
+      <input type="text" {{on "input" (fn this.updateName this.changeset)}} {{on "change" (fn this.updateName
+        this.changeset)}} value={{get this.changeset this.fieldName}} />
+      <p id="test-el">{{this.changeset.email}}</p>
+      <ul>
+        {{#each this.changeset.changes as |change|}}
+          <li>{{change.key}}: {{change.value}}</li>
+        {{/each}}
+      </ul>
+    `);
+
+    assert.dom('#test-el').hasText('bob@lob.law');
+    assert.dom('input').hasValue('bob@lob.law');
+
+    await fillIn(find('input'), 'a@b.c');
+
+    assert.dom('#test-el').hasText('a@b.c');
+    assert.dom('input').hasValue('a@b.c');
+
+    await this.changeset.rollback();
+
+    assert.dom('#test-el').hasText('bob@lob.law');
+//    assert.dom('input').hasValue('bob@lob.law');
+  });
+
   test('it succeeds in retrieving the current value using {{get}}', async function (assert) {
     this.updateName = (changeset, evt) => {
       changeset.set('name.first', evt.target.value);
     };
     await render(hbs`
-      <input
-        type="text"
-        {{on "input" (fn this.updateName this.changeset)}}
-        {{on "change" (fn this.updateName this.changeset)}}
-        value={{get this.changeset this.fieldName}} />
+      <input type="text" {{on "input" (fn this.updateName this.changeset)}} {{on "change" (fn this.updateName
+        this.changeset)}} value={{get this.changeset this.fieldName}} />
       <p id="test-el">{{get this.changeset this.fieldName}}</p>
       <ul>
         {{#each (get this.changeset "changes") as |change index|}}

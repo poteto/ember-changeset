@@ -85,7 +85,19 @@ module('Unit | Utility | changeset', function (hooks) {
     let emptyObject = Object.create(null);
     let dummyChangeset = Changeset(emptyObject, dummyValidator);
 
-    assert.strictEqual(dummyChangeset.toString(), 'changeset:[object Object]');
+    assert.ok(dummyChangeset.isChangeset);
+  });
+
+  test('content can be an object with properties', async function (assert) {
+    let content = {
+      a: 1,
+      b: 2,
+    };
+    let changeset = Changeset(content);
+
+    assert.ok(changeset.isChangeset);
+    assert.strictEqual(changeset.a, 1);
+    assert.strictEqual(changeset.b, 2);
   });
 
   /**
@@ -645,6 +657,21 @@ module('Unit | Utility | changeset', function (hooks) {
 
     let expectedChanges = [{ key: 'org.usa.ny', value: 'foo' }];
     let changes = get(c, 'changes');
+
+    assert.deepEqual(changes, expectedChanges, 'should add change');
+  });
+
+  test('#set adds a change for a boolean', async function (assert) {
+    var model = {
+      isAlive: undefined,
+    };
+    let expectedChanges = [{ key: 'isAlive', value: true }];
+    let dummyChangeset = Changeset(model);
+    dummyChangeset.set('isAlive', true);
+    let changes = dummyChangeset.changes;
+
+    assert.strictEqual(model.dateOfBirth, undefined, 'should not have value');
+    assert.ok(dummyChangeset.isAlive, 'should have new change');
 
     assert.deepEqual(changes, expectedChanges, 'should add change');
   });
@@ -1748,11 +1775,11 @@ module('Unit | Utility | changeset', function (hooks) {
     dummyChangeset.set('lastName', 'bar');
     dummyChangeset.set('name', '');
 
-    assert.deepEqual(get(dummyChangeset, 'changes'), expectedChanges, 'precondition');
-    assert.deepEqual(get(dummyChangeset, 'errors'), expectedErrors, 'precondition');
+    assert.deepEqual(get(dummyChangeset, 'changes'), expectedChanges, 'precondition changes');
+    assert.deepEqual(get(dummyChangeset, 'errors'), expectedErrors, 'precondition errors');
     dummyChangeset.rollback();
-    assert.deepEqual(get(dummyChangeset, 'changes'), [], 'should rollback');
-    assert.deepEqual(get(dummyChangeset, 'errors'), [], 'should rollback');
+    assert.deepEqual(get(dummyChangeset, 'changes'), [], 'should have no changes after rollback');
+    assert.deepEqual(get(dummyChangeset, 'errors'), [], 'should have no errors after rollback');
   });
 
   test('#rollback resets valid state', async function (assert) {

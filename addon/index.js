@@ -10,6 +10,8 @@ import { tracked } from '@glimmer/tracking';
 import { get as safeGet, set as safeSet } from '@ember/object';
 import { macroCondition, dependencySatisfies, importSync } from '@embroider/macros';
 
+import ChangesetObjectProxyHandler from 'ember-changeset/classes/ChangesetObjectProxyHandler';
+
 const CHANGES = '_changes';
 const PREVIOUS_CONTENT = '_previousContent';
 const CONTENT = '_content';
@@ -218,19 +220,20 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
  * @function Changeset
  */
 export function Changeset(obj, validateFn = defaultValidatorFn, validationMap = {}, options = {}) {
-  const c = changeset(obj, validateFn, validationMap, options);
+  return new Proxy(obj, new ChangesetObjectProxyHandler(obj));
+  // const c = changeset(obj, validateFn, validationMap, options);
 
-  return new Proxy(c, {
-    get(targetBuffer, key /*, receiver*/) {
-      const res = targetBuffer.get(key.toString());
-      return res;
-    },
+  // return new Proxy(c, {
+  //   get(targetBuffer, key /*, receiver*/) {
+  //     const res = targetBuffer.get(key.toString());
+  //     return res;
+  //   },
 
-    set(targetBuffer, key, value /*, receiver*/) {
-      targetBuffer.set(key.toString(), value);
-      return true;
-    },
-  });
+  //   set(targetBuffer, key, value /*, receiver*/) {
+  //     targetBuffer.set(key.toString(), value);
+  //     return true;
+  //   },
+  // });
 }
 
 export default class ChangesetKlass {
