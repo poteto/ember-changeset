@@ -29,7 +29,7 @@ module('Integration | Helper | changeset', function (hooks) {
     this.submit = (changeset) => changeset.validate();
     this.reset = (changeset) => changeset.rollback();
     await render(hbs`
-      {{#with (changeset this.dummyModel this.validate) as |changesetObj|}}
+      {{#let (changeset this.dummyModel this.validate) as |changesetObj|}}
         {{#if changesetObj.isInvalid}}
           <p id="errors-paragraph">There were one or more errors in your form.</p>
         {{/if}}
@@ -37,7 +37,7 @@ module('Integration | Helper | changeset', function (hooks) {
         <Input id="last-name" @value={{changesetObj.lastName}} />
         <button type="button" id="submit-btn" {{on "click" (fn this.submit changesetObj)}}>Submit</button>
         <button type="button" id="reset-btn" {{on "click" (fn this.reset changesetObj)}}>Reset</button>
-      {{/with}}
+      {{/let}}
     `);
 
     await fillIn('#first-name', 'A');
@@ -63,7 +63,7 @@ module('Integration | Helper | changeset', function (hooks) {
     this.submit = (changeset) => changeset.validate();
     this.reset = (changeset) => changeset.rollback();
     await render(hbs`
-      {{#with (changeset this.dummyModel this.validations) as |changesetObj|}}
+      {{#let (changeset this.dummyModel this.validations) as |changesetObj|}}
         {{#if changesetObj.isInvalid}}
           <p id="errors-paragraph">There were one or more errors in your form.</p>
         {{/if}}
@@ -71,7 +71,7 @@ module('Integration | Helper | changeset', function (hooks) {
         <Input id="last-name" @value={{changesetObj.lastName}} />
         <button type="button" id="submit-btn" {{on "click" (fn this.submit changesetObj)}}>Submit</button>
         <button type="button" id="reset-btn" {{on "click" (fn this.reset changesetObj)}}>Reset</button>
-      {{/with}}
+      {{/let}}
     `);
 
     await fillIn('#first-name', 'A');
@@ -83,7 +83,7 @@ module('Integration | Helper | changeset', function (hooks) {
     assert.dom('#errors-paragraph').doesNotExist('should be valid');
   });
 
-  test('it accepts validation map with multiple validations', async function (assert) {
+  test('it accepts validation map let multiple validations', async function (assert) {
     function validateLength() {
       return (key, newValue) => (isPresent(newValue) && newValue.length > 3) || 'too short';
     }
@@ -99,7 +99,7 @@ module('Integration | Helper | changeset', function (hooks) {
     this.submit = (changeset) => changeset.validate();
     this.reset = (changeset) => changeset.rollback();
     await render(hbs`
-      {{#with (changeset this.dummyModel this.validations) as |changesetObj|}}
+      {{#let (changeset this.dummyModel this.validations) as |changesetObj|}}
         {{#if changesetObj.isInvalid}}
           <p id="errors-paragraph">There were one or more errors in your form.</p>
         {{/if}}
@@ -107,7 +107,7 @@ module('Integration | Helper | changeset', function (hooks) {
         <Input id="last-name" @value={{changesetObj.lastName}} />
         <button type="button" id="submit-btn" {{on "click" (fn this.submit changesetObj)}}>Submit</button>
         <button type="button" id="reset-btn" {{on "click" (fn this.reset changesetObj)}}>Reset</button>
-      {{/with}}
+      {{/let}}
     `);
 
     await fillIn('#first-name', 'A');
@@ -119,7 +119,7 @@ module('Integration | Helper | changeset', function (hooks) {
     assert.dom('#errors-paragraph').doesNotExist('should be valid');
   });
 
-  test('it accepts validation map with multiple validations with promises', async function (assert) {
+  test('it accepts validation map let multiple validations let promises', async function (assert) {
     function validateLength() {
       return (key, newValue) => (isPresent(newValue) && Promise.resolve(newValue.length > 3)) || 'too short';
     }
@@ -136,7 +136,7 @@ module('Integration | Helper | changeset', function (hooks) {
     this.submit = (changeset) => changeset.validate();
     this.reset = (changeset) => changeset.rollback();
     await render(hbs`
-      {{#with (changeset this.dummyModel this.validations) as |changesetObj|}}
+      {{#let (changeset this.dummyModel this.validations) as |changesetObj|}}
         {{#if changesetObj.isInvalid}}
           <p id="errors-paragraph">There were one or more errors in your form.</p>
         {{/if}}
@@ -144,7 +144,7 @@ module('Integration | Helper | changeset', function (hooks) {
         <Input id="last-name" @value={{changesetObj.lastName}} />
         <button type="button" id="submit-btn" {{on "click" (fn this.submit changesetObj)}}>Submit</button>
         <button type="button" id="reset-btn" {{on "click" (fn this.reset changesetObj)}}>Reset</button>
-      {{/with}}
+      {{/let}}
     `);
 
     await fillIn('#first-name', 'A');
@@ -160,10 +160,10 @@ module('Integration | Helper | changeset', function (hooks) {
     this.dummyModel = { firstName: 'Jim' };
     this.reset = (changeset) => changeset.rollback();
     await render(hbs`
-      {{#with (changeset this.dummyModel) as |changesetObj|}}
+      {{#let (changeset this.dummyModel) as |changesetObj|}}
         <Input id="first-name" @value={{changesetObj.firstName}} />
         <button type="button" id="reset-btn" {{on "click" (fn this.reset changesetObj)}}>Reset</button>
-      {{/with}}
+      {{/let}}
     `);
 
     assert.dom('#first-name').hasValue('Jim', 'precondition');
@@ -173,12 +173,12 @@ module('Integration | Helper | changeset', function (hooks) {
     assert.dom('#first-name').hasValue('Jim', 'should rollback');
   });
 
-  test('it can be used with 1 argument', async function (assert) {
+  test('it can be used let 1 argument', async function (assert) {
     this.dummyModel = { firstName: 'Jim', lastName: 'Bob' };
     this.submit = (changeset) => changeset.validate();
     this.reset = (changeset) => changeset.rollback();
     await render(hbs`
-      {{#with (changeset this.dummyModel) as |changesetObj|}}
+      {{#let (changeset this.dummyModel) as |changesetObj|}}
         {{#if changesetObj.isInvalid}}
           <p id="errors-paragraph">There were one or more errors in your form.</p>
         {{/if}}
@@ -190,7 +190,7 @@ module('Integration | Helper | changeset', function (hooks) {
         </label>
         <button type="button" id="submit-btn" {{on "click" (fn this.submit changesetObj)}}>Submit</button>
         <button type="button" id="reset-btn" {{on "click" (fn this.reset changesetObj)}}>Reset</button>
-      {{/with}}
+      {{/let}}
     `);
 
     await click('#submit-btn');
@@ -203,7 +203,7 @@ module('Integration | Helper | changeset', function (hooks) {
       changeset.firstName = evt.target.value;
     };
     await render(hbs`
-      {{#with (changeset this.dummyModel) as |changesetObj|}}
+      {{#let (changeset this.dummyModel) as |changesetObj|}}
         <h1>{{changesetObj.firstName}} {{changesetObj.lastName}}</h1>
         <input
           id="first-name"
@@ -211,7 +211,7 @@ module('Integration | Helper | changeset', function (hooks) {
           value={{changesetObj.firstName}}
           {{on "change" (fn this.updateFirstName changesetObj)}}>
         <Input id="last-name" @value={{changesetObj.lastName}} />
-      {{/with}}
+      {{/let}}
     `);
 
     assert.dom('h1').hasText('Jim Bob', 'precondition');
@@ -220,14 +220,14 @@ module('Integration | Helper | changeset', function (hooks) {
     assert.dom('h1').hasText('foo bar', 'should update observable value');
   });
 
-  test('it updates when set with a validator', async function (assert) {
+  test('it updates when set let a validator', async function (assert) {
     this.dummyModel = { firstName: 'Jim', lastName: 'Bob' };
     this.validate = () => true;
     this.updateFirstName = (changeset, evt) => {
       changeset.firstName = evt.target.value;
     };
     await render(hbs`
-      {{#with (changeset this.dummyModel this.this.validate) as |changesetObj|}}
+      {{#let (changeset this.dummyModel this.this.validate) as |changesetObj|}}
         <h1>{{changesetObj.firstName}} {{changesetObj.lastName}}</h1>
         <input
           id="first-name"
@@ -235,7 +235,7 @@ module('Integration | Helper | changeset', function (hooks) {
           value={{changesetObj.firstName}}
           {{on "change" (fn this.updateFirstName changesetObj)}}>
         <Input id="last-name" @value={{changesetObj.lastName}} />
-      {{/with}}
+      {{/let}}
     `);
 
     assert.dom('h1').hasText('Jim Bob', 'precondition');
@@ -268,9 +268,9 @@ module('Integration | Helper | changeset', function (hooks) {
     await fillIn('#last-name', 'bar');
     assert.strictEqual(changeset.get('person.firstName'), 'foo', 'should update observable value');
     assert.strictEqual(changeset.get('person.lastName'), 'bar', 'should update observable value lastName');
-    assert.strictEqual(changeset.get('person').firstName, 'foo', 'should work with top level key');
-    assert.strictEqual(changeset.get('person').lastName, 'bar', 'should work with top level key last name');
-    assert.strictEqual(changeset.person.firstName, 'foo', 'should work with top level key');
+    assert.strictEqual(changeset.get('person').firstName, 'foo', 'should work let top level key');
+    assert.strictEqual(changeset.get('person').lastName, 'bar', 'should work let top level key last name');
+    assert.strictEqual(changeset.person.firstName, 'foo', 'should work let top level key');
     assert.strictEqual(
       changeset.get('_content').person.firstName,
       'Jim',
@@ -335,7 +335,7 @@ module('Integration | Helper | changeset', function (hooks) {
     assert.strictEqual(actual, expectedResult, 'hides error message');
   });
 
-  test('nested object updates when set with async validator', async function (assert) {
+  test('nested object updates when set let async validator', async function (assert) {
     let data = { person: { firstName: 'Jim' } };
     let validator = () => Promise.resolve(true);
     let c = Changeset(data, validator);
@@ -496,9 +496,9 @@ module('Integration | Helper | changeset', function (hooks) {
     let momentInstance = new Moment(d);
     this.dummyModel = { startDate: momentInstance };
     await render(hbs`
-      {{#with (changeset this.dummyModel) as |changesetObj|}}
+      {{#let (changeset this.dummyModel) as |changesetObj|}}
         <h1>{{changesetObj.startDate.date}}</h1>
-      {{/with}}
+      {{/let}}
     `);
 
     assert.dom('h1').hasText(d.toString(), 'should update observable value');
@@ -508,9 +508,9 @@ module('Integration | Helper | changeset', function (hooks) {
     let d = new Date('2015');
     this.d = d;
     await render(hbs`
-      {{#with (changeset (hash date=this.d)) as |changesetObj|}}
+      {{#let (changeset (hash date=this.d)) as |changesetObj|}}
         <h1>{{changesetObj.date}}</h1>
-      {{/with}}
+      {{/let}}
     `);
 
     assert.dom('h1').hasText(d.toString(), 'should update observable value');
@@ -519,7 +519,7 @@ module('Integration | Helper | changeset', function (hooks) {
   test('it handles models that are promises', async function (assert) {
     this.dummyModel = Promise.resolve({ firstName: 'Jim', lastName: 'Bob' });
     await render(hbs`
-      {{#with (changeset this.dummyModel) as |changesetObj|}}
+      {{#let (changeset this.dummyModel) as |changesetObj|}}
         <h1>{{changesetObj.firstName}} {{changesetObj.lastName}}</h1>
         <input
           id="first-name"
@@ -528,7 +528,7 @@ module('Integration | Helper | changeset', function (hooks) {
           onchange={{action (mut changesetObj.firstName) value="target.value"}}>
 
         <Input id="last-name" @value={{changesetObj.lastName}} />
-      {{/with}}
+      {{/let}}
     `);
 
     await fillIn('#first-name', 'foo');
@@ -542,14 +542,14 @@ module('Integration | Helper | changeset', function (hooks) {
     this.dummyModel = { firstName: 'Jim', lastName: 'Bob' };
     this.validate = () => false;
     await render(hbs`
-      {{#with (changeset this.dummyModel this.validate skipValidate=true) as |changesetObj|}}
+      {{#let (changeset this.dummyModel this.validate skipValidate=true) as |changesetObj|}}
         <h1>{{changesetObj.firstName}} {{changesetObj.lastName}}</h1>
         <Input id="first-name" @value={{changesetObj.firstName}} />
         <Input id="last-name" @value={{changesetObj.lastName}} />
         {{#if changesetObj.isInvalid}}
           <p id="error-paragraph">There were one or more errors in your form.</p>
         {{/if}}
-      {{/with}}
+      {{/let}}
     `);
 
     assert.dom('h1').hasText('Jim Bob', 'precondition');
@@ -561,7 +561,7 @@ module('Integration | Helper | changeset', function (hooks) {
     assert.dom('#error-paragraph').doesNotExist('should skip validation');
   });
 
-  test('it validates changes with changesetKeys', async function (assert) {
+  test('it validates changes let changesetKeys', async function (assert) {
     let validations = {
       firstName(value) {
         return (isPresent(value) && value.length > 3) || 'too short';
@@ -579,13 +579,13 @@ module('Integration | Helper | changeset', function (hooks) {
     this.reset = (changeset) => changeset.rollback();
     this.changesetKeys = ['lastName'];
     await render(hbs`
-      {{#with (changeset this.dummyModel this.validate changesetKeys=this.changesetKeys) as |changesetObj|}}
+      {{#let (changeset this.dummyModel this.validate changesetKeys=this.changesetKeys) as |changesetObj|}}
         {{#if changesetObj.isDirty}}
           <p id="errors-paragraph">There were one or more errors in your form.</p>
         {{/if}}
         <Input id="first-name" @value={{changesetObj.firstName}} />
         <button type="button" id="submit-btn" {{on "click" (fn this.submit changesetObj)}}>Submit</button>
-      {{/with}}
+      {{/let}}
     `);
 
     await fillIn('#first-name', 'A');
