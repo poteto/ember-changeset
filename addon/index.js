@@ -220,7 +220,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
  * @function Changeset
  */
 export function Changeset(obj, validateFn = defaultValidatorFn, validationMap = {}, options = {}) {
-  return new Proxy(obj, new ChangesetObjectProxyHandler(obj));
+  return new Proxy(obj, new ChangesetObjectProxyHandler(obj, options));
   // const c = changeset(obj, validateFn, validationMap, options);
 
   // return new Proxy(c, {

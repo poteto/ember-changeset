@@ -272,7 +272,7 @@ module('Integration | Helper | changeset', function (hooks) {
     assert.strictEqual(changeset.get('person').lastName, 'bar', 'should work let top level key last name');
     assert.strictEqual(changeset.person.firstName, 'foo', 'should work let top level key');
     assert.strictEqual(
-      changeset.get('_content').person.firstName,
+      changeset.get('data').person.firstName,
       'Jim',
       "keeps value on model as execute hasn't been called"
     );

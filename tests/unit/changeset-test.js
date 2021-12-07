@@ -80,8 +80,6 @@ module('Unit | Utility | changeset', function (hooks) {
    */
 
   test('content can be an empty hash', async function (assert) {
-    assert.expect(1);
-
     let emptyObject = Object.create(null);
     let dummyChangeset = Changeset(emptyObject, dummyValidator);
 
@@ -419,14 +417,14 @@ module('Unit | Utility | changeset', function (hooks) {
     });
 
     let newValue = c.get('startDate');
-    assert.ok(newValue.content instanceof Moment, 'correct instance');
+    assert.ok(newValue.data instanceof Moment, 'correct instance');
     assert.strictEqual(newValue.date, d, 'correct date on moment object');
 
     const newDate = new Date('2020');
     c.set('startDate.date', newDate);
 
     newValue = c.get('startDate');
-    assert.ok(newValue.content instanceof Moment, 'correct instance');
+    assert.ok(newValue.data instanceof Moment, 'correct instance');
     assert.strictEqual(newValue.date, newDate, 'correct date on moment object');
     assert.true(newValue._isMomentObject, 'has original content value');
   });
@@ -489,7 +487,6 @@ module('Unit | Utility | changeset', function (hooks) {
   });
 
   test('nested objects can contain arrays', async function (assert) {
-    assert.expect(7);
     setProperties(dummyModel, {
       name: 'Bob',
       contact: {
@@ -565,16 +562,14 @@ module('Unit | Utility | changeset', function (hooks) {
 
     {
       let c = Changeset(model);
-      let actual = get(c, 'foo.bar.dog');
-      let expectedResult = get(model, 'foo.bar.dog');
-      assert.strictEqual(actual, expectedResult, 'using Ember.get will work');
+      let actual = get(c, 'foo.bar.dog.breed');
+      assert.strictEqual(actual, 'shiba inu, wow', 'using Ember.get will work');
     }
 
     {
       let c = Changeset(model);
-      let actual = get(c, 'foo.bar.dog');
-      let expectedResult = get(model, 'foo.bar.dog');
-      assert.strictEqual(actual, expectedResult, 'you dont have to use .content');
+      let actual = get(c, 'foo.bar.dog.breed');
+      assert.strictEqual(actual, 'shiba inu, wow', 'you dont have to use .content');
     }
   });
 
@@ -703,7 +698,7 @@ module('Unit | Utility | changeset', function (hooks) {
     assert.deepEqual(changes, expectedChanges, 'should add change');
   });
 
-  test('#set use native setters with nested doesnt work', async function (assert) {
+  test('#set use native setters with nested', async function (assert) {
     set(dummyModel, 'org', {
       usa: {
         ny: 'ny',
@@ -712,6 +707,8 @@ module('Unit | Utility | changeset', function (hooks) {
 
     let c = Changeset(dummyModel);
     c.org.usa.ny = 'foo';
+
+    c.execute();
 
     assert.strictEqual(dummyModel.org.usa.ny, 'foo', 'change applied to model');
     assert.strictEqual(c.get('org.usa.ny'), 'foo', 'should have new change');
@@ -1253,7 +1250,7 @@ module('Unit | Utility | changeset', function (hooks) {
   });
 
   test('#execute does not remove original nested objects', function (a) {
-    class DogTag {}
+    class DogTag { }
 
     let dog = {};
     dog.info = new DogTag();
@@ -1337,7 +1334,7 @@ module('Unit | Utility | changeset', function (hooks) {
     dummyChangeset.set('org.usa.ma', { name: 'Massachusetts' });
     dummyChangeset.execute();
     assert.deepEqual(dummyChangeset.change, expectedResult, 'should have correct shape');
-    assert.deepEqual(dummyChangeset._content.org, expectedResult.org, 'should have correct shape');
+    assert.deepEqual(dummyChangeset.data.org, expectedResult.org, 'should have correct shape');
     assert.deepEqual(get(dummyModel, 'org'), expectedResult.org, 'should set value');
   });
 
@@ -1645,7 +1642,7 @@ module('Unit | Utility | changeset', function (hooks) {
       });
     };
 
-    let dummyChangeset = Changeset(dummyModel, () => {});
+    let dummyChangeset = Changeset(dummyModel, () => { });
     dummyChangeset.startDate = new Date();
 
     try {
@@ -2526,7 +2523,7 @@ module('Unit | Utility | changeset', function (hooks) {
 
   test('isValidating returns true when validations have not resolved', async function (assert) {
     let dummyChangeset;
-    let _validator = () => new Promise(() => {});
+    let _validator = () => new Promise(() => { });
     let _validations = {
       reservations() {
         return _validator();
@@ -2579,7 +2576,7 @@ module('Unit | Utility | changeset', function (hooks) {
 
   test('beforeValidation event is fired before validation', async function (assert) {
     let dummyChangeset;
-    let _validator = () => new Promise(() => {});
+    let _validator = () => new Promise(() => { });
     let _validations = {
       reservations() {
         return _validator();
@@ -2599,7 +2596,7 @@ module('Unit | Utility | changeset', function (hooks) {
 
   test('beforeValidation event is triggered with the key', async function (assert) {
     let dummyChangeset;
-    let _validator = () => new Promise(() => {});
+    let _validator = () => new Promise(() => { });
     let _validations = {
       reservations() {
         return _validator();
@@ -2722,7 +2719,7 @@ module('Unit | Utility | changeset', function (hooks) {
     set(dummyModel, 'org', {
       usa: { ny: 'vaca' },
     });
-    let extended = class ExtendedChangeset extends EmberChangeset {};
+    let extended = class ExtendedChangeset extends EmberChangeset { };
     let dummyChangeset = ChangesetFactory(dummyModel, dummyValidator, null, { changeset: extended });
     dummyChangeset.set('org.usa.ny', '');
 
