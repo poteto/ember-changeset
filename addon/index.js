@@ -11,6 +11,7 @@ import { get as safeGet, set as safeSet } from '@ember/object';
 import { macroCondition, dependencySatisfies, importSync } from '@embroider/macros';
 
 import ChangesetObjectProxyHandler from 'ember-changeset/classes/ChangesetObjectProxyHandler';
+import handlerFor from './utils/handler-for';
 
 const CHANGES = '_changes';
 const PREVIOUS_CONTENT = '_previousContent';
@@ -220,7 +221,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
  * @function Changeset
  */
 export function Changeset(obj, validateFn = defaultValidatorFn, validationMap = {}, options = {}) {
-  return new Proxy(obj, new ChangesetObjectProxyHandler(obj, options));
+  return new Proxy(obj, handlerFor(obj));
   // const c = changeset(obj, validateFn, validationMap, options);
 
   // return new Proxy(c, {
