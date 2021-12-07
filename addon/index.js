@@ -10,7 +10,6 @@ import { tracked } from '@glimmer/tracking';
 import { get as safeGet, set as safeSet } from '@ember/object';
 import { macroCondition, dependencySatisfies, importSync } from '@embroider/macros';
 
-import ChangesetObjectProxyHandler from 'ember-changeset/classes/ChangesetObjectProxyHandler';
 import handlerFor from './utils/handler-for';
 
 const CHANGES = '_changes';
