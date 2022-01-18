@@ -1,6 +1,7 @@
 import { module, test } from 'qunit';
 import { setupTest } from 'ember-qunit';
 import { set } from '@ember/object';
+import { settled } from '@ember/test-helpers';
 import { Changeset } from 'ember-changeset';
 import { isEmpty } from '@ember/utils';
 
@@ -264,9 +265,10 @@ module('Integration | main', function (hooks) {
     assert.deepEqual(changeset.changes, [{ key: 'dogs', value: [newDog] }], 'has changes');
 
     changeset.execute();
+    await settled();
 
     dogs = user.get('dogs');
-    assert.equal(dogs.length, 1, 'dogs removed', 'all dogs removed');
+    assert.equal(dogs.length, 1, 'dogs removed');
 
     assert.equal(changeset.isDirty, true, 'is still dirty');
     assert.deepEqual(changeset.changes, [{ key: 'dogs', value: [newDog] }], 'has changes');
@@ -327,6 +329,7 @@ module('Integration | main', function (hooks) {
     changeset.set('dogs', dogs);
 
     changeset.execute();
+    await settled();
 
     assert.equal(user.get('profile.firstName'), 'Bob', 'Profile is set on user');
     assert.equal(user.get('dogs.firstObject.breed'), 'rough collie');
