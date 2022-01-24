@@ -6,6 +6,26 @@ Some notable changes going from 2.x to 3.x
 - Defining a validation for a nested key worked before with {'something.else': ValidationFunc} and now it only works when defining as an object: { something: { else: validationFunc } }.
 
 
+## v4.0.0-beta.2 (2022-01-24)
+
+#### :rocket: Enhancement
+* [#630](https://github.com/poteto/ember-changeset/pull/630) Bump `@embroider/*` packages and add `peerDependencies` info ([@SergeAstapov](https://github.com/SergeAstapov))
+
+#### Committers: 1
+- Sergey Astapov ([@SergeAstapov](https://github.com/SergeAstapov))
+
+
+## v4.0.0-beta.1 (2021-11-29)
+
+#### :rocket: Enhancement
+* [#626](https://github.com/poteto/ember-changeset/pull/626) ember-cli-update ([@snewcomer](https://github.com/snewcomer))
+* [#622](https://github.com/poteto/ember-changeset/pull/622) Update npmignore file ([@SergeAstapov](https://github.com/SergeAstapov))
+
+#### Committers: 2
+- Scott Newcomer ([@snewcomer](https://github.com/snewcomer))
+- Sergey Astapov ([@SergeAstapov](https://github.com/SergeAstapov))
+
+
 ## v4.0.0-beta.0 (2021-10-27)
 
 #### :boom: Breaking Change
