@@ -15,8 +15,6 @@ type changesetFunctionsParameters = [
   Config?
 ];
 
-declare module "ember-changeset" {
-  export class EmberChangeset extends BufferedChangeset {}
-  export function changeset(...args: changesetFunctionsParameters);
-  export function Changeset(...args: changesetFunctionsParameters);
-}
+export class EmberChangeset extends BufferedChangeset {}
+export function changeset(...args: changesetFunctionsParameters);
+export function Changeset(...args: changesetFunctionsParameters);
