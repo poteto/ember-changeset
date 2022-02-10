@@ -5,7 +5,7 @@ type BufferedChangesetConstructorParameters = ConstructorParameters<
 >;
 
 interface Config extends BufferedChangesetConstructorParameters[3] {
-  changeset: typeof EmberChangeset;
+  changeset?: typeof EmberChangeset;
 }
 
 type changesetFunctionsParameters = [
