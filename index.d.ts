@@ -1,12 +1,8 @@
-import { BufferedChangeset } from "validated-changeset";
+import { BufferedChangeset } from 'validated-changeset';
 
-type BufferedChangesetConstructorParameters = ConstructorParameters<
-  typeof BufferedChangeset
->;
+type BufferedChangesetConstructorParameters = ConstructorParameters<typeof BufferedChangeset>;
 
-interface Config extends BufferedChangesetConstructorParameters[3] {
-  changeset?: typeof EmberChangeset;
-}
+type Config = BufferedChangesetConstructorParameters[3] & { changeset?: typeof EmberChangeset; }
 
 type changesetFunctionsParameters = [
   BufferedChangesetConstructorParameters[0],
@@ -16,5 +12,5 @@ type changesetFunctionsParameters = [
 ];
 
 export class EmberChangeset extends BufferedChangeset {}
-export function changeset(...args: changesetFunctionsParameters);
-export function Changeset(...args: changesetFunctionsParameters);
+export function changeset(...args: changesetFunctionsParameters): EmberChangeset;
+export function Changeset(...args: changesetFunctionsParameters): EmberChangeset;
