@@ -14,6 +14,7 @@ import { dasherize } from '@ember/string';
 import { isPresent } from '@ember/utils';
 import { next } from '@ember/runloop';
 import { macroCondition, dependencySatisfies } from '@embroider/macros';
+import moment from 'moment';
 
 function classToObj(klass) {
   return JSON.parse(JSON.stringify(klass));
@@ -2753,5 +2754,12 @@ module('Unit | Utility | changeset', function (hooks) {
     const changeset = new Changeset(mockProfileModel);
     changeset.unexecute();
     assert.ok(true); // we just want no error until here
+  });
+
+  test('moment issue with changeset', async function (assert) {
+    assert.expect(1);
+    let x = new Changeset({ foo: moment() });
+
+    assert.true(x.foo instanceof moment);
   });
 });
