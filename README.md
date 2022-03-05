@@ -38,6 +38,20 @@ See also the [plugins](#plugins) section for addons that extend `ember-changeset
 ```js
 import { Changeset } from 'ember-changeset';
 
+let dummyValidations = {
+  firstName(newValue) {
+    return !!newValue;
+  },
+};
+
+function validatorFn({ key, newValue, oldValue, changes, content }) {
+  let validator = get(dummyValidations, key);
+
+  if (typeof validator === 'function') {
+    return validator(newValue, oldValue, changes, content);
+  }
+}
+
 let changeset = Changeset(user, validatorFn);
 user.get('firstName'); // "Michael"
 user.get('lastName'); // "Bolton"
