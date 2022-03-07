@@ -6,12 +6,33 @@ Some notable changes going from 2.x to 3.x
 - Defining a validation for a nested key worked before with {'something.else': ValidationFunc} and now it only works when defining as an object: { something: { else: validationFunc } }.
 
 
-## v4.0.0-beta.2 (2022-01-24)
+## v4.0.0-beta.5 (2022-02-16)
 
-#### :rocket: Enhancement
-* [#630](https://github.com/poteto/ember-changeset/pull/630) Bump `@embroider/*` packages and add `peerDependencies` info ([@SergeAstapov](https://github.com/SergeAstapov))
+#### :bug: Bug Fix
+* [#641](https://github.com/poteto/ember-changeset/pull/641) Fix TS errors ([@bartocc](https://github.com/bartocc))
 
 #### Committers: 1
+- Julien Palmas ([@bartocc](https://github.com/bartocc))
+
+
+## v4.0.0-beta.4 (2022-02-14)
+
+#### :rocket: Enhancement
+* [#638](https://github.com/poteto/ember-changeset/pull/638) Bump validated-changeset 1.1.2 ([@snewcomer](https://github.com/snewcomer))
+* [#635](https://github.com/poteto/ember-changeset/pull/635) 🏷️ Add more typings to the `ember-changeset` module ([@bartocc](https://github.com/bartocc))
+
+#### Committers: 2
+- Julien Palmas ([@bartocc](https://github.com/bartocc))
+- Scott Newcomer ([@snewcomer](https://github.com/snewcomer))
+
+
+## v4.0.0-beta.3 (2022-02-09)
+
+#### :bug: Bug Fix
+* [#634](https://github.com/poteto/ember-changeset/pull/634) Update validated-changeset version to v1.1.1 ([@linainu](https://github.com/linainu))
+
+#### Committers: 2
+- Polina Voropaeva ([@linainu](https://github.com/linainu))
 - Sergey Astapov ([@SergeAstapov](https://github.com/SergeAstapov))
 
 
