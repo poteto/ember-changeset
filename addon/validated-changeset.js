@@ -1,7 +1,6 @@
 import { assert } from '@ember/debug';
 import { dependentKeyCompat } from '@ember/object/compat';
-import { BufferedChangeset } from 'validated-changeset';
-import { Changeset as ValidatedChangeset } from './validated-changeset';
+import { ValidationChangeset } from 'validated-changeset';
 import ArrayProxy from '@ember/array/proxy';
 import ObjectProxy from '@ember/object/proxy';
 import { notifyPropertyChange } from '@ember/object';
@@ -11,12 +10,9 @@ import { tracked } from '@glimmer/tracking';
 import { get as safeGet, set as safeSet } from '@ember/object';
 import { macroCondition, dependencySatisfies, importSync } from '@embroider/macros';
 
-export { ValidatedChangeset };
-
 const CHANGES = '_changes';
 const PREVIOUS_CONTENT = '_previousContent';
 const CONTENT = '_content';
-const defaultValidatorFn = () => true;
 
 export function buildOldValues(content, changes, getDeep) {
   const obj = Object.create(null);
@@ -41,7 +37,7 @@ if (macroCondition(dependencySatisfies('ember-data', '*'))) {
   Model = importSync('@ember-data/model').default;
 }
 
-export class EmberChangeset extends BufferedChangeset {
+export class EmberValidatedChangeset extends ValidationChangeset {
   @tracked _changes;
   @tracked _errors;
   @tracked _content;
@@ -204,15 +200,11 @@ export class EmberChangeset extends BufferedChangeset {
 /**
  * Creates new changesets.
  */
-export function changeset(obj, validateFn = defaultValidatorFn, validationMap = {}, options = {}) {
+export function changeset(obj) {
   assert('Underlying object for changeset is missing', Boolean(obj));
   assert('Array is not a valid type to pass as the first argument to `changeset`', !Array.isArray(obj));
 
-  if (options.changeset) {
-    return new options.changeset(obj, validateFn, validationMap, options);
-  }
-
-  const c = new EmberChangeset(obj, validateFn, validationMap, options);
+  const c = new EmberValidatedChangeset(obj);
   return c;
 }
 
@@ -220,8 +212,8 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
  * Creates new changesets.
  * @function Changeset
  */
-export function Changeset(obj, validateFn = defaultValidatorFn, validationMap = {}, options = {}) {
-  const c = changeset(obj, validateFn, validationMap, options);
+export function Changeset(obj) {
+  const c = changeset(obj);
 
   return new Proxy(c, {
     get(targetBuffer, key /*, receiver*/) {
@@ -234,29 +226,4 @@ export function Changeset(obj, validateFn = defaultValidatorFn, validationMap = 
       return true;
     },
   });
-}
-
-export default class ChangesetKlass {
-  /**
-   * Changeset factory
-   * TODO: deprecate in favor of factory function
-   *
-   * @class ChangesetKlass
-   * @constructor
-   */
-  constructor(obj, validateFn = defaultValidatorFn, validationMap = {}, options = {}) {
-    const c = changeset(obj, validateFn, validationMap, options);
-
-    return new Proxy(c, {
-      get(targetBuffer, key /*, receiver*/) {
-        const res = targetBuffer.get(key.toString());
-        return res;
-      },
-
-      set(targetBuffer, key, value /*, receiver*/) {
-        targetBuffer.set(key.toString(), value);
-        return true;
-      },
-    });
-  }
 }
