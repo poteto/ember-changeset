@@ -10,6 +10,7 @@ import { tracked } from '@glimmer/tracking';
 import { get as safeGet, set as safeSet } from '@ember/object';
 import { macroCondition, dependencySatisfies, importSync } from '@embroider/macros';
 
+
 const CHANGES = '_changes';
 const PREVIOUS_CONTENT = '_previousContent';
 const CONTENT = '_content';
@@ -37,7 +38,7 @@ if (macroCondition(dependencySatisfies('ember-data', '*'))) {
   Model = importSync('@ember-data/model').default;
 }
 
-export class EmberValidatedChangeset extends ValidationChangeset {
+export class EmberValidationChangeset extends ValidationChangeset {
   @tracked _changes;
   @tracked _errors;
   @tracked _content;
@@ -204,7 +205,7 @@ export function changeset(obj) {
   assert('Underlying object for changeset is missing', Boolean(obj));
   assert('Array is not a valid type to pass as the first argument to `changeset`', !Array.isArray(obj));
 
-  const c = new EmberValidatedChangeset(obj);
+  const c = new EmberValidationChangeset(obj);
   return c;
 }
 

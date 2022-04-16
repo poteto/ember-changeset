@@ -1,4 +1,5 @@
 {{!-- template-lint-disable require-input-label --}}
+<h2>Validated Changeset isValid · {{this.changeset.isValid}}</h2>
 <h2>Validated Changeset isPristine · {{this.changeset.isPristine}}</h2>
 <h2>Validated Changeset cid: <span data-test-changeset-cid>{{this.changeset.cid}}</span></h2>
 <h2>Validated Changeset Email: <span data-test-changeset-user-email>{{changeset-get this.changeset "user.email"}}</span></h2>
@@ -24,7 +25,7 @@
       data-test-cid
       type="number"
       value={{this.changeset.cid}}
-      oninput={{action (changeset-set this.changeset "cid") value="target.value"}}
+      {{on "input" (fn this.setChangesetProperty "cid")}}
     >
   </div>
 
@@ -34,7 +35,7 @@
       data-test-user-name
       type="text"
       value={{get this.changeset "user.name"}}
-      oninput={{action (changeset-set this.changeset "user.name") value="target.value"}}
+      {{on "input" (fn this.setChangesetProperty "user.name")}}
     >
   </div>
 
@@ -44,24 +45,7 @@
       data-test-user-email
       type="text"
       value={{this.changeset.user.email}}
-      oninput={{action (changeset-set this.changeset "user.email") value="target.value"}}
-    >
-  </div>
-
-  <div>
-    <label>Notifications email</label>
-    <input
-      data-test-notifications-email
-      type="checkbox"
-      checked={{this.changeset.notifications.email}}
-      onchange={{action (changeset-set this.changeset "notifications.email") value="target.checked"}}
-    >
-    <label>Notifications sms</label>
-    <input
-      data-test-notifications-sms
-      type="checkbox"
-      checked={{this.changeset.notifications.sms}}
-      onchange={{action (changeset-set this.changeset "notifications.sms") value="target.checked"}}
+      {{on "input" (fn this.setChangesetProperty "user.email")}}
     >
   </div>
 

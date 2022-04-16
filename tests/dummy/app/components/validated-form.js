@@ -3,7 +3,7 @@ import { action } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
 import { ValidatedChangeset } from 'ember-changeset';
 
-import { array, object, string, number, date } from 'yup';
+import { object, string } from 'yup';
 
 const FormSchema = object({
   name: string().required(),
@@ -48,6 +48,11 @@ export default class ValidatedForm extends Component {
 
     this.model = new Foo();
     this.changeset = ValidatedChangeset(this.model);
+  }
+
+  @action
+  setChangesetProperty(path, evt) {
+    this.changeset.set(path, evt.target.value);
   }
 
   @action
