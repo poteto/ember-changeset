@@ -1,6 +1,6 @@
 import { assert } from '@ember/debug';
 import { dependentKeyCompat } from '@ember/object/compat';
-import { ValidationChangeset } from 'validated-changeset';
+import { ValidationChangeset, getKeyValues } from 'validated-changeset';
 import ArrayProxy from '@ember/array/proxy';
 import ObjectProxy from '@ember/object/proxy';
 import { notifyPropertyChange } from '@ember/object';
@@ -185,7 +185,7 @@ export class EmberValidationChangeset extends ValidationChangeset {
       let changes = this[CHANGES];
 
       // keep old values in case of error and we want to rollback
-      oldContent = buildOldValues(content, this.changes, this.getDeep);
+      oldContent = buildOldValues(content, getKeyValues(changes), this.getDeep);
 
       // we want mutation on original object
       // @tracked
