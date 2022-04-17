@@ -4,15 +4,10 @@
 <h2>Validated Changeset cid: <span data-test-changeset-cid>{{this.changeset.cid}}</span></h2>
 <h2>Validated Changeset Email: <span data-test-changeset-user-email>{{changeset-get this.changeset "user.email"}}</span></h2>
 <h2>Validated Changeset Name: <span data-test-changeset-user-name>{{changeset-get this.changeset "user.name"}}</span></h2>
-<h2>Validated Changeset notifications email: <span data-test-changeset-notifications-email>{{changeset-get this.changeset "notifications.email"}}</span></h2>
-<h2>Validated Changeset notifications sms: <span data-test-changeset-notifications-sms>{{changeset-get this.changeset "notifications.sms"}}</span></h2>
 <br />
 <h2>Model Name: <span data-test-model-user-name>{{this.model.user.name}}</span></h2>
 <h2>Model Email: <span data-test-model-user-email>{{this.model.user.email}}</span></h2>
 <h2>Model cid: <span data-test-model-cid>{{this.model.cid}}</span></h2>
-<h2>Model notifications email: <span data-test-model-notifications-email>{{this.model.notifications.email}}</span></h2>
-<h2>Model notifications sms: <span data-test-model-notifications-sms>{{this.model.notifications.sms}}</span></h2>
-<h2>Doubled: {{this.model.doubleGrowth}}</h2>
 
 {{#each this.model.addresses as |address idx|}}
   <h2 data-test-address={{idx}}>{{address.street}} {{address.city}}</h2>
@@ -34,7 +29,7 @@
     <input
       data-test-user-name
       type="text"
-      value={{get this.changeset "user.name"}}
+      value={{this.changeset.user.name}}
       {{on "input" (fn this.setChangesetProperty "user.name")}}
     >
   </div>
@@ -60,11 +55,11 @@
   <div>
     <input
       type="number"
-      value={{changeset-get this.changeset "growth"}}
-      {{on "input" (action (changeset-set this.changeset "growth") value="target.value")}}
+      value={{this.changeset.growth}}
+      {{on "input" (fn this.setChangesetProperty "growth")}}
     />
   </div>
 
-  <button data-test-submit type="submit" disabled={{this.changeset.isInvalid}}>Submit form 1</button>
+  <button data-test-submit type="submit" disabled={{this.changeset.isInvalid}}>Submit</button>
 
 </form>

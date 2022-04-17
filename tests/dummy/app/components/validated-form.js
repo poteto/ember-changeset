@@ -6,8 +6,11 @@ import { ValidatedChangeset } from 'ember-changeset';
 import { object, string } from 'yup';
 
 const FormSchema = object({
-  name: string().required(),
-  email: string().email(),
+  cid: string().required(),
+  user: object({
+    name: string().required(),
+    email: string().email(),
+  })
 });
 
 class Address {
@@ -20,9 +23,8 @@ class Address {
 
 class Foo {
   user = {
-    aliases: ['someone'],
     name: 'someone',
-    email: 'something',
+    email: 'something@gmail.com',
   };
 
   addresses = [new Address(), new Address({ city: 'Woods' })];
@@ -32,14 +34,14 @@ class Foo {
   @tracked
   growth = 0;
 
-  notifications = {
-    email: false,
-    sms: true,
-  };
+  // notifications = {
+  //   email: false,
+  //   sms: true,
+  // };
 
-  get doubleGrowth() {
-    return this.growth * 2;
-  }
+  // get doubleGrowth() {
+  //   return this.growth * 2;
+  // }
 }
 
 export default class ValidatedForm extends Component {
@@ -51,20 +53,22 @@ export default class ValidatedForm extends Component {
   }
 
   @action
-  setChangesetProperty(path, evt) {
+  async setChangesetProperty(path, evt) {
     this.changeset.set(path, evt.target.value);
+    try {
+      await this.changeset.validate((changes) => {
+        return FormSchema.validate(changes);
+      });
+      this.changeset.removeError(path);
+    } catch (e) {
+      this.changeset.addError(e.path, { value: this.changeset.get(e.path), validation: e.message });
+    }
   }
 
   @action
   async submitForm(changeset, event) {
     event.preventDefault();
 
-    try {
-      await changeset.validate((changes) => {
-        FormSchema.validate(changes)
-      });
-    } catch (e) {
-      changeset.addError(e.path, { value: e.value.age, validation: e.message });
-    }
+    changeset.execute();
   }
 }
