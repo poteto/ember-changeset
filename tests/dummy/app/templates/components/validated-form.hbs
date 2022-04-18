@@ -1,0 +1,63 @@
+{{! template-lint-disable require-input-label }}
+<h2>Validated Changeset isValid · {{this.changeset.isValid}}</h2>
+<h2>Validated Changeset isPristine · {{this.changeset.isPristine}}</h2>
+<h2>Validated Changeset cid: <span data-test-changeset-cid>{{this.changeset.cid}}</span></h2>
+<h2>Validated Changeset Email:
+  <span data-test-changeset-user-email>{{changeset-get this.changeset 'user.email'}}</span></h2>
+<h2>Validated Changeset Name:
+  <span data-test-changeset-user-name>{{changeset-get this.changeset 'user.name'}}</span></h2>
+<br />
+<h2>Model Name: <span data-test-model-user-name>{{this.model.user.name}}</span></h2>
+<h2>Model Email: <span data-test-model-user-email>{{this.model.user.email}}</span></h2>
+<h2>Model cid: <span data-test-model-cid>{{this.model.cid}}</span></h2>
+
+{{#each this.model.addresses as |address idx|}}
+  <h2 data-test-address={{idx}}>{{address.street}} {{address.city}}</h2>
+{{/each}}
+
+<form {{on 'submit' (fn this.submitForm this.changeset)}}>
+  <div>
+    <label>cid</label>
+    <input
+      data-test-cid
+      type='number'
+      value={{this.changeset.cid}}
+      {{on 'input' (fn this.setChangesetProperty 'cid')}}
+    />
+  </div>
+
+  <div>
+    <label>name</label>
+    <input
+      data-test-user-name
+      type='text'
+      value={{this.changeset.user.name}}
+      {{on 'input' (fn this.setChangesetProperty 'user.name')}}
+    />
+  </div>
+
+  <div>
+    <label>email</label>
+    <input
+      data-test-user-email
+      type='text'
+      value={{this.changeset.user.email}}
+      {{on 'input' (fn this.setChangesetProperty 'user.email')}}
+    />
+  </div>
+
+  <div>
+    <h3>Addresses</h3>
+    {{#each this.changeset.addresses as |address index|}}
+      <input type='text' value={{address.street}} data-test-address-street={{index}} />
+      <input type='text' value={{address.city}} data-test-address-city={{index}} />
+    {{/each}}
+  </div>
+
+  <div>
+    <input type='number' value={{this.changeset.growth}} {{on 'input' (fn this.setChangesetProperty 'growth')}} />
+  </div>
+
+  <button data-test-submit type='submit' disabled={{this.changeset.isInvalid}}>Submit</button>
+
+</form>

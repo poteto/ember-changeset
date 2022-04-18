@@ -227,6 +227,68 @@ Other available types include the following. Please put in a PR if you need more
 import { ValidationResult, ValidatorMapFunc, ValidatorAction } from 'ember-changeset/types';
 ```
 
+## Alternative Changeset
+
+Enabled in 4.1.0
+
+We now ship a ValidatedChangeset that is a proposed new API we would like to introduce and see if it jives with users. The goal of this new feature is to remove confusing APIs and externalize validations.
+
+- ✂️ `save`
+- ✂️ `cast`
+- ✂️ `merge`
+- `errors` are required to be added to the Changeset manually after `validate`
+- `validate` takes a callback with the sum of changes.  In user land you will call `changeset.validate((changes) => yupSchema.validate(changes))`
+
+```js
+import Component from '@glimmer/component';
+import { ValidatedChangeset } from 'ember-changeset';
+import { action, get } from '@ember/object';
+import { object, string } from 'yup';
+
+class Foo {
+  user = {
+    name: 'someone',
+    email: 'something@gmail.com',
+  };
+}
+
+const FormSchema = object({
+  cid: string().required(),
+  user: object({
+    name: string().required(),
+    email: string().email(),
+  })
+});
+
+export default class ValidatedForm extends Component {
+  constructor() {
+    super(...arguments);
+
+    this.model = new Foo();
+    this.changeset = ValidatedChangeset(this.model);
+  }
+
+  @action
+  async setChangesetProperty(path, evt) {
+    this.changeset.set(path, evt.target.value);
+    try {
+      await this.changeset.validate((changes) => FormSchema.validate(changes));
+      this.changeset.removeError(path);
+      await this.model.save();
+    } catch (e) {
+      this.changeset.addError(e.path, { value: this.changeset.get(e.path), validation: e.message });
+    }
+  }
+
+  @action
+  async submitForm(changeset, event) {
+    event.preventDefault();
+
+    changeset.execute();
+  }
+}
+```
+
 ## API
 
 - Properties
