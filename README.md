@@ -237,7 +237,7 @@ We now ship a ValidatedChangeset that is a proposed new API we would like to int
 - ✂️ `cast`
 - ✂️ `merge`
 - `errors` are required to be added to the Changeset manually after `validate`
-- `validate` takes a callback with the sum of changes.  In user land you will call `changeset.validate((changes) => yupSchema.validate(changes))`
+- `validate` takes a callback with the sum of changes and original content to be applied to your externalized validation.  In user land you will call `changeset.validate((changes) => yupSchema.validate(changes))`
 
 ```js
 import Component from '@glimmer/component';
