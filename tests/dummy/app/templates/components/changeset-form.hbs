@@ -1,10 +1,12 @@
-{{!-- template-lint-disable require-input-label --}}
+{{! template-lint-disable require-input-label }}
 <h2>Changeset isPristine · {{this.changeset.isPristine}}</h2>
 <h2>Changeset cid: <span data-test-changeset-cid>{{this.changeset.cid}}</span></h2>
-<h2>Changeset Email: <span data-test-changeset-user-email>{{changeset-get this.changeset "user.email"}}</span></h2>
-<h2>Changeset Name: <span data-test-changeset-user-name>{{changeset-get this.changeset "user.name"}}</span></h2>
-<h2>Changeset notifications email: <span data-test-changeset-notifications-email>{{changeset-get this.changeset "notifications.email"}}</span></h2>
-<h2>Changeset notifications sms: <span data-test-changeset-notifications-sms>{{changeset-get this.changeset "notifications.sms"}}</span></h2>
+<h2>Changeset Email: <span data-test-changeset-user-email>{{changeset-get this.changeset 'user.email'}}</span></h2>
+<h2>Changeset Name: <span data-test-changeset-user-name>{{changeset-get this.changeset 'user.name'}}</span></h2>
+<h2>Changeset notifications email:
+  <span data-test-changeset-notifications-email>{{changeset-get this.changeset 'notifications.email'}}</span></h2>
+<h2>Changeset notifications sms:
+  <span data-test-changeset-notifications-sms>{{changeset-get this.changeset 'notifications.sms'}}</span></h2>
 <br />
 <h2>Model Name: <span data-test-model-user-name>{{this.model.user.name}}</span></h2>
 <h2>Model Email: <span data-test-model-user-email>{{this.model.user.email}}</span></h2>
@@ -21,70 +23,70 @@
   <h2 data-test-address={{idx}}>{{address.street}} {{address.city}}</h2>
 {{/each}}
 
-<form {{on "submit" (fn this.submitForm this.changeset)}}>
+<form {{on 'submit' (fn this.submitForm this.changeset)}}>
   <div>
     <label>cid</label>
     <input
       data-test-cid
-      type="number"
+      type='number'
       value={{this.changeset.cid}}
-      oninput={{action (changeset-set this.changeset "cid") value="target.value"}}
-    >
+      oninput={{action (changeset-set this.changeset 'cid') value='target.value'}}
+    />
   </div>
 
   <div>
     <label>name</label>
     <input
       data-test-user-name
-      type="text"
-      value={{get this.changeset "user.name"}}
-      oninput={{action (changeset-set this.changeset "user.name") value="target.value"}}
-    >
+      type='text'
+      value={{get this.changeset 'user.name'}}
+      oninput={{action (changeset-set this.changeset 'user.name') value='target.value'}}
+    />
   </div>
 
   <div>
     <label>email</label>
     <input
       data-test-user-email
-      type="text"
+      type='text'
       value={{this.changeset.user.email}}
-      oninput={{action (changeset-set this.changeset "user.email") value="target.value"}}
-    >
+      oninput={{action (changeset-set this.changeset 'user.email') value='target.value'}}
+    />
   </div>
 
   <div>
     <label>Notifications email</label>
     <input
       data-test-notifications-email
-      type="checkbox"
+      type='checkbox'
       checked={{this.changeset.notifications.email}}
-      onchange={{action (changeset-set this.changeset "notifications.email") value="target.checked"}}
-    >
+      onchange={{action (changeset-set this.changeset 'notifications.email') value='target.checked'}}
+    />
     <label>Notifications sms</label>
     <input
       data-test-notifications-sms
-      type="checkbox"
+      type='checkbox'
       checked={{this.changeset.notifications.sms}}
-      onchange={{action (changeset-set this.changeset "notifications.sms") value="target.checked"}}
-    >
+      onchange={{action (changeset-set this.changeset 'notifications.sms') value='target.checked'}}
+    />
   </div>
 
   <div>
     <h3>Addresses</h3>
     {{#each this.changeset.addresses as |address index|}}
-      <input type="text" value={{address.street}} data-test-address-street={{index}}>
-      <input type="text" value={{address.city}} data-test-address-city={{index}}>
+      <input type='text' value={{address.street}} data-test-address-street={{index}} />
+      <input type='text' value={{address.city}} data-test-address-city={{index}} />
     {{/each}}
   </div>
 
   <div>
     <input
-      type="number"
-      value={{changeset-get this.changeset "growth"}}
-      {{on "input" (action (changeset-set this.changeset "growth") value="target.value")}}
+      type='number'
+      value={{changeset-get this.changeset 'growth'}}
+      {{on 'input' (action (changeset-set this.changeset 'growth') value='target.value')}}
     />
   </div>
 
-  <button data-test-submit type="submit" disabled={{this.changeset.isInvalid}}>Submit form 1</button>
+  <button data-test-submit type='submit' disabled={{this.changeset.isInvalid}}>Submit form 1</button>
 
 </form>

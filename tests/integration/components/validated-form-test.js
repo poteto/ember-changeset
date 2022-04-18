@@ -19,7 +19,9 @@ module('Integration | Component | validated-form', function (hooks) {
 
     assert.true(find('[data-test-submit]').disabled, 'button disabled due to invalid email');
 
-    assert.dom('[data-test-model-user-email]').hasText('something@gmail.com', 'has old email still b/c input not valid');
+    assert
+      .dom('[data-test-model-user-email]')
+      .hasText('something@gmail.com', 'has old email still b/c input not valid');
 
     await fillIn('[data-test-user-email]', 'foo@gmail.com');
 

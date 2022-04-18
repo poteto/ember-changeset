@@ -10,7 +10,7 @@ const FormSchema = object({
   user: object({
     name: string().required(),
     email: string().email(),
-  })
+  }),
 });
 
 class Address {
@@ -33,6 +33,10 @@ class Foo {
 
   @tracked
   growth = 0;
+
+  save() {
+    return Promise.resolve();
+  }
 
   // notifications = {
   //   email: false,
@@ -60,6 +64,8 @@ export default class ValidatedForm extends Component {
         return FormSchema.validate(changes);
       });
       this.changeset.removeError(path);
+
+      this.model.save();
     } catch (e) {
       this.changeset.addError(e.path, { value: this.changeset.get(e.path), validation: e.message });
     }

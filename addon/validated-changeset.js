@@ -10,7 +10,6 @@ import { tracked } from '@glimmer/tracking';
 import { get as safeGet, set as safeSet } from '@ember/object';
 import { macroCondition, dependencySatisfies, importSync } from '@embroider/macros';
 
-
 const CHANGES = '_changes';
 const PREVIOUS_CONTENT = '_previousContent';
 const CONTENT = '_content';
