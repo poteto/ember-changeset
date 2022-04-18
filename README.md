@@ -231,7 +231,7 @@ import { ValidationResult, ValidatorMapFunc, ValidatorAction } from 'ember-chang
 
 Enabled in 4.1.0
 
-We now ship a ValidatedChangeset that is a proposed new API we would like to ship. The goal of this refactor is to remove confusing APIs and externalize validations.
+We now ship a ValidatedChangeset that is a proposed new API we would like to introduce and see if it jives with users. The goal of this new feature is to remove confusing APIs and externalize validations.
 
 - ✂️ `save`
 - ✂️ `cast`
