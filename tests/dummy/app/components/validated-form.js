@@ -65,7 +65,7 @@ export default class ValidatedForm extends Component {
       });
       this.changeset.removeError(path);
 
-      this.model.save();
+      await this.model.save();
     } catch (e) {
       this.changeset.addError(e.path, { value: this.changeset.get(e.path), validation: e.message });
     }
