@@ -229,7 +229,7 @@ import { ValidationResult, ValidatorMapFunc, ValidatorAction } from 'ember-chang
 
 ## Alternative Changeset
 
-Enabled in 4.1.0
+Enabled in 4.1.0. Experimental and subject to changes until 5.0.
 
 We now ship a ValidatedChangeset that is a proposed new API we would like to introduce and see if it jives with users. The goal of this new feature is to remove confusing APIs and externalize validations.
 
@@ -237,7 +237,7 @@ We now ship a ValidatedChangeset that is a proposed new API we would like to int
 - ✂️ `cast`
 - ✂️ `merge`
 - `errors` are required to be added to the Changeset manually after `validate`
-- `validate` takes a callback with the sum of changes.  In user land you will call `changeset.validate((changes) => yupSchema.validate(changes))`
+- `validate` takes a callback with the sum of changes and original content to be applied to your externalized validation.  In user land you will call `changeset.validate((changes) => yupSchema.validate(changes))`
 
 ```js
 import Component from '@glimmer/component';
@@ -274,7 +274,6 @@ export default class ValidatedForm extends Component {
     try {
       await this.changeset.validate((changes) => FormSchema.validate(changes));
       this.changeset.removeError(path);
-      await this.model.save();
     } catch (e) {
       this.changeset.addError(e.path, { value: this.changeset.get(e.path), validation: e.message });
     }
@@ -285,6 +284,7 @@ export default class ValidatedForm extends Component {
     event.preventDefault();
 
     changeset.execute();
+    await this.model.save();
   }
 }
 ```
