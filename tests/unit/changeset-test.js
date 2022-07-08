@@ -2754,4 +2754,21 @@ module('Unit | Utility | changeset', function (hooks) {
     changeset.unexecute();
     assert.ok(true); // we just want no error until here
   });
+
+  test('#unexecute after #execute on ember-data model with belongsTo', async function (assert) {
+    let store = this.owner.lookup('service:store');
+    let profileModel1 = store.createRecord('profile');
+    let profileModel2 = store.createRecord('profile');
+    let mockUserModel = store.createRecord('sync-user', {
+      profile: profileModel1,
+    });
+    const changeset = new Changeset(mockUserModel);
+    changeset.set('profile', profileModel2);
+    changeset.execute();
+    assert.equal(get(changeset, 'profile'), profileModel2);
+    changeset.unexecute();
+    assert.equal(get(changeset, 'profile'), profileModel1);
+
+    assert.ok(true); // we just want no error until here
+  });
 });
