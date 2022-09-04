@@ -39,6 +39,19 @@ module('Unit | Utility | merge deep', (hooks) => {
     assert.deepEqual(value, { company: { employees: ['Jull', 'Olafur'] } }, 'has right employees');
   });
 
+  test('it works with source null', async function (assert) {
+    let objA = { company: { employees: null } };
+    let objB = { company: { employees: new Change(['Jull', 'Olafur']) } };
+    let value = mergeDeep(objA, objB);
+
+    assert.deepEqual(value, { company: { employees: ['Jull', 'Olafur'] } }, 'has right employees');
+
+    objB = { company: { employees: null } };
+    value = mergeDeep(objA, objB);
+
+    assert.deepEqual(value, { company: { employees: null } }, 'has right employees');
+  });
+
   test('it works with unsafe properties', async function (assert) {
     class A {
       _boo = 'bo';

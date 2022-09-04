@@ -5,7 +5,7 @@ function isMergeableObject(value) {
 }
 
 function isNonNullObject(value) {
-  return !!value && typeof value === 'object';
+  return !!value && typeof value === 'object' && value !== null;
 }
 
 function isSpecial(value) {
