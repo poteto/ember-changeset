@@ -1,4 +1,5 @@
 import { isChange, getChangeValue, normalizeObject } from 'validated-changeset';
+import { isArrayObject, objectToArray, arrayToObject } from '../utils/array-object';
 
 function isMergeableObject(value) {
   return isNonNullObject(value) && !isSpecial(value);
@@ -146,17 +147,32 @@ export default function mergeDeep(target, source, options = {}) {
   let sourceAndTargetTypesMatch = sourceIsArray === targetIsArray;
 
   if (!sourceAndTargetTypesMatch) {
+    let sourceIsArrayLike = isArrayObject(source);
+
+    if (targetIsArray && sourceIsArrayLike) {
+      return objectToArray(mergeTargetAndSource(arrayToObject(target), source, options));
+    }
+
     return source;
   } else if (sourceIsArray) {
     return source;
-  }
-
-  try {
-    return mergeTargetAndSource(target, source, options);
-  } catch (e) {
-    // this is very unlikely to be hit but lets throw an error otherwise
-    throw new Error(
-      'Unable to `mergeDeep` with your data. Are you trying to merge two ember-data objects? Please file an issue with ember-changeset.'
-    );
+  } else if (target === null || target === undefined) {
+    /**
+     * If the target was set to null or undefined, we always want to return the source.
+     * There is nothing to merge.
+     *
+     * Without this explicit check, typeof null === typeof {any object-like thing}
+     * which means that mergeTargetAndSource will be called, and you can't merge with null
+     */
+    return source;
+  } else {
+    try {
+      return mergeTargetAndSource(target, source, options);
+    } catch (e) {
+      // this is very unlikely to be hit but lets throw an error otherwise
+      throw new Error(
+        'Unable to `mergeDeep` with your data. Are you trying to merge two ember-data objects? Please file an issue with ember-changeset.'
+      );
+    }
   }
 }
