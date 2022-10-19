@@ -2,9 +2,43 @@ import { module, test } from 'qunit';
 import { setupRenderingTest } from 'ember-qunit';
 import { click, find, fillIn, render } from '@ember/test-helpers';
 import hbs from 'htmlbars-inline-precompile';
+import { ValidatedChangeset } from 'ember-changeset';
 
 module('Integration | Component | validated-form', function (hooks) {
   setupRenderingTest(hooks);
+
+  test('repro', async function (assert) {
+    let data = {
+      foo: {},
+      bar: 4,
+    };
+    let changeset = new ValidatedChangeset(data) ;
+    this.setProperties({
+      changeset,
+      setDeepFoo: (event) => {
+        let value = event.target.value;
+
+        changeset.set('foo.deep', value);
+      },
+      setBar: (event) => {
+        let value = event.target.value;
+
+        changeset.set('bar', value);
+      },
+      checkFoo: (foo) => console.log('foo', foo),
+      checkBar: (bar) => console.log('bar', bar),
+    });
+
+    await render(hbs`
+      <input {{on 'input' this.setDeepFoo}} />
+      <input {{on 'input' this.setBar }} />
+
+      {{this.checkFoo this.changeset.foo}}
+      {{this.checkBar this.changeset.bar}}
+    `);
+
+    await this.pauseTest();
+  });
 
   test('it renders form', async function (assert) {
     await render(hbs`<ValidatedForm />`);
