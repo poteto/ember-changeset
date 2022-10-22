@@ -1,10 +1,35 @@
 import { module, test } from 'qunit';
 import { setupRenderingTest } from 'ember-qunit';
 import { click, find, fillIn, render } from '@ember/test-helpers';
+import { helper } from '@ember/component/helper';
 import hbs from 'htmlbars-inline-precompile';
+import { ValidatedChangeset } from 'ember-changeset';
 
 module('Integration | Component | validated-form', function (hooks) {
   setupRenderingTest(hooks);
+
+  test(`changing one property does not dirty other properties`, async function (assert) {
+    let data = { foo: 'FOO', bar: 'BAR' };
+    let changeset = new ValidatedChangeset(data);
+    this.setProperties({
+      changeset,
+      changeFoo: () => (changeset.foo = 'FOO-changed'),
+      checkFoo: helper(([foo]) => assert.step(`checkFoo: ${foo}`)),
+      checkBar: helper(([bar]) => assert.step(`checkBar: ${bar}`)),
+    });
+
+    await render(hbs`
+      <input id="foo" {{on 'input' this.changeFoo}} />
+      {{this.checkFoo this.changeset.foo}}
+      {{this.checkBar this.changeset.bar}}
+    `);
+
+    assert.verifySteps(['checkFoo: FOO', 'checkBar: BAR'], 'expected check helpers called on inial render');
+
+    await fillIn('#foo', 'test-foo');
+
+    assert.verifySteps(['checkFoo: FOO-changed'], 'expected only checkFoo to be called');
+  });
 
   test('it renders form', async function (assert) {
     await render(hbs`<ValidatedForm />`);
