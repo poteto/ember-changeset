@@ -15,6 +15,14 @@ module('Unit | Utility | merge deep', (hooks) => {
     assert.deepEqual(value, { other: 'Ivan', foo: 'bar', zoo: 'doo' }, 'merges both values');
   });
 
+  test('works with arrays', function (assert) {
+    const objA = { employees: ['Ivan', 'Jan'] };
+    const objB = { employees: { 0: new Change('Jull'), 1: new Change('Olafur') } };
+    const value = mergeDeep(objA, objB);
+
+    assert.deepEqual(value, { employees: ['Jull', 'Olafur'] });
+  });
+
   test('it unsets', async function (assert) {
     let objA = { other: 'Ivan' };
     let objB = { other: new Change(null) };
