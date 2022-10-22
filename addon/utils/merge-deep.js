@@ -1,5 +1,11 @@
-import { isChange, getChangeValue, normalizeObject } from 'validated-changeset';
-import { isArrayObject, objectToArray, arrayToObject } from '../utils/array-object';
+import {
+  isChange,
+  getChangeValue,
+  normalizeObject,
+  isArrayObject,
+  objectToArray,
+  arrayToObject,
+} from 'validated-changeset';
 
 function isMergeableObject(value) {
   return isNonNullObject(value) && !isSpecial(value);
