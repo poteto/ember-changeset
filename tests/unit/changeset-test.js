@@ -2754,4 +2754,13 @@ module('Unit | Utility | changeset', function (hooks) {
     changeset.unexecute();
     assert.ok(true); // we just want no error until here
   });
+
+  test('instanceof checks on custom classes work`', async function (assert) {
+    class Foo {}
+    let model = EmberObject.create({ foo: new Foo() });
+    let dummyChangeset = Changeset(model);
+
+    assert.ok(dummyChangeset.foo.content instanceof Foo, 'content property is an instance');
+    assert.ok(dummyChangeset.foo instanceof Foo, 'proxy itself is an instance');
+  });
 });
