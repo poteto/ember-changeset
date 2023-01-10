@@ -1,6 +1,6 @@
 import { assert } from '@ember/debug';
 import { dependentKeyCompat } from '@ember/object/compat';
-import { BufferedChangeset } from 'validated-changeset';
+import { BufferedChangeset, Change, isChange } from 'validated-changeset';
 import { Changeset as ValidatedChangeset } from './validated-changeset';
 import ArrayProxy from '@ember/array/proxy';
 import ObjectProxy from '@ember/object/proxy';
@@ -13,6 +13,7 @@ import { macroCondition, dependencySatisfies, importSync } from '@embroider/macr
 
 export { ValidatedChangeset };
 
+const { keys, getOwnPropertySymbols } = Object;
 const CHANGES = '_changes';
 const PREVIOUS_CONTENT = '_previousContent';
 const CONTENT = '_content';
@@ -198,6 +199,38 @@ export class EmberChangeset extends BufferedChangeset {
     this[PREVIOUS_CONTENT] = oldContent;
 
     return this;
+  }
+
+  /**
+   * Gets the changes of the changeset to take a snapshot of them
+   *
+   * @override
+   * @see https://github.com/validated-changeset/validated-changeset/blob/main/src/index.ts#L673
+   */
+  getChangesForSnapshot(changes) {
+    return keys(changes).reduce((newObj, key) => {
+      newObj[key] = isChange(changes[key]) ? changes[key] : this.getChangesForSnapshot(changes[key]);
+      return newObj;
+    }, {});
+  }
+
+  /**
+   * Gets the changes of the changeset from the snapshot as well as
+   * takes nested keys and recursively makes their values into `Change` objects.
+   *
+   * @override
+   * @see https://github.com/validated-changeset/validated-changeset/blob/main/src/index.ts#L699
+   */
+  getChangesFromSnapshot(value) {
+    if (isChange(value)) {
+      const VALUE = getOwnPropertySymbols(value)[0];
+      return new Change(value[VALUE]);
+    }
+
+    return keys(value).reduce((newObj, key) => {
+      newObj[key] = this.getChangesFromSnapshot(value[key]);
+      return newObj;
+    }, {});
   }
 }
 
