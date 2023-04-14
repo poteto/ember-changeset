@@ -77,12 +77,12 @@ First, create a new `Changeset` using the `changeset` helper or through JavaScri
 
 ```hbs
 {{! application/template.hbs}}
-{{#with (changeset model this.validate) as |changesetObj|}}
+{{#let (changeset model this.validate) as |changesetObj|}}
   <DummyForm
       @changeset={{changesetObj}}
       @submit={{this.submit}}
       @rollback={{this.rollback}} />
-{{/with}}
+{{/let}}
 ```
 
 ```js
@@ -190,9 +190,9 @@ let changeset = Changeset(model, validatorFn, validationMap, { skipValidate: tru
 ```
 
 ```hbs
-{{#with (changeset model this.validate skipValidate=true) as |changesetObj|}}
+{{#let (changeset model this.validate skipValidate=true) as |changesetObj|}}
   ...
-{{/with}}
+{{/let}}
 ```
 
 Be sure to call `validate()` on the `changeset` before saving or committing changes.
