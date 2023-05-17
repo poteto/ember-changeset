@@ -2326,6 +2326,94 @@ module('Unit | Utility | changeset', function (hooks) {
   });
 
   /**
+   * #removeError
+   */
+
+  test('#removeError removes an error from the changeset', async function (assert) {
+    let dummyChangeset = Changeset(dummyModel);
+    dummyChangeset.addError('email', {
+      value: 'jim@bob.com',
+      validation: 'Email already taken',
+    });
+
+    assert.true(dummyChangeset.isInvalid);
+    assert.strictEqual(get(dummyChangeset, 'error.email.validation'), 'Email already taken');
+
+    dummyChangeset.removeError('email');
+    assert.true(dummyChangeset.isValid);
+
+    assert.strictEqual(get(dummyChangeset, 'error.email.validation'), undefined);
+  });
+
+  test('#removeError using an invalid key does not throw an error', async function (assert) {
+    let dummyChangeset = Changeset(dummyModel);
+    dummyChangeset.addError('email', {
+      value: 'jim@bob.com',
+      validation: 'Email already taken',
+    });
+
+    assert.true(dummyChangeset.isInvalid);
+    assert.strictEqual(get(dummyChangeset, 'error.email.validation'), 'Email already taken');
+
+    dummyChangeset.removeError('email');
+    dummyChangeset.removeError('foo');
+    assert.true(dummyChangeset.isValid);
+
+    assert.strictEqual(get(dummyChangeset, 'error.email.validation'), undefined);
+  });
+
+  test('#removeError removing one error leaves the other', async function (assert) {
+    let dummyChangeset = Changeset(dummyModel);
+    dummyChangeset.addError('email', {
+      value: 'jim@bob.com',
+      validation: 'Email already taken',
+    });
+    dummyChangeset.addError('age', {
+      value: '0',
+      validation: 'Age is too low',
+    });
+
+    assert.true(dummyChangeset.isInvalid);
+    assert.strictEqual(get(dummyChangeset, 'error.email.validation'), 'Email already taken');
+    assert.strictEqual(get(dummyChangeset, 'error.age.validation'), 'Age is too low');
+
+    dummyChangeset.removeError('email');
+    assert.false(dummyChangeset.isValid);
+
+    assert.strictEqual(get(dummyChangeset, 'error.email.validation'), undefined);
+    assert.strictEqual(get(dummyChangeset, 'error.age.validation'), 'Age is too low');
+  });
+
+  /**
+   * #removeErrors
+   */
+
+  test('#removeErrors removes all errors', async function (assert) {
+    let dummyChangeset = Changeset(dummyModel);
+    dummyChangeset.addError('email', {
+      value: 'jim@bob.com',
+      validation: 'Email already taken',
+    });
+
+    assert.true(dummyChangeset.isInvalid);
+    assert.strictEqual(get(dummyChangeset, 'error.email.validation'), 'Email already taken');
+
+    dummyChangeset.removeErrors();
+    assert.true(dummyChangeset.isValid);
+
+    assert.strictEqual(get(dummyChangeset, 'error.email.validation'), undefined);
+    assert.propEqual(get(dummyChangeset, 'errors'), []);
+  });
+
+  test('#removeErrors succeeds even when there are no errors', async function (assert) {
+    let dummyChangeset = Changeset(dummyModel);
+    assert.false(dummyChangeset.isInvalid);
+    dummyChangeset.removeErrors();
+    assert.true(dummyChangeset.isValid);
+    assert.propEqual(get(dummyChangeset, 'errors'), []);
+  });
+
+  /**
    * #pushErrors
    */
 

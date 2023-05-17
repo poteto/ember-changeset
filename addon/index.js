@@ -127,6 +127,29 @@ export class EmberChangeset extends BufferedChangeset {
   }
 
   /**
+   * Manually remove an error from the changeset.
+   *
+   * @method removeError
+   */
+  removeError(key) {
+    super.removeError(key);
+
+    notifyPropertyChange(this, key);
+    // Return passed-in `error`.
+    return this;
+  }
+
+  /**
+   * Manually clears the errors from the changeset
+   *
+   * @method removeError
+   */
+  removeErrors() {
+    super.removeErrors();
+    return this;
+  }
+
+  /**
    * Manually push multiple errors to the changeset as an array.
    *
    * @method pushErrors
