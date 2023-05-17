@@ -316,6 +316,8 @@ export default class ValidatedForm extends Component {
   - [`validate`](#validate)
   - [`addError`](#adderror)
   - [`pushErrors`](#pusherrors)
+  - [`removeError`](#removeerror)
+  - [`removeErrors`](#removeerrors)
   - [`snapshot`](#snapshot)
   - [`restore`](#restore)
   - [`cast`](#cast)
@@ -820,6 +822,28 @@ changeset.pushErrors('dogYears.age', 'Too short', 'Not a valid number', 'Must be
 ```
 
 This is compatible with `ember-changeset-validations`, and allows you to either add a new error with multiple validation messages or push to an existing array of validation messages.
+
+**[⬆️ back to top](#api)**
+
+#### `removeError`
+
+Manually remove an error from the changeset.
+
+```js
+changeset.removeError('email');
+```
+Removes an error without having to rollback the property.
+
+**[⬆️ back to top](#api)**
+
+#### `removeErrors`
+
+Manually remove an error from the changeset.
+
+```js
+changeset.removeErrors()
+```
+Removes all the errors without having to rollback properties.
 
 **[⬆️ back to top](#api)**
 
